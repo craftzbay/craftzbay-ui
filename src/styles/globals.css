@@ -28,8 +28,7 @@
  * ============================================================================= */
 
 @import 'tailwindcss';
-@import 'geist/font/sans';
-@import 'geist/font/mono';
+/* Geist + Geist Mono are loaded via a <link> in index.html (Google Fonts). */
 
 /* The dark variant flips on the `dark` class anywhere up the tree. */
 @custom-variant dark (&:where(.dark, .dark *));
