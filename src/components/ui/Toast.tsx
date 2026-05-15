@@ -1,0 +1,167 @@
+import {
+  forwardRef,
+  type ComponentPropsWithoutRef,
+  type ElementRef,
+  type ReactElement,
+} from 'react';
+import * as ToastPrimitive from '@radix-ui/react-toast';
+import { AlertTriangle, CheckCircle2, Info, X, XCircle } from '@/icons';
+import { cn } from '@/lib/utils';
+import { cva, type VariantProps } from '@/lib/cva';
+
+export const ToastProvider = ToastPrimitive.Provider;
+
+export const ToastViewport = forwardRef<
+  ElementRef<typeof ToastPrimitive.Viewport>,
+  ComponentPropsWithoutRef<typeof ToastPrimitive.Viewport>
+>(function ToastViewport({ className, ...props }, ref) {
+  return (
+    <ToastPrimitive.Viewport
+      ref={ref}
+      className={cn(
+        'fixed bottom-0 right-0 z-[var(--z-toast)] flex max-h-screen w-full flex-col-reverse gap-2 p-6',
+        'sm:bottom-auto sm:top-4 sm:right-4 sm:max-w-sm sm:flex-col',
+        className,
+      )}
+      {...props}
+    />
+  );
+});
+ToastViewport.displayName = 'ToastViewport';
+
+const toast = cva(
+  [
+    'group pointer-events-auto relative flex w-full items-start gap-3',
+    'overflow-hidden rounded-lg border p-4 pr-8 shadow-md',
+    'data-[state=open]:animate-in data-[state=closed]:animate-out',
+    'data-[state=closed]:fade-out-80 data-[state=open]:slide-in-from-right-full',
+    'data-[state=closed]:slide-out-to-right-full',
+    'data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)]',
+    'data-[swipe=cancel]:translate-x-0 data-[swipe=cancel]:transition-transform',
+    'data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)]',
+  ],
+  {
+    variants: {
+      variant: {
+        default: 'border-border bg-card text-card-foreground',
+        success: 'border-success-border-soft bg-success-soft text-success-text',
+        warning: 'border-warning-border-soft bg-warning-soft text-warning-text',
+        danger: 'border-danger-border-soft bg-danger-soft text-danger-text',
+        info: 'border-info-border-soft bg-info-soft text-info-text',
+      },
+    },
+    defaultVariants: { variant: 'default' },
+  },
+);
+
+const iconMap = {
+  default: null,
+  success: <CheckCircle2 className="size-5 text-success-text shrink-0 mt-0.5" aria-hidden />,
+  warning: <AlertTriangle className="size-5 text-warning-text shrink-0 mt-0.5" aria-hidden />,
+  danger: <XCircle className="size-5 text-danger-text shrink-0 mt-0.5" aria-hidden />,
+  info: <Info className="size-5 text-info-text shrink-0 mt-0.5" aria-hidden />,
+} satisfies Record<'default' | 'success' | 'warning' | 'danger' | 'info', ReactElement | null>;
+
+export interface ToastProps
+  extends ComponentPropsWithoutRef<typeof ToastPrimitive.Root>,
+    VariantProps<typeof toast> {}
+
+export const Toast = forwardRef<ElementRef<typeof ToastPrimitive.Root>, ToastProps>(
+  function Toast({ className, variant = 'default', children, ...props }, ref) {
+    return (
+      <ToastPrimitive.Root ref={ref} className={cn(toast({ variant }), className)} {...props}>
+        {iconMap[variant ?? 'default']}
+        <div className="flex-1 space-y-1">{children}</div>
+      </ToastPrimitive.Root>
+    );
+  },
+);
+Toast.displayName = 'Toast';
+
+export const ToastTitle = forwardRef<
+  ElementRef<typeof ToastPrimitive.Title>,
+  ComponentPropsWithoutRef<typeof ToastPrimitive.Title>
+>(function ToastTitle({ className, ...props }, ref) {
+  return (
+    <ToastPrimitive.Title
+      ref={ref}
+      className={cn('text-sm font-medium', className)}
+      {...props}
+    />
+  );
+});
+ToastTitle.displayName = 'ToastTitle';
+
+export const ToastDescription = forwardRef<
+  ElementRef<typeof ToastPrimitive.Description>,
+  ComponentPropsWithoutRef<typeof ToastPrimitive.Description>
+>(function ToastDescription({ className, ...props }, ref) {
+  return (
+    <ToastPrimitive.Description
+      ref={ref}
+      className={cn('text-sm opacity-90', className)}
+      {...props}
+    />
+  );
+});
+ToastDescription.displayName = 'ToastDescription';
+
+export const ToastAction = forwardRef<
+  ElementRef<typeof ToastPrimitive.Action>,
+  ComponentPropsWithoutRef<typeof ToastPrimitive.Action>
+>(function ToastAction({ className, ...props }, ref) {
+  return (
+    <ToastPrimitive.Action
+      ref={ref}
+      className={cn(
+        'inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-current bg-transparent px-3 text-sm font-medium',
+        'transition-colors hover:bg-current/10 outline-none',
+        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card',
+        className,
+      )}
+      {...props}
+    />
+  );
+});
+ToastAction.displayName = 'ToastAction';
+
+export const ToastClose = forwardRef<
+  ElementRef<typeof ToastPrimitive.Close>,
+  ComponentPropsWithoutRef<typeof ToastPrimitive.Close>
+>(function ToastClose({ className, ...props }, ref) {
+  return (
+    <ToastPrimitive.Close
+      ref={ref}
+      aria-label="Close"
+      className={cn(
+        'absolute right-2 top-2 inline-flex size-7 items-center justify-center rounded-md text-foreground-subtle',
+        'opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground',
+        'outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring',
+        className,
+      )}
+      toast-close=""
+      {...props}
+    >
+      <X className="size-4" aria-hidden />
+    </ToastPrimitive.Close>
+  );
+});
+ToastClose.displayName = 'ToastClose';
+
+/**
+ * @example
+ *   <ToastProvider>
+ *     …app…
+ *     <Toast variant="success">
+ *       <ToastTitle>Saved</ToastTitle>
+ *       <ToastDescription>Your changes are live.</ToastDescription>
+ *       <ToastAction altText="Undo">Undo</ToastAction>
+ *       <ToastClose />
+ *     </Toast>
+ *     <ToastViewport />
+ *   </ToastProvider>
+ *
+ * @do Use the `useToast()` hook (in `src/hooks/use-toast.ts`) in app code —
+ *      the components here are the primitives the hook renders.
+ * @dont Stack more than two toasts at a time. Newer toasts replace older ones.
+ */
