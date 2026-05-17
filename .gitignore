@@ -7,7 +7,6 @@ dist-lib
 .env.local
 .env.*.local
 .vite
-storybook-static
 .turbo
 coverage
 *.tsbuildinfo

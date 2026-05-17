@@ -45,13 +45,13 @@ import { FirstRunEmpty } from '@/components/patterns/FirstRunEmpty';
 import { cn } from '@/lib/utils';
 
 const VERSION = '0.2.0';
-const STORYBOOK_URL = 'https://design.runestonetechnologies.com/storybook/';
 const GITHUB_URL = 'https://github.com/craftzbay/design-system';
 const NPM_URL = 'https://www.npmjs.com/package/@craftzbay/ui';
 
 type PatternKey =
   | 'home'
   | 'catalog'
+  | 'docs'
   | 'auth-signin'
   | 'auth-signup'
   | 'auth-forgot'
@@ -67,13 +67,14 @@ type PatternKey =
 interface PatternEntry {
   key: PatternKey;
   label: string;
-  group: 'Overview' | 'Catalog' | 'Authentication' | 'App' | 'Marketing';
+  group: 'Overview' | 'Catalog' | 'Docs' | 'Authentication' | 'App' | 'Marketing';
   description?: string;
 }
 
 const patterns: PatternEntry[] = [
   { key: 'home', label: 'Overview', group: 'Overview' },
   { key: 'catalog', label: 'Components catalog', group: 'Catalog', description: 'Every primitive on one page' },
+  { key: 'docs', label: 'Docs', group: 'Docs', description: 'Quick start, theming, a11y, FAQ' },
   { key: 'auth-signin', label: 'Sign in', group: 'Authentication', description: 'Email + password with social options' },
   { key: 'auth-signup', label: 'Sign up', group: 'Authentication', description: 'Account creation' },
   { key: 'auth-forgot', label: 'Forgot password', group: 'Authentication', description: 'Password reset request' },
@@ -162,22 +163,31 @@ export function App() {
               ))}
               <CommandGroup heading="Resources">
                 <CommandItem
-                  value="storybook"
+                  value="catalog all components"
                   onSelect={() => {
-                    window.open(STORYBOOK_URL, '_blank', 'noopener,noreferrer');
+                    setActive('catalog');
                     setCmdOpen(false);
                   }}
                 >
-                  Open Storybook ↗
+                  Components catalog
                 </CommandItem>
                 <CommandItem
-                  value="github"
+                  value="github source"
                   onSelect={() => {
                     window.open(GITHUB_URL, '_blank', 'noopener,noreferrer');
                     setCmdOpen(false);
                   }}
                 >
                   Open GitHub ↗
+                </CommandItem>
+                <CommandItem
+                  value="npm package"
+                  onSelect={() => {
+                    window.open(NPM_URL, '_blank', 'noopener,noreferrer');
+                    setCmdOpen(false);
+                  }}
+                >
+                  Open npm ↗
                 </CommandItem>
                 <CommandItem
                   value="theme"
@@ -296,8 +306,11 @@ function TopBar({
           @craftzbay/ui
         </a>
         <nav className="hidden items-center gap-1 text-sm text-foreground-muted sm:flex">
-          <a className="rounded-md px-3 py-1.5 hover:bg-background-muted hover:text-foreground" href={STORYBOOK_URL} target="_blank" rel="noreferrer">
-            Storybook
+          <a className="rounded-md px-3 py-1.5 hover:bg-background-muted hover:text-foreground" href="#catalog">
+            Components
+          </a>
+          <a className="rounded-md px-3 py-1.5 hover:bg-background-muted hover:text-foreground" href="#docs">
+            Docs
           </a>
           <a className="rounded-md px-3 py-1.5 hover:bg-background-muted hover:text-foreground" href={GITHUB_URL} target="_blank" rel="noreferrer">
             GitHub
@@ -336,6 +349,8 @@ function renderPattern(key: PatternKey, setActive: (k: PatternKey) => void): Rea
       return <OverviewPage onPick={setActive} />;
     case 'catalog':
       return <CatalogPage />;
+    case 'docs':
+      return <DocsPage />;
     case 'auth-signin':
       return (
         <AuthLayout
@@ -468,12 +483,12 @@ function CatalogPage() {
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">{e.name}</span>
                       <a
-                        href={`${STORYBOOK_URL}?path=/docs/${e.storyId}--docs`}
+                        href={`${GITHUB_URL}/blob/main/src/components/ui/${e.name}.tsx`}
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-1 text-[11px] text-foreground-subtle hover:text-accent"
                       >
-                        Storybook <ExternalLink className="size-3" aria-hidden />
+                        Source <ExternalLink className="size-3" aria-hidden />
                       </a>
                     </div>
                     <div className="flex min-h-[5rem] flex-1 items-center justify-center">
@@ -486,6 +501,191 @@ function CatalogPage() {
           );
         })}
       </main>
+    </div>
+  );
+}
+
+/* -----------------------------------------------------------------------------
+ *  DocsPage — Quick start + Theming + Accessibility + FAQ in one scrollable
+ *  article with sticky section nav.
+ * --------------------------------------------------------------------------- */
+
+const docsSections = [
+  { id: 'quickstart', label: 'Quick start' },
+  { id: 'theming', label: 'Theming' },
+  { id: 'accessibility', label: 'Accessibility' },
+  { id: 'faq', label: 'FAQ' },
+] as const;
+
+function DocsPage() {
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
+        <div className="mx-auto flex h-14 max-w-5xl items-center gap-4 px-6">
+          <a href="#" className="flex items-center gap-2 font-semibold">
+            <span className="inline-flex size-6 items-center justify-center rounded-md bg-accent text-on-accent text-xs">
+              ✦
+            </span>
+            Docs
+          </a>
+          <nav className="ml-auto hidden flex-wrap items-center gap-1 text-xs text-foreground-muted md:flex">
+            {docsSections.map((s) => (
+              <a
+                key={s.id}
+                href={`#docs-${s.id}`}
+                className="rounded-md px-2 py-1 hover:bg-background-muted hover:text-foreground"
+              >
+                {s.label}
+              </a>
+            ))}
+            <a href="#catalog" className="rounded-md px-2 py-1 hover:bg-background-muted hover:text-foreground">
+              Components ↗
+            </a>
+          </nav>
+        </div>
+      </header>
+
+      <article className="mx-auto max-w-3xl px-6 py-12 [&_h2]:mt-12 [&_h2]:mb-4 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:tracking-tight [&_h3]:mt-8 [&_h3]:mb-2 [&_h3]:text-base [&_h3]:font-semibold [&_p]:mb-3 [&_p]:text-sm [&_p]:text-foreground-muted [&_p]:leading-relaxed [&_ul]:mb-3 [&_ul]:list-disc [&_ul]:pl-6 [&_li]:text-sm [&_li]:text-foreground-muted [&_li]:mt-1 [&_code]:rounded [&_code]:bg-background-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[12.5px] [&_code]:text-foreground [&_pre]:mb-4 [&_pre]:overflow-x-auto [&_pre]:rounded-md [&_pre]:border [&_pre]:border-border [&_pre]:bg-card [&_pre]:p-4 [&_pre]:text-[13px] [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_a]:text-accent [&_a]:hover:underline">
+        <section id="docs-quickstart" className="scroll-mt-20">
+          <p className="text-xs uppercase tracking-wider text-accent">@craftzbay/ui</p>
+          <h1 className="mb-2 text-4xl font-semibold tracking-tight">Documentation</h1>
+          <p>
+            A refined-minimal Tailwind v4 + React design system. 49 components,
+            8 page patterns, dark mode out of the box.
+          </p>
+
+          <h2>Quick start</h2>
+          <h3>1. Install</h3>
+          <pre><code>pnpm add @craftzbay/ui</code></pre>
+          <p>Peer dependencies: <code>react@&gt;=18</code>, <code>react-dom@&gt;=18</code>.</p>
+
+          <h3>2. Import the stylesheet</h3>
+          <p>Once, at the top of your app entry:</p>
+          <pre><code>{`import '@craftzbay/ui/styles.css';`}</code></pre>
+
+          <h3>3. Use a component</h3>
+          <pre><code>{`import { Button, Dialog, DialogContent, DialogTrigger, DialogTitle } from '@craftzbay/ui';
+
+export function ExportDialog() {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>Export…</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogTitle>Export workspace</DialogTitle>
+        …
+      </DialogContent>
+    </Dialog>
+  );
+}`}</code></pre>
+
+          <h3>4. Dark mode</h3>
+          <p>
+            Toggle the <code>dark</code> class on any container — usually <code>&lt;html&gt;</code>. All token-coloured
+            surfaces flip automatically.
+          </p>
+        </section>
+
+        <section id="docs-theming" className="scroll-mt-20">
+          <h2>Theming</h2>
+          <p>
+            The library is built on Tailwind v4 CSS variables. Every visual
+            decision flows through a token. There are three override surfaces.
+          </p>
+
+          <h3>1. Global override — CSS variables</h3>
+          <pre><code>{`@import '@craftzbay/ui/styles.css';
+
+:root {
+  --color-accent: oklch(0.55 0.18 250);
+  --color-accent-700: oklch(0.46 0.16 250);
+  --radius-md: 8px;
+}
+
+.dark {
+  --color-accent: oklch(0.65 0.18 250);
+}`}</code></pre>
+
+          <h3>2. Per-subtree — DesignSystemProvider</h3>
+          <pre><code>{`import { DesignSystemProvider, brandPresets } from '@craftzbay/ui';
+
+<DesignSystemProvider tokens={brandPresets.edgelog}>
+  <Card>…</Card>
+</DesignSystemProvider>`}</code></pre>
+          <p>
+            Presets: <code>default</code>, <code>edgelog</code>, <code>gerege</code>, <code>forest</code>.
+            Or pass any token map with or without the <code>--</code> prefix.
+          </p>
+
+          <h3>3. Per-component — className</h3>
+          <pre><code>{`<Button className="rounded-full px-6">Round once</Button>`}</code></pre>
+          <p>Conflicts resolve cleanly via <code>tailwind-merge</code>.</p>
+        </section>
+
+        <section id="docs-accessibility" className="scroll-mt-20">
+          <h2>Accessibility</h2>
+          <p>Every primitive ships a11y-correct by default. The library follows three non-negotiable rules:</p>
+          <ul>
+            <li><strong>WCAG AA contrast</strong> on text + interactive UI.</li>
+            <li><strong>Keyboard parity</strong> — Tab, Enter, Space, Arrow, Escape, ⌘K.</li>
+            <li><strong>Screen-reader semantics</strong> — labels required, ARIA set by Radix.</li>
+          </ul>
+          <p>
+            The library tests itself with <code>jest-axe</code>. Run <code>pnpm test</code>
+            in the repo to see the suite. You can do the same in your app.
+          </p>
+
+          <h3>Patterns to follow</h3>
+          <ul>
+            <li>Always pair icon-only buttons with <code>aria-label</code>.</li>
+            <li>Use the <code>label</code> prop on form inputs — it wires <code>htmlFor</code>.</li>
+            <li>Always include a <code>DialogTitle</code> / <code>SheetTitle</code> / <code>DrawerTitle</code>.</li>
+            <li>Pass <code>aria-label</code> on <code>Progress</code>, <code>Spinner</code>, <code>IconButton</code>.</li>
+          </ul>
+        </section>
+
+        <section id="docs-faq" className="scroll-mt-20">
+          <h2>FAQ</h2>
+
+          <h3>Can I use it without Tailwind in my consumer app?</h3>
+          <p>
+            Yes. The library ships a precompiled <code>styles.css</code>. If you do
+            have Tailwind in your app, no conflict either.
+          </p>
+
+          <h3>Why Tailwind v4 specifically?</h3>
+          <p>
+            CSS-first config (tokens in <code>@theme</code> blocks), 3× faster
+            builds, native CSS variable output, and automatic dark mode via class.
+          </p>
+
+          <h3>How big is the bundle?</h3>
+          <p>
+            ESM <code>index.js</code> is ~142 KB / ~33 KB gzipped. Plus
+            <code>styles.css</code> at 8 KB / 2 KB gzipped. Tree-shakeable.
+          </p>
+
+          <h3>Does it work with Next.js / Remix / TanStack Start?</h3>
+          <p>
+            Yes. For React Server Components, interactive primitives need
+            <code>'use client'</code> at the consuming file — standard for any
+            Radix-based library.
+          </p>
+
+          <h3>Where do I see every component?</h3>
+          <p>
+            On the <a href="#catalog">Components catalog</a> page — every primitive
+            with a live mini-demo and a link to its source on GitHub.
+          </p>
+
+          <h3>Where do I report bugs?</h3>
+          <p>
+            <a href="https://github.com/craftzbay/design-system/issues" target="_blank" rel="noreferrer">GitHub Issues</a>.
+            PRs welcome — CI runs typecheck, tests, and all builds on every PR.
+          </p>
+        </section>
+      </article>
     </div>
   );
 }
@@ -550,8 +750,8 @@ function Hero() {
 
         <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
           <Button asChild>
-            <a href={STORYBOOK_URL} target="_blank" rel="noreferrer">
-              View Storybook
+            <a href="#catalog">
+              Browse components
               <ArrowRight className="size-4" />
             </a>
           </Button>
@@ -966,8 +1166,11 @@ function Footer() {
           <a className="inline-flex items-center gap-1 hover:text-foreground" href={GITHUB_URL} target="_blank" rel="noreferrer">
             <Github className="size-3" /> GitHub <ExternalLink className="size-3" />
           </a>
-          <a className="inline-flex items-center gap-1 hover:text-foreground" href={STORYBOOK_URL} target="_blank" rel="noreferrer">
-            Storybook <ExternalLink className="size-3" />
+          <a className="inline-flex items-center gap-1 hover:text-foreground" href="#catalog">
+            Components
+          </a>
+          <a className="inline-flex items-center gap-1 hover:text-foreground" href="#docs">
+            Docs
           </a>
         </nav>
       </div>

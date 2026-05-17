@@ -5,7 +5,8 @@ primitives — Button through DataGrid — plus composed patterns
 (authentication, app shell, settings, etc.).
 
 - **Showcase:** [design.runestonetechnologies.com](https://design.runestonetechnologies.com)
-- **Storybook:** [design.runestonetechnologies.com/storybook](https://design.runestonetechnologies.com/storybook/)
+- **Components catalog:** [design.runestonetechnologies.com#catalog](https://design.runestonetechnologies.com#catalog)
+- **Docs:** [design.runestonetechnologies.com#docs](https://design.runestonetechnologies.com#docs)
 
 > **Aesthetic direction:** Linear / Vercel / Stripe Dashboard / Notion / Raycast.
 > Neutral-dominant, one accent, hairline borders, generous whitespace, fast quiet
@@ -33,7 +34,6 @@ Peer dependencies: `react@>=18`, `react-dom@>=18`.
 ```bash
 pnpm install
 pnpm dev           # Vite showcase at localhost:5173
-pnpm storybook     # Storybook at localhost:6006
 pnpm build:lib     # Build library → dist-lib/
 ```
 
