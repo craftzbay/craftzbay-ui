@@ -2,6 +2,8 @@ import { forwardRef, type ComponentPropsWithoutRef, type ElementRef, type HTMLAt
 import { Drawer as DrawerPrimitive } from 'vaul';
 import { cn } from '@/lib/utils';
 
+type Direction = 'top' | 'right' | 'bottom' | 'left';
+
 export const Drawer = ({
   shouldScaleBackground = true,
   ...props
@@ -27,24 +29,54 @@ export const DrawerOverlay = forwardRef<
   );
 });
 
+const directionStyles: Record<Direction, string> = {
+  bottom:
+    'inset-x-0 bottom-0 mt-24 flex h-auto max-h-[90vh] flex-col rounded-t-xl border-t border-border',
+  top: 'inset-x-0 top-0 mb-24 flex h-auto max-h-[90vh] flex-col rounded-b-xl border-b border-border',
+  left: 'inset-y-0 left-0 flex h-full w-[420px] max-w-[90vw] flex-col rounded-r-xl border-r border-border',
+  right: 'inset-y-0 right-0 flex h-full w-[420px] max-w-[90vw] flex-col rounded-l-xl border-l border-border',
+};
+
+const handleStyles: Record<Direction, string> = {
+  bottom: 'mx-auto mt-3 h-1.5 w-12 rounded-full bg-border',
+  top: 'mx-auto mb-3 h-1.5 w-12 rounded-full bg-border order-last',
+  left: 'mx-1.5 my-auto h-12 w-1.5 rounded-full bg-border order-last self-stretch shrink-0',
+  right: 'mx-1.5 my-auto h-12 w-1.5 rounded-full bg-border shrink-0 self-stretch',
+};
+
+export interface DrawerContentProps
+  extends ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> {
+  /** Side the drawer slides in from. Default `bottom`. */
+  direction?: Direction;
+  /** Hide the drag handle. */
+  hideHandle?: boolean;
+}
+
 export const DrawerContent = forwardRef<
   ElementRef<typeof DrawerPrimitive.Content>,
-  ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
->(function DrawerContent({ className, children, ...props }, ref) {
+  DrawerContentProps
+>(function DrawerContent(
+  { className, direction = 'bottom', hideHandle, children, ...props },
+  ref,
+) {
+  const isHorizontal = direction === 'left' || direction === 'right';
   return (
     <DrawerPortal>
       <DrawerOverlay />
       <DrawerPrimitive.Content
         ref={ref}
         className={cn(
-          'fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-xl',
-          'border-t border-border bg-card',
+          'fixed z-50 bg-card',
+          directionStyles[direction],
+          isHorizontal && 'flex-row',
           className,
         )}
         {...props}
       >
-        <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-border" />
-        {children}
+        {!hideHandle && <div aria-hidden className={handleStyles[direction]} />}
+        <div className={cn('min-h-0 min-w-0 flex-1', isHorizontal && 'flex flex-col')}>
+          {children}
+        </div>
       </DrawerPrimitive.Content>
     </DrawerPortal>
   );
