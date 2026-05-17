@@ -28,10 +28,15 @@ const meta: Meta<typeof Toast> = {
 export default meta;
 type Story = StoryObj<typeof Toast>;
 
+/** Inline viewport so static-render demos stay inside the story canvas
+ *  instead of using the default `fixed top-4 right-4` Radix viewport. */
+const inlineViewport =
+  '!static !w-full !max-w-sm !flex-col !gap-3 !p-0';
+
 /** Static visual — what a single toast looks like. */
 export const Default: Story = {
   render: () => (
-    <div className="max-w-sm">
+    <ToastViewport className={inlineViewport}>
       <Toast open variant="default">
         <div className="grid gap-0.5">
           <ToastTitle>Changes saved</ToastTitle>
@@ -41,13 +46,13 @@ export const Default: Story = {
           <X className="size-4" />
         </ToastClose>
       </Toast>
-    </div>
+    </ToastViewport>
   ),
 };
 
 export const Variants: Story = {
   render: () => (
-    <div className="flex max-w-sm flex-col gap-3">
+    <ToastViewport className={inlineViewport}>
       {(['default', 'info', 'success', 'warning', 'danger'] as const).map((v) => (
         <Toast key={v} open variant={v}>
           <div className="grid gap-0.5">
@@ -56,13 +61,13 @@ export const Variants: Story = {
           </div>
         </Toast>
       ))}
-    </div>
+    </ToastViewport>
   ),
 };
 
 export const WithAction: Story = {
   render: () => (
-    <div className="max-w-sm">
+    <ToastViewport className={inlineViewport}>
       <Toast open>
         <div className="grid gap-0.5">
           <ToastTitle>Project archived</ToastTitle>
@@ -72,7 +77,7 @@ export const WithAction: Story = {
           <Button size="sm" variant="ghost">Undo</Button>
         </ToastAction>
       </Toast>
-    </div>
+    </ToastViewport>
   ),
 };
 
