@@ -28,6 +28,7 @@
  * ============================================================================= */
 
 @import 'tailwindcss';
+@import 'tw-animate-css';
 /* Geist + Geist Mono are loaded via a <link> in index.html (Google Fonts). */
 
 /* The dark variant flips on the `dark` class anywhere up the tree. */

@@ -13,6 +13,9 @@ export * from './hooks/use-toast';
 // Icons (namespaced to avoid name collisions with consumer apps)
 export * as Icons from './icons';
 
+// Illustrations — refined-minimal line art for empty / error / 404 states
+export * as Illustrations from './illustrations';
+
 // Primitives
 export * from './components/ui/Accordion';
 export * from './components/ui/Alert';

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Inbox, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Button } from './Button';
+import { InboxEmpty, NoSearchResults } from '@/illustrations';
 import { EmptyState } from './EmptyState';
 
 const meta = {
@@ -8,7 +9,7 @@ const meta = {
   component: EmptyState,
   tags: ['autodocs'],
   args: {
-    icon: <Inbox className="size-6" />,
+    icon: <InboxEmpty />,
     title: 'No projects yet',
     description: 'Create your first project to get started.',
     action: <Button leadingIcon={<Plus />}>New project</Button>,
@@ -18,3 +19,12 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+export const NoResults: Story = {
+  args: {
+    icon: <NoSearchResults />,
+    title: 'No results',
+    description: 'Try a different search term or clear filters.',
+    action: <Button variant="outline">Clear filters</Button>,
+  },
+};

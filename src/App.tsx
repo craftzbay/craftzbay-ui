@@ -12,6 +12,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert } from '@/components/ui/Alert';
 import { Progress } from '@/components/ui/Progress';
 import { IconButton } from '@/components/ui/IconButton';
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  useCommandPaletteShortcut,
+} from '@/components/ui/CommandPalette';
 import { useSidebar } from '@/components/ui/Sidebar';
 import { ToastProvider, ToastViewport } from '@/components/ui/Toast';
 import { TooltipProvider } from '@/components/ui/Tooltip';
@@ -110,6 +119,9 @@ export function App() {
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
+  const [cmdOpen, setCmdOpen] = useState(false);
+  useCommandPaletteShortcut(setCmdOpen);
+
   const toggleTheme = () => setTheme((t) => (t === 'light' ? 'dark' : 'light'));
   const isHome = active === 'home';
 
@@ -117,8 +129,62 @@ export function App() {
     <TooltipProvider>
       <ToastProvider>
         <div className="min-h-screen bg-background text-foreground">
-          {isHome && <TopBar theme={theme} onToggleTheme={toggleTheme} />}
+          {isHome && <TopBar theme={theme} onToggleTheme={toggleTheme} onOpenPalette={() => setCmdOpen(true)} />}
           {renderPattern(active, setActive)}
+
+          <CommandDialog open={cmdOpen} onOpenChange={setCmdOpen}>
+            <CommandInput placeholder="Jump to a pattern or component…" />
+            <CommandList>
+              <CommandEmpty>No results.</CommandEmpty>
+              {(['Overview', 'Authentication', 'App', 'Marketing'] as const).map((group) => (
+                <CommandGroup key={group} heading={group}>
+                  {patterns
+                    .filter((p) => p.group === group)
+                    .map((p) => (
+                      <CommandItem
+                        key={p.key}
+                        value={`${p.label} ${p.key}`}
+                        onSelect={() => {
+                          setActive(p.key);
+                          setCmdOpen(false);
+                        }}
+                      >
+                        {p.label}
+                      </CommandItem>
+                    ))}
+                </CommandGroup>
+              ))}
+              <CommandGroup heading="Resources">
+                <CommandItem
+                  value="storybook"
+                  onSelect={() => {
+                    window.open(STORYBOOK_URL, '_blank', 'noopener,noreferrer');
+                    setCmdOpen(false);
+                  }}
+                >
+                  Open Storybook ↗
+                </CommandItem>
+                <CommandItem
+                  value="github"
+                  onSelect={() => {
+                    window.open(GITHUB_URL, '_blank', 'noopener,noreferrer');
+                    setCmdOpen(false);
+                  }}
+                >
+                  Open GitHub ↗
+                </CommandItem>
+                <CommandItem
+                  value="theme"
+                  onSelect={() => {
+                    toggleTheme();
+                    setCmdOpen(false);
+                  }}
+                >
+                  Toggle theme
+                </CommandItem>
+              </CommandGroup>
+            </CommandList>
+          </CommandDialog>
 
           {!isHome && (
             <div className="fixed bottom-4 right-4 z-[var(--z-sticky)]">
@@ -205,7 +271,15 @@ export function App() {
   );
 }
 
-function TopBar({ theme, onToggleTheme }: { theme: 'light' | 'dark'; onToggleTheme: () => void }) {
+function TopBar({
+  theme,
+  onToggleTheme,
+  onOpenPalette,
+}: {
+  theme: 'light' | 'dark';
+  onToggleTheme: () => void;
+  onOpenPalette: () => void;
+}) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-6">
@@ -227,6 +301,16 @@ function TopBar({ theme, onToggleTheme }: { theme: 'light' | 'dark'; onToggleThe
           </a>
         </nav>
         <div className="ml-auto flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onOpenPalette}
+            className="hidden h-8 items-center gap-2 rounded-md border border-border bg-card px-2.5 text-sm text-foreground-muted transition-colors hover:bg-background-muted hover:text-foreground sm:flex"
+          >
+            <span className="text-xs">Search…</span>
+            <span className="rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[10px] text-foreground-subtle">
+              ⌘K
+            </span>
+          </button>
           <IconButton
             aria-label="Toggle theme"
             icon={theme === 'light' ? <Moon /> : <Sun />}

@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   BarChart3,
   Bell,
@@ -9,6 +9,7 @@ import {
   Inbox,
   LayoutGrid,
   LogOut,
+  Menu,
   Plug,
   Search,
   Settings,
@@ -19,8 +20,10 @@ import {
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { IconButton } from '@/components/ui/IconButton';
 import { Input } from '@/components/ui/Input';
 import { Kbd } from '@/components/ui/Kbd';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/Sheet';
 import { Sidebar, SidebarItem, SidebarSection } from '@/components/ui/Sidebar';
 import {
   Table,
@@ -71,64 +74,91 @@ export interface AppShellProps {
   active?: AppShellNavKey;
 }
 
+function NavSections({ active }: { active: AppShellNavKey }) {
+  return (
+    <>
+      <SidebarSection label="Workspace">
+        <SidebarItem href="#dashboard" icon={<Home />} active={active === 'home'}>
+          Home
+        </SidebarItem>
+        <SidebarItem href="#data-table" icon={<Folder />} active={active === 'projects'} trailing={<Pill tone="neutral">12</Pill>}>
+          Projects
+        </SidebarItem>
+        <SidebarItem href="#first-run" icon={<Inbox />} active={active === 'inbox'} trailing={<Pill tone="accent">5</Pill>}>
+          Inbox
+        </SidebarItem>
+        <SidebarItem href="#record" icon={<Users />} active={active === 'members'} trailing={<Pill tone="neutral">3</Pill>}>
+          Members
+        </SidebarItem>
+        <SidebarItem href="#dashboard" icon={<BarChart3 />} active={active === 'insights'}>
+          Insights
+        </SidebarItem>
+      </SidebarSection>
+      <SidebarSection label="Personal">
+        <SidebarItem href="#pricing" icon={<Bookmark />} active={active === 'bookmarks'}>
+          Bookmarks
+        </SidebarItem>
+        <SidebarItem href="#onboarding" icon={<LayoutGrid />} active={active === 'apps'}>
+          Apps
+        </SidebarItem>
+      </SidebarSection>
+      <SidebarSection label="Account">
+        <SidebarItem href="#settings" icon={<Settings />} active={active === 'settings'}>
+          Settings
+        </SidebarItem>
+        <SidebarItem href="#settings" icon={<Plug />} active={active === 'integrations'}>
+          Integrations
+        </SidebarItem>
+        <SidebarItem href="#" icon={<HelpCircle />} active={active === 'help'}>
+          Help & docs
+        </SidebarItem>
+      </SidebarSection>
+    </>
+  );
+}
+
 export function AppShell({ children, brand, active = 'home' }: AppShellProps) {
   return (
     <div className="flex min-h-screen w-full bg-background">
-      <Sidebar
-        defaultCollapsed={false}
-        header={brand}
-        footer={<ProfileFooter />}
-      >
-        <SidebarSection label="Workspace">
-          <SidebarItem href="#dashboard" icon={<Home />} active={active === 'home'}>
-            Home
-          </SidebarItem>
-          <SidebarItem href="#data-table" icon={<Folder />} active={active === 'projects'} trailing={<Pill tone="neutral">12</Pill>}>
-            Projects
-          </SidebarItem>
-          <SidebarItem href="#first-run" icon={<Inbox />} active={active === 'inbox'} trailing={<Pill tone="accent">5</Pill>}>
-            Inbox
-          </SidebarItem>
-          <SidebarItem href="#record" icon={<Users />} active={active === 'members'} trailing={<Pill tone="neutral">3</Pill>}>
-            Members
-          </SidebarItem>
-          <SidebarItem href="#dashboard" icon={<BarChart3 />} active={active === 'insights'}>
-            Insights
-          </SidebarItem>
-        </SidebarSection>
-        <SidebarSection label="Personal">
-          <SidebarItem href="#pricing" icon={<Bookmark />} active={active === 'bookmarks'}>
-            Bookmarks
-          </SidebarItem>
-          <SidebarItem href="#onboarding" icon={<LayoutGrid />} active={active === 'apps'}>
-            Apps
-          </SidebarItem>
-        </SidebarSection>
-        <SidebarSection label="Account">
-          <SidebarItem href="#settings" icon={<Settings />} active={active === 'settings'}>
-            Settings
-          </SidebarItem>
-          <SidebarItem href="#settings" icon={<Plug />} active={active === 'integrations'}>
-            Integrations
-          </SidebarItem>
-          <SidebarItem href="#" icon={<HelpCircle />} active={active === 'help'}>
-            Help & docs
-          </SidebarItem>
-        </SidebarSection>
+      <Sidebar defaultCollapsed={false} header={brand} footer={<ProfileFooter />}>
+        <NavSections active={active} />
       </Sidebar>
 
-      <div className="flex flex-1 flex-col min-w-0">
-        <TopBar />
-        <main className="flex-1 overflow-y-auto p-6 md:p-8">{children}</main>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <TopBar brand={brand} active={active} />
+        <main className="flex-1 overflow-y-auto p-4 md:p-8">{children}</main>
       </div>
     </div>
   );
 }
 
-function TopBar() {
+function TopBar({ brand, active }: { brand: ReactNode; active: AppShellNavKey }) {
+  const [open, setOpen] = useState(false);
+
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur md:px-6">
-      <div className="relative flex-1 max-w-xl">
+      {/* Mobile-only hamburger + brand */}
+      <div className="flex items-center gap-2 md:hidden">
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <IconButton aria-label="Open menu" icon={<Menu />} variant="ghost" size="sm" />
+          </SheetTrigger>
+          <SheetContent side="left" className="w-64 p-0">
+            <div className="flex h-14 shrink-0 items-center border-b border-border px-3">
+              {brand}
+            </div>
+            <div className="flex-1 overflow-y-auto py-3" onClick={() => setOpen(false)}>
+              <NavSections active={active} />
+            </div>
+            <div className="border-t border-border p-2">
+              <ProfileFooter />
+            </div>
+          </SheetContent>
+        </Sheet>
+        <div className="text-sm">{brand}</div>
+      </div>
+
+      <div className="relative hidden flex-1 max-w-xl sm:block">
         <Input
           type="search"
           placeholder="Search projects, members, files…"
