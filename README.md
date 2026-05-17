@@ -5,7 +5,7 @@ primitives — Button through DataGrid — plus composed patterns
 (authentication, app shell, settings, etc.).
 
 - **Showcase:** [design.runestonetechnologies.com](https://design.runestonetechnologies.com)
-- **Storybook:** [storybook.runestonetechnologies.com](https://storybook.runestonetechnologies.com)
+- **Storybook:** [design.runestonetechnologies.com/storybook](https://design.runestonetechnologies.com/storybook/)
 
 > **Aesthetic direction:** Linear / Vercel / Stripe Dashboard / Notion / Raycast.
 > Neutral-dominant, one accent, hairline borders, generous whitespace, fast quiet

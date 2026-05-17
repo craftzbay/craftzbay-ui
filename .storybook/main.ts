@@ -22,8 +22,11 @@ const config: StorybookConfig = {
         prop.parent ? !/node_modules/.test(prop.parent.fileName) : true,
     },
   },
-  viteFinal: async (config) =>
+  viteFinal: async (config, { configType }) =>
     mergeConfig(config, {
+      // In production we deploy under `/storybook/` on the design subdomain.
+      // Local `pnpm storybook` keeps the default base ('/') so dev URLs stay clean.
+      base: configType === 'PRODUCTION' ? '/storybook/' : config.base ?? '/',
       plugins: [tailwindcss()],
       resolve: {
         alias: {

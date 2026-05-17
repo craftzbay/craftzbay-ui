@@ -85,7 +85,7 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
     error,
     placeholder = 'Select…',
     emptyText = 'No results.',
-    maxVisibleChips = 4,
+    maxVisibleChips = 3,
     clearable = true,
     disabled,
     className,
@@ -148,7 +148,7 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
             aria-invalid={isError || undefined}
             aria-describedby={isError ? errorId : helperText ? helperId : undefined}
             className={cn(
-              'flex w-full min-h-9 cursor-text flex-wrap items-center gap-1.5 rounded-md border bg-card px-2 py-1 text-sm',
+              'flex h-9 w-full cursor-text items-center gap-1.5 overflow-hidden rounded-md border bg-card px-2 py-1 text-sm',
               'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)]',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               isError
@@ -164,9 +164,9 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
             {visibleChips.map((opt) => (
               <span
                 key={opt.value}
-                className="inline-flex items-center gap-1 rounded-md bg-accent-soft px-1.5 py-0.5 text-xs font-medium text-on-accent-soft"
+                className="inline-flex max-w-[10rem] shrink-0 items-center gap-1 rounded-md bg-accent-soft px-1.5 py-0.5 text-xs font-medium text-on-accent-soft"
               >
-                {opt.label}
+                <span className="truncate">{opt.label}</span>
                 <button
                   type="button"
                   aria-label={`Remove ${opt.label}`}
@@ -181,8 +181,8 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
               </span>
             ))}
             {overflow > 0 && (
-              <span className="rounded-md bg-background-muted px-1.5 py-0.5 text-xs font-medium text-foreground-muted">
-                +{overflow} more
+              <span className="shrink-0 rounded-md bg-background-muted px-1.5 py-0.5 text-xs font-medium text-foreground-muted">
+                +{overflow}
               </span>
             )}
             <input

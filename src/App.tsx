@@ -32,7 +32,7 @@ import { FirstRunEmpty } from '@/components/patterns/FirstRunEmpty';
 import { cn } from '@/lib/utils';
 
 const VERSION = '0.2.0';
-const STORYBOOK_URL = 'https://storybook.runestonetechnologies.com';
+const STORYBOOK_URL = 'https://design.runestonetechnologies.com/storybook/';
 const GITHUB_URL = 'https://github.com/craftzbay/design-system';
 const NPM_URL = 'https://www.npmjs.com/package/@craftzbay/ui';
 

@@ -1,8 +1,8 @@
 import { forwardRef, useId, useState, type ReactNode } from 'react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
-import { DayPicker, type DateRange } from 'react-day-picker';
-import 'react-day-picker/style.css';
-import { Calendar, ChevronLeft, ChevronRight } from '@/icons';
+import type { DateRange } from 'react-day-picker';
+import { Calendar as CalendarIcon } from '@/icons';
+import { Calendar } from './Calendar';
 import { cn } from '@/lib/utils';
 
 /* -----------------------------------------------------------------------------
@@ -11,34 +11,6 @@ import { cn } from '@/lib/utils';
  *    <DatePicker value={date} onChange={setDate} />        // single date
  *    <DateRangePicker value={range} onChange={setRange} /> // {from,to}
  * --------------------------------------------------------------------------- */
-
-const calendarClassNames = {
-  root: 'p-3',
-  month: 'space-y-2',
-  caption: 'flex items-center justify-between px-1 pb-2',
-  caption_label: 'text-sm font-medium text-foreground',
-  nav: 'flex items-center gap-1',
-  nav_button:
-    'inline-flex size-7 items-center justify-center rounded-md text-foreground-muted hover:bg-background-muted hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring',
-  table: 'w-full border-collapse',
-  head_row: 'flex',
-  head_cell: 'w-9 text-xs font-medium text-foreground-subtle',
-  row: 'flex w-full mt-1',
-  cell: 'relative size-9 p-0 text-center',
-  day: 'inline-flex size-9 items-center justify-center rounded-md text-sm text-foreground transition-colors outline-none hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring',
-  day_selected: 'bg-accent text-on-accent hover:bg-accent hover:text-on-accent',
-  day_today: 'font-semibold text-accent',
-  day_outside: 'text-foreground-subtle opacity-50',
-  day_disabled: 'text-foreground-subtle opacity-50 pointer-events-none',
-  day_range_start: 'rounded-l-md',
-  day_range_end: 'rounded-r-md',
-  day_range_middle: 'bg-accent-soft text-on-accent-soft rounded-none',
-} as const;
-
-const calendarComponents = {
-  IconLeft: () => <ChevronLeft className="size-4" aria-hidden />,
-  IconRight: () => <ChevronRight className="size-4" aria-hidden />,
-};
 
 function formatDate(d?: Date): string {
   if (!d) return '';
@@ -86,7 +58,7 @@ function PickerTrigger({
             !hasValue && 'text-foreground-subtle',
           )}
         >
-          <Calendar className="size-4 text-foreground-subtle" aria-hidden />
+          <CalendarIcon className="size-4 text-foreground-subtle" aria-hidden />
           <span className="truncate">{hasValue ? children : placeholder}</span>
         </button>
       </PopoverPrimitive.Trigger>
@@ -147,17 +119,15 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(function D
             sideOffset={4}
             className="z-[var(--z-popover)] rounded-lg border border-border bg-popover text-popover-foreground shadow-md"
           >
-            <DayPicker
+            <Calendar
               mode="single"
               selected={value}
               onSelect={(d) => {
                 onChange(d ?? undefined);
                 if (d) setOpen(false);
               }}
-              fromDate={fromDate}
-              toDate={toDate}
-              classNames={calendarClassNames}
-              components={calendarComponents}
+              startMonth={fromDate}
+              endMonth={toDate}
             />
           </PopoverPrimitive.Content>
         </PopoverPrimitive.Portal>
@@ -216,15 +186,13 @@ export const DateRangePicker = forwardRef<HTMLDivElement, DateRangePickerProps>(
             sideOffset={4}
             className="z-[var(--z-popover)] rounded-lg border border-border bg-popover text-popover-foreground shadow-md"
           >
-            <DayPicker
+            <Calendar
               mode="range"
               selected={value}
               onSelect={onChange}
               numberOfMonths={2}
-              fromDate={fromDate}
-              toDate={toDate}
-              classNames={calendarClassNames}
-              components={calendarComponents}
+              startMonth={fromDate}
+              endMonth={toDate}
             />
           </PopoverPrimitive.Content>
         </PopoverPrimitive.Portal>
