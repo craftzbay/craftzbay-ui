@@ -1,5 +1,22 @@
 # @craftzbay/ui
 
+## 0.7.1
+
+### Patch Changes
+
+- Hotfix: chunk load-order regression on hard refresh.
+  - The 0.7.0 multi-vendor split (radix / cmdk / embla / vaul / day-picker /
+    rhf / lucide each in own chunk) tripped Rollup's chunk-import graph in
+    production, producing
+    `Uncaught TypeError: Cannot read properties of undefined (reading 'useLayoutEffect')`
+    on hard refresh. Several of those vendors import React indirectly, and
+    the generated chunk graph evaluated them before `vendor-react` was ready.
+  - Replaced with a conservative 2-chunk split: only React + its tight
+    runtime deps (scheduler, jsx-runtime, use-sync-external-store) live in
+    `vendor-react`; everything else stays in a single `vendor` chunk.
+  - Added a `/favicon.svg` (previously 404'd) and tightened the index.html
+    title + description.
+
 ## 0.7.0
 
 ### Minor Changes

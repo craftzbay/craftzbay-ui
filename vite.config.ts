@@ -66,22 +66,27 @@ export default defineConfig({
         },
       }
     : {
-        chunkSizeWarningLimit: 600,
+        chunkSizeWarningLimit: 1000,
         rollupOptions: {
           output: {
-            // Showcase code-splitting: keep first-paint small by isolating
-            // each large vendor group into its own chunk.
+            // Two-chunk vendor split: React + its tight runtime deps
+            // (scheduler, jsx-runtime, use-sync-external-store) get their
+            // own chunk so React hooks are always defined before the rest
+            // of the vendor code evaluates. Splitting further (radix,
+            // lucide, cmdk, …) introduced "Cannot read properties of
+            // undefined (reading 'useLayoutEffect')" on hard refresh —
+            // those packages import React indirectly and broke under the
+            // wrong chunk load order.
             manualChunks: (id) => {
               if (!id.includes('node_modules')) return undefined;
-              if (id.includes('react-dom')) return 'vendor-react';
-              if (id.includes('/react/') || id.endsWith('/react')) return 'vendor-react';
-              if (id.includes('@radix-ui')) return 'vendor-radix';
-              if (id.includes('lucide-react')) return 'vendor-lucide';
-              if (id.includes('react-day-picker') || id.includes('date-fns')) return 'vendor-datepicker';
-              if (id.includes('react-hook-form')) return 'vendor-rhf';
-              if (id.includes('embla-carousel')) return 'vendor-carousel';
-              if (id.includes('vaul')) return 'vendor-vaul';
-              if (id.includes('cmdk')) return 'vendor-cmdk';
+              if (
+                id.includes('node_modules/react/') ||
+                id.includes('node_modules/react-dom/') ||
+                id.includes('node_modules/scheduler/') ||
+                id.includes('node_modules/use-sync-external-store/')
+              ) {
+                return 'vendor-react';
+              }
               return 'vendor';
             },
           },

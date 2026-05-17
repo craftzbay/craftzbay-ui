@@ -1,6 +1,6 @@
 import { routeToHash } from '../routing';
 
-const VERSION = '0.7.0';
+const VERSION = '0.7.1';
 const GITHUB_URL = 'https://github.com/craftzbay/design-system';
 const NPM_URL = 'https://www.npmjs.com/package/@craftzbay/ui';
 const CHANGELOG_URL = `${GITHUB_URL}/blob/main/CHANGELOG.md`;
