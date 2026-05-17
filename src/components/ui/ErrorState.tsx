@@ -1,6 +1,6 @@
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
-import { AlertTriangle, XCircle } from '@/icons';
 import { cn } from '@/lib/utils';
+import { NotFound, ServerError, ConnectionLost } from '@/illustrations';
 import { Button } from './Button';
 
 export interface ErrorStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
@@ -10,6 +10,11 @@ export interface ErrorStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 't
   title?: ReactNode;
   /** Override the default description. */
   description?: ReactNode;
+  /**
+   * Override the variant's default illustration. Pass any ReactNode (e.g.
+   * `<Illustrations.Construction className="size-32" />`).
+   */
+  illustration?: ReactNode;
   /** Custom action node. Replaces the default retry button. */
   action?: ReactNode;
   /** When provided, renders a default "Try again" button calling this handler. */
@@ -18,17 +23,17 @@ export interface ErrorStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 't
 
 const presets = {
   '404': {
-    icon: <AlertTriangle />,
+    illustration: <NotFound className="size-32" />,
     title: 'Page not found',
     description: "We couldn't find what you were looking for.",
   },
   '500': {
-    icon: <XCircle />,
+    illustration: <ServerError className="size-32" />,
     title: 'Something went wrong',
     description: "We're looking into it. Please try again in a moment.",
   },
   generic: {
-    icon: <AlertTriangle />,
+    illustration: <ConnectionLost className="size-32" />,
     title: 'Unexpected error',
     description: 'Something interrupted this action.',
   },
@@ -37,20 +42,26 @@ const presets = {
 /**
  * Page-level error placeholder. Pair with `onRetry` for transient failures.
  *
- * @example 500
+ * @example 404 (uses built-in line illustration)
+ *   <ErrorState variant="404" />
+ *
+ * @example 500 with retry
  *   <ErrorState variant="500" onRetry={refetch} />
  *
  * @example Custom
- *   <ErrorState title="Quota exceeded"
- *               description="Your plan allows 1,000 events/day."
- *               action={<Button>Upgrade plan</Button>} />
+ *   <ErrorState
+ *     title="Quota exceeded"
+ *     description="Your plan allows 1,000 events/day."
+ *     illustration={<Illustrations.Construction className="size-32" />}
+ *     action={<Button>Upgrade plan</Button>}
+ *   />
  *
  * @do Match the tone to the cause — server errors apologise, user errors
  *      explain. Always offer a next step.
  * @dont Show a raw stack trace to end users.
  */
 export const ErrorState = forwardRef<HTMLDivElement, ErrorStateProps>(function ErrorState(
-  { variant = 'generic', title, description, action, onRetry, className, ...props },
+  { variant = 'generic', title, description, illustration, action, onRetry, className, ...props },
   ref,
 ) {
   const preset = presets[variant];
@@ -64,9 +75,7 @@ export const ErrorState = forwardRef<HTMLDivElement, ErrorStateProps>(function E
       )}
       {...props}
     >
-      <div className="inline-flex size-12 items-center justify-center rounded-full bg-danger-soft text-danger-text [&_svg]:size-6">
-        {preset.icon}
-      </div>
+      {illustration ?? preset.illustration}
       <h3 className="text-base font-semibold text-foreground leading-tight">
         {title ?? preset.title}
       </h3>

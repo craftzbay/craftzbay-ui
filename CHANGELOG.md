@@ -1,5 +1,41 @@
 # @craftzbay/ui
 
+## 0.6.0
+
+### Minor Changes
+
+- AppShell template + Illustrations defaults + live guides + global scrollbar polish.
+
+  **AppShell**
+  - `navSections`, `sidebar`, `topbarActions`, `search`, `user`, `profileMenu`,
+    `notifications`, `onMarkAllNotificationsRead`, `onViewAllNotifications` are
+    all configurable. The default still renders the same demo so existing call
+    sites are unaffected.
+  - `active` now accepts any string (was a closed union); legacy `AppShellNavKey`
+    alias retained for typed callers.
+  - `Dashboard` accepts `stats`, `chart`, `chartTitle`, `chartDescription`,
+    `activity`, `activityTitle`, `headerActions` — defaults match the demo.
+
+  **EmptyState / ErrorState**
+  - `EmptyState` adds `illustration` prop. With no `icon` or `illustration` it
+    renders the built-in `InboxEmpty` line illustration as a default hero —
+    previously empty.
+  - `ErrorState` swaps its default Lucide icon for the matching line
+    illustration per variant (NotFound / ServerError / ConnectionLost). New
+    `illustration` prop lets consumers override.
+
+  **Showcase**
+  - Guides now embed live interactive demos:
+    - **Theming** — brand-swap between default / EdgeLog / Gerege / Forest
+      presets, with primitives re-rendering inside the scope.
+    - **Forms** — working react-hook-form sign-in form with validation + Switch.
+    - **Dark mode** — live theme-toggle button bound to `<html>.dark`.
+    - **Responsive** — live breakpoint indicator using `useMediaQuery`.
+  - Sidebar — removed redundant section title (top-link already conveys
+    context); group sub-headers (Buttons, Inputs, …) retained.
+  - Global subtle scrollbars (thin, transparent track, visible only on hover
+    of the scroll container) replace platform-default chrome.
+
 ## 0.5.0
 
 ### Minor Changes

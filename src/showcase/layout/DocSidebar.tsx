@@ -83,9 +83,9 @@ export function DocSidebar({ sections, current, topLinks = [] }: DocSidebarProps
 
       {filteredSections.map((section) => (
         <div key={section.title} className="mb-6">
-          <div className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-wider text-foreground-subtle">
-            {section.title}
-          </div>
+          {/* Section title intentionally hidden — the active top-link already
+              communicates which kind (Components / Templates / Guides) the
+              sidebar is showing. Group sub-headers carry the structure. */}
           {section.groups.map((group) => (
             <div key={group.name} className="mb-3">
               <div className="mb-1 px-2 text-[10px] font-medium uppercase tracking-wide text-foreground-subtle/80">

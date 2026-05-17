@@ -9,43 +9,58 @@ const doc: ComponentDoc = {
   name: 'EmptyState',
   group: 'Feedback',
   description:
-    'Friendly "nothing here yet" panel. Always pair with at least one next-step action — empty + no action is a dead end.',
+    'Friendly "nothing here yet" panel. Defaults to the built-in InboxEmpty line illustration; pass `icon` for a compact look or `illustration` to swap in another one. Always pair with at least one next-step action.',
   exports: ['EmptyState'],
   sourceFile: 'EmptyState.tsx',
   examples: [
     {
-      title: 'With icon + action',
+      title: 'Default (built-in illustration)',
+      description: 'No icon or illustration prop — falls back to the InboxEmpty line illustration.',
       preview: (
         <EmptyState
-          icon={<Folder className="size-6" />}
           title="No projects yet"
           description="Create your first project to get started."
           action={<Button size="sm" leadingIcon={<Plus />}>New project</Button>}
         />
       ),
       code: `<EmptyState
-  icon={<Folder className="size-6" />}
   title="No projects yet"
   description="Create your first project to get started."
   action={<Button size="sm" leadingIcon={<Plus />}>New project</Button>}
 />`,
     },
     {
-      title: 'With illustration',
-      description: 'Use one of the built-in line illustrations for a softer, more on-brand empty state.',
+      title: 'Compact (icon)',
+      description: 'Pass `icon` for a small Lucide glyph in a 48 px circular container. Use for table cells and sidebar panes.',
       preview: (
         <EmptyState
-          icon={<Illustrations.InboxEmpty className="size-32" />}
-          title="Inbox zero"
-          description="You're all caught up. Take a breath."
+          icon={<Folder className="size-6" />}
+          title="No items"
+          description="Drag a file in or create one."
+        />
+      ),
+      code: `<EmptyState
+  icon={<Folder className="size-6" />}
+  title="No items"
+  description="Drag a file in or create one."
+/>`,
+    },
+    {
+      title: 'Custom illustration',
+      description: 'Use any of the built-in line illustrations via the `Illustrations` namespace.',
+      preview: (
+        <EmptyState
+          illustration={<Illustrations.NoSearchResults className="size-32" />}
+          title="No results"
+          description="Try a different search term or clear your filters."
         />
       ),
       code: `import { Illustrations } from '@craftzbay/ui';
 
 <EmptyState
-  icon={<Illustrations.InboxEmpty className="size-32" />}
-  title="Inbox zero"
-  description="You're all caught up. Take a breath."
+  illustration={<Illustrations.NoSearchResults className="size-32" />}
+  title="No results"
+  description="Try a different search term or clear your filters."
 />`,
     },
   ],
@@ -54,8 +69,10 @@ const doc: ComponentDoc = {
       rows: [
         { name: 'title', type: 'ReactNode', required: true, description: 'Primary line.' },
         { name: 'description', type: 'ReactNode', description: 'Body copy.' },
-        { name: 'icon', type: 'ReactNode', description: 'Icon or illustration above the title.' },
+        { name: 'illustration', type: 'ReactNode', description: 'Full-size illustration. Takes precedence over `icon`. If neither is set, the default InboxEmpty illustration is used.' },
+        { name: 'icon', type: 'ReactNode', description: 'Small Lucide-sized icon in a 48 px circular container.' },
         { name: 'action', type: 'ReactNode', description: 'Primary CTA — usually a Button.' },
+        { name: 'secondaryAction', type: 'ReactNode', description: 'Optional secondary action next to the primary.' },
       ],
     },
   ],

@@ -1,9 +1,19 @@
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { InboxEmpty } from '@/illustrations';
 
 export interface EmptyStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
-  /** Visual marker — small Lucide icon or custom illustration. */
+  /**
+   * Small Lucide-sized icon rendered inside a 48px circular container.
+   * Use for compact empty states (table cells, sidebar panes, cards).
+   */
   icon?: ReactNode;
+  /**
+   * Full-size illustration rendered without the icon container. Takes
+   * precedence over `icon`. If neither is set, the default `InboxEmpty`
+   * line illustration is used.
+   */
+  illustration?: ReactNode;
   /** Heading. One short sentence. */
   title: ReactNode;
   /** Description. One or two sentences max. */
@@ -18,21 +28,27 @@ export interface EmptyStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 't
  * Shown when a list / dataset / surface has no content yet. Tone is helpful,
  * never apologetic.
  *
- * @example
+ * @example Default — uses the built-in InboxEmpty illustration
  *   <EmptyState
- *     icon={<Folder className="size-6" />}
  *     title="No projects yet"
  *     description="Create a project to start tracking work."
  *     action={<Button>New project</Button>}
  *   />
  *
- * @do Lead with the next action. The icon is decoration; the button is the
- *      point.
- * @dont Use elaborate illustrations on internal product surfaces — they
- *       break the refined-minimal direction.
+ * @example Compact — small Lucide icon for dense layouts
+ *   <EmptyState
+ *     icon={<Folder className="size-6" />}
+ *     title="No items"
+ *   />
+ *
+ * @example Custom illustration
+ *   <EmptyState
+ *     illustration={<Illustrations.NoSearchResults className="size-32" />}
+ *     title="No results"
+ *   />
  */
 export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(function EmptyState(
-  { icon, title, description, action, secondaryAction, className, ...props },
+  { icon, illustration, title, description, action, secondaryAction, className, ...props },
   ref,
 ) {
   return (
@@ -44,10 +60,15 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(function E
       )}
       {...props}
     >
-      {icon && (
+      {/* Visual: illustration > icon > default illustration */}
+      {illustration ? (
+        illustration
+      ) : icon ? (
         <div className="inline-flex size-12 items-center justify-center rounded-full bg-background-muted text-foreground-muted [&_svg]:size-6">
           {icon}
         </div>
+      ) : (
+        <InboxEmpty className="size-24" />
       )}
       <h3 className="text-base font-semibold text-foreground leading-tight">{title}</h3>
       {description && (
