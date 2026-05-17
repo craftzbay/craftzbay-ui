@@ -12,6 +12,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert } from '@/components/ui/Alert';
 import { Progress } from '@/components/ui/Progress';
 import { IconButton } from '@/components/ui/IconButton';
+import { Tooltip } from '@/components/ui/Tooltip';
+import { Separator } from '@/components/ui/Separator';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/Accordion';
 import {
   CommandDialog,
   CommandEmpty,
@@ -428,10 +431,16 @@ function OverviewPage({ onPick }: { onPick: (k: PatternKey) => void }) {
     <>
       <Hero />
       <Stats />
+      <Separator className="mx-auto max-w-6xl" />
       <ComponentShowcase />
+      <Separator className="mx-auto max-w-6xl" />
       <QuickStart />
+      <Separator className="mx-auto max-w-6xl" />
       <Features />
+      <Separator className="mx-auto max-w-6xl" />
       <PatternGallery onPick={onPick} />
+      <Separator className="mx-auto max-w-6xl" />
+      <FAQ />
       <Footer />
     </>
   );
@@ -484,44 +493,73 @@ function Hero() {
 
 function InstallSnippet() {
   const [copied, setCopied] = useState(false);
-  const text = 'pnpm add @craftzbay/ui';
+  const [pkgMgr, setPkgMgr] = useState<'pnpm' | 'npm' | 'yarn' | 'bun'>('pnpm');
+  const commands = {
+    pnpm: 'pnpm add @craftzbay/ui',
+    npm: 'npm install @craftzbay/ui',
+    yarn: 'yarn add @craftzbay/ui',
+    bun: 'bun add @craftzbay/ui',
+  };
+  const text = commands[pkgMgr];
 
   return (
-    <div className="group flex items-center gap-3 rounded-md border border-border bg-card px-4 py-2.5 font-mono text-sm">
-      <span className="text-foreground-subtle">$</span>
-      <code>{text}</code>
-      <button
-        type="button"
-        aria-label="Copy install command"
-        className="ml-2 rounded p-1 text-foreground-subtle transition-colors hover:bg-background-muted hover:text-foreground"
-        onClick={() => {
-          navigator.clipboard.writeText(text).then(() => {
-            setCopied(true);
-            setTimeout(() => setCopied(false), 1500);
-          });
-        }}
-      >
-        {copied ? <Check className="size-3.5 text-success-text" /> : <Copy className="size-3.5" />}
-      </button>
-    </div>
+    <Card className="w-full max-w-md p-0 overflow-hidden">
+      <Tabs value={pkgMgr} onValueChange={(v) => setPkgMgr(v as typeof pkgMgr)}>
+        <div className="flex items-center justify-between border-b border-border px-2">
+          <TabsList variant="underline" size="sm" className="border-b-0 gap-2">
+            <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+            <TabsTrigger value="npm">npm</TabsTrigger>
+            <TabsTrigger value="yarn">yarn</TabsTrigger>
+            <TabsTrigger value="bun">bun</TabsTrigger>
+          </TabsList>
+          <Tooltip label={copied ? 'Copied!' : 'Copy'}>
+            <IconButton
+              aria-label="Copy install command"
+              size="sm"
+              variant="ghost"
+              icon={copied ? <Check className="text-success-text" /> : <Copy />}
+              onClick={() => {
+                navigator.clipboard.writeText(text).then(() => {
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 1500);
+                });
+              }}
+            />
+          </Tooltip>
+        </div>
+        <div className="flex items-center gap-3 px-4 py-3 font-mono text-sm">
+          <span className="text-foreground-subtle">$</span>
+          <code>{text}</code>
+        </div>
+      </Tabs>
+    </Card>
   );
 }
 
 function Stats() {
   const items = [
-    { value: '49', label: 'Components' },
-    { value: '8', label: 'Page patterns' },
+    { value: '49', label: 'Components', trend: '+9 in 0.3' },
+    { value: '8', label: 'Page patterns', trend: 'ready-to-ship' },
     { value: '124', label: 'Storybook stories' },
-    { value: '56 KB', label: 'Gzipped (ESM)' },
+    { value: '33 KB', label: 'Gzipped (ESM)', trend: '−35% in 0.5', tone: 'success' as const },
   ];
   return (
     <section className="mx-auto max-w-6xl px-6 pb-16">
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {items.map((it) => (
-          <div key={it.label} className="flex flex-col gap-1 bg-card p-5">
-            <span className="text-3xl font-semibold tabular-nums text-foreground">{it.value}</span>
-            <span className="text-xs text-foreground-subtle">{it.label}</span>
-          </div>
+          <Card key={it.label} className="p-5">
+            <div className="flex flex-col gap-2">
+              <span className="text-3xl font-semibold tabular-nums text-foreground">{it.value}</span>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs text-foreground-subtle">{it.label}</span>
+                {it.trend && (
+                  <Badge tone={it.tone ?? 'neutral'} variant="outline" className="text-[10px]">
+                    {it.trend}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </Card>
         ))}
       </div>
     </section>
@@ -634,12 +672,12 @@ function ComponentShowcase() {
 
 function Demo({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-5">
+    <Card className="flex flex-col gap-3 p-5">
       <div className="text-[10px] font-medium uppercase tracking-wider text-foreground-subtle">
         {title}
       </div>
       <div className="flex min-h-[5rem] flex-col justify-center">{children}</div>
-    </div>
+    </Card>
   );
 }
 
@@ -669,29 +707,30 @@ function QuickStart() {
 function CodeBlock({ label, code }: { label: string; code: string }) {
   const [copied, setCopied] = useState(false);
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-card">
+    <Card className="overflow-hidden p-0">
       <div className="flex items-center justify-between border-b border-border px-4 py-2">
         <span className="text-[10px] font-medium uppercase tracking-wider text-foreground-subtle">
           {label}
         </span>
-        <button
-          type="button"
-          aria-label={`Copy ${label}`}
-          onClick={() => {
-            navigator.clipboard.writeText(code).then(() => {
-              setCopied(true);
-              setTimeout(() => setCopied(false), 1500);
-            });
-          }}
-          className="rounded p-1 text-foreground-subtle hover:bg-background-muted hover:text-foreground"
-        >
-          {copied ? <Check className="size-3.5 text-success-text" /> : <Copy className="size-3.5" />}
-        </button>
+        <Tooltip label={copied ? 'Copied!' : 'Copy'}>
+          <IconButton
+            aria-label={`Copy ${label}`}
+            size="sm"
+            variant="ghost"
+            icon={copied ? <Check className="text-success-text" /> : <Copy />}
+            onClick={() => {
+              navigator.clipboard.writeText(code).then(() => {
+                setCopied(true);
+                setTimeout(() => setCopied(false), 1500);
+              });
+            }}
+          />
+        </Tooltip>
       </div>
       <pre className="overflow-x-auto px-4 py-3 font-mono text-[13px] leading-relaxed text-foreground">
         <code>{code}</code>
       </pre>
-    </div>
+    </Card>
   );
 }
 
@@ -720,12 +759,61 @@ function Features() {
       <SectionHeader eyebrow="Why" title="Built to disappear." />
       <div className="grid gap-4 sm:grid-cols-2">
         {items.map((it) => (
-          <div key={it.title} className="rounded-lg border border-border bg-card p-5">
-            <h3 className="text-base font-semibold">{it.title}</h3>
-            <p className="mt-1 text-sm text-foreground-muted">{it.body}</p>
-          </div>
+          <Card key={it.title} className="p-5">
+            <CardHeader className="p-0">
+              <CardTitle className="text-base">{it.title}</CardTitle>
+              <CardDescription>{it.body}</CardDescription>
+            </CardHeader>
+          </Card>
         ))}
       </div>
+    </section>
+  );
+}
+
+function FAQ() {
+  const items = [
+    {
+      q: 'Can I use it without Tailwind in my consumer app?',
+      a: 'Yes. The library ships a precompiled styles.css — your app does not need its own Tailwind setup. If you do have Tailwind, no conflict either.',
+    },
+    {
+      q: 'Why Tailwind v4 specifically?',
+      a: 'CSS-first config (tokens in @theme blocks), 3× faster builds, native CSS variable output that is easy to override in consumer apps, and automatic dark mode via class selector.',
+    },
+    {
+      q: 'How big is the bundle?',
+      a: 'ESM 142 KB / 33 KB gzipped, plus 8 KB / 2 KB gzipped CSS. Tree-shakeable — you only pay for what you import.',
+    },
+    {
+      q: 'Does it work with Next.js / Remix / TanStack Start?',
+      a: 'Yes. Pure React, no runtime side effects. For React Server Components, interactive primitives need a "use client" directive at the consuming file (standard for any Radix-based library).',
+    },
+    {
+      q: 'How do I theme it for my brand?',
+      a: 'Three ways: (1) override CSS variables globally in your app stylesheet, (2) wrap a subtree in <DesignSystemProvider tokens={...}> for per-section brands, (3) pass className for one-off tweaks.',
+    },
+    {
+      q: 'Where do I report bugs?',
+      a: 'GitHub Issues at craftzbay/design-system. PRs welcome too — CI runs typecheck, tests, and all 3 builds on every PR.',
+    },
+  ];
+
+  return (
+    <section className="mx-auto max-w-3xl px-6 pb-20">
+      <SectionHeader
+        eyebrow="FAQ"
+        title="Common questions."
+        subtitle="The same questions teams ask the first week they pick it up."
+      />
+      <Accordion type="single" collapsible>
+        {items.map((it, i) => (
+          <AccordionItem key={i} value={`item-${i}`}>
+            <AccordionTrigger>{it.q}</AccordionTrigger>
+            <AccordionContent>{it.a}</AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
     </section>
   );
 }
@@ -745,12 +833,12 @@ function PatternGallery({ onPick }: { onPick: (k: PatternKey) => void }) {
             key={p.key}
             type="button"
             onClick={() => onPick(p.key)}
-            className="group flex flex-col gap-2 rounded-lg border border-border bg-card p-5 text-left outline-none transition-colors hover:border-border-strong hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring"
+            className="group flex flex-col gap-2 rounded-md border border-border bg-card p-5 text-left outline-none transition-colors hover:border-border-strong hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring"
           >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium uppercase tracking-wider text-foreground-subtle">
+              <Badge tone="neutral" variant="outline" className="text-[10px]">
                 {p.group}
-              </span>
+              </Badge>
               <ArrowRight className="size-4 text-foreground-subtle transition-transform group-hover:translate-x-0.5" />
             </div>
             <span className="text-base font-semibold">{p.label}</span>
