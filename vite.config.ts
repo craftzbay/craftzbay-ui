@@ -65,5 +65,26 @@ export default defineConfig({
           ],
         },
       }
-    : undefined,
+    : {
+        chunkSizeWarningLimit: 600,
+        rollupOptions: {
+          output: {
+            // Showcase code-splitting: keep first-paint small by isolating
+            // each large vendor group into its own chunk.
+            manualChunks: (id) => {
+              if (!id.includes('node_modules')) return undefined;
+              if (id.includes('react-dom')) return 'vendor-react';
+              if (id.includes('/react/') || id.endsWith('/react')) return 'vendor-react';
+              if (id.includes('@radix-ui')) return 'vendor-radix';
+              if (id.includes('lucide-react')) return 'vendor-lucide';
+              if (id.includes('react-day-picker') || id.includes('date-fns')) return 'vendor-datepicker';
+              if (id.includes('react-hook-form')) return 'vendor-rhf';
+              if (id.includes('embla-carousel')) return 'vendor-carousel';
+              if (id.includes('vaul')) return 'vendor-vaul';
+              if (id.includes('cmdk')) return 'vendor-cmdk';
+              return 'vendor';
+            },
+          },
+        },
+      },
 });

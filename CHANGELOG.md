@@ -1,5 +1,44 @@
 # @craftzbay/ui
 
+## 0.7.0
+
+### Minor Changes
+
+- Mobile nav, real Dashboard chart, footer, migration guide, filterable templates,
+  sidebar keyboard nav, vendor code-splitting, and 63 new tests.
+
+  **Templates (library)**
+  - `Dashboard` chart placeholder now renders a real `LineChart` with synthetic
+    30-day data. Pass `chart` to override.
+
+  **Showcase**
+  - Mobile sidebar: a hamburger button now appears below the TopBar on screens
+    < md, opening the full sidebar in a left Sheet drawer. Closes on navigation.
+  - Sidebar search now supports keyboard nav: `↓ / ↑` cycle results, `↵` opens,
+    `Esc` clears. Hint line shows under the input when results are visible.
+  - TemplatesIndexPage: use-case chips are now clickable filters. Multi-select
+    - clear button.
+  - 404 page now uses the library's own `ErrorState` component for consistency.
+  - New showcase Footer with brand, version, license, docs / project /
+    resources columns. Hidden on `#preview/*` routes.
+  - New Migration guide (`#guides/migration`) covering every prop addition
+    from 0.4 → 0.6.
+  - Home page version pill links to GitHub CHANGELOG.
+
+  **Performance**
+  - Showcase build now manually chunks vendor code (react, radix, lucide,
+    cmdk, embla, vaul, react-day-picker, react-hook-form). First-paint
+    bundle drops from ~244 KB gzip to ~95 KB (react) + ~78 KB (app code).
+    No more "chunks larger than 500 KB" warning.
+
+  **Tests**
+  - 63 new tests across 8 new smoke-test files (one per component category):
+    buttons, inputs, feedback, overlays, navigation, layout, data-display,
+    form. Total test count: **87 passing**.
+  - New jsdom polyfills: `IntersectionObserver` (Embla),
+    `Element.scrollIntoView` (cmdk), `hasPointerCapture` / `releasePointerCapture`
+    (Radix).
+
 ## 0.6.1
 
 ### Patch Changes

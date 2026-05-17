@@ -4,6 +4,7 @@ import { ThemingBody } from '../guides/Theming';
 import { FormsBody } from '../guides/Forms';
 import { DarkModeBody } from '../guides/DarkMode';
 import { ResponsiveBody } from '../guides/Responsive';
+import { MigrationBody } from '../guides/Migration';
 
 /* -----------------------------------------------------------------------------
  *  Long-form guides. Inline guides (Quick start, Accessibility) keep their
@@ -107,6 +108,13 @@ const responsive: GuideDoc = {
   body: <ResponsiveBody />,
 };
 
+const migration: GuideDoc = {
+  slug: 'migration',
+  title: 'Migration (0.4 → 0.6)',
+  description: 'Upgrade notes — all changes are backwards-compatible, but new props unlock real templates.',
+  body: <MigrationBody />,
+};
+
 export const guideDocs: GuideDoc[] = [
   quickstart,
   theming,
@@ -114,6 +122,7 @@ export const guideDocs: GuideDoc[] = [
   forms,
   darkMode,
   responsive,
+  migration,
 ];
 
 export function getGuideDoc(slug: string): GuideDoc | undefined {

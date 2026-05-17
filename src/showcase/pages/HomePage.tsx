@@ -6,7 +6,7 @@ import { templateDocs } from '../registry/templates';
 import { guideDocs } from '../registry/guides';
 import { routeToHash } from '../routing';
 
-const VERSION = '0.6.1'; // bumped in lockstep with package.json via changeset
+const VERSION = '0.7.0'; // bumped in lockstep with package.json via changeset
 
 export function HomePage() {
   return (
@@ -39,7 +39,16 @@ export function HomePage() {
         </div>
 
         <div className="mt-6 flex flex-wrap items-center gap-2 text-xs text-foreground-muted">
-          <Badge variant="outline" tone="neutral">v{VERSION}</Badge>
+          <a
+            href="https://github.com/craftzbay/design-system/blob/main/CHANGELOG.md"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 hover:text-accent"
+            aria-label="View release notes"
+          >
+            <Badge variant="outline" tone="neutral">v{VERSION}</Badge>
+            <span className="text-[10px] text-foreground-subtle">release notes ↗</span>
+          </a>
           <span>·</span>
           <code className="rounded bg-background-muted px-1.5 py-0.5 font-mono">pnpm add @craftzbay/ui</code>
         </div>

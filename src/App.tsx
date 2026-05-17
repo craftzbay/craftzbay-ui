@@ -18,6 +18,8 @@ import {
   SignUpForm,
 } from '@/components/patterns/Authentication';
 import { AppShell, Dashboard } from '@/components/patterns/AppShell';
+import { Button } from '@/components/ui/Button';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { SettingsPage } from '@/components/patterns/Settings';
 import { DataTablePage } from '@/components/patterns/DataTablePage';
 import { RecordDetail } from '@/components/patterns/RecordDetail';
@@ -27,6 +29,7 @@ import { FirstRunEmpty } from '@/components/patterns/FirstRunEmpty';
 
 import { isFullBleedRoute, parseHash, routeToHash, type Route } from './showcase/routing';
 import { ShowcaseTopBar } from './showcase/layout/ShowcaseTopBar';
+import { ShowcaseFooter } from './showcase/layout/ShowcaseFooter';
 import { DocLayout } from './showcase/layout/DocLayout';
 import {
   buildComponentSidebar,
@@ -110,6 +113,8 @@ export function App() {
           )}
 
           <RouteView route={route} brand={<Brand />} />
+
+          {route.kind !== 'preview' && <ShowcaseFooter />}
 
           <ShowcasePalette
             open={cmdOpen}
@@ -227,16 +232,17 @@ function RouteView({ route, brand }: { route: Route; brand: React.ReactNode }) {
 
 function NotFound() {
   return (
-    <div className="mx-auto max-w-3xl px-6 py-20 text-center">
-      <p className="text-xs font-medium uppercase tracking-wider text-foreground-subtle">404</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight">Page not found</h1>
-      <p className="mt-3 text-sm text-foreground-muted">
-        The requested doc page does not exist.{' '}
-        <a className="text-accent hover:underline" href="#">
-          Back to overview
-        </a>
-        .
-      </p>
+    <div className="mx-auto max-w-3xl px-6 py-16">
+      <ErrorState
+        variant="404"
+        title="Page not found"
+        description="The doc page you are looking for does not exist."
+        action={
+          <Button asChild>
+            <a href="#">Back to overview</a>
+          </Button>
+        }
+      />
     </div>
   );
 }

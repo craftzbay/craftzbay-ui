@@ -20,6 +20,7 @@ import {
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { LineChart } from '@/components/ui/Chart';
 import { IconButton } from '@/components/ui/IconButton';
 import { Input } from '@/components/ui/Input';
 import { Kbd } from '@/components/ui/Kbd';
@@ -585,6 +586,15 @@ export interface DashboardProps {
   activityTitle?: ReactNode;
 }
 
+// Synthetic 30-day active-users series shown by default. Realistic-looking
+// gentle upward drift with weekly periodicity.
+const DEFAULT_CHART_DATA = Array.from({ length: 30 }, (_, i) => {
+  const trend = 2200 + i * 22;
+  const weekly = Math.sin(i / 3.5) * 180;
+  const noise = (Math.sin(i * 7.3) + Math.cos(i * 3.1)) * 60;
+  return { x: i, y: Math.round(trend + weekly + noise) };
+});
+
 const DEFAULT_STATS: DashboardStat[] = [
   { label: 'Active users', value: '2,840', delta: { value: '+12%', positive: true } },
   { label: 'Sessions today', value: '8,402', delta: { value: '+4%', positive: true } },
@@ -660,15 +670,7 @@ export function Dashboard({
             {chartTitle && <CardTitle>{chartTitle}</CardTitle>}
             {chartDescription && <CardDescription>{chartDescription}</CardDescription>}
           </CardHeader>
-          <CardContent>
-            {chart ?? (
-              <div
-                role="img"
-                aria-label="Chart placeholder"
-                className="h-48 w-full rounded-md border border-dashed border-border bg-background-subtle"
-              />
-            )}
-          </CardContent>
+          <CardContent>{chart ?? <LineChart data={DEFAULT_CHART_DATA} height={160} className="w-full" />}</CardContent>
         </Card>
       )}
 
