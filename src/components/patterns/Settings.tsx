@@ -45,10 +45,11 @@ export function SettingsPage() {
           <ul className="flex flex-col gap-px">
             {sections.map((s) => (
               <li key={s.id}>
-                <a
-                  href={`#${s.id}`}
+                <button
+                  type="button"
                   onClick={() => setActive(s.id)}
                   className={cn(
+                    'w-full text-left',
                     'flex h-9 items-center gap-2 rounded-md px-2 text-sm transition-colors duration-[var(--duration-fast)] outline-none',
                     'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                     active === s.id
@@ -59,7 +60,7 @@ export function SettingsPage() {
                 >
                   <span className="[&_svg]:size-4">{s.icon}</span>
                   {s.label}
-                </a>
+                </button>
               </li>
             ))}
           </ul>

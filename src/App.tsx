@@ -99,8 +99,11 @@ export function App() {
 
   useEffect(() => {
     const onHash = () => {
-      const k = (window.location.hash.replace('#', '') as PatternKey) || 'home';
-      setActive(patterns.find((p) => p.key === k)?.key ?? 'home');
+      const k = window.location.hash.replace('#', '');
+      // Empty hash → overview. Unknown hash (e.g. a Settings sub-section
+      // anchor like #profile) is ignored so the current pattern stays put.
+      if (k === '') setActive('home');
+      else if (patterns.some((p) => p.key === k)) setActive(k as PatternKey);
     };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
