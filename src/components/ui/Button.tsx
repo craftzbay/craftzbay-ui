@@ -137,17 +137,34 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   },
   ref,
 ) {
-  const Comp: any = asChild ? Slot : 'button';
   const isDisabled = disabled || loading;
+  const classes = cn(button({ variant, size }), className);
+
+  if (asChild) {
+    // Slot requires exactly one element child — pass the consumer's element
+    // through untouched. The consumer is responsible for any leading/trailing
+    // icons inside that element.
+    return (
+      <Slot
+        ref={ref}
+        aria-busy={loading || undefined}
+        data-loading={loading || undefined}
+        className={classes}
+        {...props}
+      >
+        {children}
+      </Slot>
+    );
+  }
 
   return (
-    <Comp
+    <button
       ref={ref}
-      type={asChild ? undefined : type}
+      type={type}
       aria-busy={loading || undefined}
-      disabled={asChild ? undefined : isDisabled}
+      disabled={isDisabled}
       data-loading={loading || undefined}
-      className={cn(button({ variant, size }), className)}
+      className={classes}
       {...props}
     >
       {loading ? (
@@ -157,7 +174,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       )}
       {children}
       {!loading && trailingIcon}
-    </Comp>
+    </button>
   );
 });
 
