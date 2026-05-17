@@ -33,25 +33,34 @@ interface InternalToast extends ToastDescriptor {
 
 type Listener = (toasts: InternalToast[]) => void;
 
-const store = {
-  toasts: [] as InternalToast[],
+interface ToastStore {
+  toasts: InternalToast[];
+  listeners: Set<Listener>;
+  emit(): void;
+  push(t: ToastDescriptor): string;
+  dismiss(id: string): void;
+  remove(id: string): void;
+}
+
+const store: ToastStore = {
+  toasts: [],
   listeners: new Set<Listener>(),
-  emit(this: typeof store) {
+  emit() {
     for (const listener of this.listeners) listener(this.toasts);
   },
-  push(this: typeof store, t: ToastDescriptor) {
+  push(t: ToastDescriptor) {
     const id = t.id ?? `t_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     const next: InternalToast = { open: true, duration: 5000, variant: 'default', ...t, id };
     this.toasts = [next, ...this.toasts].slice(0, 3);
     this.emit();
     return id;
   },
-  dismiss(this: typeof store, id: string) {
-    this.toasts = this.toasts.map((t) => (t.id === id ? { ...t, open: false } : t));
+  dismiss(id: string) {
+    this.toasts = this.toasts.map((t: InternalToast) => (t.id === id ? { ...t, open: false } : t));
     this.emit();
   },
-  remove(this: typeof store, id: string) {
-    this.toasts = this.toasts.filter((t) => t.id !== id);
+  remove(id: string) {
+    this.toasts = this.toasts.filter((t: InternalToast) => t.id !== id);
     this.emit();
   },
 };

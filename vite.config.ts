@@ -26,7 +26,6 @@ export default defineConfig({
               'src/foundations/**',
             ],
             insertTypesEntry: true,
-            rollupTypes: false,
           }),
         ]
       : []),

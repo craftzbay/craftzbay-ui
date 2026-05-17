@@ -28,7 +28,7 @@ const iconForVariant = {
 };
 
 export interface AlertProps
-  extends HTMLAttributes<HTMLDivElement>,
+  extends Omit<HTMLAttributes<HTMLDivElement>, 'title'>,
     VariantProps<typeof alert> {
   /** Heading. Renders bold above the description. */
   title?: ReactNode;

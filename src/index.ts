@@ -30,6 +30,7 @@ export * from './components/ui/CommandPalette';
 export * from './components/ui/ContextMenu';
 export * from './components/ui/DataGrid';
 export * from './components/ui/DatePicker';
+export * from './components/ui/DesignSystemProvider';
 export * from './components/ui/Dialog';
 export * from './components/ui/DropdownMenu';
 export * from './components/ui/EmptyState';

@@ -65,7 +65,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
   const fieldId = id ?? autoId;
   const helperId = `${fieldId}-helper`;
   const errorId = `${fieldId}-error`;
-  const innerRef = useRef<HTMLTextAreaElement>(null);
+  const innerRef = useRef<HTMLTextAreaElement | null>(null);
 
   // Stash a ref locally and forward to the consumer.
   const setRef = (node: HTMLTextAreaElement | null) => {

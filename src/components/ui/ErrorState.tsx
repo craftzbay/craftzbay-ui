@@ -3,7 +3,7 @@ import { AlertTriangle, XCircle } from '@/icons';
 import { cn } from '@/lib/utils';
 import { Button } from './Button';
 
-export interface ErrorStateProps extends HTMLAttributes<HTMLDivElement> {
+export interface ErrorStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
   /** `404` not-found, `500` server, or `generic` (catch-all). */
   variant?: '404' | '500' | 'generic';
   /** Override the default title. */
