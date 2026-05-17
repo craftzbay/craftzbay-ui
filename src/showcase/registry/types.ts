@@ -1,0 +1,85 @@
+import type { ReactNode } from 'react';
+
+/* -----------------------------------------------------------------------------
+ *  Shared metadata shapes for component / template / guide documentation.
+ * --------------------------------------------------------------------------- */
+
+export interface PropRow {
+  name: string;
+  type: string;
+  default?: string;
+  required?: boolean;
+  description: string;
+}
+
+export interface PropGroup {
+  title?: string;
+  rows: PropRow[];
+}
+
+export interface Example {
+  /** Short title used as the section heading on the doc page. */
+  title: string;
+  /** Optional 1–2 sentence explainer rendered above the demo. */
+  description?: string;
+  /** Live, fully interactive React node rendered in the Preview tab. */
+  preview: ReactNode;
+  /** Verbatim source code shown in the Code tab + Copy button. */
+  code: string;
+  /** Optional override for the preview surface (e.g. add height / padding). */
+  surfaceClassName?: string;
+}
+
+export type ComponentGroup =
+  | 'Buttons'
+  | 'Inputs'
+  | 'Feedback'
+  | 'Overlays'
+  | 'Navigation'
+  | 'Layout'
+  | 'Data Display'
+  | 'Typography';
+
+export interface ComponentDoc {
+  /** URL slug — e.g. 'button'. */
+  slug: string;
+  /** Display name — e.g. 'Button'. */
+  name: string;
+  group: ComponentGroup;
+  /** One-line tagline shown under the title and in lists. */
+  description: string;
+  /** Names re-exported from `@craftzbay/ui` for this component. */
+  exports: string[];
+  /** Path under src/components/ui/ — used for the GitHub source link. */
+  sourceFile: string;
+  examples: Example[];
+  /** Each table is rendered with its own optional title. */
+  api?: PropGroup[];
+  accessibility?: string[];
+  /** Cross-links rendered at the bottom of the page. */
+  related?: { slug: string; reason: string }[];
+}
+
+export interface TemplateDoc {
+  slug: string;
+  name: string;
+  /** One-line tagline. */
+  description: string;
+  /** Names re-exported from `@craftzbay/ui` (or component path). */
+  exports: string[];
+  sourceFile: string;
+  /** Full-bleed preview slug (#preview/<slug>). */
+  previewSlug?: string;
+  examples: Example[];
+  api?: PropGroup[];
+  /** What flows / pages this template is intended for. */
+  useCases?: string[];
+}
+
+export interface GuideDoc {
+  slug: string;
+  title: string;
+  description: string;
+  /** Rendered as the body of the guide page. */
+  body: ReactNode;
+}

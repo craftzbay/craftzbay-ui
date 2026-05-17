@@ -1,0 +1,68 @@
+import { TopNav, TopNavLink } from '@/components/ui/TopNav';
+import { Avatar } from '@/components/ui/Avatar';
+import type { ComponentDoc } from '../registry/types';
+
+const doc: ComponentDoc = {
+  slug: 'top-nav',
+  name: 'TopNav',
+  group: 'Navigation',
+  description:
+    'Horizontal app header. Slots: logo, nav (links), and actions (search, profile). Use as the chrome at the top of a dashboard.',
+  exports: ['TopNav', 'TopNavLink'],
+  sourceFile: 'TopNav.tsx',
+  examples: [
+    {
+      title: 'Default',
+      preview: (
+        <div className="w-full max-w-2xl overflow-hidden rounded-md border border-border">
+          <TopNav
+            logo={<span className="text-sm font-semibold">Atlas</span>}
+            nav={
+              <nav className="flex items-center gap-3 text-sm">
+                <TopNavLink href="#" active>Home</TopNavLink>
+                <TopNavLink href="#">Projects</TopNavLink>
+                <TopNavLink href="#">Members</TopNavLink>
+              </nav>
+            }
+            actions={<Avatar fallback="BO" size="sm" />}
+          />
+        </div>
+      ),
+      code: `<TopNav
+  logo={<span className="text-sm font-semibold">Atlas</span>}
+  nav={
+    <nav className="flex items-center gap-3 text-sm">
+      <TopNavLink href="/" active>Home</TopNavLink>
+      <TopNavLink href="/projects">Projects</TopNavLink>
+    </nav>
+  }
+  actions={<Avatar fallback="BO" size="sm" />}
+/>`,
+    },
+  ],
+  api: [
+    {
+      title: 'TopNav',
+      rows: [
+        { name: 'logo', type: 'ReactNode', description: 'Leftmost slot — brand mark or wordmark.' },
+        { name: 'nav', type: 'ReactNode', description: 'Center slot — link list.' },
+        { name: 'actions', type: 'ReactNode', description: 'Right slot — search, profile, notifications.' },
+      ],
+    },
+    {
+      title: 'TopNavLink',
+      rows: [
+        { name: 'href', type: 'string', required: true, description: 'Destination.' },
+        { name: 'active', type: 'boolean', default: 'false', description: 'Highlights as current.' },
+      ],
+    },
+  ],
+  accessibility: [
+    'TopNavLink with `active` sets aria-current="page".',
+  ],
+  related: [
+    { slug: 'sidebar', reason: 'For vertical app nav.' },
+  ],
+};
+
+export default doc;
