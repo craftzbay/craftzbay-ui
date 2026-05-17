@@ -1,5 +1,24 @@
 # @craftzbay/ui
 
+## 0.6.1
+
+### Patch Changes
+
+- Showcase fixes: never strand the user on a preview, sidebar search now finds
+  matches across all three doc kinds.
+  - `#preview/*` routes used to render full-bleed, hiding the showcase TopBar
+    entirely. Templates like Dashboard rendered their own internal chrome and
+    left no obvious way back to the docs. The ShowcaseTopBar is now always
+    visible; preview routes get a slim "Live preview · <name>" banner with a
+    "Back to template docs" link.
+  - The sidebar search input only filtered the current kind's section (a user
+    on the Components page could not find "Authentication" by typing "auth").
+    When a query is active, the sidebar now searches across components,
+    templates, and guides — grouped by kind, with a quick "Open" link to the
+    matching index page.
+  - Search input now uses `size="sm"` and a clear button.
+  - 5 new tests cover the search + cross-kind behaviour.
+
 ## 0.6.0
 
 ### Minor Changes

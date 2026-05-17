@@ -30,6 +30,7 @@ import { ShowcaseTopBar } from './showcase/layout/ShowcaseTopBar';
 import { DocLayout } from './showcase/layout/DocLayout';
 import {
   buildComponentSidebar,
+  buildCrossKindSections,
   buildGuideSidebar,
   buildTemplateSidebar,
   docTopLinks,
@@ -144,6 +145,7 @@ function RouteView({ route, brand }: { route: Route; brand: React.ReactNode }) {
           sidebar={buildComponentSidebar()}
           topLinks={docTopLinks}
           current={{ kind: route.kind }}
+          crossKindSections={buildCrossKindSections('component')}
         >
           <ComponentsIndexPage />
         </DocLayout>
@@ -157,6 +159,7 @@ function RouteView({ route, brand }: { route: Route; brand: React.ReactNode }) {
           sidebar={buildComponentSidebar()}
           topLinks={docTopLinks}
           current={{ kind: 'component', slug: doc.slug }}
+          crossKindSections={buildCrossKindSections('component')}
         >
           <ComponentDocPage doc={doc} />
         </DocLayout>
@@ -169,6 +172,7 @@ function RouteView({ route, brand }: { route: Route; brand: React.ReactNode }) {
           sidebar={buildTemplateSidebar()}
           topLinks={docTopLinks}
           current={{ kind: route.kind }}
+          crossKindSections={buildCrossKindSections('template')}
         >
           <TemplatesIndexPage />
         </DocLayout>
@@ -182,6 +186,7 @@ function RouteView({ route, brand }: { route: Route; brand: React.ReactNode }) {
           sidebar={buildTemplateSidebar()}
           topLinks={docTopLinks}
           current={{ kind: 'template', slug: doc.slug }}
+          crossKindSections={buildCrossKindSections('template')}
         >
           <TemplateDocPage doc={doc} />
         </DocLayout>
@@ -194,6 +199,7 @@ function RouteView({ route, brand }: { route: Route; brand: React.ReactNode }) {
           sidebar={buildGuideSidebar()}
           topLinks={docTopLinks}
           current={{ kind: route.kind }}
+          crossKindSections={buildCrossKindSections('guide')}
         >
           <GuidesIndexPage />
         </DocLayout>
@@ -207,6 +213,7 @@ function RouteView({ route, brand }: { route: Route; brand: React.ReactNode }) {
           sidebar={buildGuideSidebar()}
           topLinks={docTopLinks}
           current={{ kind: 'guide', slug: doc.slug }}
+          crossKindSections={buildCrossKindSections('guide')}
         >
           <GuidePage doc={doc} />
         </DocLayout>
@@ -235,6 +242,33 @@ function NotFound() {
 }
 
 function PreviewView({ slug, brand }: { slug: string; brand: React.ReactNode }) {
+  const doc = getTemplateDoc(slug);
+  if (!doc) return <NotFound />;
+
+  return (
+    <>
+      <div className="border-b border-border bg-background-subtle/70">
+        <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-4 py-2 text-xs md:px-6">
+          <div className="flex items-center gap-2 text-foreground-muted">
+            <span className="inline-flex size-1.5 rounded-full bg-accent" aria-hidden />
+            <span>
+              Live preview · <span className="font-medium text-foreground">{doc.name}</span>
+            </span>
+          </div>
+          <a
+            href={`#${routeToHash({ kind: 'template', slug })}`}
+            className="inline-flex items-center gap-1 font-medium text-accent hover:underline"
+          >
+            Back to template docs ↗
+          </a>
+        </div>
+      </div>
+      <PreviewBody slug={slug} brand={brand} />
+    </>
+  );
+}
+
+function PreviewBody({ slug, brand }: { slug: string; brand: React.ReactNode }) {
   const noopSubmit = async () => {};
   switch (slug) {
     case 'auth-signin':

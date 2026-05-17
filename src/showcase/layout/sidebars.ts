@@ -58,3 +58,18 @@ export const docTopLinks: { label: string; route: Route }[] = [
   { label: 'Templates', route: { kind: 'templates-index' } },
   { label: 'Guides', route: { kind: 'guides-index' } },
 ];
+
+type Kind = 'component' | 'template' | 'guide';
+
+/**
+ * Returns the sidebar sections for the two kinds NOT matching `currentKind`.
+ * Passed to DocLayout as `crossKindSections` so the search input can surface
+ * matches from other docs sections without showing them when idle.
+ */
+export function buildCrossKindSections(currentKind: Kind) {
+  const others: ReturnType<typeof buildComponentSidebar>[number][] = [];
+  if (currentKind !== 'component') others.push(...buildComponentSidebar());
+  if (currentKind !== 'template') others.push(...buildTemplateSidebar());
+  if (currentKind !== 'guide') others.push(...buildGuideSidebar());
+  return others;
+}

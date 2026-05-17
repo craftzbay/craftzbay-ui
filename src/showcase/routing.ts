@@ -81,7 +81,9 @@ export function routeToHash(route: Route): string {
   }
 }
 
-export function isFullBleedRoute(route: Route): boolean {
-  // Pages that render a full-screen preview without the showcase TopBar.
-  return route.kind === 'preview';
+export function isFullBleedRoute(_route: Route): boolean {
+  // Always render the showcase TopBar so users never get stranded inside a
+  // template preview with no way back to the docs. Templates render below
+  // the slim showcase header.
+  return false;
 }
