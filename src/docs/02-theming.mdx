@@ -1,0 +1,126 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Docs/Theming" />
+
+# Theming
+
+`@craftzbay/ui` is built on **Tailwind v4 CSS variables**. Every visual decision
+(color, radius, spacing, font) flows through a token. There are three ways to
+override them — pick whichever fits your scope.
+
+## 1. Global override — CSS variables
+
+For an app-wide brand change, just write your own CSS variables AFTER the
+library's stylesheet:
+
+```css
+/* your-app/globals.css */
+@import '@craftzbay/ui/styles.css';
+
+:root {
+  --color-accent: oklch(0.55 0.18 250);
+  --color-accent-700: oklch(0.46 0.16 250);
+  --color-accent-soft: oklch(0.95 0.04 250);
+  --radius-md: 8px;
+  --font-sans: 'Inter', system-ui, sans-serif;
+}
+
+.dark {
+  --color-accent: oklch(0.65 0.18 250);
+}
+```
+
+The components reference `bg-accent`, `text-accent`, `rounded-md` etc. via
+Tailwind — your overrides cascade through.
+
+## 2. Per-subtree override — `DesignSystemProvider`
+
+To brand part of an app — multi-tenant dashboards, embedded widgets, or
+showcases that demo several brands side by side — wrap that subtree:
+
+```tsx
+import { DesignSystemProvider, brandPresets } from '@craftzbay/ui';
+
+<DesignSystemProvider tokens={brandPresets.edgelog}>
+  <Card>...</Card>
+</DesignSystemProvider>
+```
+
+Built-in presets: `default`, `edgelog`, `gerege`, `forest`. Or pass an
+arbitrary token map:
+
+```tsx
+<DesignSystemProvider tokens={{
+  'color-accent': '#e11d48',
+  'color-accent-700': '#be123c',
+  'radius-md': '14px',
+}}>
+  <App />
+</DesignSystemProvider>
+```
+
+Keys can include or omit the `--` prefix — both are accepted.
+
+## 3. Per-component override — `className`
+
+For one-off tweaks, every component accepts `className` and merges it via
+`tailwind-merge`, so conflicts resolve cleanly:
+
+```tsx
+<Button className="rounded-full px-6">Round-edge once</Button>
+```
+
+## Available tokens
+
+These are the names you can override. See `src/styles/globals.css` for the
+full reference + dark-mode mirrors.
+
+### Color — surface
+
+| Variable | Use |
+|---|---|
+| `--color-background` | Default page background |
+| `--color-background-muted` | Subtle elevated surface (`bg-background-muted`) |
+| `--color-background-subtle` | Even more subtle — group containers |
+| `--color-card` | Card backgrounds |
+| `--color-popover` | Popover / dropdown / menu |
+
+### Color — foreground
+
+| Variable | Use |
+|---|---|
+| `--color-foreground` | Default body text |
+| `--color-foreground-muted` | Secondary text |
+| `--color-foreground-subtle` | Tertiary text, hints |
+
+### Color — accent + state
+
+| Variable | Use |
+|---|---|
+| `--color-accent` / `--color-accent-700` / `--color-accent-800` | Primary action ramp |
+| `--color-accent-soft` | Subtle accent surfaces (badges, banners) |
+| `--color-success` / `--color-warning` / `--color-danger` / `--color-info` | Status |
+
+### Geometry
+
+| Variable | Default | Use |
+|---|---|---|
+| `--radius-sm` | 4px | Small chips |
+| `--radius-md` | 6px | Buttons, inputs, cards |
+| `--radius-lg` | 8px | Dialogs, modals |
+
+### Typography
+
+| Variable | Default |
+|---|---|
+| `--font-sans` | Geist |
+| `--font-mono` | Geist Mono |
+| `--text-sm` / `--text-base` / `--text-lg` / … | 13/14/16/18/22/28/36 |
+
+### Motion
+
+| Variable | Default |
+|---|---|
+| `--duration-fast` | 120ms |
+| `--duration-base` | 180ms |
+| `--ease-out` | cubic-bezier(0.22, 1, 0.36, 1) |

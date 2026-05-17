@@ -1,0 +1,95 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Docs/FAQ" />
+
+# FAQ
+
+## Can I use it without Tailwind in my consumer app?
+
+Yes. The library ships a **precompiled** `styles.css` — your app doesn't need
+its own Tailwind setup. Just import the stylesheet once:
+
+```ts
+import '@craftzbay/ui/styles.css';
+```
+
+If you DO have Tailwind in your app, no conflict — both stylesheets coexist
+because the library's classes are scoped via Tailwind v4 layer ordering.
+
+## Why Tailwind v4 specifically?
+
+- CSS-first config — tokens live in `@theme {}`, no `tailwind.config.js`
+  for the design system layer.
+- Automatic dark mode via `:where(.dark, .dark *)`.
+- 3× faster builds.
+- Native CSS variable output — clean to override in consumer apps.
+
+## How big is the bundle?
+
+| Output | Size | Gzipped |
+|---|---|---|
+| `dist-lib/index.js` (ESM) | ~190 KB | ~50 KB |
+| `dist-lib/index.cjs` (CJS) | ~185 KB | ~48 KB |
+| `dist-lib/styles.css` | 8 KB | 2 KB |
+
+Tree-shakeable. Only what you import lands in your bundle.
+
+## Does it work with Next.js / Remix / TanStack Start?
+
+Yes. All components are pure React with no runtime side effects (CSS aside).
+For server components in Next.js, the interactive components (`Button`,
+`Dialog`, etc.) need a `'use client'` directive at the consuming file —
+that's standard Next.js practice for any Radix-based library.
+
+## Can I use it with React Server Components?
+
+Static components (Card, Badge, Alert without a dismiss handler) render
+server-side fine. Interactive components require `'use client'`.
+
+## How do I add custom components in the same style?
+
+Reach for the same primitives the library uses:
+
+```tsx
+import { cn, cva, type VariantProps } from '@craftzbay/ui';
+
+const myThing = cva('rounded-md transition-colors', {
+  variants: {
+    tone: {
+      neutral: 'bg-background-muted',
+      accent: 'bg-accent-soft text-on-accent-soft',
+    },
+  },
+});
+
+export function MyThing({ tone, className, ...props }: VariantProps<typeof myThing> & React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn(myThing({ tone }), className)} {...props} />;
+}
+```
+
+`cn`, `cva`, and `VariantProps` are exported from `@craftzbay/ui`.
+
+## Why is `Sidebar` hidden on mobile?
+
+By design — narrow screens get the hamburger Sheet pattern from `AppShell`.
+For a custom mobile nav, follow the same shape: hamburger trigger → Sheet
+on `side="left"` → embed your sidebar children inside.
+
+## Why doesn't the Toast show up?
+
+Radix `Toast.Root` only renders inside a `<ToastViewport>` mounted somewhere
+in the tree. Either:
+1. Use the `toast(...)` function from `useToast` + render `<Toaster />` once
+   at the app root (manages provider + viewport for you).
+2. Manually mount `<ToastProvider><ToastViewport /></ToastProvider>` and
+   render `<Toast open>` children inside.
+
+## Where do I report bugs?
+
+[GitHub Issues](https://github.com/craftzbay/design-system/issues).
+
+## Why "refined-minimal"?
+
+It's the explicit aesthetic direction in `docs/PHILOSOPHY.md`. Short version:
+the UI should disappear so the content can lead. About 85% of any screen is
+neutral; colour appears only on action, status, and focus.

@@ -1,0 +1,80 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Docs/Accessibility" />
+
+# Accessibility
+
+Every primitive ships a11y-correct by default. The library follows three
+non-negotiable rules:
+
+1. **WCAG AA contrast** on all text + interactive UI. Audited per token in
+   `src/styles/globals.css` (look for the contrast notes at the top).
+2. **Keyboard parity.** Every interactive element is reachable, focusable,
+   and operable from the keyboard — Tab/Shift+Tab, Enter, Space, Arrow keys,
+   Escape, ⌘K.
+3. **Screen-reader semantics.** Labels are required where applicable; ARIA
+   is set automatically by Radix primitives.
+
+## Verifying in your app
+
+We test components against `jest-axe` automatically. You can do the same in
+your app:
+
+```tsx
+import { axe } from 'jest-axe';
+import { render } from '@testing-library/react';
+import { Button } from '@craftzbay/ui';
+
+test('Button is a11y-clean', async () => {
+  const { container } = render(<Button>Save</Button>);
+  expect(await axe(container)).toHaveNoViolations();
+});
+```
+
+## Patterns to follow
+
+### Icon-only buttons
+
+Always pair with an `aria-label`:
+
+```tsx
+<IconButton aria-label="Delete" icon={<Trash2 />} />
+```
+
+`IconButton` will throw a development warning if the label is missing.
+
+### Form inputs
+
+Use the `label` prop on `Input` / `Textarea` / `Switch` / `Checkbox`. It
+wires `id` → `htmlFor` for you. Use `hideLabel` if you need to hide the
+label visually (announce to screen readers but not paint):
+
+```tsx
+<Input label="Email" /> {/* visible label above the input */}
+<Input label="Search" hideLabel placeholder="Search…" /> {/* visually hidden */}
+```
+
+### Toasts
+
+`toast()` calls render with `role="status"` (polite) by default. For urgent
+messages pass `variant="danger"` — they upgrade to `role="alert"` (assertive).
+
+### Dialogs / Sheets / Drawers
+
+Always include a `<DialogTitle>` (or `SheetTitle` / `DrawerTitle`). Radix uses
+it for the accessible name; if omitted, a console warning fires.
+
+## Tested coverage
+
+The following components have full axe-test coverage in the library suite:
+Button, Input, Switch, Badge, Alert. Run `pnpm test` in the repo to see.
+
+## What you still own
+
+Library a11y is necessary but not sufficient. In your app, you still need to:
+
+- Order focus logically across pages.
+- Provide page titles (`<title>` / `document.title`).
+- Use semantic landmarks (`<main>`, `<nav>`, `<header>`, `<footer>`).
+- Avoid keyboard traps in modal flows that don't use Radix.
+- Test with VoiceOver / NVDA / Narrator periodically.

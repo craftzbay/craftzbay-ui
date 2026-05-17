@@ -56,10 +56,12 @@ export default defineConfig({
             'class-variance-authority',
             'clsx',
             'cmdk',
+            /^embla-carousel/,
             'lucide-react',
             'react-day-picker',
             'react-hook-form',
             'tailwind-merge',
+            'vaul',
           ],
         },
       }
