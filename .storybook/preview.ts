@@ -3,6 +3,7 @@ import { withThemeByClassName } from '@storybook/addon-themes';
 import '../src/styles/globals.css';
 
 const preview: Preview = {
+  tags: ['autodocs'],
   parameters: {
     controls: {
       matchers: {
