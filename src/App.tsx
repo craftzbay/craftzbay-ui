@@ -25,6 +25,7 @@ import {
   useCommandPaletteShortcut,
 } from '@/components/ui/CommandPalette';
 import { useSidebar } from '@/components/ui/Sidebar';
+import { useCatalogEntries } from './catalog';
 import { ToastProvider, ToastViewport } from '@/components/ui/Toast';
 import { TooltipProvider } from '@/components/ui/Tooltip';
 import {
@@ -50,6 +51,7 @@ const NPM_URL = 'https://www.npmjs.com/package/@craftzbay/ui';
 
 type PatternKey =
   | 'home'
+  | 'catalog'
   | 'auth-signin'
   | 'auth-signup'
   | 'auth-forgot'
@@ -65,12 +67,13 @@ type PatternKey =
 interface PatternEntry {
   key: PatternKey;
   label: string;
-  group: 'Overview' | 'Authentication' | 'App' | 'Marketing';
+  group: 'Overview' | 'Catalog' | 'Authentication' | 'App' | 'Marketing';
   description?: string;
 }
 
 const patterns: PatternEntry[] = [
   { key: 'home', label: 'Overview', group: 'Overview' },
+  { key: 'catalog', label: 'Components catalog', group: 'Catalog', description: 'Every primitive on one page' },
   { key: 'auth-signin', label: 'Sign in', group: 'Authentication', description: 'Email + password with social options' },
   { key: 'auth-signup', label: 'Sign up', group: 'Authentication', description: 'Account creation' },
   { key: 'auth-forgot', label: 'Forgot password', group: 'Authentication', description: 'Password reset request' },
@@ -331,6 +334,8 @@ function renderPattern(key: PatternKey, setActive: (k: PatternKey) => void): Rea
   switch (key) {
     case 'home':
       return <OverviewPage onPick={setActive} />;
+    case 'catalog':
+      return <CatalogPage />;
     case 'auth-signin':
       return (
         <AuthLayout
@@ -412,6 +417,77 @@ function renderPattern(key: PatternKey, setActive: (k: PatternKey) => void): Rea
     default:
       return null;
   }
+}
+
+/* -----------------------------------------------------------------------------
+ *  CatalogPage — every primitive on one page. Mini-demo + Storybook link.
+ * --------------------------------------------------------------------------- */
+
+function CatalogPage() {
+  const entries = useCatalogEntries();
+  const groups = Array.from(new Set(entries.map((e) => e.group)));
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
+        <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-6">
+          <a href="#" className="flex items-center gap-2 font-semibold">
+            <span className="inline-flex size-6 items-center justify-center rounded-md bg-accent text-on-accent text-xs">
+              ✦
+            </span>
+            Components
+          </a>
+          <span className="text-xs text-foreground-subtle">{entries.length} primitives</span>
+          <nav className="ml-auto hidden flex-wrap items-center gap-1 text-xs text-foreground-muted md:flex">
+            {groups.map((g) => (
+              <a
+                key={g}
+                href={`#group-${g.toLowerCase().replace(/\s+/g, '-')}`}
+                className="rounded-md px-2 py-1 hover:bg-background-muted hover:text-foreground"
+              >
+                {g}
+              </a>
+            ))}
+          </nav>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-7xl px-6 py-10">
+        {groups.map((group) => {
+          const groupEntries = entries.filter((e) => e.group === group);
+          const anchor = `group-${group.toLowerCase().replace(/\s+/g, '-')}`;
+          return (
+            <section key={group} id={anchor} className="mb-12 scroll-mt-20">
+              <div className="mb-4 flex items-baseline justify-between">
+                <h2 className="text-xl font-semibold tracking-tight">{group}</h2>
+                <span className="text-xs text-foreground-subtle">{groupEntries.length}</span>
+              </div>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {groupEntries.map((e) => (
+                  <Card key={e.name} className="flex flex-col gap-3 p-5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">{e.name}</span>
+                      <a
+                        href={`${STORYBOOK_URL}?path=/docs/${e.storyId}--docs`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] text-foreground-subtle hover:text-accent"
+                      >
+                        Storybook <ExternalLink className="size-3" aria-hidden />
+                      </a>
+                    </div>
+                    <div className="flex min-h-[5rem] flex-1 items-center justify-center">
+                      {e.render()}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          );
+        })}
+      </main>
+    </div>
+  );
 }
 
 function Brand() {
