@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert } from '@/components/ui/Alert';
 import { Progress } from '@/components/ui/Progress';
 import { IconButton } from '@/components/ui/IconButton';
+import { useSidebar } from '@/components/ui/Sidebar';
 import { ToastProvider, ToastViewport } from '@/components/ui/Toast';
 import { TooltipProvider } from '@/components/ui/Tooltip';
 import {
@@ -327,13 +328,14 @@ function renderPattern(key: PatternKey, setActive: (k: PatternKey) => void): Rea
 }
 
 function Brand() {
+  const { collapsed } = useSidebar();
   return (
-    <span className="flex items-center gap-2 font-semibold text-foreground">
-      <span className="inline-flex size-6 items-center justify-center rounded-md bg-accent text-on-accent text-xs font-semibold">
+    <a href="#" className="flex items-center gap-2 font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md">
+      <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-md bg-accent text-on-accent text-xs font-semibold">
         ✦
       </span>
-      Atlas
-    </span>
+      {!collapsed && <span className="truncate">Atlas</span>}
+    </a>
   );
 }
 

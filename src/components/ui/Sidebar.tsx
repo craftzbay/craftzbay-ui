@@ -14,6 +14,12 @@ interface SidebarContextValue {
 }
 const SidebarContext = createContext<SidebarContextValue>({ collapsed: false });
 
+/** Read the parent Sidebar's collapsed state. Useful for brand/footer slots
+ *  that need to swap between full and compact rendering. */
+export function useSidebar(): SidebarContextValue {
+  return useContext(SidebarContext);
+}
+
 export interface SidebarProps extends HTMLAttributes<HTMLElement> {
   /** Default state on first mount. Use `defaultCollapsed` for uncontrolled. */
   defaultCollapsed?: boolean;
@@ -80,7 +86,12 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
         {...props}
       >
         {header && (
-          <div className="flex h-14 shrink-0 items-center border-b border-border px-3">
+          <div
+            className={cn(
+              'flex h-14 shrink-0 items-center overflow-hidden border-b border-border',
+              collapsed ? 'justify-center px-2' : 'px-3',
+            )}
+          >
             {header}
           </div>
         )}

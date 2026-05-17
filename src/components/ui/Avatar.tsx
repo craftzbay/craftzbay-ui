@@ -17,22 +17,15 @@ const sizeMap = {
   xl: 'size-12 text-base',
 } as const;
 
-const avatar = cva(
-  [
-    'relative inline-flex shrink-0 overflow-hidden rounded-full',
-    'bg-background-muted text-foreground-muted',
-  ],
-  {
-    variants: {
-      size: sizeMap,
-    },
-    defaultVariants: { size: 'md' },
-  },
-);
+// The wrapper sets size — Root sits inside and clips image/fallback only.
+const avatarWrapper = cva('relative inline-flex shrink-0', {
+  variants: { size: sizeMap },
+  defaultVariants: { size: 'md' },
+});
 
 export interface AvatarProps
   extends ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>,
-    VariantProps<typeof avatar> {
+    VariantProps<typeof avatarWrapper> {
   /** Image URL. If absent or fails to load, fallback initials are shown. */
   src?: string;
   /** Alt text for the image; falls back to fallback when there's no `src`. */
@@ -68,30 +61,39 @@ const statusColour: Record<NonNullable<AvatarProps['status']>, string> = {
 export const Avatar = forwardRef<ElementRef<typeof AvatarPrimitive.Root>, AvatarProps>(
   function Avatar({ className, size, src, alt, fallback, status, ...props }, ref) {
     return (
-      <AvatarPrimitive.Root ref={ref} className={cn(avatar({ size }), className)} {...props}>
-        {src && (
-          <AvatarPrimitive.Image
-            src={src}
-            alt={alt ?? ''}
-            className="aspect-square size-full object-cover"
-          />
-        )}
-        <AvatarPrimitive.Fallback
-          delayMs={src ? 200 : 0}
-          className="flex size-full items-center justify-center bg-background-muted font-medium uppercase"
+      <span className={avatarWrapper({ size })}>
+        <AvatarPrimitive.Root
+          ref={ref}
+          className={cn(
+            'block size-full overflow-hidden rounded-full bg-background-muted text-foreground-muted',
+            className,
+          )}
+          {...props}
         >
-          {fallback ?? '?'}
-        </AvatarPrimitive.Fallback>
+          {src && (
+            <AvatarPrimitive.Image
+              src={src}
+              alt={alt ?? ''}
+              className="aspect-square size-full object-cover"
+            />
+          )}
+          <AvatarPrimitive.Fallback
+            delayMs={src ? 200 : 0}
+            className="flex size-full items-center justify-center bg-background-muted font-medium uppercase"
+          >
+            {fallback ?? '?'}
+          </AvatarPrimitive.Fallback>
+        </AvatarPrimitive.Root>
         {status && (
           <span
             aria-label={`Status: ${status}`}
             className={cn(
-              'absolute bottom-0 right-0 block size-1/4 rounded-full ring-2 ring-background',
+              'absolute bottom-0 right-0 block size-[28%] rounded-full ring-2 ring-background',
               statusColour[status],
             )}
           />
         )}
-      </AvatarPrimitive.Root>
+      </span>
     );
   },
 );
