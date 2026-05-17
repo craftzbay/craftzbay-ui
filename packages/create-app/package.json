@@ -1,7 +1,7 @@
 {
-  "name": "create-craftzbay-ui",
+  "name": "@craftzbay/create-app",
   "version": "1.0.0",
-  "description": "Scaffold a new project preconfigured with @craftzbay/ui.",
+  "description": "Scaffold a new project preconfigured with @craftzbay/ui. Invoke via `npm create @craftzbay/app my-app`.",
   "license": "MIT",
   "author": "craftzbay",
   "homepage": "https://design.runestonetechnologies.com",
@@ -23,7 +23,7 @@
   ],
   "type": "module",
   "bin": {
-    "create-craftzbay-ui": "./dist/index.js"
+    "create-craftzbay-app": "./dist/index.js"
   },
   "files": [
     "dist",

@@ -1,15 +1,15 @@
-# create-craftzbay-ui
+# @craftzbay/create-app
 
 Scaffold a new project preconfigured with [`@craftzbay/ui`](https://www.npmjs.com/package/@craftzbay/ui).
 
 ```bash
-npm create craftzbay-ui my-app
+npm create @craftzbay/app my-app
 # or
-pnpm create craftzbay-ui my-app
+pnpm create @craftzbay/app my-app
 # or
-yarn create craftzbay-ui my-app
+yarn create @craftzbay/app my-app
 # or
-bun create craftzbay-ui my-app
+bun create @craftzbay/app my-app
 ```
 
 Then:
@@ -29,13 +29,15 @@ pnpm dev
 Pass `--template <id>` to skip the picker:
 
 ```bash
-npm create craftzbay-ui my-app -- --template vite-dashboard
+npm create @craftzbay/app my-app -- --template vite-dashboard
 ```
 
 ## Options
 
 ```
 -t, --template <name>   Skip the prompt and use a known template
+-y, --yes               Skip "install deps?" prompt and install
+    --no-install        Skip dependency install entirely
 -h, --help              Show this help
 ```
 

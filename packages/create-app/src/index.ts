@@ -73,10 +73,10 @@ function parseArgs(argv: string[]): {
 function printHelp() {
   const lines = [
     '',
-    kleur.bold('  create-craftzbay-ui') + kleur.gray(' — scaffold a new @craftzbay/ui project'),
+    kleur.bold('  @craftzbay/create-app') + kleur.gray(' — scaffold a new @craftzbay/ui project'),
     '',
     '  Usage:',
-    '    npm create craftzbay-ui [project-name] [options]',
+    '    npm create @craftzbay/app [project-name] [options]',
     '',
     '  Options:',
     '    -t, --template <name>   Skip the prompt and use a known template',
@@ -130,7 +130,7 @@ function walk(srcDir: string, destDir: string, projectName: string) {
 }
 
 async function run() {
-  intro(kleur.bold(kleur.cyan('  ✦  create-craftzbay-ui  ')));
+  intro(kleur.bold(kleur.cyan('  ✦  @craftzbay/create-app  ')));
 
   const { projectName: cliName, template: cliTemplate, noInstall, yes } = parseArgs(process.argv);
 
