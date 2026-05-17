@@ -98,7 +98,7 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
               Rows per page
             </label>
             <Select value={String(pageSize)} onValueChange={(v) => onPageSizeChange(Number(v))}>
-              <SelectTrigger size="sm" className="w-20" />
+              <SelectTrigger size="sm" className="w-[7.5rem] whitespace-nowrap" />
               <SelectContent>
                 {pageSizeOptions.map((s) => (
                   <SelectItem key={s} value={String(s)}>

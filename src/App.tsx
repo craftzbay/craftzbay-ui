@@ -255,7 +255,7 @@ function renderPattern(key: PatternKey, setActive: (k: PatternKey) => void): Rea
             </>
           }
         >
-          <SignInForm onSubmit={() => undefined} />
+          <SignInForm onSubmit={() => setActive('dashboard')} />
         </AuthLayout>
       );
     case 'auth-signup':
@@ -265,7 +265,7 @@ function renderPattern(key: PatternKey, setActive: (k: PatternKey) => void): Rea
           title="Create your account"
           subtitle="Free for the first 14 days. No credit card required."
         >
-          <SignUpForm onSubmit={() => undefined} />
+          <SignUpForm onSubmit={() => setActive('onboarding')} />
         </AuthLayout>
       );
     case 'auth-forgot':
@@ -275,7 +275,7 @@ function renderPattern(key: PatternKey, setActive: (k: PatternKey) => void): Rea
           title="Reset password"
           subtitle="Enter the email tied to your account."
         >
-          <ForgotPasswordForm onSubmit={() => undefined} />
+          <ForgotPasswordForm onSubmit={() => setActive('auth-magic')} />
         </AuthLayout>
       );
     case 'auth-magic':
@@ -286,31 +286,31 @@ function renderPattern(key: PatternKey, setActive: (k: PatternKey) => void): Rea
       );
     case 'dashboard':
       return (
-        <AppShell brand={<Brand />}>
+        <AppShell brand={<Brand />} active="home">
           <Dashboard />
         </AppShell>
       );
     case 'settings':
       return (
-        <AppShell brand={<Brand />}>
+        <AppShell brand={<Brand />} active="settings">
           <SettingsPage />
         </AppShell>
       );
     case 'data-table':
       return (
-        <AppShell brand={<Brand />}>
+        <AppShell brand={<Brand />} active="projects">
           <DataTablePage />
         </AppShell>
       );
     case 'record':
       return (
-        <AppShell brand={<Brand />}>
+        <AppShell brand={<Brand />} active="members">
           <RecordDetail />
         </AppShell>
       );
     case 'first-run':
       return (
-        <AppShell brand={<Brand />}>
+        <AppShell brand={<Brand />} active="inbox">
           <FirstRunEmpty />
         </AppShell>
       );

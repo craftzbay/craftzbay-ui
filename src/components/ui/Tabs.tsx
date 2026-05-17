@@ -34,7 +34,7 @@ export interface TabsListProps
     VariantProps<typeof list> {}
 
 export const TabsList = forwardRef<ElementRef<typeof TabsPrimitive.List>, TabsListProps>(
-  function TabsList({ className, variant, size, ...props }, ref) {
+  function TabsList({ className, variant = 'underline', size, ...props }, ref) {
     return (
       <TabsPrimitive.List
         ref={ref}

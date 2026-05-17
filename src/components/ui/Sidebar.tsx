@@ -21,6 +21,8 @@ export interface SidebarProps extends HTMLAttributes<HTMLElement> {
   collapsed?: boolean;
   /** Called when the user toggles via the rail or keyboard. */
   onCollapsedChange?: (next: boolean) => void;
+  /** Header slot pinned to the top (brand, workspace switcher, etc.). */
+  header?: ReactNode;
   /** Footer slot pinned to the bottom (user card, version, etc.). */
   footer?: ReactNode;
 }
@@ -49,6 +51,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
     defaultCollapsed = false,
     collapsed: controlled,
     onCollapsedChange,
+    header,
     footer,
     className,
     children,
@@ -76,6 +79,11 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
         )}
         {...props}
       >
+        {header && (
+          <div className="flex h-14 shrink-0 items-center border-b border-border px-3">
+            {header}
+          </div>
+        )}
         <div className="flex-1 overflow-y-auto py-3">{children}</div>
         {footer && (
           <div className="border-t border-border p-2">{footer}</div>
