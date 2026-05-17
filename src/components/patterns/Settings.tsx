@@ -67,7 +67,7 @@ export function SettingsPage() {
         </nav>
 
         <div className="space-y-8">
-          <section id="profile">
+          <section id="profile" hidden={active !== 'profile'}>
             <Card>
               <CardHeader>
                 <CardTitle>Profile</CardTitle>
@@ -94,7 +94,7 @@ export function SettingsPage() {
             </Card>
           </section>
 
-          <section id="security">
+          <section id="security" hidden={active !== 'security'}>
             <Card>
               <CardHeader>
                 <CardTitle>Security</CardTitle>
@@ -120,7 +120,7 @@ export function SettingsPage() {
             </Card>
           </section>
 
-          <section id="notifications">
+          <section id="notifications" hidden={active !== 'notifications'}>
             <Card>
               <CardHeader>
                 <CardTitle>Notifications</CardTitle>
@@ -136,7 +136,7 @@ export function SettingsPage() {
             </Card>
           </section>
 
-          <section id="billing">
+          <section id="billing" hidden={active !== 'billing'}>
             <Card>
               <CardHeader>
                 <CardTitle>Billing</CardTitle>
@@ -157,7 +157,7 @@ export function SettingsPage() {
             </Card>
           </section>
 
-          <section id="team">
+          <section id="team" hidden={active !== 'team'}>
             <Card>
               <CardHeader>
                 <CardTitle>Team</CardTitle>

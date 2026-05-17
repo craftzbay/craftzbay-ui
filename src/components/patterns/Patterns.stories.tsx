@@ -24,10 +24,13 @@ export const SignIn: Story = {
 };
 
 export const Shell: Story = {
+  parameters: { viewport: { defaultViewport: 'reset' } },
   render: () => (
-    <AppShell brand="Atlas">
-      <Dashboard />
-    </AppShell>
+    <div className="min-w-[960px]">
+      <AppShell brand="Atlas">
+        <Dashboard />
+      </AppShell>
+    </div>
   ),
 };
 

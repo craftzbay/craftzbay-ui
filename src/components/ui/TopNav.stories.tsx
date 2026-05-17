@@ -20,8 +20,7 @@ export const Default: Story = {
           <TopNavLink href="#">Team</TopNavLink>
         </nav>
       }
-    >
-      <Avatar fallback="BO" size="sm" />
-    </TopNav>
+      actions={<Avatar fallback="BO" size="sm" />}
+    />
   ),
 };
