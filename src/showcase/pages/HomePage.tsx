@@ -6,7 +6,7 @@ import { templateDocs } from '../registry/templates';
 import { guideDocs } from '../registry/guides';
 import { routeToHash } from '../routing';
 
-const VERSION = '0.5.0';
+const VERSION = '0.5.0'; // bumped in lockstep with package.json via changeset
 
 export function HomePage() {
   return (
