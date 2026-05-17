@@ -1,19 +1,40 @@
-# Design System
+# @craftzbay/ui
 
-A refined-minimal Tailwind v4 + React design system for internal company products.
-Production-grade primitives — Button through DataGrid — plus composed patterns
+A refined-minimal Tailwind v4 + React design system. Production-grade
+primitives — Button through DataGrid — plus composed patterns
 (authentication, app shell, settings, etc.).
+
+- **Showcase:** [design.runestonetechnologies.com](https://design.runestonetechnologies.com)
+- **Storybook:** [storybook.runestonetechnologies.com](https://storybook.runestonetechnologies.com)
 
 > **Aesthetic direction:** Linear / Vercel / Stripe Dashboard / Notion / Raycast.
 > Neutral-dominant, one accent, hairline borders, generous whitespace, fast quiet
 > motion. See [`docs/PHILOSOPHY.md`](./docs/PHILOSOPHY.md).
 
-## Quick start
+## Install
+
+```bash
+pnpm add @craftzbay/ui
+```
+
+```tsx
+import { Button, Dialog, Toast } from '@craftzbay/ui';
+import '@craftzbay/ui/styles.css';
+
+export function App() {
+  return <Button variant="primary">Save</Button>;
+}
+```
+
+Peer dependencies: `react@>=18`, `react-dom@>=18`.
+
+## Local development
 
 ```bash
 pnpm install
-pnpm dev
-pnpm storybook
+pnpm dev           # Vite showcase at localhost:5173
+pnpm storybook     # Storybook at localhost:6006
+pnpm build:lib     # Build library → dist-lib/
 ```
 
 ## Tech stack
