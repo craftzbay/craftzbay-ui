@@ -17,6 +17,13 @@ const meta: Meta<typeof Toast> = {
   title: 'Feedback/Toast',
   component: Toast,
   tags: ['autodocs'],
+  decorators: [
+    (Story) => (
+      <ToastProvider swipeDirection="right" duration={Infinity}>
+        <Story />
+      </ToastProvider>
+    ),
+  ],
 };
 export default meta;
 type Story = StoryObj<typeof Toast>;
@@ -95,8 +102,7 @@ export const Interactive: Story = {
 
     return (
       <div className="relative h-[24rem] overflow-hidden rounded-md border border-border bg-background-subtle p-4">
-        <ToastProvider swipeDirection="right">
-          <div className="flex flex-wrap items-start gap-2">
+        <div className="flex flex-wrap items-start gap-2">
             <Button size="sm" onClick={() => push('default', 'Changes saved', 'Your settings have been updated.')}>
               Default
             </Button>
@@ -133,10 +139,9 @@ export const Interactive: Story = {
             </Toast>
           ))}
 
-          {/* Anchor the viewport to THIS story instead of the page so it
-              stays inside the canvas frame. */}
-          <ToastViewport className="!absolute !bottom-2 !right-2 !top-auto !w-auto !max-w-sm !p-0" />
-        </ToastProvider>
+        {/* Anchor the viewport to THIS story instead of the page so it
+            stays inside the canvas frame. */}
+        <ToastViewport className="!absolute !bottom-2 !right-2 !top-auto !w-auto !max-w-sm !p-0" />
       </div>
     );
   },
