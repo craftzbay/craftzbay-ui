@@ -1,6 +1,7 @@
 import { ExternalLink } from '@/icons';
-import type { ComponentDoc } from '../registry/types';
+import type { ComponentDoc, PropGroup } from '../registry/types';
 import { getRelatedDocs } from '../registry/components';
+import { getGeneratedProps } from '../registry/generated-props';
 import { CodeBlock } from '../widgets/CodeBlock';
 import { CodePreview } from '../widgets/CodePreview';
 import { PropsTable } from '../widgets/PropsTable';
@@ -69,12 +70,16 @@ export function ComponentDocPage({ doc }: ComponentDocPageProps) {
         </>
       )}
 
-      {doc.api && doc.api.length > 0 && (
-        <>
-          <SectionAnchor id="api">API reference</SectionAnchor>
-          <PropsTable groups={doc.api} />
-        </>
-      )}
+      {(() => {
+        const groups = resolveApiGroups(doc);
+        if (groups.length === 0) return null;
+        return (
+          <>
+            <SectionAnchor id="api">API reference</SectionAnchor>
+            <PropsTable groups={groups} />
+          </>
+        );
+      })()}
 
       {doc.accessibility && doc.accessibility.length > 0 && (
         <>
@@ -121,4 +126,32 @@ function slugify(s: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
+}
+
+/**
+ * Resolve which prop groups to render. Order of precedence:
+ *
+ *  1. If the doc file declares `api` explicitly → use it verbatim (override).
+ *  2. Otherwise, fall back to auto-generated props per exported name.
+ *     Each export becomes its own group with the component name as title
+ *     (so Card / CardHeader / CardTitle each get their own section).
+ *
+ * Empty / unknown exports are dropped silently.
+ */
+function resolveApiGroups(doc: ComponentDoc): PropGroup[] {
+  if (doc.api && doc.api.length > 0) return doc.api;
+
+  const groups: PropGroup[] = [];
+  for (const exportName of doc.exports) {
+    const generated = getGeneratedProps(exportName);
+    if (!generated || generated.length === 0) continue;
+    for (const g of generated) {
+      if (g.rows.length === 0) continue;
+      groups.push({
+        title: doc.exports.length > 1 ? exportName : g.title,
+        rows: g.rows,
+      });
+    }
+  }
+  return groups;
 }
