@@ -57,6 +57,17 @@ export * from './components/ui/Toast';
 export * from './components/ui/Tooltip';
 export * from './components/ui/TopNav';
 
+// New in 0.2.0
+export * from './components/ui/Calendar';
+export * from './components/ui/Carousel';
+export * from './components/ui/Chart';
+export * from './components/ui/Drawer';
+export * from './components/ui/FileUpload';
+export * from './components/ui/Snackbar';
+export * from './components/ui/TagInput';
+export * from './components/ui/Timeline';
+export * from './components/ui/Tree';
+
 // Patterns
 export * from './components/patterns/Authentication';
 export * from './components/patterns/AppShell';
