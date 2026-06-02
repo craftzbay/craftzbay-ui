@@ -987,13 +987,8 @@ function TopBar({ onProfile, onSettings, onSignOut }: { onProfile: () => void; o
 /*  Shell                                                                     */
 /* -------------------------------------------------------------------------- */
 
-export interface AdminDashboardProps {
-  brand?: ReactNode;
-  /** Called by the profile menu's "Sign out". */
-  onSignOut?: () => void;
-}
-
-export function AdminDashboard({ onSignOut }: AdminDashboardProps = {}) {
+export function AdminDashboard() {
+  const { push } = useToast();
   const [areaKey, setAreaKey] = useState('dashboard');
   const [page, setPage] = useState('overview');
   const [workspace, setWorkspace] = useState(WORKSPACES[0].id);
@@ -1107,7 +1102,7 @@ export function AdminDashboard({ onSignOut }: AdminDashboardProps = {}) {
         <TopBar
           onProfile={() => { setAreaKey('settings'); setPage('profile'); }}
           onSettings={() => { setAreaKey('settings'); setPage('profile'); }}
-          onSignOut={() => onSignOut?.()}
+          onSignOut={() => push({ title: 'Signed out', description: 'Demo — no real session.' })}
         />
         <main className="flex-1 overflow-y-auto p-6">{renderPage(page)}</main>
       </div>

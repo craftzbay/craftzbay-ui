@@ -40,13 +40,23 @@ export const blockMeta: BlockMeta[] = [
     slug: 'admin',
     name: 'Admin dashboard',
     description:
-      'A complete admin app: collapsible sidebar driving Home, Projects, Inbox, Members, Insights and Settings pages, plus sign-in / sign-up screens. Everything is assembled from the library primitives.',
+      'A complete admin app: a two-level sidebar (icon rail + child menu) and a workspace switcher driving Overview, Analytics, Projects (full CRUD), Inbox, Team, Insights and Settings — all assembled from the library primitives.',
     useCases: ['SaaS back-office', 'Internal tools', 'Analytics console'],
     sourceFile: 'AdminDashboard.tsx',
+    screens: [{ key: 'app', label: 'Dashboard' }],
+  },
+  {
+    slug: 'auth',
+    name: 'Authentication',
+    description:
+      'The full auth flow on a split-screen layout — sign in, sign up, forgot password and the magic-link confirmation. Switch screens from the preview dock.',
+    useCases: ['App login', 'Customer sign-up', 'Password reset flow'],
+    sourceFile: 'AuthTemplate.tsx',
     screens: [
-      { key: 'app', label: 'Dashboard' },
       { key: 'signin', label: 'Sign in' },
       { key: 'signup', label: 'Sign up' },
+      { key: 'forgot', label: 'Forgot password' },
+      { key: 'magic', label: 'Magic link' },
     ],
   },
   {

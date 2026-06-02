@@ -1,4 +1,5 @@
 import { AdminTemplate } from './AdminTemplate';
+import { AuthTemplate } from './AuthTemplate';
 import { LandingTemplate } from './LandingTemplate';
 import { NewsTemplate } from './NewsTemplate';
 import { EcommerceTemplate } from './EcommerceTemplate';
@@ -21,7 +22,9 @@ export default function BlockPreview({
   const props = { screen, setScreen, brand: <BrandMark /> };
   switch (slug) {
     case 'admin':
-      return <AdminTemplate {...props} />;
+      return <AdminTemplate />;
+    case 'auth':
+      return <AuthTemplate {...props} />;
     case 'landing':
       return <LandingTemplate {...props} />;
     case 'news':

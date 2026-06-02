@@ -5,12 +5,14 @@
  * bundle.
  */
 import adminSrc from './AdminDashboard.tsx?raw';
+import authSrc from './AuthTemplate.tsx?raw';
 import landingSrc from './LandingTemplate.tsx?raw';
 import newsSrc from './NewsTemplate.tsx?raw';
 import ecommerceSrc from './EcommerceTemplate.tsx?raw';
 
 export const blockSources: Record<string, string> = {
   admin: adminSrc,
+  auth: authSrc,
   landing: landingSrc,
   news: newsSrc,
   ecommerce: ecommerceSrc,
