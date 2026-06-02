@@ -7,10 +7,12 @@ import { DesignSystemProvider, brandPresets, type BrandName } from '@/components
 import { CodeBlock } from '../widgets/CodeBlock';
 
 const BRANDS: { name: BrandName; label: string }[] = [
-  { name: 'default', label: 'Default' },
-  { name: 'edgelog', label: 'EdgeLog' },
-  { name: 'gerege', label: 'Gerege' },
-  { name: 'forest', label: 'Forest' },
+  { name: 'default', label: 'Indigo' },
+  { name: 'blue', label: 'Blue' },
+  { name: 'violet', label: 'Violet' },
+  { name: 'emerald', label: 'Emerald' },
+  { name: 'rose', label: 'Rose' },
+  { name: 'amber', label: 'Amber' },
 ];
 
 function BrandSwapDemo() {
@@ -34,7 +36,7 @@ function BrandSwapDemo() {
           <CardHeader>
             <CardTitle>Preview</CardTitle>
             <CardDescription>
-              All primitives inside this card switch their accent + radius live.
+              All primitives inside this card switch their accent colour live.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -70,7 +72,7 @@ export function ThemingBody() {
       <CodeBlock
         code={`import { DesignSystemProvider, brandPresets } from '@craftzbay/ui';
 
-<DesignSystemProvider tokens={brandPresets.forest}>
+<DesignSystemProvider tokens={brandPresets.violet}>
   <App />
 </DesignSystemProvider>`}
       />

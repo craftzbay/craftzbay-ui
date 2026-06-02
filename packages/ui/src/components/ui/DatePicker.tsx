@@ -117,7 +117,7 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(function D
           <PopoverPrimitive.Content
             align="start"
             sideOffset={4}
-            className="z-[var(--z-popover)] rounded-lg border border-border bg-popover text-popover-foreground shadow-md"
+            className="z-[var(--z-popover)] rounded-lg text-popover-foreground shadow-lg"
           >
             <Calendar
               mode="single"
@@ -184,7 +184,7 @@ export const DateRangePicker = forwardRef<HTMLDivElement, DateRangePickerProps>(
           <PopoverPrimitive.Content
             align="start"
             sideOffset={4}
-            className="z-[var(--z-popover)] rounded-lg border border-border bg-popover text-popover-foreground shadow-md"
+            className="z-[var(--z-popover)] rounded-lg text-popover-foreground shadow-lg"
           >
             <Calendar
               mode="range"

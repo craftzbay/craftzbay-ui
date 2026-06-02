@@ -143,8 +143,8 @@ craftzbay-ui my-app`).
 
   **Showcase**
   - Guides now embed live interactive demos:
-    - **Theming** — brand-swap between default / EdgeLog / Gerege / Forest
-      presets, with primitives re-rendering inside the scope.
+    - **Theming** — swap between the built-in accent presets, with primitives
+      re-rendering inside the scope.
     - **Forms** — working react-hook-form sign-in form with validation + Switch.
     - **Dark mode** — live theme-toggle button bound to `<html>.dark`.
     - **Responsive** — live breakpoint indicator using `useMediaQuery`.

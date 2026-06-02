@@ -56,7 +56,7 @@ export function BrandSwitcher({ compact = false }: { compact?: boolean }) {
           className={cn(
             'inline-flex h-8 items-center gap-2 rounded-md border border-border bg-card px-2.5 text-sm text-foreground-muted transition-colors hover:bg-background-muted hover:text-foreground',
           )}
-          aria-label={`Brand: ${active.label}`}
+          aria-label={`Accent colour: ${active.label}`}
         >
           <Swatch color={active.swatch} />
           {!compact && <span className="hidden md:inline">{active.label}</span>}
@@ -64,7 +64,7 @@ export function BrandSwitcher({ compact = false }: { compact?: boolean }) {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-60">
-        <DropdownMenuLabel>Brand preset</DropdownMenuLabel>
+        <DropdownMenuLabel>Accent colour</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {BRANDS.map((b) => (
           <DropdownMenuItem

@@ -158,43 +158,44 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
             )}
             onClick={() => inputRef.current?.focus()}
           >
-            {visibleChips.length === 0 && (
-              <span className="text-foreground-subtle px-1">{placeholder}</span>
-            )}
-            {visibleChips.map((opt) => (
-              <span
-                key={opt.value}
-                className="inline-flex max-w-[10rem] shrink-0 items-center gap-1 rounded-md bg-accent-soft px-1.5 py-0.5 text-xs font-medium text-on-accent-soft"
-              >
-                <span className="truncate">{opt.label}</span>
-                <button
-                  type="button"
-                  aria-label={`Remove ${opt.label}`}
-                  className="inline-flex items-center text-on-accent-soft hover:text-foreground"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggle(opt.value);
-                  }}
+            <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden">
+              {visibleChips.length === 0 && (
+                <span className="truncate px-1 text-foreground-subtle">{placeholder}</span>
+              )}
+              {visibleChips.map((opt) => (
+                <span
+                  key={opt.value}
+                  className="inline-flex max-w-[10rem] shrink-0 items-center gap-1 rounded-md bg-accent-soft px-1.5 py-0.5 text-xs font-medium text-on-accent-soft"
                 >
-                  <X className="size-3" aria-hidden />
-                </button>
-              </span>
-            ))}
-            {overflow > 0 && (
-              <span className="shrink-0 rounded-md bg-background-muted px-1.5 py-0.5 text-xs font-medium text-foreground-muted">
-                +{overflow}
-              </span>
-            )}
-            <input
-              ref={inputRef}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onFocus={() => setOpen(true)}
-              className="flex-1 min-w-[8ch] bg-transparent text-sm outline-none placeholder:text-foreground-subtle"
-              placeholder={selected.length === 0 ? '' : ''}
-              disabled={disabled}
-            />
-            <span className="ml-auto flex items-center gap-1">
+                  <span className="truncate">{opt.label}</span>
+                  <button
+                    type="button"
+                    aria-label={`Remove ${opt.label}`}
+                    className="inline-flex items-center text-on-accent-soft hover:text-foreground"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggle(opt.value);
+                    }}
+                  >
+                    <X className="size-3" aria-hidden />
+                  </button>
+                </span>
+              ))}
+              {overflow > 0 && (
+                <span className="shrink-0 rounded-md bg-background-muted px-1.5 py-0.5 text-xs font-medium text-foreground-muted">
+                  +{overflow}
+                </span>
+              )}
+              <input
+                ref={inputRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onFocus={() => setOpen(true)}
+                className="min-w-[6ch] flex-1 bg-transparent text-sm outline-none placeholder:text-foreground-subtle"
+                disabled={disabled}
+              />
+            </div>
+            <span className="flex shrink-0 items-center gap-1 pl-1">
               {clearable && selected.length > 0 && (
                 <button
                   type="button"

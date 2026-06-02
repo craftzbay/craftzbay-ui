@@ -11,24 +11,38 @@ export type CalendarProps = DayPickerProps & { className?: string };
  * directly in popovers, sheets, or inline forms. Wraps `react-day-picker` v9.
  */
 export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calendar(
-  { className, classNames, ...props },
+  { className, classNames, captionLayout = 'dropdown', startMonth, endMonth, ...props },
   _ref,
 ) {
+  // Bound the month/year dropdowns. Consumers can narrow this with
+  // startMonth / endMonth; the default spans a century back to a decade ahead
+  // so the year dropdown is useful for both birthdays and future scheduling.
+  const now = new Date();
+  const start = startMonth ?? new Date(now.getFullYear() - 100, 0, 1);
+  const end = endMonth ?? new Date(now.getFullYear() + 10, 11, 31);
+
   return (
     <DayPicker
       showOutsideDays
-      className={cn('p-3', className)}
+      captionLayout={captionLayout}
+      startMonth={start}
+      endMonth={end}
+      className={cn('inline-block rounded-lg border border-border bg-card p-3', className)}
       classNames={{
         root: 'rdp',
-        months: 'flex flex-col gap-4 sm:flex-row sm:gap-6',
+        months: 'relative flex flex-col gap-4 sm:flex-row sm:gap-6',
         month: 'flex flex-col gap-3',
-        month_caption: 'relative flex h-8 items-center justify-center',
+        month_caption: 'relative flex h-8 items-center justify-center px-8',
         caption_label: 'text-sm font-medium',
+        dropdowns: 'flex items-center justify-center gap-1.5',
+        dropdown_root: 'relative inline-flex items-center',
+        dropdown:
+          'cursor-pointer rounded-md border border-border bg-card px-2 py-1 text-sm font-medium text-foreground outline-none hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring',
         nav: 'absolute inset-x-0 top-0 flex h-8 items-center justify-between',
         button_previous:
-          'inline-flex h-7 w-7 items-center justify-center rounded-md text-foreground-muted hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring outline-none',
+          'inline-flex h-7 w-7 items-center justify-center rounded-md text-foreground-muted hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring outline-none disabled:opacity-40 disabled:pointer-events-none',
         button_next:
-          'inline-flex h-7 w-7 items-center justify-center rounded-md text-foreground-muted hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring outline-none',
+          'inline-flex h-7 w-7 items-center justify-center rounded-md text-foreground-muted hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring outline-none disabled:opacity-40 disabled:pointer-events-none',
         month_grid: 'w-full border-collapse',
         weekdays: 'grid grid-cols-7',
         weekday:

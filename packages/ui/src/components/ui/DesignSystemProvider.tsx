@@ -11,11 +11,8 @@ import { cn } from '@/lib/utils';
  *     <App />
  *   </DesignSystemProvider>
  *
- * @example Multiple brands in one app
- *   <DesignSystemProvider tokens={edgelogBrand}>
- *     <Card>...</Card>
- *   </DesignSystemProvider>
- *   <DesignSystemProvider tokens={geregeBrand}>
+ * @example Swap in one of the built-in accent presets
+ *   <DesignSystemProvider tokens={brandPresets.violet}>
  *     <Card>...</Card>
  *   </DesignSystemProvider>
  */
@@ -54,35 +51,59 @@ export function DesignSystemProvider({
 }
 
 /**
- * Built-in brand presets — drop-in starters showing how a token override
- * map is shaped. Consumers can fork or replace any value.
+ * Built-in accent presets — swap the system's single accent colour without
+ * touching anything else. Each maps the accent ramp tokens the components
+ * read (`color-accent`, its hover/active steps, and the soft surface + text).
+ * `default` is the library's graphite-indigo; the rest are colour starters you
+ * can use as-is or fork. Light/dark both follow because only the hue changes.
  */
 export const brandPresets = {
+  /** The library default — graphite indigo. */
   default: {} as BrandTokens,
-  /** Cool indigo accent, slightly rounder corners. */
-  edgelog: {
-    'color-accent': 'oklch(0.55 0.18 250)',
-    'color-accent-700': 'oklch(0.46 0.16 250)',
-    'color-accent-800': 'oklch(0.38 0.14 250)',
+  /** Blue. */
+  blue: {
+    'color-accent': 'oklch(0.55 0.16 250)',
+    'color-accent-700': 'oklch(0.47 0.16 250)',
+    'color-accent-800': 'oklch(0.39 0.14 250)',
     'color-accent-soft': 'oklch(0.95 0.04 250)',
-    'radius-md': '8px',
-    'radius-lg': '12px',
+    'color-on-accent-soft': 'oklch(0.45 0.15 250)',
+    ring: 'oklch(0.62 0.16 250)',
   },
-  /** Warm copper accent, tighter geometry. */
-  gerege: {
-    'color-accent': 'oklch(0.62 0.16 45)',
-    'color-accent-700': 'oklch(0.54 0.16 45)',
-    'color-accent-800': 'oklch(0.46 0.14 45)',
-    'color-accent-soft': 'oklch(0.95 0.04 45)',
-    'radius-md': '4px',
-    'radius-lg': '6px',
+  /** Violet. */
+  violet: {
+    'color-accent': 'oklch(0.53 0.20 295)',
+    'color-accent-700': 'oklch(0.45 0.18 295)',
+    'color-accent-800': 'oklch(0.38 0.16 295)',
+    'color-accent-soft': 'oklch(0.95 0.04 295)',
+    'color-on-accent-soft': 'oklch(0.45 0.18 295)',
+    ring: 'oklch(0.60 0.20 295)',
   },
-  /** Forest green accent. */
-  forest: {
-    'color-accent': 'oklch(0.55 0.14 155)',
-    'color-accent-700': 'oklch(0.47 0.14 155)',
-    'color-accent-800': 'oklch(0.39 0.12 155)',
-    'color-accent-soft': 'oklch(0.95 0.04 155)',
+  /** Emerald. */
+  emerald: {
+    'color-accent': 'oklch(0.55 0.13 160)',
+    'color-accent-700': 'oklch(0.47 0.13 160)',
+    'color-accent-800': 'oklch(0.39 0.12 160)',
+    'color-accent-soft': 'oklch(0.95 0.04 160)',
+    'color-on-accent-soft': 'oklch(0.42 0.12 160)',
+    ring: 'oklch(0.60 0.13 160)',
+  },
+  /** Rose. */
+  rose: {
+    'color-accent': 'oklch(0.57 0.19 12)',
+    'color-accent-700': 'oklch(0.49 0.18 12)',
+    'color-accent-800': 'oklch(0.41 0.16 12)',
+    'color-accent-soft': 'oklch(0.95 0.035 12)',
+    'color-on-accent-soft': 'oklch(0.48 0.18 12)',
+    ring: 'oklch(0.62 0.19 12)',
+  },
+  /** Amber. */
+  amber: {
+    'color-accent': 'oklch(0.62 0.14 65)',
+    'color-accent-700': 'oklch(0.54 0.13 65)',
+    'color-accent-800': 'oklch(0.46 0.12 65)',
+    'color-accent-soft': 'oklch(0.95 0.05 75)',
+    'color-on-accent-soft': 'oklch(0.48 0.12 65)',
+    ring: 'oklch(0.66 0.14 65)',
   },
 } as const;
 
