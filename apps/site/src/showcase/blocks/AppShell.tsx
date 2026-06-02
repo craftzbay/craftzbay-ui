@@ -19,10 +19,12 @@ import {
 } from 'lucide-react';
 import { Avatar } from '@craftzbay/ui';
 import { Badge } from '@craftzbay/ui';
+import { Button } from '@craftzbay/ui';
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@craftzbay/ui';
 import { LineChart } from '@craftzbay/ui';
 import { IconButton } from '@craftzbay/ui';
 import { Input } from '@craftzbay/ui';
+import { Switch } from '@craftzbay/ui';
 import { Kbd } from '@craftzbay/ui';
 import { Sheet, SheetContent, SheetTrigger } from '@craftzbay/ui';
 import { Sidebar, SidebarItem, SidebarSection } from '@craftzbay/ui';
@@ -713,5 +715,272 @@ export function Dashboard({
         </Card>
       )}
     </div>
+  );
+}
+
+/* =============================================================================
+ *  AdminDashboard — a complete, multi-page admin app built on <AppShell>.
+ *
+ *  This is the "Dashboard" block: a real working dashboard, not a static
+ *  screenshot. The sidebar items drive an internal `section` state (no routing,
+ *  no hrefs — so the shell never navigates away), and each section renders its
+ *  own page of example content assembled from the primitives. Lift `section`
+ *  into your router if you want real URLs.
+ * ========================================================================== */
+
+function PageHeader({
+  title,
+  subtitle,
+  actions,
+}: {
+  title: ReactNode;
+  subtitle?: ReactNode;
+  actions?: ReactNode;
+}) {
+  return (
+    <header className="mb-6 flex items-end justify-between gap-4">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
+        {subtitle && <p className="mt-1 text-sm text-foreground-muted">{subtitle}</p>}
+      </div>
+      {actions && <div className="hidden items-center gap-2 md:flex">{actions}</div>}
+    </header>
+  );
+}
+
+const PROJECTS = [
+  { name: 'Aurora web', status: 'Active', tone: 'success', owner: 'Anu B.', initials: 'AB', updated: '12m ago' },
+  { name: 'Billing v2', status: 'In review', tone: 'warning', owner: 'Bat E.', initials: 'BE', updated: '1h ago' },
+  { name: 'Mobile beta', status: 'Active', tone: 'success', owner: 'Tuya G.', initials: 'TG', updated: '3h ago' },
+  { name: 'Data pipeline', status: 'Blocked', tone: 'danger', owner: 'Khulan O.', initials: 'KO', updated: 'Yesterday' },
+  { name: 'Design system', status: 'Active', tone: 'success', owner: 'Sara K.', initials: 'SK', updated: '2d ago' },
+  { name: 'Legacy import', status: 'Archived', tone: 'neutral', owner: 'Mark R.', initials: 'MR', updated: '1w ago' },
+] as const;
+
+function ProjectsPage() {
+  return (
+    <div>
+      <PageHeader
+        title="Projects"
+        subtitle="Everything your team is shipping."
+        actions={<Button size="sm">New project</Button>}
+      />
+      <Card padding="none">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Owner</TableHead>
+              <TableHead className="text-right">Updated</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {PROJECTS.map((p) => (
+              <TableRow key={p.name}>
+                <TableCell className="font-medium text-foreground">{p.name}</TableCell>
+                <TableCell>
+                  <Badge tone={p.tone as 'success' | 'warning' | 'danger' | 'neutral'} dot>
+                    {p.status}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Avatar size="xs" fallback={p.initials} />
+                    <span className="text-foreground">{p.owner}</span>
+                  </div>
+                </TableCell>
+                <TableCell className="tabular text-right text-foreground-subtle">{p.updated}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
+    </div>
+  );
+}
+
+const MESSAGES = [
+  { from: 'Anu Bold', initials: 'AB', subject: 'Re: Q2 roadmap', preview: 'Pushed the segment work to next sprint — let me know if that blocks you.', when: '12m', unread: true },
+  { from: 'Bat Erdene', initials: 'BE', subject: 'Login flow fix is live', preview: 'Deployed the hotfix, error rate is already back down.', when: '1h', unread: true },
+  { from: 'Tuya Ganbat', initials: 'TG', subject: 'Design review notes', preview: 'A few small spacing tweaks on the pricing page, screenshots attached.', when: '3h', unread: false },
+  { from: 'Khulan O.', initials: 'KO', subject: 'Invoice #2041', preview: 'Approved and scheduled for payment on the 1st.', when: 'Yesterday', unread: false },
+  { from: 'Sara Khan', initials: 'SK', subject: 'Welcome to the team!', preview: 'So glad to have you — here is everything to get set up.', when: '2d', unread: false },
+];
+
+function InboxPage() {
+  return (
+    <div>
+      <PageHeader title="Inbox" subtitle="5 conversations, 2 unread." />
+      <Card padding="none">
+        <ul className="divide-y divide-border">
+          {MESSAGES.map((m, i) => (
+            <li key={i} className="flex items-start gap-3 px-5 py-3.5 hover:bg-background-muted">
+              <Avatar size="sm" fallback={m.initials} />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="truncate text-sm font-medium text-foreground">{m.from}</span>
+                  {m.unread && <span className="size-1.5 shrink-0 rounded-full bg-accent" aria-label="Unread" />}
+                  <span className="ml-auto shrink-0 text-xs text-foreground-subtle">{m.when}</span>
+                </div>
+                <div className="truncate text-sm text-foreground">{m.subject}</div>
+                <div className="truncate text-xs text-foreground-muted">{m.preview}</div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Card>
+    </div>
+  );
+}
+
+const MEMBERS = [
+  { name: 'Anu Bold', email: 'anu@acme.co', initials: 'AB', role: 'Owner', tone: 'accent', status: 'Active' },
+  { name: 'Bat Erdene', email: 'bat@acme.co', initials: 'BE', role: 'Admin', tone: 'neutral', status: 'Active' },
+  { name: 'Tuya Ganbat', email: 'tuya@acme.co', initials: 'TG', role: 'Member', tone: 'neutral', status: 'Active' },
+  { name: 'Khulan O.', email: 'khulan@acme.co', initials: 'KO', role: 'Member', tone: 'neutral', status: 'Invited' },
+  { name: 'Sara Khan', email: 'sara@acme.co', initials: 'SK', role: 'Billing', tone: 'neutral', status: 'Active' },
+];
+
+function MembersPage() {
+  return (
+    <div>
+      <PageHeader title="Members" subtitle="People with access to this workspace." actions={<Button size="sm">Invite</Button>} />
+      <Card padding="none">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead className="text-right">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {MEMBERS.map((m) => (
+              <TableRow key={m.email}>
+                <TableCell>
+                  <div className="flex items-center gap-2.5">
+                    <Avatar size="sm" fallback={m.initials} />
+                    <div className="leading-tight">
+                      <div className="font-medium text-foreground">{m.name}</div>
+                      <div className="text-xs text-foreground-subtle">{m.email}</div>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge tone={m.tone as 'accent' | 'neutral'} variant="outline">
+                    {m.role}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right text-foreground-muted">{m.status}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
+    </div>
+  );
+}
+
+const SESSIONS = Array.from({ length: 30 }, (_, i) => ({
+  x: i,
+  y: Math.round(1400 + i * 14 + Math.sin(i / 2.5) * 220 + Math.cos(i * 5) * 70),
+}));
+
+function InsightsPage() {
+  return (
+    <div>
+      <PageHeader title="Insights" subtitle="Usage across the last 30 days." actions={<Badge tone="neutral" variant="outline">Last 30 days</Badge>} />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Active users</CardTitle>
+            <CardDescription>Distinct sessions per day</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <LineChart data={DEFAULT_CHART_DATA} height={180} className="w-full" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Sessions</CardTitle>
+            <CardDescription>Total sessions per day</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <LineChart data={SESSIONS} height={180} className="w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+function AccountSettingsPage() {
+  return (
+    <div className="max-w-2xl">
+      <PageHeader title="Settings" subtitle="Manage your profile and preferences." />
+      <Card>
+        <CardHeader>
+          <CardTitle>Profile</CardTitle>
+          <CardDescription>This is how others see you.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input label="First name" defaultValue="Alex" />
+            <Input label="Last name" defaultValue="Morgan" />
+          </div>
+          <Input label="Email" type="email" defaultValue="alex@example.com" />
+          <div className="space-y-3 pt-2">
+            <label className="flex items-center justify-between gap-4">
+              <span className="text-sm text-foreground">Email notifications</span>
+              <Switch defaultChecked />
+            </label>
+            <label className="flex items-center justify-between gap-4">
+              <span className="text-sm text-foreground">Weekly digest</span>
+              <Switch />
+            </label>
+          </div>
+          <div className="flex justify-end pt-2">
+            <Button>Save changes</Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+export interface AdminDashboardProps {
+  brand?: ReactNode;
+}
+
+export function AdminDashboard({ brand }: AdminDashboardProps = {}) {
+  const [section, setSection] = useState('home');
+
+  const navSections: AppShellNavSection[] = [
+    {
+      label: 'Workspace',
+      items: [
+        { key: 'home', label: 'Home', icon: <Home />, onClick: () => setSection('home') },
+        { key: 'projects', label: 'Projects', icon: <Folder />, trailing: <Badge tone="neutral">12</Badge>, onClick: () => setSection('projects') },
+        { key: 'inbox', label: 'Inbox', icon: <Inbox />, trailing: <Badge tone="accent">2</Badge>, onClick: () => setSection('inbox') },
+        { key: 'members', label: 'Members', icon: <Users />, trailing: <Badge tone="neutral">5</Badge>, onClick: () => setSection('members') },
+        { key: 'insights', label: 'Insights', icon: <BarChart3 />, onClick: () => setSection('insights') },
+      ],
+    },
+    {
+      label: 'Account',
+      items: [{ key: 'settings', label: 'Settings', icon: <Settings />, onClick: () => setSection('settings') }],
+    },
+  ];
+
+  return (
+    <AppShell brand={brand} active={section} navSections={navSections}>
+      {section === 'home' && <Dashboard />}
+      {section === 'projects' && <ProjectsPage />}
+      {section === 'inbox' && <InboxPage />}
+      {section === 'members' && <MembersPage />}
+      {section === 'insights' && <InsightsPage />}
+      {section === 'settings' && <AccountSettingsPage />}
+    </AppShell>
   );
 }

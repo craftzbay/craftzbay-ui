@@ -1,4 +1,4 @@
-import { AppShell, Dashboard } from './AppShell';
+import { AdminDashboard } from './AppShell';
 import {
   AuthLayout,
   ForgotPasswordForm,
@@ -25,11 +25,7 @@ export default function BlockPreview({ slug }: { slug: string }) {
   const brand = <BrandMark />;
   switch (slug) {
     case 'dashboard':
-      return (
-        <AppShell brand={brand} active="home">
-          <Dashboard />
-        </AppShell>
-      );
+      return <AdminDashboard brand={brand} />;
     case 'data-table':
       return <DataTablePage />;
     case 'settings':
