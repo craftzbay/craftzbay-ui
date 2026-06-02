@@ -49,10 +49,13 @@ export interface SignInFormProps {
   onSubmit: (data: { email: string; password: string }) => void | Promise<void>;
   loading?: boolean;
   error?: ReactNode;
+  /** Link target for "Forgot password?" (plain navigation). */
   forgotHref?: string;
+  /** SPA handler for "Forgot password?" — takes precedence over `forgotHref`. */
+  onForgot?: () => void;
 }
 
-export function SignInForm({ onSubmit, loading, error, forgotHref = '/forgot' }: SignInFormProps) {
+export function SignInForm({ onSubmit, loading, error, forgotHref = '/forgot', onForgot }: SignInFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -80,13 +83,23 @@ export function SignInForm({ onSubmit, loading, error, forgotHref = '/forgot' }:
         autoComplete="current-password"
         required
       />
-      <div className="flex items-center justify-between text-sm">
-        <a
-          href={forgotHref}
-          className="font-medium text-accent hover:underline outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
-        >
-          Forgot password?
-        </a>
+      <div className="flex items-center justify-end text-sm">
+        {onForgot ? (
+          <button
+            type="button"
+            onClick={onForgot}
+            className="rounded-sm font-medium text-accent outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            Forgot password?
+          </button>
+        ) : (
+          <a
+            href={forgotHref}
+            className="rounded-sm font-medium text-accent outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            Forgot password?
+          </a>
+        )}
       </div>
       <Button type="submit" loading={loading} className="w-full" trailingIcon={<ArrowRight />}>
         Sign in

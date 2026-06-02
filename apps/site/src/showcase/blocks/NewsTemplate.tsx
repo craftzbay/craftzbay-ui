@@ -48,6 +48,7 @@ function Masthead({ brand }: { brand: React.ReactNode }) {
             <a
               key={c}
               href="#"
+              onClick={(e) => e.preventDefault()}
               className={i === 0 ? 'font-medium text-accent' : 'text-foreground-muted hover:text-foreground'}
             >
               {c}

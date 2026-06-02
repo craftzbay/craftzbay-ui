@@ -50,7 +50,7 @@ function ShopHeader({ brand, cartCount, onCart }: { brand: React.ReactNode; cart
         <div className="text-sm">{brand}</div>
         <nav className="hidden items-center gap-5 text-sm text-foreground-muted md:flex">
           {CATEGORIES.slice(1).map((c) => (
-            <a key={c} href="#" className="hover:text-foreground">{c}</a>
+            <a key={c} href="#" onClick={(e) => e.preventDefault()} className="hover:text-foreground">{c}</a>
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-1">

@@ -29,7 +29,7 @@ function Nav({ brand, onSignUp }: { brand: React.ReactNode; onSignUp: () => void
         <div className="text-sm">{brand}</div>
         <nav className="hidden items-center gap-6 text-sm text-foreground-muted md:flex">
           {NAV.map((n) => (
-            <a key={n} href="#" className="transition-colors hover:text-foreground">
+            <a key={n} href="#" onClick={(e) => e.preventDefault()} className="transition-colors hover:text-foreground">
               {n}
             </a>
           ))}
@@ -160,7 +160,7 @@ function Landing({ brand, onSignUp }: { brand: React.ReactNode; onSignUp: () => 
               <ul className="space-y-2 text-sm text-foreground-muted">
                 {col.links.map((l) => (
                   <li key={l}>
-                    <a href="#" className="hover:text-foreground">{l}</a>
+                    <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-foreground">{l}</a>
                   </li>
                 ))}
               </ul>
