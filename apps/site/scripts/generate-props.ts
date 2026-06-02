@@ -14,10 +14,11 @@ import fs from 'node:fs';
 import { withCustomConfig } from 'react-docgen-typescript';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, '..');
-const UI_DIR = path.join(ROOT, 'src/components/ui');
+const ROOT = path.resolve(__dirname, '..'); // apps/site
+const UI_PKG = path.resolve(ROOT, '../../packages/ui'); // packages/ui
+const UI_DIR = path.join(UI_PKG, 'src/components/ui');
 const OUTPUT = path.join(ROOT, 'src/showcase/registry/generated-props.ts');
-const TSCONFIG = path.join(ROOT, 'tsconfig.json');
+const TSCONFIG = path.join(UI_PKG, 'tsconfig.json');
 
 const parser = withCustomConfig(TSCONFIG, {
   savePropValueAsString: true,

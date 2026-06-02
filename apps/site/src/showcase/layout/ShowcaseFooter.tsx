@@ -1,13 +1,10 @@
-import { routeToHash } from '../routing';
-
-const VERSION = '0.7.1';
-const GITHUB_URL = 'https://github.com/craftzbay/design-system';
-const NPM_URL = 'https://www.npmjs.com/package/@craftzbay/ui';
-const CHANGELOG_URL = `${GITHUB_URL}/blob/main/CHANGELOG.md`;
+import { routeToHash, previewUrl } from '../routing';
+import { CHANGELOG_URL, GITHUB_URL, NPM_URL, VERSION } from '../site.config';
+import { BrandMark } from '../components/BrandMark';
 
 /**
- * Site-wide footer rendered on Home + all doc routes. Hidden on
- * full-bleed preview routes so it doesn't pollute template screenshots.
+ * Site-wide footer rendered on Home + all doc routes. Hidden on standalone
+ * preview tabs so it doesn't pollute template screenshots.
  */
 export function ShowcaseFooter() {
   const year = new Date().getFullYear();
@@ -15,12 +12,7 @@ export function ShowcaseFooter() {
     <footer className="mt-20 border-t border-border bg-background">
       <div className="mx-auto flex max-w-[1400px] flex-col gap-6 px-6 py-8 md:flex-row md:items-start md:justify-between">
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm font-semibold">
-            <span className="inline-flex size-5 items-center justify-center rounded-md bg-accent text-on-accent text-[10px]">
-              ✦
-            </span>
-            @craftzbay/ui
-          </div>
+          <BrandMark className="text-sm" />
           <p className="max-w-xs text-xs text-foreground-muted">
             Refined-minimal Tailwind v4 + React design system. MIT-licensed.
           </p>
@@ -51,7 +43,7 @@ export function ShowcaseFooter() {
             links={[
               { label: 'Quick start', href: `#${routeToHash({ kind: 'guide', slug: 'quickstart' })}` },
               { label: 'Theming', href: `#${routeToHash({ kind: 'guide', slug: 'theming' })}` },
-              { label: 'Migration', href: `#${routeToHash({ kind: 'guide', slug: 'migration' })}` },
+              { label: 'Dashboard preview', href: previewUrl('dashboard'), external: true },
             ]}
           />
         </div>

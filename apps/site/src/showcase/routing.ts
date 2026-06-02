@@ -81,9 +81,20 @@ export function routeToHash(route: Route): string {
   }
 }
 
-export function isFullBleedRoute(_route: Route): boolean {
-  // Always render the showcase TopBar so users never get stranded inside a
-  // template preview with no way back to the docs. Templates render below
-  // the slim showcase header.
-  return false;
+/** True for routes that render standalone — no showcase TopBar/Footer chrome. */
+export function isFullBleedRoute(route: Route): boolean {
+  return route.kind === 'preview';
+}
+
+/**
+ * Absolute URL to a template's full-bleed live preview. Used with
+ * `target="_blank"` so a template opens in its own browser tab, isolated from
+ * the showcase chrome — the headline behaviour of the Templates section.
+ */
+export function previewUrl(slug: string): string {
+  const base =
+    typeof window === 'undefined'
+      ? ''
+      : `${window.location.origin}${window.location.pathname}${window.location.search}`;
+  return `${base}#${routeToHash({ kind: 'preview', slug })}`;
 }

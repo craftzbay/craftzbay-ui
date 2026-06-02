@@ -1,11 +1,10 @@
-import { Moon, Sun } from '@/icons';
-import { IconButton } from '@/components/ui/IconButton';
 import { cn } from '@/lib/utils';
 import { routeToHash, type Route } from '../routing';
+import { GITHUB_URL, NPM_URL } from '../site.config';
+import { BrandMark } from '../components/BrandMark';
+import { BrandSwitcher, ThemeToggle } from '../theme/Controls';
 
 interface ShowcaseTopBarProps {
-  theme: 'light' | 'dark';
-  onToggleTheme: () => void;
   onOpenPalette: () => void;
   current: Route;
 }
@@ -16,27 +15,13 @@ const NAV: { label: string; route: Route; matchKinds: Route['kind'][] }[] = [
   { label: 'Guides', route: { kind: 'guides-index' }, matchKinds: ['guides-index', 'guide'] },
 ];
 
-const GITHUB_URL = 'https://github.com/craftzbay/design-system';
-const NPM_URL = 'https://www.npmjs.com/package/@craftzbay/ui';
-
-/**
- * Persistent top bar shared by Home + docs pages. Hidden in full-bleed
- * preview routes (templates rendered for screenshot / live use).
- */
-export function ShowcaseTopBar({
-  theme,
-  onToggleTheme,
-  onOpenPalette,
-  current,
-}: ShowcaseTopBarProps) {
+/** Persistent top bar shared by Home + docs pages (hidden on preview tabs). */
+export function ShowcaseTopBar({ onOpenPalette, current }: ShowcaseTopBarProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-6 px-6">
-        <a href="#" className="flex items-center gap-2 text-sm font-semibold">
-          <span className="inline-flex size-6 items-center justify-center rounded-md bg-accent text-on-accent text-xs">
-            ✦
-          </span>
-          @craftzbay/ui
+        <a href="#" className="text-sm" aria-label="Home">
+          <BrandMark />
         </a>
 
         <nav className="hidden items-center gap-1 text-sm text-foreground-muted sm:flex">
@@ -49,9 +34,7 @@ export function ShowcaseTopBar({
                 aria-current={active ? 'page' : undefined}
                 className={cn(
                   'rounded-md px-3 py-1.5 transition-colors',
-                  active
-                    ? 'text-foreground'
-                    : 'hover:bg-background-muted hover:text-foreground',
+                  active ? 'text-foreground' : 'hover:bg-background-muted hover:text-foreground',
                 )}
               >
                 {item.label}
@@ -72,6 +55,8 @@ export function ShowcaseTopBar({
             </span>
           </button>
 
+          <BrandSwitcher />
+
           <a
             href={GITHUB_URL}
             target="_blank"
@@ -91,13 +76,7 @@ export function ShowcaseTopBar({
             <NpmGlyph />
           </a>
 
-          <IconButton
-            aria-label="Toggle theme"
-            icon={theme === 'light' ? <Moon /> : <Sun />}
-            size="sm"
-            variant="ghost"
-            onClick={onToggleTheme}
-          />
+          <ThemeToggle />
         </div>
       </div>
     </header>

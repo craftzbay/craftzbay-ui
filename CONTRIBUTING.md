@@ -20,7 +20,7 @@ Releases are fully automated via [`changesets/action`](https://github.com/change
 That's it. The bot does the rest:
 
 - **On push to `main` with pending changesets** → opens (or updates) a "Version Packages" PR that bumps `package.json` versions and rewrites `CHANGELOG.md`.
-- **When that PR is merged** → runs `pnpm build:lib` + `pnpm changeset publish`, which publishes to npm (using the `NPM_TOKEN` secret), creates a GitHub release for each package, and pushes git tags.
+- **When that PR is merged** → runs `pnpm build:lib` (builds `packages/ui`) + `pnpm changeset publish`, which publishes to npm (using the `NPM_TOKEN` secret), creates a GitHub release for each package, and pushes git tags.
 
 ### Adding multiple changes before releasing
 
@@ -35,8 +35,8 @@ pnpm changeset version    # consume pending changesets, bump version
 git commit -am "chore: release X.Y.Z"
 git push
 pnpm build:lib
-npm publish               # requires ~/.npmrc with the craftzbay npm token
-git tag vX.Y.Z && git push --tags
+cd packages/ui && npm publish   # requires ~/.npmrc with the craftzbay npm token
+cd ../.. && git tag vX.Y.Z && git push --tags
 ```
 
 But the bot is the canonical path — keep it intact.
@@ -47,26 +47,37 @@ Required in GitHub repo settings → Secrets and variables → Actions:
 
 - `NPM_TOKEN` — npm automation token for the `craftzbay` user, scope `@craftzbay/*`. Already set.
 
+## Repository layout
+
+```
+packages/ui/          # @craftzbay/ui — the published library
+packages/create-app/  # @craftzbay/create-app — project scaffolder
+apps/site/            # the showcase site (not published; consumes packages/ui)
+```
+
 ## Development
+
+Run from the repo root (pnpm workspace):
 
 ```bash
 pnpm install
-pnpm dev            # showcase at localhost:5173
-pnpm typecheck
-pnpm test
-pnpm build:lib      # outputs to dist-lib/
-pnpm build          # showcase build to dist/
+pnpm dev            # showcase site (apps/site) at localhost:5173
+pnpm typecheck      # all packages
+pnpm test           # @craftzbay/ui component tests
+pnpm build:lib      # build packages/ui → packages/ui/dist-lib/
+pnpm build:site     # build apps/site → apps/site/dist/
+pnpm build          # build the library, then the site
 ```
 
 ## Component checklist
 
 Before opening a PR adding a new component:
 
-- [ ] Component file in `src/components/ui/`
-- [ ] Exported from `src/index.ts`
-- [ ] Doc file in `src/showcase/components/<Name>.docs.tsx`
-- [ ] Registered in `src/showcase/registry/components.ts`
-- [ ] At least one smoke test in the matching `src/components/ui/__tests__/<group>.smoke.test.tsx`
+- [ ] Component file in `packages/ui/src/components/ui/`
+- [ ] Exported from `packages/ui/src/index.ts`
+- [ ] Doc file in `apps/site/src/showcase/components/<Name>.docs.tsx`
+- [ ] Registered in `apps/site/src/showcase/registry/components.ts`
+- [ ] At least one smoke test in the matching `packages/ui/src/components/ui/__tests__/<group>.smoke.test.tsx`
 - [ ] axe-clean on the rendered default state
 - [ ] WCAG AA contrast respected (see `docs/ACCESSIBILITY.md`)
 - [ ] Forwards refs correctly + `displayName` set

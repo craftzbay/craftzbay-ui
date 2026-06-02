@@ -1,11 +1,11 @@
-import { ArrowRight, ExternalLink } from '@/icons';
+import { ExternalLink } from '@/icons';
 import type { TemplateDoc } from '../registry/types';
 import { CodeBlock } from '../widgets/CodeBlock';
 import { CodePreview } from '../widgets/CodePreview';
 import { PropsTable } from '../widgets/PropsTable';
 import { SectionAnchor } from '../widgets/SectionAnchor';
-
-const GITHUB_BLOB = 'https://github.com/craftzbay/design-system/blob/main/src/components/patterns';
+import { previewUrl } from '../routing';
+import { SRC_PATTERNS } from '../site.config';
 
 interface TemplateDocPageProps {
   doc: TemplateDoc;
@@ -23,14 +23,16 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
         <div className="mt-4 flex flex-wrap items-center gap-4">
           {doc.previewSlug && (
             <a
-              href={`#preview/${doc.previewSlug}`}
+              href={previewUrl(doc.previewSlug)}
+              target="_blank"
+              rel="noreferrer"
               className="inline-flex items-center gap-1 rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-on-accent hover:opacity-90"
             >
-              Open live preview <ArrowRight className="size-3" aria-hidden />
+              Open live preview <ExternalLink className="size-3" aria-hidden />
             </a>
           )}
           <a
-            href={`${GITHUB_BLOB}/${doc.sourceFile}`}
+            href={`${SRC_PATTERNS}/${doc.sourceFile}`}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-1 text-xs text-foreground-muted hover:text-accent"

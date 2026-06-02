@@ -7,8 +7,7 @@ import { CodePreview } from '../widgets/CodePreview';
 import { PropsTable } from '../widgets/PropsTable';
 import { SectionAnchor } from '../widgets/SectionAnchor';
 import { routeToHash } from '../routing';
-
-const GITHUB_BLOB = 'https://github.com/craftzbay/design-system/blob/main/src/components/ui';
+import { SRC_UI as GITHUB_BLOB } from '../site.config';
 
 interface ComponentDocPageProps {
   doc: ComponentDoc;

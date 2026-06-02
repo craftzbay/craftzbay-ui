@@ -7,11 +7,11 @@
   "homepage": "https://design.runestonetechnologies.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/craftzbay/design-system.git",
+    "url": "https://github.com/craftzbay/craftzbay-ui.git",
     "directory": "packages/create-app"
   },
   "bugs": {
-    "url": "https://github.com/craftzbay/design-system/issues"
+    "url": "https://github.com/craftzbay/craftzbay-ui/issues"
   },
   "keywords": [
     "create-app",

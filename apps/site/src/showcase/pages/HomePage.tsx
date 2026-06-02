@@ -1,12 +1,13 @@
-import { ArrowRight, Package, Sparkles } from '@/icons';
+import { ArrowRight, ExternalLink, Package, Sparkles } from '@/icons';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { componentDocs } from '../registry/components';
 import { templateDocs } from '../registry/templates';
 import { guideDocs } from '../registry/guides';
-import { routeToHash } from '../routing';
+import { previewUrl, routeToHash } from '../routing';
+import { CHANGELOG_URL, PKG_NAME, VERSION } from '../site.config';
 
-const VERSION = '0.7.1'; // bumped in lockstep with package.json via changeset
+const FEATURED = ['button', 'input', 'dialog', 'data-grid', 'card', 'toast', 'command-palette', 'date-picker'];
 
 export function HomePage() {
   return (
@@ -21,8 +22,9 @@ export function HomePage() {
           A design system you can actually <span className="text-accent">use today</span>.
         </h1>
         <p className="mt-4 text-lg leading-relaxed text-foreground-muted">
-          {componentDocs.length} accessible primitives, {templateDocs.length} page templates, {guideDocs.length} guides. All
-          dark-mode-ready, all keyboard-accessible, all on a single Tailwind v4 token system.
+          {componentDocs.length} accessible primitives, {templateDocs.length} page templates,{' '}
+          {guideDocs.length} guides — all dark-mode-ready, all keyboard-accessible, all on one
+          Tailwind v4 token system. Re-brand the whole thing live with the switcher up top.
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <Button asChild>
@@ -40,7 +42,7 @@ export function HomePage() {
 
         <div className="mt-6 flex flex-wrap items-center gap-2 text-xs text-foreground-muted">
           <a
-            href="https://github.com/craftzbay/design-system/blob/main/CHANGELOG.md"
+            href={CHANGELOG_URL}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-1 hover:text-accent"
@@ -50,7 +52,7 @@ export function HomePage() {
             <span className="text-[10px] text-foreground-subtle">release notes ↗</span>
           </a>
           <span>·</span>
-          <code className="rounded bg-background-muted px-1.5 py-0.5 font-mono">pnpm add @craftzbay/ui</code>
+          <code className="rounded bg-background-muted px-1.5 py-0.5 font-mono">pnpm add {PKG_NAME}</code>
         </div>
       </div>
 
@@ -78,10 +80,13 @@ export function HomePage() {
         ))}
       </div>
 
-      {/* Highlighted templates */}
+      {/* Highlighted templates — open in a new tab */}
       <section className="mt-20">
         <div className="mb-6 flex items-baseline justify-between">
-          <h2 className="text-2xl font-semibold tracking-tight">Templates</h2>
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight">Templates</h2>
+            <p className="mt-1 text-sm text-foreground-muted">Open live in a new tab ↗</p>
+          </div>
           <a
             href={`#${routeToHash({ kind: 'templates-index' })}`}
             className="text-sm text-foreground-muted hover:text-accent"
@@ -93,10 +98,18 @@ export function HomePage() {
           {templateDocs.slice(0, 6).map((t) => (
             <a
               key={t.slug}
-              href={`#${routeToHash({ kind: 'template', slug: t.slug })}`}
+              href={previewUrl(t.previewSlug ?? t.slug)}
+              target="_blank"
+              rel="noreferrer"
               className="group flex flex-col gap-1.5 rounded-md border border-border bg-card p-4 transition-colors hover:border-accent"
             >
-              <div className="text-sm font-medium text-foreground">{t.name}</div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-foreground">{t.name}</span>
+                <ExternalLink
+                  className="size-3.5 text-foreground-subtle transition-colors group-hover:text-accent"
+                  aria-hidden
+                />
+              </div>
               <div className="text-xs leading-relaxed text-foreground-muted">{t.description}</div>
             </a>
           ))}
@@ -115,8 +128,7 @@ export function HomePage() {
           </a>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {['button', 'input', 'dialog', 'data-grid', 'card', 'toast', 'command-palette', 'date-picker']
-            .map((slug) => componentDocs.find((d) => d.slug === slug))
+          {FEATURED.map((slug) => componentDocs.find((d) => d.slug === slug))
             .filter((d): d is NonNullable<typeof d> => Boolean(d))
             .map((d) => (
               <a
@@ -140,7 +152,7 @@ export function HomePage() {
               Install in seconds
             </div>
             <pre className="mt-3 overflow-x-auto rounded-md bg-background-muted px-4 py-3 font-mono text-sm">
-              <code>pnpm add @craftzbay/ui</code>
+              <code>pnpm add {PKG_NAME}</code>
             </pre>
           </div>
           <Button asChild>
