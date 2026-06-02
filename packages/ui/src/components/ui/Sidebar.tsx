@@ -167,12 +167,12 @@ export function SidebarItem({
   const { collapsed } = useContext(SidebarContext);
   const Comp: any = href ? 'a' : 'button';
   return (
-    <li>
+    <li className="px-2">
       <Comp
         href={href}
         aria-current={active ? 'page' : undefined}
         className={cn(
-          'mx-2 flex h-8 items-center gap-2 rounded-md px-2 text-sm outline-none',
+          'flex h-8 w-full items-center gap-2 rounded-md px-2 text-sm outline-none',
           'transition-colors duration-[var(--duration-fast)]',
           'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           active
