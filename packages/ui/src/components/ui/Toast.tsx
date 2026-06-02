@@ -8,6 +8,7 @@ import * as ToastPrimitive from '@radix-ui/react-toast';
 import { AlertTriangle, CheckCircle2, Info, X, XCircle } from '@/icons';
 import { cn } from '@/lib/utils';
 import { cva, type VariantProps } from '@/lib/cva';
+import { useToast } from '@/hooks/use-toast';
 
 export const ToastProvider = ToastPrimitive.Provider;
 
@@ -147,6 +148,56 @@ export const ToastClose = forwardRef<
   );
 });
 ToastClose.displayName = 'ToastClose';
+
+/**
+ * Drop-in host that connects the `useToast()` queue to the Radix primitives.
+ * Mount it once near your app root — then `useToast().push({...})` (or the
+ * standalone `toast()`) from anywhere renders here. Self-contained: it brings
+ * its own ToastProvider + Viewport, so no other Toast wiring is needed.
+ *
+ * @example
+ *   function App() {
+ *     return (
+ *       <>
+ *         <Routes />
+ *         <Toaster />
+ *       </>
+ *     );
+ *   }
+ */
+export function Toaster() {
+  const { toasts, remove } = useToast();
+  return (
+    <ToastProvider>
+      {toasts.map((t) => (
+        <Toast
+          key={t.id}
+          variant={t.variant ?? 'default'}
+          open={t.open}
+          duration={t.duration}
+          onOpenChange={(open) => {
+            if (!open) remove(t.id);
+          }}
+        >
+          {t.title && <ToastTitle>{t.title}</ToastTitle>}
+          {t.description && <ToastDescription>{t.description}</ToastDescription>}
+          {t.action && (
+            <ToastAction
+              altText={t.action.altText}
+              onClick={t.action.onClick}
+              className="mt-1"
+            >
+              {t.action.label}
+            </ToastAction>
+          )}
+          <ToastClose />
+        </Toast>
+      ))}
+      <ToastViewport />
+    </ToastProvider>
+  );
+}
+Toaster.displayName = 'Toaster';
 
 /**
  * @example

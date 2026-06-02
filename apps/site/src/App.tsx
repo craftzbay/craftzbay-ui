@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ToastProvider, ToastViewport } from '@/components/ui/Toast';
+import { Toaster } from '@/components/ui/Toast';
 import { TooltipProvider } from '@/components/ui/Tooltip';
 import { useCommandPaletteShortcut } from '@/components/ui/CommandPalette';
 
@@ -46,10 +46,8 @@ export function App() {
   return (
     <ThemeProvider>
       <TooltipProvider>
-        <ToastProvider>
-          <Shell />
-          <ToastViewport />
-        </ToastProvider>
+        <Shell />
+        <Toaster />
       </TooltipProvider>
     </ThemeProvider>
   );

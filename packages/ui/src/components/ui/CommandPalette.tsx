@@ -184,7 +184,7 @@ export function CommandDialog({ open, onOpenChange, children, title = 'Command p
           )}
         >
           <DialogPrimitive.Title className="sr-only">{title}</DialogPrimitive.Title>
-          {children}
+          <Command>{children}</Command>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
