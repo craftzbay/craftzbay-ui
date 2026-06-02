@@ -85,8 +85,8 @@ export function ThemingBody() {
       <CodeBlock
         code={`<DesignSystemProvider
   tokens={{
-    'color-accent': 'oklch(0.62 0.21 260)',
-    'color-accent-soft': 'oklch(0.94 0.04 260)',
+    accent: 'oklch(0.62 0.21 260)',
+    'accent-subtle': 'oklch(0.94 0.04 260)',
     'radius-md': '4px',
     'font-sans': 'Inter, system-ui, sans-serif',
   }}
@@ -103,8 +103,8 @@ export function ThemingBody() {
       <CodeBlock
         language="css"
         code={`:root {
-  --color-accent: oklch(0.62 0.21 260);
-  --color-accent-soft: oklch(0.94 0.04 260);
+  --accent: oklch(0.62 0.21 260);
+  --accent-subtle: oklch(0.94 0.04 260);
   --radius-sm: 4px;
   --font-sans: 'Inter', system-ui, sans-serif;
 }`}
