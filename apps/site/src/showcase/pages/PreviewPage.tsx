@@ -1,6 +1,14 @@
-import { lazy, Suspense } from 'react';
-import { ArrowLeft } from '@/icons';
+import { lazy, Suspense, useState } from 'react';
+import { ArrowLeft, Check, ChevronDown } from '@/icons';
 import { Spinner } from '@/components/ui/Spinner';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/DropdownMenu';
 import { getBlockMeta } from '../blocks/meta';
 import { routeToHash } from '../routing';
 import { ThemeToggle, BrandSwitcher } from '../theme/Controls';
@@ -9,14 +17,18 @@ import { NotFound } from './NotFound';
 const BlockPreview = lazy(() => import('../blocks/Preview'));
 
 /**
- * Standalone block preview — its own browser tab, no showcase navigation. The
- * block fills the whole viewport; the only chrome is a small floating dock at
- * the bottom carrying "back to docs" + the live brand / theme controls, so it
- * never intrudes on the template itself.
+ * Standalone template preview — its own browser tab, no showcase navigation.
+ * The template fills the viewport; the only chrome is a small floating dock at
+ * the bottom: back-to-docs, a screen switcher (for layout-changing screens like
+ * sign-in), and the live brand / theme controls.
  */
 export function PreviewPage({ slug }: { slug: string }) {
   const doc = getBlockMeta(slug);
+  const [screen, setScreen] = useState(() => doc?.screens[0]?.key ?? 'home');
+
   if (!doc) return <NotFound />;
+
+  const activeScreen = doc.screens.find((s) => s.key === screen) ?? doc.screens[0];
 
   return (
     <div className="min-h-screen bg-background">
@@ -27,7 +39,7 @@ export function PreviewPage({ slug }: { slug: string }) {
           </div>
         }
       >
-        <BlockPreview slug={slug} />
+        <BlockPreview slug={slug} screen={screen} setScreen={setScreen} />
       </Suspense>
 
       {/* Floating control dock */}
@@ -42,7 +54,30 @@ export function PreviewPage({ slug }: { slug: string }) {
             <ArrowLeft className="size-4" aria-hidden />
           </a>
 
-          <span className="hidden px-1 text-xs text-foreground-muted sm:inline">{doc.name}</span>
+          {doc.screens.length > 1 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-foreground transition-colors hover:bg-background-muted"
+                >
+                  {activeScreen.label}
+                  <ChevronDown className="size-3.5 opacity-60" aria-hidden />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" side="top" sideOffset={8} className="w-44">
+                <DropdownMenuLabel>Screen</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {doc.screens.map((s) => (
+                  <DropdownMenuItem key={s.key} onSelect={() => setScreen(s.key)}>
+                    <span>{s.label}</span>
+                    {s.key === activeScreen.key && <Check className="ml-auto size-3.5 text-accent" aria-hidden />}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
           <span className="h-4 w-px bg-border" aria-hidden />
 
           <BrandSwitcher compact />

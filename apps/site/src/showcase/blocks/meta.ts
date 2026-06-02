@@ -1,105 +1,90 @@
 /**
- * Lightweight block metadata — safe to import anywhere (home, sidebar, command
- * palette) without pulling in the block components or their source text. The
- * heavy parts load on demand: the rendered preview from ./Preview (React.lazy)
- * and the verbatim source from ./sources (dynamic import).
+ * Template metadata — lightweight, safe to import anywhere (home, sidebar,
+ * command palette). The rendered template loads lazily from ./Preview and its
+ * source from ./sources.
+ *
+ * A template is a complete, multi-page product (ThemeForest-style). Pages that
+ * share a chrome (a dashboard's sidebar, a site's top nav) switch inside the
+ * template; pages whose whole layout changes (sign-in, cart, …) are exposed as
+ * `screens` and switched from the floating dock in the preview.
  */
+import type { ReactNode } from 'react';
+
+export interface TemplateScreen {
+  key: string;
+  label: string;
+}
+
+/** Props every template component receives from the preview host. */
+export interface TemplateProps {
+  /** Active top-level screen key. */
+  screen: string;
+  /** Switch the top-level screen (also driven by the dock). */
+  setScreen: (screen: string) => void;
+  /** Wordmark to render in the template's chrome. */
+  brand: ReactNode;
+}
+
 export interface BlockMeta {
   slug: string;
   name: string;
   description: string;
   useCases: string[];
-  /** File the source comes from (shown as a hint + GitHub link). */
   sourceFile: string;
+  /** Top-level screens, switched from the preview dock. First is the default. */
+  screens: TemplateScreen[];
 }
 
 export const blockMeta: BlockMeta[] = [
   {
-    slug: 'dashboard',
-    name: 'Dashboard',
+    slug: 'admin',
+    name: 'Admin dashboard',
     description:
-      'Application shell — sidebar + top bar + content — wrapping a stats / chart / activity overview. The whole page is assembled from Sidebar, TopNav, Card, Chart and Table primitives.',
-    useCases: ['Admin dashboard', 'SaaS analytics home', 'Internal back-office'],
-    sourceFile: 'AppShell.tsx',
+      'A complete admin app: collapsible sidebar driving Home, Projects, Inbox, Members, Insights and Settings pages, plus sign-in / sign-up screens. Everything is assembled from the library primitives.',
+    useCases: ['SaaS back-office', 'Internal tools', 'Analytics console'],
+    sourceFile: 'AdminTemplate.tsx',
+    screens: [
+      { key: 'app', label: 'Dashboard' },
+      { key: 'signin', label: 'Sign in' },
+      { key: 'signup', label: 'Sign up' },
+    ],
   },
   {
-    slug: 'data-table',
-    name: 'Data table page',
+    slug: 'landing',
+    name: 'Landing page',
     description:
-      'Filter bar + search + bulk-action toolbar + DataGrid + Pagination. Generic over your row type — pass columns and rows.',
-    useCases: ['Project list', 'User management', 'Audit log'],
-    sourceFile: 'DataTablePage.tsx',
+      'A complete SaaS marketing page — sticky nav, hero, logo strip, feature grid, pricing, testimonial and a closing CTA with footer — plus a matching sign-up screen.',
+    useCases: ['Product marketing site', 'Startup landing', 'Pre-launch page'],
+    sourceFile: 'LandingTemplate.tsx',
+    screens: [
+      { key: 'home', label: 'Landing' },
+      { key: 'signup', label: 'Sign up' },
+    ],
   },
   {
-    slug: 'settings',
-    name: 'Settings',
+    slug: 'news',
+    name: 'News / magazine',
     description:
-      'Two-column settings layout: sticky sub-nav on the left, scrolling sections on the right. Sections are plain data — add or remove without touching the layout.',
-    useCases: ['User account settings', 'Workspace settings', 'Project settings'],
-    sourceFile: 'Settings.tsx',
+      'A publication front page and article reader: masthead with category nav, lead story, a grid of latest articles, a sidebar of trending posts, and a full article layout.',
+    useCases: ['News site', 'Company blog', 'Magazine / editorial'],
+    sourceFile: 'NewsTemplate.tsx',
+    screens: [
+      { key: 'home', label: 'Front page' },
+      { key: 'article', label: 'Article' },
+    ],
   },
   {
-    slug: 'record',
-    name: 'Record detail',
+    slug: 'ecommerce',
+    name: 'E-commerce',
     description:
-      'Header with title + metadata + actions, Tabs for related views, and an optional side panel. Use for any "thing detail" page — user, project, ticket, order.',
-    useCases: ['User profile', 'Project overview', 'Ticket detail', 'Order detail'],
-    sourceFile: 'RecordDetail.tsx',
-  },
-  {
-    slug: 'onboarding',
-    name: 'Onboarding wizard',
-    description:
-      'Multi-step Stepper flow with one card per step. Steps are declared as data; the block handles navigation and per-step state.',
-    useCases: ['New user setup', 'Workspace creation flow', 'Integration setup wizard'],
-    sourceFile: 'Onboarding.tsx',
-  },
-  {
-    slug: 'first-run',
-    name: 'First-run empty',
-    description:
-      'Welcoming empty state — hero + three next-step action cards. Use as the first screen of a brand-new workspace or project.',
-    useCases: ['New workspace landing', 'Empty project home', 'Post-signup welcome'],
-    sourceFile: 'FirstRunEmpty.tsx',
-  },
-  {
-    slug: 'pricing',
-    name: 'Pricing',
-    description:
-      'Three-tier comparison grid with feature lists and CTAs. Tiers are declared as data — change copy or add a tier without touching the layout.',
-    useCases: ['Marketing pricing page', 'In-app upgrade flow'],
-    sourceFile: 'Pricing.tsx',
-  },
-  {
-    slug: 'auth-signin',
-    name: 'Sign in',
-    description:
-      'Centered sign-in card with email + password, built on the AuthLayout split-screen shell and the Form primitives.',
-    useCases: ['Customer SaaS sign-in page', 'Internal admin login'],
-    sourceFile: 'Authentication.tsx',
-  },
-  {
-    slug: 'auth-signup',
-    name: 'Sign up',
-    description:
-      'Account-creation form with email + password and terms acceptance — the same shape as Sign in.',
-    useCases: ['New customer account creation', 'Internal user onboarding'],
-    sourceFile: 'Authentication.tsx',
-  },
-  {
-    slug: 'auth-forgot',
-    name: 'Forgot password',
-    description: 'Single-field "enter your email" form to request a password-reset link.',
-    useCases: ['Password reset request'],
-    sourceFile: 'Authentication.tsx',
-  },
-  {
-    slug: 'auth-magic',
-    name: 'Magic link sent',
-    description:
-      'Post-submit confirmation screen for magic-link / password-reset flows — tells the user to check their inbox.',
-    useCases: ['After magic-link sign-in', 'After password reset email'],
-    sourceFile: 'Authentication.tsx',
+      'A storefront flow: a filterable product grid, a product detail page with gallery and add-to-cart, and a cart / checkout summary — all sharing a shop header.',
+    useCases: ['Online store', 'Product catalog', 'Marketplace'],
+    sourceFile: 'EcommerceTemplate.tsx',
+    screens: [
+      { key: 'shop', label: 'Shop' },
+      { key: 'product', label: 'Product' },
+      { key: 'cart', label: 'Cart' },
+    ],
   },
 ];
 

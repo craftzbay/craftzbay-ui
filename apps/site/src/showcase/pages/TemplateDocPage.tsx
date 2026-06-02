@@ -21,8 +21,10 @@ interface TemplateDocPageProps {
  */
 export function TemplateDocPage({ doc }: TemplateDocPageProps) {
   const [source, setSource] = useState<string | null>(null);
+  const [screen, setScreen] = useState(doc.screens[0]?.key ?? 'home');
 
   useEffect(() => {
+    setScreen(doc.screens[0]?.key ?? 'home');
     let alive = true;
     setSource(null);
     import('../blocks/sources').then((m) => {
@@ -31,7 +33,7 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
     return () => {
       alive = false;
     };
-  }, [doc.slug]);
+  }, [doc.slug, doc.screens]);
 
   return (
     <article className="max-w-4xl">
@@ -74,8 +76,27 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
       )}
 
       <SectionAnchor id="preview">Preview</SectionAnchor>
+      {doc.screens.length > 1 && (
+        <div className="mb-3 flex flex-wrap gap-1.5">
+          {doc.screens.map((s) => (
+            <button
+              key={s.key}
+              type="button"
+              onClick={() => setScreen(s.key)}
+              aria-pressed={s.key === screen}
+              className={`rounded-full border px-2.5 py-1 text-xs transition-colors ${
+                s.key === screen
+                  ? 'border-accent bg-accent-soft text-on-accent-soft'
+                  : 'border-border text-foreground-muted hover:border-border-strong hover:text-foreground'
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="overflow-hidden rounded-lg border border-border bg-background">
-        <div className="max-h-[480px] overflow-auto">
+        <div className="max-h-[520px] overflow-auto">
           <Suspense
             fallback={
               <div className="flex h-48 items-center justify-center">
@@ -83,7 +104,7 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
               </div>
             }
           >
-            <BlockPreview slug={doc.slug} />
+            <BlockPreview slug={doc.slug} screen={screen} setScreen={setScreen} />
           </Suspense>
         </div>
       </div>
@@ -102,11 +123,10 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
 
       <SectionAnchor id="source">Source</SectionAnchor>
       <p className="mb-4 text-sm leading-relaxed text-foreground-muted">
-        A complete page built only from{' '}
-        <code className="rounded bg-background-muted px-1 py-0.5 font-mono text-xs">@craftzbay/ui</code>{' '}
-        primitives. Copy it into your project (e.g.{' '}
+        The template's entry file (
         <code className="rounded bg-background-muted px-1 py-0.5 font-mono text-xs">{doc.sourceFile}</code>),
-        then wire your own data and handlers.
+        composed from <code className="rounded bg-background-muted px-1 py-0.5 font-mono text-xs">@craftzbay/ui</code>{' '}
+        primitives. Copy it — plus the building blocks it imports — and wire your own data and handlers.
       </p>
       {source === null ? (
         <div className="flex h-24 items-center justify-center rounded-md border border-border">
