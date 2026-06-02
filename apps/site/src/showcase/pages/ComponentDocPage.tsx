@@ -1,7 +1,7 @@
+import { useEffect, useState } from 'react';
 import { ExternalLink } from '@/icons';
 import type { ComponentDoc, PropGroup } from '../registry/types';
 import { getRelatedDocs } from '../registry/components';
-import { getGeneratedProps } from '../registry/generated-props';
 import { CodeBlock } from '../widgets/CodeBlock';
 import { CodePreview } from '../widgets/CodePreview';
 import { PropsTable } from '../widgets/PropsTable';
@@ -17,6 +17,27 @@ export function ComponentDocPage({ doc }: ComponentDocPageProps) {
   const related = doc.related ? getRelatedDocs(doc.related.map((r) => r.slug)) : [];
 
   const importLine = `import { ${doc.exports.join(', ')} } from '@craftzbay/ui';`;
+
+  // The generated-props table is ~5k lines of data used only here — load it on
+  // demand so it never sits in the initial bundle. Explicit `doc.api` needs no
+  // fetch.
+  const [apiGroups, setApiGroups] = useState<PropGroup[]>(() =>
+    doc.api && doc.api.length > 0 ? doc.api : [],
+  );
+  useEffect(() => {
+    if (doc.api && doc.api.length > 0) {
+      setApiGroups(doc.api);
+      return;
+    }
+    let alive = true;
+    setApiGroups([]);
+    import('../registry/generated-props').then((m) => {
+      if (alive) setApiGroups(resolveGeneratedGroups(doc, m.getGeneratedProps));
+    });
+    return () => {
+      alive = false;
+    };
+  }, [doc]);
 
   return (
     <article className="max-w-3xl">
@@ -69,16 +90,12 @@ export function ComponentDocPage({ doc }: ComponentDocPageProps) {
         </>
       )}
 
-      {(() => {
-        const groups = resolveApiGroups(doc);
-        if (groups.length === 0) return null;
-        return (
-          <>
-            <SectionAnchor id="api">API reference</SectionAnchor>
-            <PropsTable groups={groups} />
-          </>
-        );
-      })()}
+      {apiGroups.length > 0 && (
+        <>
+          <SectionAnchor id="api">API reference</SectionAnchor>
+          <PropsTable groups={apiGroups} />
+        </>
+      )}
 
       {doc.accessibility && doc.accessibility.length > 0 && (
         <>
@@ -128,21 +145,19 @@ function slugify(s: string): string {
 }
 
 /**
- * Resolve which prop groups to render. Order of precedence:
- *
- *  1. If the doc file declares `api` explicitly → use it verbatim (override).
- *  2. Otherwise, fall back to auto-generated props per exported name.
- *     Each export becomes its own group with the component name as title
- *     (so Card / CardHeader / CardTitle each get their own section).
- *
- * Empty / unknown exports are dropped silently.
+ * Build prop groups from the auto-generated props (used when a doc file does
+ * not declare `api` explicitly). Each exported name becomes its own group with
+ * the component name as title (Card / CardHeader / CardTitle each get one).
+ * Empty / unknown exports are dropped silently. `getGen` is the lazily-loaded
+ * lookup from generated-props.
  */
-function resolveApiGroups(doc: ComponentDoc): PropGroup[] {
-  if (doc.api && doc.api.length > 0) return doc.api;
-
+function resolveGeneratedGroups(
+  doc: ComponentDoc,
+  getGen: (name: string) => PropGroup[] | undefined,
+): PropGroup[] {
   const groups: PropGroup[] = [];
   for (const exportName of doc.exports) {
-    const generated = getGeneratedProps(exportName);
+    const generated = getGen(exportName);
     if (!generated || generated.length === 0) continue;
     for (const g of generated) {
       if (g.rows.length === 0) continue;

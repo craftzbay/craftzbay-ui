@@ -1,8 +1,8 @@
 /**
  * Templates are "blocks" — complete pages composed from @craftzbay/ui
  * primitives, shipped as copy-paste source rather than importable components.
- * The registry lives in ../blocks/registry; this module re-exports it under
- * the names the rest of the showcase already uses.
+ * Listings use the lightweight metadata here; the rendered preview and the
+ * verbatim source load on demand (see ../blocks/Preview and ../blocks/sources).
  */
-export type { BlockDoc as TemplateDoc } from '../blocks/registry';
-export { blockDocs as templateDocs, getBlockDoc as getTemplateDoc } from '../blocks/registry';
+export type { BlockMeta as TemplateDoc } from '../blocks/meta';
+export { blockMeta as templateDocs, getBlockMeta as getTemplateDoc } from '../blocks/meta';

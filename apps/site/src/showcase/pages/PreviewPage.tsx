@@ -1,16 +1,20 @@
+import { lazy, Suspense } from 'react';
 import { ArrowLeft } from '@/icons';
-import { getBlockDoc } from '../blocks/registry';
+import { Spinner } from '@/components/ui/Spinner';
+import { getBlockMeta } from '../blocks/meta';
 import { routeToHash } from '../routing';
 import { ThemeToggle, BrandSwitcher } from '../theme/Controls';
 import { NotFound } from './NotFound';
 
+const BlockPreview = lazy(() => import('../blocks/Preview'));
+
 /**
  * Standalone block preview — what opens when a template is clicked. Its own
  * browser tab, no showcase navigation, just a slim chrome strip carrying the
- * live brand + theme controls. The block fills the rest of the viewport.
+ * live brand + theme controls. The block component loads lazily.
  */
 export function PreviewPage({ slug }: { slug: string }) {
-  const doc = getBlockDoc(slug);
+  const doc = getBlockMeta(slug);
   if (!doc) return <NotFound />;
 
   return (
@@ -36,7 +40,17 @@ export function PreviewPage({ slug }: { slug: string }) {
         </div>
       </div>
 
-      <div className="flex-1">{doc.render()}</div>
+      <div className="flex-1">
+        <Suspense
+          fallback={
+            <div className="flex h-[60vh] items-center justify-center">
+              <Spinner />
+            </div>
+          }
+        >
+          <BlockPreview slug={slug} />
+        </Suspense>
+      </div>
     </div>
   );
 }

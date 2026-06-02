@@ -1,9 +1,13 @@
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { ExternalLink } from '@/icons';
+import { Spinner } from '@/components/ui/Spinner';
 import type { TemplateDoc } from '../registry/templates';
 import { CodeBlock } from '../widgets/CodeBlock';
 import { SectionAnchor } from '../widgets/SectionAnchor';
 import { previewUrl } from '../routing';
 import { SRC_BLOCKS } from '../site.config';
+
+const BlockPreview = lazy(() => import('../blocks/Preview'));
 
 interface TemplateDocPageProps {
   doc: TemplateDoc;
@@ -12,10 +16,23 @@ interface TemplateDocPageProps {
 /**
  * A "block" page: a complete example composed from @craftzbay/ui primitives.
  * It is not an importable component — the deliverable is the source below,
- * which you copy into your app and adapt. The live preview opens in its own
- * tab (try the brand + theme switchers there).
+ * which you copy into your app and adapt. The preview component and the source
+ * text both load lazily, so they never weigh down the rest of the site.
  */
 export function TemplateDocPage({ doc }: TemplateDocPageProps) {
+  const [source, setSource] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    setSource(null);
+    import('../blocks/sources').then((m) => {
+      if (alive) setSource(m.blockSources[doc.slug] ?? '');
+    });
+    return () => {
+      alive = false;
+    };
+  }, [doc.slug]);
+
   return (
     <article className="max-w-4xl">
       <header className="mb-8 border-b border-border pb-6">
@@ -58,7 +75,17 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
 
       <SectionAnchor id="preview">Preview</SectionAnchor>
       <div className="overflow-hidden rounded-lg border border-border bg-background">
-        <div className="max-h-[480px] overflow-auto">{doc.render()}</div>
+        <div className="max-h-[480px] overflow-auto">
+          <Suspense
+            fallback={
+              <div className="flex h-48 items-center justify-center">
+                <Spinner />
+              </div>
+            }
+          >
+            <BlockPreview slug={doc.slug} />
+          </Suspense>
+        </div>
       </div>
       <p className="mt-2 text-xs text-foreground-subtle">
         Interactive. For the full-screen version,{' '}
@@ -75,11 +102,19 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
 
       <SectionAnchor id="source">Source</SectionAnchor>
       <p className="mb-4 text-sm leading-relaxed text-foreground-muted">
-        A complete page built only from <code className="rounded bg-background-muted px-1 py-0.5 font-mono text-xs">@craftzbay/ui</code>{' '}
-        primitives. Copy it into your project (e.g. <code className="rounded bg-background-muted px-1 py-0.5 font-mono text-xs">{doc.sourceFile}</code>),
+        A complete page built only from{' '}
+        <code className="rounded bg-background-muted px-1 py-0.5 font-mono text-xs">@craftzbay/ui</code>{' '}
+        primitives. Copy it into your project (e.g.{' '}
+        <code className="rounded bg-background-muted px-1 py-0.5 font-mono text-xs">{doc.sourceFile}</code>),
         then wire your own data and handlers.
       </p>
-      <CodeBlock code={doc.source} />
+      {source === null ? (
+        <div className="flex h-24 items-center justify-center rounded-md border border-border">
+          <Spinner />
+        </div>
+      ) : (
+        <CodeBlock code={source} />
+      )}
     </article>
   );
 }

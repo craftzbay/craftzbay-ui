@@ -34,21 +34,16 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 const THEME_KEY = 'theme';
 const BRAND_KEY = 'brand';
 
-/** Every CSS variable any preset touches — cleared before a new brand applies
- *  so switching brands never leaves a stale override behind. */
-const ALL_BRAND_KEYS = Array.from(
-  new Set(Object.values(brandPresets).flatMap((preset) => Object.keys(preset))),
-);
-
+/**
+ * Apply the accent by toggling `data-accent` on <html>. The actual token
+ * values (light + dark) live in globals.css under `[data-accent="…"]`, so a
+ * switch is a single attribute write and dark mode adapts automatically.
+ */
 function applyBrand(brand: BrandName) {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
-  for (const key of ALL_BRAND_KEYS) {
-    root.style.removeProperty(key.startsWith('--') ? key : `--${key}`);
-  }
-  for (const [k, v] of Object.entries(brandPresets[brand] ?? {})) {
-    root.style.setProperty(k.startsWith('--') ? k : `--${k}`, v);
-  }
+  if (brand === 'default') root.removeAttribute('data-accent');
+  else root.setAttribute('data-accent', brand);
 }
 
 function readInitialTheme(): Theme {

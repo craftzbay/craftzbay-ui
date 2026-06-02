@@ -25,12 +25,16 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    // No manual vendor chunking. Splitting React's runtime (scheduler /
-    // use-sync-external-store) into a separate chunk from its consumers
-    // (cmdk, Radix Toast/Dialog) races on module init and throws
-    // "Cannot read properties of undefined (reading 'subscribe')" the first
-    // time a portal-based component mounts. A single bundle has no cross-chunk
-    // ordering to get wrong.
     chunkSizeWarningLimit: 1200,
+    rollupOptions: {
+      output: {
+        // One vendor chunk for all third-party code: it changes far less often
+        // than app code, so it stays cached across deploys. Everything lives in
+        // a single chunk (React included), so there's no cross-chunk init order
+        // to get wrong — route pages, blocks and the generated-props table are
+        // split off separately via dynamic import().
+        manualChunks: (id) => (id.includes('node_modules') ? 'vendor' : undefined),
+      },
+    },
   },
 });
