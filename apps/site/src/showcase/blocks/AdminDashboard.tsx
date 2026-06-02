@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState, type ComponentType, type ReactNode } from
 import {
   BarChart3,
   Bell,
+  Check,
+  ChevronsUpDown,
   CreditCard,
   Folder,
   HelpCircle,
@@ -111,6 +113,71 @@ const AREAS: NavArea[] = [
 ];
 
 const USER = { name: 'Alex Morgan', email: 'alex@example.com', initials: 'AM' };
+
+interface Workspace {
+  id: string;
+  name: string;
+  plan: string;
+  initial: string;
+  hue: number;
+}
+const WORKSPACES: Workspace[] = [
+  { id: 'acme', name: 'Acme Inc', plan: 'Team', initial: 'A', hue: 250 },
+  { id: 'northwind', name: 'Northwind', plan: 'Enterprise', initial: 'N', hue: 160 },
+  { id: 'globex', name: 'Globex', plan: 'Free', initial: 'G', hue: 30 },
+];
+
+function WorkspaceLogo({ ws, className }: { ws: Workspace; className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn('inline-flex shrink-0 items-center justify-center rounded-md text-xs font-semibold text-white', className)}
+      style={{ background: `oklch(0.55 0.16 ${ws.hue})` }}
+    >
+      {ws.initial}
+    </span>
+  );
+}
+
+/** Team / tenant switcher pinned to the top of the panel. */
+function WorkspaceSwitcher({ value, onChange }: { value: string; onChange: (id: string) => void }) {
+  const ws = WORKSPACES.find((w) => w.id === value) ?? WORKSPACES[0];
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="flex h-14 w-full shrink-0 items-center gap-2.5 border-b border-border px-3 text-left outline-none transition-colors hover:bg-background-muted">
+          <WorkspaceLogo ws={ws} className="size-8" />
+          <span className="min-w-0 flex-1 leading-tight">
+            <span className="block truncate text-sm font-semibold text-foreground">{ws.name}</span>
+            <span className="block text-xs text-foreground-subtle">{ws.plan} plan</span>
+          </span>
+          <ChevronsUpDown className="size-4 shrink-0 text-foreground-subtle" aria-hidden />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-[232px]">
+        <DropdownMenuLabel>Workspaces</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {WORKSPACES.map((w) => (
+          <DropdownMenuItem key={w.id} onSelect={() => onChange(w.id)} className="gap-2.5">
+            <WorkspaceLogo ws={w} className="size-6" />
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="truncate text-sm text-foreground">{w.name}</span>
+              <span className="text-xs text-foreground-subtle">{w.plan}</span>
+            </span>
+            {w.id === value && <Check className="size-4 text-accent" aria-hidden />}
+          </DropdownMenuItem>
+        ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="gap-2.5">
+          <span className="inline-flex size-6 items-center justify-center rounded-md border border-dashed border-border text-foreground-subtle">
+            <Plus className="size-3.5" />
+          </span>
+          Create workspace
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 /* -------------------------------------------------------------------------- */
 /*  Shared bits                                                               */
@@ -926,9 +993,10 @@ export interface AdminDashboardProps {
   onSignOut?: () => void;
 }
 
-export function AdminDashboard({ brand, onSignOut }: AdminDashboardProps = {}) {
+export function AdminDashboard({ onSignOut }: AdminDashboardProps = {}) {
   const [areaKey, setAreaKey] = useState('dashboard');
   const [page, setPage] = useState('overview');
+  const [workspace, setWorkspace] = useState(WORKSPACES[0].id);
   const area = AREAS.find((a) => a.key === areaKey) ?? AREAS[0];
 
   const openArea = (a: NavArea) => {
@@ -984,9 +1052,7 @@ export function AdminDashboard({ brand, onSignOut }: AdminDashboardProps = {}) {
 
       {/* Secondary panel — child menu of the active area */}
       <aside className="flex w-60 shrink-0 flex-col border-r border-border bg-background">
-        <div className="flex h-14 shrink-0 items-center border-b border-border px-4 text-sm">
-          {brand ?? <span className="font-semibold">{area.label}</span>}
-        </div>
+        <WorkspaceSwitcher value={workspace} onChange={setWorkspace} />
         <div className="flex items-center gap-2.5 px-4 pb-3 pt-4">
           <span className="inline-flex size-8 items-center justify-center rounded-lg bg-accent-soft text-on-accent-soft">
             <area.icon className="size-4" />
