@@ -174,6 +174,7 @@ export function CommandDialog({ open, onOpenChange, children, title = 'Command p
           )}
         />
         <DialogPrimitive.Content
+          aria-describedby={undefined}
           className={cn(
             'fixed left-1/2 top-[20%] z-[var(--z-modal)] -translate-x-1/2',
             'w-[calc(100%-2rem)] max-w-[640px] overflow-hidden',

@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 import { DayPicker, type DayPickerProps } from 'react-day-picker';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import 'react-day-picker/style.css';
 import { cn } from '@/lib/utils';
 
@@ -33,11 +33,13 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
         months: 'relative flex flex-col gap-4 sm:flex-row sm:gap-6',
         month: 'flex flex-col gap-3',
         month_caption: 'relative flex h-8 items-center justify-center px-8',
-        caption_label: 'text-sm font-medium',
-        dropdowns: 'flex items-center justify-center gap-1.5',
-        dropdown_root: 'relative inline-flex items-center',
-        dropdown:
-          'cursor-pointer rounded-md border border-border bg-card px-2 py-1 text-sm font-medium text-foreground outline-none hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring',
+        // Dropdown layout: the visible pill is `dropdown_root` + `caption_label`
+        // (value text + caret); the native <select> sits transparent on top.
+        dropdowns: 'flex items-center justify-center gap-2',
+        dropdown_root:
+          'relative inline-flex items-center rounded-md border border-border bg-card px-2 py-1 hover:bg-background-muted focus-within:ring-2 focus-within:ring-ring',
+        dropdown: 'absolute inset-0 cursor-pointer opacity-0',
+        caption_label: 'flex items-center gap-1 text-sm font-medium',
         nav: 'absolute inset-x-0 top-0 flex h-8 items-center justify-between',
         button_previous:
           'inline-flex h-7 w-7 items-center justify-center rounded-md text-foreground-muted hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring outline-none disabled:opacity-40 disabled:pointer-events-none',
@@ -64,12 +66,12 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
         ...classNames,
       }}
       components={{
-        Chevron: ({ orientation }) =>
-          orientation === 'left' ? (
-            <ChevronLeft className="size-4" />
-          ) : (
-            <ChevronRight className="size-4" />
-          ),
+        Chevron: ({ orientation }) => {
+          if (orientation === 'left') return <ChevronLeft className="size-4" />;
+          if (orientation === 'right') return <ChevronRight className="size-4" />;
+          // up/down — used for the month/year dropdown carets
+          return <ChevronDown className="size-3.5 opacity-60" />;
+        },
       }}
       {...props}
     />
