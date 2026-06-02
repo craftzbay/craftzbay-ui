@@ -96,7 +96,7 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
         </div>
       )}
       <div className="overflow-hidden rounded-lg border border-border bg-background">
-        <div className="max-h-[520px] overflow-auto">
+        <div className="embedded-preview h-[540px] overflow-auto">
           <Suspense
             fallback={
               <div className="flex h-48 items-center justify-center">

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Check, Copy } from '@/icons';
 import { cn } from '@/lib/utils';
+import { highlight } from './highlight';
 
 interface CodeBlockProps {
   code: string;
@@ -29,7 +30,7 @@ export function CodeBlock({ code, language = 'tsx', className }: CodeBlockProps)
   return (
     <div
       className={cn(
-        'group relative overflow-hidden rounded-md border border-border bg-card font-mono text-[12.5px] leading-relaxed',
+        'code-block group relative overflow-hidden rounded-md border border-border bg-card font-mono text-[12.5px] leading-relaxed',
         className,
       )}
     >
@@ -48,7 +49,7 @@ export function CodeBlock({ code, language = 'tsx', className }: CodeBlockProps)
         </button>
       </div>
       <pre className="max-h-[70vh] overflow-auto p-4 text-foreground">
-        <code>{code}</code>
+        <code>{highlight(code, language)}</code>
       </pre>
     </div>
   );

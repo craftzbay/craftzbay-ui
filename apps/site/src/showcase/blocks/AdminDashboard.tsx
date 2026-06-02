@@ -5,8 +5,8 @@ import {
   Check,
   ChevronsUpDown,
   CreditCard,
+  FileText,
   Folder,
-  HelpCircle,
   Home,
   Inbox,
   LogOut,
@@ -58,7 +58,6 @@ import {
   TableHeader,
   TableRow,
   Toaster,
-  Tooltip,
   cn,
   useToast,
 } from '@craftzbay/ui';
@@ -66,50 +65,49 @@ import {
 /* =============================================================================
  *  AdminDashboard — a complete, sellable admin console.
  *
- *  Layout: a slim ICON RAIL on the far left switches the active area; clicking
- *  an icon renders that area's child menu in the secondary panel. The panel's
- *  items switch the page shown in the main column. The top bar carries a
- *  working notifications menu and profile menu. Pages are real and interactive
- *  — Projects is full CRUD with search, status filter and pagination; Team and
- *  Billing have their own data; Settings persists with a toast.
+ *  Layout: a single grouped sidebar (workspace switcher on top, profile at the
+ *  bottom) whose items switch the page in the main column. The top bar carries
+ *  a working notifications menu and profile menu. Pages are real and
+ *  interactive — Projects is full CRUD with search, status filter and
+ *  pagination; Team and Billing have their own data; Settings persists with a
+ *  toast.
  * ========================================================================== */
 
-interface NavChild {
-  key: string;
-  label: string;
-  count?: number;
-}
-interface NavArea {
+interface NavItem {
   key: string;
   label: string;
   icon: ComponentType<{ className?: string }>;
-  children: NavChild[];
+  count?: number;
+}
+interface NavSection {
+  label: string;
+  items: NavItem[];
 }
 
-const AREAS: NavArea[] = [
-  { key: 'dashboard', label: 'Dashboard', icon: Home, children: [
-    { key: 'overview', label: 'Overview' },
-    { key: 'analytics', label: 'Analytics' },
-  ] },
-  { key: 'projects', label: 'Projects', icon: Folder, children: [
-    { key: 'projects', label: 'All projects', count: 11 },
-    { key: 'archived', label: 'Archived', count: 1 },
-  ] },
-  { key: 'inbox', label: 'Inbox', icon: Inbox, children: [
-    { key: 'inbox', label: 'Messages', count: 2 },
-  ] },
-  { key: 'team', label: 'Team', icon: Users, children: [
-    { key: 'members', label: 'Members', count: 5 },
-    { key: 'invites', label: 'Invitations', count: 2 },
-  ] },
-  { key: 'insights', label: 'Insights', icon: BarChart3, children: [
-    { key: 'reports', label: 'Reports' },
-  ] },
-  { key: 'settings', label: 'Settings', icon: SettingsIcon, children: [
-    { key: 'profile', label: 'Profile' },
-    { key: 'notifications', label: 'Notifications' },
-    { key: 'billing', label: 'Billing' },
-  ] },
+const NAV: NavSection[] = [
+  {
+    label: 'General',
+    items: [
+      { key: 'overview', label: 'Overview', icon: Home },
+      { key: 'analytics', label: 'Analytics', icon: BarChart3 },
+    ],
+  },
+  {
+    label: 'Workspace',
+    items: [
+      { key: 'projects', label: 'Projects', icon: Folder, count: 11 },
+      { key: 'inbox', label: 'Inbox', icon: Inbox, count: 2 },
+      { key: 'members', label: 'Team', icon: Users, count: 5 },
+      { key: 'reports', label: 'Reports', icon: FileText },
+    ],
+  },
+  {
+    label: 'Account',
+    items: [
+      { key: 'profile', label: 'Settings', icon: SettingsIcon },
+      { key: 'billing', label: 'Billing', icon: CreditCard },
+    ],
+  },
 ];
 
 const USER = { name: 'Alex Morgan', email: 'alex@example.com', initials: 'AM' };
@@ -989,105 +987,56 @@ function TopBar({ onProfile, onSettings, onSignOut }: { onProfile: () => void; o
 
 export function AdminDashboard() {
   const { push } = useToast();
-  const [areaKey, setAreaKey] = useState('dashboard');
   const [page, setPage] = useState('overview');
   const [workspace, setWorkspace] = useState(WORKSPACES[0].id);
-  const area = AREAS.find((a) => a.key === areaKey) ?? AREAS[0];
-
-  const openArea = (a: NavArea) => {
-    setAreaKey(a.key);
-    setPage(a.children[0].key);
-  };
 
   return (
     <div className="flex h-screen overflow-hidden bg-background-subtle text-foreground">
-      {/* Icon rail */}
-      <nav className="flex w-[68px] shrink-0 flex-col items-center gap-1.5 border-r border-border bg-background py-3">
-        <div className="mb-1 inline-flex size-10 items-center justify-center rounded-xl bg-accent text-base text-on-accent shadow-sm">
-          ✦
-        </div>
-        <div className="my-1 h-px w-7 bg-border" aria-hidden />
-        {AREAS.map((a) => {
-          const ActiveIcon = a.icon;
-          const active = a.key === areaKey;
-          return (
-            <Tooltip key={a.key} label={a.label} side="right">
-              <button
-                onClick={() => openArea(a)}
-                aria-label={a.label}
-                aria-current={active ? 'page' : undefined}
-                className="relative flex w-full items-center justify-center py-0.5 outline-none"
-              >
-                {active && (
-                  <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-accent" aria-hidden />
-                )}
-                <span
-                  className={cn(
-                    'inline-flex size-10 items-center justify-center rounded-xl transition-colors',
-                    active
-                      ? 'bg-accent text-on-accent shadow-sm'
-                      : 'text-foreground-subtle hover:bg-background-muted hover:text-foreground',
-                  )}
-                >
-                  <ActiveIcon className="size-5" />
-                </span>
-              </button>
-            </Tooltip>
-          );
-        })}
-        <Tooltip label="Help & support" side="right">
-          <button
-            aria-label="Help & support"
-            className="mt-auto inline-flex size-10 items-center justify-center rounded-xl text-foreground-subtle transition-colors hover:bg-background-muted hover:text-foreground"
-          >
-            <HelpCircle className="size-5" />
-          </button>
-        </Tooltip>
-      </nav>
-
-      {/* Secondary panel — child menu of the active area */}
-      <aside className="flex w-60 shrink-0 flex-col border-r border-border bg-background">
+      {/* Sidebar */}
+      <aside className="flex w-64 shrink-0 flex-col border-r border-border bg-background">
         <WorkspaceSwitcher value={workspace} onChange={setWorkspace} />
-        <div className="flex items-center gap-2.5 px-4 pb-3 pt-4">
-          <span className="inline-flex size-8 items-center justify-center rounded-lg bg-accent-soft text-on-accent-soft">
-            <area.icon className="size-4" />
-          </span>
-          <div className="leading-tight">
-            <div className="text-sm font-semibold text-foreground">{area.label}</div>
-            <div className="text-xs text-foreground-subtle">{area.children.length} sections</div>
-          </div>
+        <div className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
+          {NAV.map((section) => (
+            <div key={section.label}>
+              <div className="px-3 pb-1.5 text-xs font-semibold uppercase tracking-wide text-foreground-subtle">
+                {section.label}
+              </div>
+              <ul className="space-y-0.5">
+                {section.items.map((it) => {
+                  const on = page === it.key;
+                  const Icon = it.icon;
+                  return (
+                    <li key={it.key}>
+                      <button
+                        onClick={() => setPage(it.key)}
+                        aria-current={on ? 'page' : undefined}
+                        className={cn(
+                          'flex h-9 w-full items-center gap-2.5 rounded-md px-3 text-sm transition-colors',
+                          on
+                            ? 'bg-accent-soft font-medium text-on-accent-soft'
+                            : 'text-foreground-muted hover:bg-background-muted hover:text-foreground',
+                        )}
+                      >
+                        <Icon className="size-4 shrink-0" />
+                        <span className="flex-1 text-left">{it.label}</span>
+                        {it.count != null && (
+                          <span
+                            className={cn(
+                              'tabular rounded-full px-1.5 text-[11px]',
+                              on ? 'bg-accent/15 text-on-accent-soft' : 'bg-background-muted text-foreground-subtle',
+                            )}
+                          >
+                            {it.count}
+                          </span>
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
         </div>
-        <ul className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 pt-1">
-          {area.children.map((c) => {
-            const on = page === c.key;
-            return (
-              <li key={c.key}>
-                <button
-                  onClick={() => setPage(c.key)}
-                  aria-current={on ? 'page' : undefined}
-                  className={cn(
-                    'flex h-9 w-full items-center gap-2 rounded-md px-3 text-sm transition-colors',
-                    on
-                      ? 'bg-accent-soft font-medium text-on-accent-soft'
-                      : 'text-foreground-muted hover:bg-background-muted hover:text-foreground',
-                  )}
-                >
-                  <span className="flex-1 text-left">{c.label}</span>
-                  {c.count != null && (
-                    <span
-                      className={cn(
-                        'tabular rounded-full px-1.5 text-[11px]',
-                        on ? 'bg-accent/15 text-on-accent-soft' : 'bg-background-muted text-foreground-subtle',
-                      )}
-                    >
-                      {c.count}
-                    </span>
-                  )}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
         <div className="flex items-center gap-2.5 border-t border-border p-3">
           <Avatar size="sm" fallback={USER.initials} status="online" />
           <div className="min-w-0 leading-tight">
@@ -1100,8 +1049,8 @@ export function AdminDashboard() {
       {/* Main column */}
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar
-          onProfile={() => { setAreaKey('settings'); setPage('profile'); }}
-          onSettings={() => { setAreaKey('settings'); setPage('profile'); }}
+          onProfile={() => setPage('profile')}
+          onSettings={() => setPage('profile')}
           onSignOut={() => push({ title: 'Signed out', description: 'Demo — no real session.' })}
         />
         <main className="flex-1 overflow-y-auto p-6">{renderPage(page)}</main>

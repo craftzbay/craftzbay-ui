@@ -8,3 +8,30 @@
 
 @source '../../../packages/ui/src';
 @source './';
+
+/* Embedded template preview: full-page templates use min-h-screen / h-screen
+ * (viewport units), which inside the doc page's fixed-height preview box would
+ * force ~100vh and a giant scroll (most visible on the centered auth screens).
+ * Within an embedded preview, resolve those to the box height instead. */
+.embedded-preview .min-h-screen {
+  min-height: 100% !important;
+}
+.embedded-preview .h-screen {
+  height: 100% !important;
+}
+
+/* Syntax-highlight token colours (see widgets/highlight.tsx). Token-based, so
+ * they adapt to light / dark and the active accent. */
+.code-block .tok-comment {
+  color: var(--color-foreground-subtle);
+  font-style: italic;
+}
+.code-block .tok-string {
+  color: var(--color-success-text);
+}
+.code-block .tok-number {
+  color: var(--color-warning-text);
+}
+.code-block .tok-keyword {
+  color: var(--color-accent);
+}
