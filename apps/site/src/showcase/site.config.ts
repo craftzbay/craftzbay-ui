@@ -14,7 +14,8 @@ export const CHANGELOG_URL = `${GITHUB_URL}/blob/main/packages/ui/CHANGELOG.md`;
 
 /** Source-file link bases (monorepo layout). */
 export const SRC_UI = `${GITHUB_URL}/blob/main/packages/ui/src/components/ui`;
-export const SRC_PATTERNS = `${GITHUB_URL}/blob/main/packages/ui/src/components/patterns`;
+/** Blocks (page templates) live in the showcase, not the published package. */
+export const SRC_BLOCKS = `${GITHUB_URL}/blob/main/apps/site/src/showcase/blocks`;
 
 /**
  * Accent presets the switcher cycles through. `name` keys into the library's

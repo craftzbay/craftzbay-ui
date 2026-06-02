@@ -1,5 +1,6 @@
 import {
   forwardRef,
+  useEffect,
   type ComponentPropsWithoutRef,
   type ElementRef,
   type ReactElement,
@@ -166,7 +167,17 @@ ToastClose.displayName = 'ToastClose';
  *   }
  */
 export function Toaster() {
-  const { toasts, remove } = useToast();
+  const { toasts, dismiss, remove } = useToast();
+
+  // Closing a toast sets open:false so Radix can play the slide-out; drop it
+  // from the queue once that animation has had time to finish.
+  useEffect(() => {
+    const closing = toasts.filter((t) => !t.open);
+    if (closing.length === 0) return;
+    const timers = closing.map((t) => window.setTimeout(() => remove(t.id), 200));
+    return () => timers.forEach((id) => window.clearTimeout(id));
+  }, [toasts, remove]);
+
   return (
     <ToastProvider>
       {toasts.map((t) => (
@@ -176,7 +187,7 @@ export function Toaster() {
           open={t.open}
           duration={t.duration}
           onOpenChange={(open) => {
-            if (!open) remove(t.id);
+            if (!open) dismiss(t.id);
           }}
         >
           {t.title && <ToastTitle>{t.title}</ToastTitle>}

@@ -3,7 +3,7 @@ import type { TemplateDoc } from '../registry/templates';
 import { CodeBlock } from '../widgets/CodeBlock';
 import { SectionAnchor } from '../widgets/SectionAnchor';
 import { previewUrl } from '../routing';
-import { SRC_PATTERNS } from '../site.config';
+import { SRC_BLOCKS } from '../site.config';
 
 interface TemplateDocPageProps {
   doc: TemplateDoc;
@@ -32,7 +32,7 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
             Open live preview <ExternalLink className="size-3" aria-hidden />
           </a>
           <a
-            href={`${SRC_PATTERNS}/${doc.sourceFile}`}
+            href={`${SRC_BLOCKS}/${doc.sourceFile}`}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-1 text-xs text-foreground-muted hover:text-accent"

@@ -60,21 +60,9 @@ export interface ComponentDoc {
   related?: { slug: string; reason: string }[];
 }
 
-export interface TemplateDoc {
-  slug: string;
-  name: string;
-  /** One-line tagline. */
-  description: string;
-  /** Names re-exported from `@craftzbay/ui` (or component path). */
-  exports: string[];
-  sourceFile: string;
-  /** Full-bleed preview slug (#preview/<slug>). */
-  previewSlug?: string;
-  examples: Example[];
-  api?: PropGroup[];
-  /** What flows / pages this template is intended for. */
-  useCases?: string[];
-}
+/* TemplateDoc lived here when templates were thin wrappers around exported
+ * pattern components. Templates are now copy-paste blocks — see the BlockDoc
+ * type in ../blocks/registry, re-exported as TemplateDoc from ./templates. */
 
 export interface GuideDoc {
   slug: string;
