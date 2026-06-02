@@ -115,13 +115,15 @@ const migration: GuideDoc = {
   body: <MigrationBody />,
 };
 
+// Ordered as a learning progression, not alphabetically: start → theme it →
+// dark mode → build forms → make it responsive → a11y → migrate.
 export const guideDocs: GuideDoc[] = [
   quickstart,
   theming,
-  accessibility,
-  forms,
   darkMode,
+  forms,
   responsive,
+  accessibility,
   migration,
 ];
 

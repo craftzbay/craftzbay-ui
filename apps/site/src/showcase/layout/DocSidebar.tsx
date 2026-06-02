@@ -298,8 +298,11 @@ function groupEntries(entries: DocSidebarEntry[]) {
     if (!map.has(e.group)) map.set(e.group, []);
     map.get(e.group)!.push(e);
   }
+  // Preserve registry order within each group (it's deliberate — e.g. Guides
+  // lead with "Quick start", Inputs lead with the text fields). Alphabetising
+  // here pushed "Quick start" into the middle of the guides list.
   return Array.from(map.entries()).map(([name, entries]) => ({
     name,
-    entries: entries.slice().sort((a, b) => a.label.localeCompare(b.label)),
+    entries,
   }));
 }
