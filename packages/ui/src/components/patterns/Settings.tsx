@@ -61,10 +61,10 @@ const DEMO_SECTIONS: SettingsSection[] = [
           </div>
           <Separator />
           <div className="grid gap-4 sm:grid-cols-2">
-            <Input label="First name" defaultValue="Bay" />
-            <Input label="Last name" defaultValue="Otgonbayar" />
+            <Input label="First name" defaultValue="Alex" />
+            <Input label="Last name" defaultValue="Morgan" />
           </div>
-          <Input label="Display email" type="email" defaultValue="bay@company.com" />
+          <Input label="Display email" type="email" defaultValue="alex@example.com" />
           <div className="flex justify-end">
             <Button>Save changes</Button>
           </div>

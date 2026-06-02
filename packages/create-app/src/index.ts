@@ -235,7 +235,7 @@ async function run() {
       ...(installNow ? [] : [`    ${kleur.cyan(`${pm} install`)}`]),
       `    ${kleur.cyan(`${pm} run dev`)}`,
       '',
-      kleur.gray('  Docs: https://design.runestonetechnologies.com'),
+      kleur.gray('  Docs: https://components.runestonetechnologies.com'),
     ].join('\n'),
   );
 }

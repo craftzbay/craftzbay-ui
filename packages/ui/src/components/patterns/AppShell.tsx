@@ -192,9 +192,9 @@ const DEFAULT_NAV_SECTIONS: AppShellNavSection[] = [
 ];
 
 const DEFAULT_USER: AppShellUser = {
-  name: 'Bay Otgonbayar',
-  email: 'bay@craftzbay.com',
-  initials: 'BO',
+  name: 'Alex Morgan',
+  email: 'alex@example.com',
+  initials: 'AM',
   status: 'online',
 };
 

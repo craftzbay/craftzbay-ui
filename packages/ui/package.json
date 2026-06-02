@@ -4,7 +4,7 @@
   "description": "Refined-minimal Tailwind v4 + React design system — 40+ accessible primitives and ready-made page patterns.",
   "license": "MIT",
   "author": "craftzbay",
-  "homepage": "https://design.runestonetechnologies.com",
+  "homepage": "https://components.runestonetechnologies.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/craftzbay/craftzbay-ui.git",
@@ -51,7 +51,6 @@
     "build": "vite build",
     "dev": "vite build --watch",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",

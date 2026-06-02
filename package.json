@@ -13,9 +13,9 @@
     "build:lib": "pnpm --filter @craftzbay/ui build",
     "build:site": "pnpm --filter @craftzbay/site build",
     "typecheck": "pnpm -r typecheck",
-    "lint": "pnpm -r --no-bail lint",
     "test": "pnpm --filter @craftzbay/ui test",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
     "prettier": "^3.4.2",

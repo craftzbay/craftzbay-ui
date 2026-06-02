@@ -4,9 +4,9 @@ A refined-minimal Tailwind v4 + React design system. Production-grade
 primitives — Button through DataGrid — plus composed patterns
 (authentication, app shell, settings, etc.).
 
-- **Showcase:** [design.runestonetechnologies.com](https://design.runestonetechnologies.com)
-- **Components:** [design.runestonetechnologies.com#components](https://design.runestonetechnologies.com#components)
-- **Templates:** [design.runestonetechnologies.com#templates](https://design.runestonetechnologies.com#templates)
+- **Showcase:** [components.runestonetechnologies.com](https://components.runestonetechnologies.com)
+- **Components:** [components.runestonetechnologies.com#components](https://components.runestonetechnologies.com#components)
+- **Templates:** [components.runestonetechnologies.com#templates](https://components.runestonetechnologies.com#templates)
 
 > **Aesthetic direction:** Linear / Vercel / Stripe Dashboard / Notion / Raycast.
 > Neutral-dominant, one accent, hairline borders, generous whitespace, fast quiet
@@ -161,4 +161,4 @@ docs/
 3. Every interactive element ships with: default, hover, focus-visible, active,
    disabled, loading, and (where applicable) error / success states.
 4. Forward refs correctly; set `displayName`.
-5. Run `pnpm typecheck && pnpm lint` before opening a PR.
+5. Run `pnpm typecheck && pnpm test` before opening a PR.

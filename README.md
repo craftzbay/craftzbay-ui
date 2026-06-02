@@ -1,7 +1,12 @@
 # craftzbay-ui
 
+[![npm](https://img.shields.io/npm/v/@craftzbay/ui.svg)](https://www.npmjs.com/package/@craftzbay/ui)
+[![CI](https://github.com/craftzbay/craftzbay-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/craftzbay/craftzbay-ui/actions/workflows/ci.yml)
+[![license](https://img.shields.io/npm/l/@craftzbay/ui.svg)](./LICENSE)
+
 Monorepo for **[@craftzbay/ui](https://www.npmjs.com/package/@craftzbay/ui)** — a
 refined-minimal Tailwind v4 + React design system — and its showcase site.
+Live demo: **[components.runestonetechnologies.com](https://components.runestonetechnologies.com)**.
 
 > Aesthetic direction: Linear / Vercel / Stripe Dashboard / Notion / Raycast.
 > Neutral-dominant, one accent, hairline borders, generous whitespace, fast quiet motion.
