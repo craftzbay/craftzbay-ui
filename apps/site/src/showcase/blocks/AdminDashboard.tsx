@@ -4,6 +4,7 @@ import {
   Bell,
   CreditCard,
   Folder,
+  HelpCircle,
   Home,
   Inbox,
   LogOut,
@@ -55,6 +56,7 @@ import {
   TableHeader,
   TableRow,
   Toaster,
+  Tooltip,
   cn,
   useToast,
 } from '@craftzbay/ui';
@@ -73,6 +75,7 @@ import {
 interface NavChild {
   key: string;
   label: string;
+  count?: number;
 }
 interface NavArea {
   key: string;
@@ -87,15 +90,15 @@ const AREAS: NavArea[] = [
     { key: 'analytics', label: 'Analytics' },
   ] },
   { key: 'projects', label: 'Projects', icon: Folder, children: [
-    { key: 'projects', label: 'All projects' },
-    { key: 'archived', label: 'Archived' },
+    { key: 'projects', label: 'All projects', count: 11 },
+    { key: 'archived', label: 'Archived', count: 1 },
   ] },
   { key: 'inbox', label: 'Inbox', icon: Inbox, children: [
-    { key: 'inbox', label: 'Messages' },
+    { key: 'inbox', label: 'Messages', count: 2 },
   ] },
   { key: 'team', label: 'Team', icon: Users, children: [
-    { key: 'members', label: 'Members' },
-    { key: 'invites', label: 'Invitations' },
+    { key: 'members', label: 'Members', count: 5 },
+    { key: 'invites', label: 'Invitations', count: 2 },
   ] },
   { key: 'insights', label: 'Insights', icon: BarChart3, children: [
     { key: 'reports', label: 'Reports' },
@@ -936,50 +939,93 @@ export function AdminDashboard({ brand, onSignOut }: AdminDashboardProps = {}) {
   return (
     <div className="flex h-screen overflow-hidden bg-background-subtle text-foreground">
       {/* Icon rail */}
-      <nav className="flex w-16 shrink-0 flex-col items-center gap-1 border-r border-border bg-background py-3">
-        <div className="mb-2 inline-flex size-9 items-center justify-center rounded-md bg-accent text-on-accent">✦</div>
+      <nav className="flex w-[68px] shrink-0 flex-col items-center gap-1.5 border-r border-border bg-background py-3">
+        <div className="mb-1 inline-flex size-10 items-center justify-center rounded-xl bg-accent text-base text-on-accent shadow-sm">
+          ✦
+        </div>
+        <div className="my-1 h-px w-7 bg-border" aria-hidden />
         {AREAS.map((a) => {
           const ActiveIcon = a.icon;
           const active = a.key === areaKey;
           return (
-            <button
-              key={a.key}
-              onClick={() => openArea(a)}
-              title={a.label}
-              aria-label={a.label}
-              aria-current={active ? 'page' : undefined}
-              className={cn(
-                'inline-flex size-10 items-center justify-center rounded-lg transition-colors',
-                active ? 'bg-accent-soft text-on-accent-soft' : 'text-foreground-subtle hover:bg-background-muted hover:text-foreground',
-              )}
-            >
-              <ActiveIcon className="size-5" />
-            </button>
+            <Tooltip key={a.key} label={a.label} side="right">
+              <button
+                onClick={() => openArea(a)}
+                aria-label={a.label}
+                aria-current={active ? 'page' : undefined}
+                className="relative flex w-full items-center justify-center py-0.5 outline-none"
+              >
+                {active && (
+                  <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-accent" aria-hidden />
+                )}
+                <span
+                  className={cn(
+                    'inline-flex size-10 items-center justify-center rounded-xl transition-colors',
+                    active
+                      ? 'bg-accent text-on-accent shadow-sm'
+                      : 'text-foreground-subtle hover:bg-background-muted hover:text-foreground',
+                  )}
+                >
+                  <ActiveIcon className="size-5" />
+                </span>
+              </button>
+            </Tooltip>
           );
         })}
+        <Tooltip label="Help & support" side="right">
+          <button
+            aria-label="Help & support"
+            className="mt-auto inline-flex size-10 items-center justify-center rounded-xl text-foreground-subtle transition-colors hover:bg-background-muted hover:text-foreground"
+          >
+            <HelpCircle className="size-5" />
+          </button>
+        </Tooltip>
       </nav>
 
       {/* Secondary panel — child menu of the active area */}
       <aside className="flex w-60 shrink-0 flex-col border-r border-border bg-background">
-        <div className="flex h-14 items-center px-4 text-sm">{brand ?? <span className="font-semibold">{area.label}</span>}</div>
-        <div className="border-t border-border px-3 pb-2 pt-3 text-xs font-semibold uppercase tracking-wide text-foreground-subtle">
-          {area.label}
+        <div className="flex h-14 shrink-0 items-center border-b border-border px-4 text-sm">
+          {brand ?? <span className="font-semibold">{area.label}</span>}
         </div>
-        <ul className="flex flex-1 flex-col gap-px overflow-y-auto px-2">
-          {area.children.map((c) => (
-            <li key={c.key}>
-              <button
-                onClick={() => setPage(c.key)}
-                aria-current={page === c.key ? 'page' : undefined}
-                className={cn(
-                  'flex h-8 w-full items-center rounded-md px-3 text-sm transition-colors',
-                  page === c.key ? 'bg-background-muted font-medium text-foreground' : 'text-foreground-muted hover:bg-background-muted hover:text-foreground',
-                )}
-              >
-                {c.label}
-              </button>
-            </li>
-          ))}
+        <div className="flex items-center gap-2.5 px-4 pb-3 pt-4">
+          <span className="inline-flex size-8 items-center justify-center rounded-lg bg-accent-soft text-on-accent-soft">
+            <area.icon className="size-4" />
+          </span>
+          <div className="leading-tight">
+            <div className="text-sm font-semibold text-foreground">{area.label}</div>
+            <div className="text-xs text-foreground-subtle">{area.children.length} sections</div>
+          </div>
+        </div>
+        <ul className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 pt-1">
+          {area.children.map((c) => {
+            const on = page === c.key;
+            return (
+              <li key={c.key}>
+                <button
+                  onClick={() => setPage(c.key)}
+                  aria-current={on ? 'page' : undefined}
+                  className={cn(
+                    'flex h-9 w-full items-center gap-2 rounded-md px-3 text-sm transition-colors',
+                    on
+                      ? 'bg-accent-soft font-medium text-on-accent-soft'
+                      : 'text-foreground-muted hover:bg-background-muted hover:text-foreground',
+                  )}
+                >
+                  <span className="flex-1 text-left">{c.label}</span>
+                  {c.count != null && (
+                    <span
+                      className={cn(
+                        'tabular rounded-full px-1.5 text-[11px]',
+                        on ? 'bg-accent/15 text-on-accent-soft' : 'bg-background-muted text-foreground-subtle',
+                      )}
+                    >
+                      {c.count}
+                    </span>
+                  )}
+                </button>
+              </li>
+            );
+          })}
         </ul>
         <div className="flex items-center gap-2.5 border-t border-border p-3">
           <Avatar size="sm" fallback={USER.initials} status="online" />
