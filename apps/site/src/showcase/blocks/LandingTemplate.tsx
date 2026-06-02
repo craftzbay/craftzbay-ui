@@ -178,7 +178,23 @@ function Landing({ brand, onSignUp }: { brand: React.ReactNode; onSignUp: () => 
 export function LandingTemplate({ screen, setScreen, brand }: TemplateProps) {
   if (screen === 'signup') {
     return (
-      <AuthLayout brand={brand} title="Create your account" subtitle="Start your 14-day free trial.">
+      <AuthLayout
+        brand={brand}
+        title="Create your account"
+        subtitle="Start your 14-day free trial."
+        footer={
+          <>
+            Just looking?{' '}
+            <button
+              type="button"
+              onClick={() => setScreen('home')}
+              className="rounded-sm font-medium text-accent outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Back to site
+            </button>
+          </>
+        }
+      >
         <SignUpForm onSubmit={async () => {}} />
       </AuthLayout>
     );
