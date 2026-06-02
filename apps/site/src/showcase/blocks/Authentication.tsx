@@ -1,9 +1,9 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
-import { ArrowRight, CheckCircle2, Mail } from '@/icons';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Alert } from '@/components/ui/Alert';
-import { Separator } from '@/components/ui/Separator';
+import { ArrowRight, CheckCircle2, Mail } from 'lucide-react';
+import { Button } from '@craftzbay/ui';
+import { Input } from '@craftzbay/ui';
+import { Alert } from '@craftzbay/ui';
+import { Separator } from '@craftzbay/ui';
 
 /* -----------------------------------------------------------------------------
  *  Authentication pattern — four screens that share the same shell.

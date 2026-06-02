@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
-import { Check } from '@/icons';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { cn } from '@/lib/utils';
+import { Check } from 'lucide-react';
+import { Badge } from '@craftzbay/ui';
+import { Button } from '@craftzbay/ui';
+import { cn } from '@craftzbay/ui';
 
 /* -----------------------------------------------------------------------------
  *  Pricing — N-tier comparison grid. Tiers are declared as data so consumers

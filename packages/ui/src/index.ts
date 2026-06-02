@@ -72,12 +72,7 @@ export * from './components/ui/TagInput';
 export * from './components/ui/Timeline';
 export * from './components/ui/Tree';
 
-// Patterns
-export * from './components/patterns/Authentication';
-export * from './components/patterns/AppShell';
-export * from './components/patterns/Settings';
-export * from './components/patterns/DataTablePage';
-export * from './components/patterns/RecordDetail';
-export * from './components/patterns/Onboarding';
-export * from './components/patterns/Pricing';
-export * from './components/patterns/FirstRunEmpty';
+// Note: page-level compositions (dashboard, settings, auth, pricing, …) are
+// NOT shipped as components. They live in the showcase as copy-paste "blocks"
+// assembled from these primitives — read the source and adapt it, rather than
+// importing an opaque page. See the Templates section of the showcase.

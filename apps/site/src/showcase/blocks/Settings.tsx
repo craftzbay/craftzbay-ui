@@ -1,12 +1,12 @@
 import { useState, type ReactNode } from 'react';
-import { Bell, CreditCard, Lock, User, Users } from '@/icons';
-import { Avatar } from '@/components/ui/Avatar';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { Separator } from '@/components/ui/Separator';
-import { Switch } from '@/components/ui/Switch';
-import { cn } from '@/lib/utils';
+import { Bell, CreditCard, Lock, User, Users } from 'lucide-react';
+import { Avatar } from '@craftzbay/ui';
+import { Button } from '@craftzbay/ui';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@craftzbay/ui';
+import { Input } from '@craftzbay/ui';
+import { Separator } from '@craftzbay/ui';
+import { Switch } from '@craftzbay/ui';
+import { cn } from '@craftzbay/ui';
 
 /* -----------------------------------------------------------------------------
  *  Settings shell with a sticky left sub-nav. Sections are declared as data so

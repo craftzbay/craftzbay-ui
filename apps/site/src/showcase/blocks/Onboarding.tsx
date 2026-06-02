@@ -1,10 +1,10 @@
 import { useState, type ReactNode } from 'react';
-import { ArrowLeft, ArrowRight, CheckCircle2 } from '@/icons';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { RadioGroup, RadioItem } from '@/components/ui/RadioGroup';
-import { Stepper } from '@/components/ui/Stepper';
+import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Button } from '@craftzbay/ui';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@craftzbay/ui';
+import { Input } from '@craftzbay/ui';
+import { RadioGroup, RadioItem } from '@craftzbay/ui';
+import { Stepper } from '@craftzbay/ui';
 
 /* -----------------------------------------------------------------------------
  *  Onboarding — multi-step wizard. Steps are declared as data; each step

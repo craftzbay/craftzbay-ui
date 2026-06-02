@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
-import { ArrowRight, Folder, Plus, Upload, Users } from '@/icons';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent } from '@/components/ui/Card';
-import { EmptyState } from '@/components/ui/EmptyState';
+import { ArrowRight, Folder, Plus, Upload, Users } from 'lucide-react';
+import { Button } from '@craftzbay/ui';
+import { Card, CardContent } from '@craftzbay/ui';
+import { EmptyState } from '@craftzbay/ui';
 
 /* -----------------------------------------------------------------------------
  *  First-run empty product state. Combines a hero EmptyState with N

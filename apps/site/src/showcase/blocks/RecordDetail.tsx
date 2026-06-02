@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react';
-import { Edit2, ExternalLink, Trash2 } from '@/icons';
-import { Avatar } from '@/components/ui/Avatar';
-import { Badge } from '@/components/ui/Badge';
-import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
+import { Edit2, ExternalLink, Trash2 } from 'lucide-react';
+import { Avatar } from '@craftzbay/ui';
+import { Badge } from '@craftzbay/ui';
+import { Breadcrumbs } from '@craftzbay/ui';
+import { Button } from '@craftzbay/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '@craftzbay/ui';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@craftzbay/ui';
 
 /* -----------------------------------------------------------------------------
  *  RecordDetail — header + tabs + side panel layout for any "thing detail

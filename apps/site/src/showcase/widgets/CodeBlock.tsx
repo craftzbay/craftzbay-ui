@@ -47,7 +47,7 @@ export function CodeBlock({ code, language = 'tsx', className }: CodeBlockProps)
           {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
-      <pre className="overflow-x-auto p-4 text-foreground">
+      <pre className="max-h-[70vh] overflow-auto p-4 text-foreground">
         <code>{code}</code>
       </pre>
     </div>

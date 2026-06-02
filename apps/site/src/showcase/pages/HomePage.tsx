@@ -98,7 +98,7 @@ export function HomePage() {
           {templateDocs.slice(0, 6).map((t) => (
             <a
               key={t.slug}
-              href={previewUrl(t.previewSlug ?? t.slug)}
+              href={previewUrl(t.slug)}
               target="_blank"
               rel="noreferrer"
               className="group flex flex-col gap-1.5 rounded-md border border-border bg-card p-4 transition-colors hover:border-accent"

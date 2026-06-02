@@ -1,12 +1,12 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { Download, Filter, Plus, Trash2, Upload } from '@/icons';
-import { Badge } from '@/components/ui/Badge';
-import { Button, type ButtonProps } from '@/components/ui/Button';
-import { Checkbox } from '@/components/ui/Checkbox';
-import { DataGrid, type DataGridColumn } from '@/components/ui/DataGrid';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { Pagination } from '@/components/ui/Pagination';
-import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/Select';
+import { Download, Filter, Plus, Trash2, Upload } from 'lucide-react';
+import { Badge } from '@craftzbay/ui';
+import { Button, type ButtonProps } from '@craftzbay/ui';
+import { Checkbox } from '@craftzbay/ui';
+import { DataGrid, type DataGridColumn } from '@craftzbay/ui';
+import { EmptyState } from '@craftzbay/ui';
+import { Pagination } from '@craftzbay/ui';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@craftzbay/ui';
 
 /* -----------------------------------------------------------------------------
  *  DataTablePage — generic filter + search + bulk-action + grid + pagination

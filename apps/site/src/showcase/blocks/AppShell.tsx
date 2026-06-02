@@ -16,16 +16,16 @@ import {
   Sparkles,
   User,
   Users,
-} from '@/icons';
-import { Avatar } from '@/components/ui/Avatar';
-import { Badge } from '@/components/ui/Badge';
-import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { LineChart } from '@/components/ui/Chart';
-import { IconButton } from '@/components/ui/IconButton';
-import { Input } from '@/components/ui/Input';
-import { Kbd } from '@/components/ui/Kbd';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/Sheet';
-import { Sidebar, SidebarItem, SidebarSection } from '@/components/ui/Sidebar';
+} from 'lucide-react';
+import { Avatar } from '@craftzbay/ui';
+import { Badge } from '@craftzbay/ui';
+import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@craftzbay/ui';
+import { LineChart } from '@craftzbay/ui';
+import { IconButton } from '@craftzbay/ui';
+import { Input } from '@craftzbay/ui';
+import { Kbd } from '@craftzbay/ui';
+import { Sheet, SheetContent, SheetTrigger } from '@craftzbay/ui';
+import { Sidebar, SidebarItem, SidebarSection } from '@craftzbay/ui';
 import {
   Table,
   TableBody,
@@ -33,7 +33,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/Table';
+} from '@craftzbay/ui';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,7 +41,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/DropdownMenu';
+} from '@craftzbay/ui';
 
 /* -----------------------------------------------------------------------------
  *  Generic AppShell — sidebar (with brand in header + nav + footer) plus a

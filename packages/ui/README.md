@@ -135,16 +135,14 @@ docs/
 ### Typography
 - [Kbd](./src/components/ui/Kbd.tsx) — keyboard shortcut indicator
 
-## Patterns (composed layouts)
+## Blocks (page templates)
 
-- [Authentication](./src/components/patterns/Authentication.tsx) — sign-in, sign-up, forgot, magic-link
-- [AppShell + Dashboard](./src/components/patterns/AppShell.tsx) — sidebar + topnav shell, 4 stat cards + chart + activity table
-- [Settings](./src/components/patterns/Settings.tsx) — sub-nav + 5 sections
-- [DataTablePage](./src/components/patterns/DataTablePage.tsx) — filter / search / bulk actions / pagination
-- [RecordDetail](./src/components/patterns/RecordDetail.tsx) — header + tabs + side panel
-- [Onboarding](./src/components/patterns/Onboarding.tsx) — 4-step stepper flow
-- [Pricing](./src/components/patterns/Pricing.tsx) — 3-tier comparison
-- [FirstRunEmpty](./src/components/patterns/FirstRunEmpty.tsx) — hero + 3 next-step cards
+Whole-page compositions — dashboard, settings, auth, pricing, data table,
+record detail, onboarding, first-run — are **not** shipped as importable
+components. They live in the showcase as copy-paste **blocks**: complete pages
+assembled from the primitives above, with the full source on the page. Read it,
+copy it, adapt it — no opaque `<Dashboard />` import. Browse them under
+**Templates** in the [showcase](https://components.runestonetechnologies.com/#templates).
 
 ## Documentation
 

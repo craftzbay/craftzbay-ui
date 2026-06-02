@@ -93,7 +93,7 @@ export function TemplatesIndexPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {filtered.map((doc) => {
-            const preview = doc.previewSlug ?? doc.slug;
+            const preview = doc.slug;
             return (
               <div
                 key={doc.slug}
