@@ -9,47 +9,45 @@ import { NotFound } from './NotFound';
 const BlockPreview = lazy(() => import('../blocks/Preview'));
 
 /**
- * Standalone block preview — what opens when a template is clicked. Its own
- * browser tab, no showcase navigation, just a slim chrome strip carrying the
- * live brand + theme controls. The block component loads lazily.
+ * Standalone block preview — its own browser tab, no showcase navigation. The
+ * block fills the whole viewport; the only chrome is a small floating dock at
+ * the bottom carrying "back to docs" + the live brand / theme controls, so it
+ * never intrudes on the template itself.
  */
 export function PreviewPage({ slug }: { slug: string }) {
   const doc = getBlockMeta(slug);
   if (!doc) return <NotFound />;
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <div className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-12 w-full max-w-[1600px] items-center gap-3 px-4">
+    <div className="min-h-screen bg-background">
+      <Suspense
+        fallback={
+          <div className="flex h-screen items-center justify-center">
+            <Spinner />
+          </div>
+        }
+      >
+        <BlockPreview slug={slug} />
+      </Suspense>
+
+      {/* Floating control dock */}
+      <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2">
+        <div className="flex items-center gap-1.5 rounded-full border border-border bg-background/90 p-1.5 shadow-lg backdrop-blur">
           <a
             href={`#${routeToHash({ kind: 'template', slug })}`}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground-muted transition-colors hover:text-foreground"
+            title="Back to docs"
+            aria-label="Back to docs"
+            className="inline-flex size-8 items-center justify-center rounded-full text-foreground-muted transition-colors hover:bg-background-muted hover:text-foreground"
           >
-            <ArrowLeft className="size-3.5" aria-hidden />
-            Docs
+            <ArrowLeft className="size-4" aria-hidden />
           </a>
-          <span className="h-4 w-px bg-border" aria-hidden />
-          <div className="flex items-center gap-2 text-xs text-foreground-muted">
-            <span className="inline-flex size-1.5 rounded-full bg-accent" aria-hidden />
-            Live preview · <span className="font-medium text-foreground">{doc.name}</span>
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            <BrandSwitcher />
-            <ThemeToggle />
-          </div>
-        </div>
-      </div>
 
-      <div className="flex-1">
-        <Suspense
-          fallback={
-            <div className="flex h-[60vh] items-center justify-center">
-              <Spinner />
-            </div>
-          }
-        >
-          <BlockPreview slug={slug} />
-        </Suspense>
+          <span className="hidden px-1 text-xs text-foreground-muted sm:inline">{doc.name}</span>
+          <span className="h-4 w-px bg-border" aria-hidden />
+
+          <BrandSwitcher compact />
+          <ThemeToggle />
+        </div>
       </div>
     </div>
   );
