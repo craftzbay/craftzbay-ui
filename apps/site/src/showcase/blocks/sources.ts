@@ -4,7 +4,7 @@
  * dynamically by the template page, so this text stays out of the initial
  * bundle.
  */
-import adminSrc from './AdminTemplate.tsx?raw';
+import adminSrc from './AdminDashboard.tsx?raw';
 import landingSrc from './LandingTemplate.tsx?raw';
 import newsSrc from './NewsTemplate.tsx?raw';
 import ecommerceSrc from './EcommerceTemplate.tsx?raw';

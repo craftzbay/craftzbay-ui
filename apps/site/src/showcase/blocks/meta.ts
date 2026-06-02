@@ -42,7 +42,7 @@ export const blockMeta: BlockMeta[] = [
     description:
       'A complete admin app: collapsible sidebar driving Home, Projects, Inbox, Members, Insights and Settings pages, plus sign-in / sign-up screens. Everything is assembled from the library primitives.',
     useCases: ['SaaS back-office', 'Internal tools', 'Analytics console'],
-    sourceFile: 'AdminTemplate.tsx',
+    sourceFile: 'AdminDashboard.tsx',
     screens: [
       { key: 'app', label: 'Dashboard' },
       { key: 'signin', label: 'Sign in' },
