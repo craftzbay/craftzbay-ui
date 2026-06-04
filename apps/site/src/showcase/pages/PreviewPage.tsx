@@ -9,9 +9,11 @@ import { NotFound } from './NotFound';
 const BlockPreview = lazy(() => import('../blocks/Preview'));
 
 /**
- * Standalone template preview — its own browser tab. A slim top bar carries
- * "back to docs" plus the live accent + theme controls; navigation between a
- * template's screens happens inside the template itself.
+ * Standalone template preview — its own browser tab. The template owns the
+ * full viewport (its own sticky navs behave exactly as they would in a real
+ * app); a small floating dock at the bottom-right carries "back to docs" plus
+ * the live accent + theme controls. Navigation between a template's screens
+ * happens inside the template itself.
  */
 export function PreviewPage({ slug }: { slug: string }) {
   const doc = getBlockMeta(slug);
@@ -20,8 +22,20 @@ export function PreviewPage({ slug }: { slug: string }) {
   if (!doc) return <NotFound />;
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="sticky top-0 z-50 flex h-11 shrink-0 items-center gap-3 border-b border-border bg-background/85 px-4 backdrop-blur">
+    <div className="min-h-screen bg-background">
+      <Suspense
+        fallback={
+          <div className="flex h-[60vh] items-center justify-center">
+            <Spinner />
+          </div>
+        }
+      >
+        <BlockPreview slug={slug} screen={screen} setScreen={setScreen} />
+      </Suspense>
+
+      {/* Floating preview dock — bottom-right so the template renders edge to
+          edge like a real deployment. */}
+      <div className="fixed bottom-4 right-4 z-[var(--z-toast)] flex items-center gap-2 rounded-full border border-border bg-background/90 py-1.5 pl-3 pr-1.5 shadow-lg backdrop-blur">
         <a
           href={`#${routeToHash({ kind: 'template', slug })}`}
           className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground-muted transition-colors hover:text-foreground"
@@ -30,26 +44,12 @@ export function PreviewPage({ slug }: { slug: string }) {
           Docs
         </a>
         <span className="h-4 w-px bg-border" aria-hidden />
-        <span className="flex items-center gap-2 text-xs text-foreground-muted">
+        <span className="hidden items-center gap-1.5 text-xs text-foreground-muted sm:flex">
           <span className="inline-flex size-1.5 rounded-full bg-accent" aria-hidden />
-          Live preview · <span className="font-medium text-foreground">{doc.name}</span>
+          <span className="font-medium text-foreground">{doc.name}</span>
         </span>
-        <div className="ml-auto flex items-center gap-2">
-          <BrandSwitcher />
-          <ThemeToggle />
-        </div>
-      </header>
-
-      <div className="flex-1">
-        <Suspense
-          fallback={
-            <div className="flex h-[60vh] items-center justify-center">
-              <Spinner />
-            </div>
-          }
-        >
-          <BlockPreview slug={slug} screen={screen} setScreen={setScreen} />
-        </Suspense>
+        <BrandSwitcher />
+        <ThemeToggle />
       </div>
     </div>
   );

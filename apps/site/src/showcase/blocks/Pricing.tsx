@@ -34,6 +34,8 @@ export interface PricingProps {
   tiers?: PricingTier[];
   /** Label shown on the highlighted tier badge. */
   highlightedLabel?: string;
+  /** Fallback CTA handler for tiers that don't define their own onSelect. */
+  onTierSelect?: (tier: PricingTier) => void;
   className?: string;
 }
 
@@ -93,6 +95,7 @@ export function Pricing({
   subtitle = 'Start free, upgrade when you need more. All paid plans include a 14-day trial — no credit card required.',
   tiers = DEFAULT_TIERS,
   highlightedLabel = 'Most popular',
+  onTierSelect,
   className,
 }: PricingProps = {}) {
   const cols = tiers.length;
@@ -149,7 +152,7 @@ export function Pricing({
             <Button
               variant={tier.highlighted ? 'primary' : 'outline'}
               className="mt-auto w-full"
-              onClick={tier.onSelect}
+              onClick={tier.onSelect ?? (onTierSelect && (() => onTierSelect(tier)))}
             >
               {tier.cta}
             </Button>

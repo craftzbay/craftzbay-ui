@@ -11,7 +11,14 @@ import type { TemplateProps } from './meta';
  * logo strip, features, pricing, testimonial, CTA, footer). The matching
  * sign-up screen is reached from the preview dock.
  */
-const NAV = ['Product', 'Features', 'Pricing', 'Customers', 'Docs'];
+// Nav items anchor-scroll to their landing sections (Docs removed — the
+// template has no docs page to point at).
+const NAV = [
+  { label: 'Product', id: 'product' },
+  { label: 'Features', id: 'features' },
+  { label: 'Pricing', id: 'pricing' },
+  { label: 'Customers', id: 'customers' },
+];
 
 const FEATURES = [
   { icon: Zap, title: 'Fast by default', body: 'Ships a tuned Vite build and tree-shakeable components — your bundle stays lean.' },
@@ -29,8 +36,16 @@ function Nav({ brand, onSignUp }: { brand: React.ReactNode; onSignUp: () => void
         <div className="text-sm">{brand}</div>
         <nav className="hidden items-center gap-6 text-sm text-foreground-muted md:flex">
           {NAV.map((n) => (
-            <a key={n} href="#" onClick={(e) => e.preventDefault()} className="transition-colors hover:text-foreground">
-              {n}
+            <a
+              key={n.id}
+              href={`#${n.id}`}
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById(n.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+              className="transition-colors hover:text-foreground"
+            >
+              {n.label}
             </a>
           ))}
         </nav>
@@ -53,7 +68,7 @@ function Landing({ brand, onSignUp }: { brand: React.ReactNode; onSignUp: () => 
       <Nav brand={brand} onSignUp={onSignUp} />
 
       {/* Hero */}
-      <section className="mx-auto max-w-4xl px-6 py-24 text-center">
+      <section id="product" className="mx-auto max-w-4xl scroll-mt-16 px-6 py-24 text-center">
         <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-foreground-muted">
           <Sparkles className="size-3 text-accent" aria-hidden />
           New — real-time collaboration is here
@@ -87,7 +102,7 @@ function Landing({ brand, onSignUp }: { brand: React.ReactNode; onSignUp: () => 
       </section>
 
       {/* Features */}
-      <section className="mx-auto max-w-6xl px-6 py-24">
+      <section id="features" className="mx-auto max-w-6xl scroll-mt-16 px-6 py-24">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-semibold tracking-tight">Everything you need, nothing you don't</h2>
           <p className="mt-3 text-foreground-muted">One tool that replaces five — without the bloat.</p>
@@ -108,12 +123,12 @@ function Landing({ brand, onSignUp }: { brand: React.ReactNode; onSignUp: () => 
       </section>
 
       {/* Pricing */}
-      <section className="border-t border-border bg-background-subtle/40 py-24">
-        <Pricing />
+      <section id="pricing" className="scroll-mt-16 border-t border-border bg-background-subtle/40 py-24">
+        <Pricing onTierSelect={onSignUp} />
       </section>
 
       {/* Testimonial */}
-      <section className="mx-auto max-w-3xl px-6 py-24 text-center">
+      <section id="customers" className="mx-auto max-w-3xl scroll-mt-16 px-6 py-24 text-center">
         <div className="mb-4 flex items-center justify-center gap-1 text-warning-text">
           {Array.from({ length: 5 }).map((_, i) => (
             <Star key={i} className="size-4 fill-current" aria-hidden />

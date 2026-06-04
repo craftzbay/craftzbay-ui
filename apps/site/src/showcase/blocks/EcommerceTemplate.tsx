@@ -1,15 +1,18 @@
-import { ArrowLeft, Heart, Minus, Plus, Search, ShoppingCart, Star, Trash2 } from '@/icons';
+import { useMemo, useState } from 'react';
+import { ArrowLeft, Heart, Minus, Plus, Search, ShoppingCart, Star, Trash2, X } from '@/icons';
 import { Badge } from '@craftzbay/ui';
 import { Button } from '@craftzbay/ui';
 import { Card, CardContent } from '@craftzbay/ui';
 import { IconButton } from '@craftzbay/ui';
+import { Input } from '@craftzbay/ui';
 import { Separator } from '@craftzbay/ui';
 import type { TemplateProps } from './meta';
 
 /**
  * E-commerce template — storefront grid, product detail, and cart, all sharing
- * a shop header. Screens switch from the preview dock; clicking a product or
- * "Add to cart" moves between them too.
+ * a shop header. Fully interactive without a backend: the cart, quantity
+ * steppers, wishlist hearts, category filter and search all run on local
+ * state.
  */
 const CATEGORIES = ['All', 'Audio', 'Wearables', 'Home', 'Accessories'];
 
@@ -21,6 +24,8 @@ const PRODUCTS = [
   { name: 'Field Backpack', price: 149, rating: 4.7, tag: 'Accessories', hue: 30 },
   { name: 'Nest Speaker', price: 179, rating: 4.4, tag: 'Audio', hue: 200 },
 ];
+
+type Cart = Record<string, number>;
 
 const money = (n: number) => `$${n.toFixed(2)}`;
 
@@ -43,18 +48,99 @@ function Stars({ rating }: { rating: number }) {
   );
 }
 
-function ShopHeader({ brand, cartCount, onCart }: { brand: React.ReactNode; cartCount: number; onCart: () => void }) {
+function QtyStepper({
+  qty,
+  onChange,
+  min = 1,
+}: {
+  qty: number;
+  onChange: (q: number) => void;
+  min?: number;
+}) {
+  return (
+    <div className="inline-flex items-center rounded-md border border-border">
+      <IconButton
+        aria-label="Decrease"
+        icon={<Minus />}
+        variant="ghost"
+        size="sm"
+        disabled={qty <= min}
+        onClick={() => onChange(qty - 1)}
+      />
+      <span className="w-8 text-center text-sm tabular">{qty}</span>
+      <IconButton aria-label="Increase" icon={<Plus />} variant="ghost" size="sm" onClick={() => onChange(qty + 1)} />
+    </div>
+  );
+}
+
+function ShopHeader({
+  brand,
+  cartCount,
+  onCart,
+  onCategory,
+  query,
+  onQuery,
+}: {
+  brand: React.ReactNode;
+  cartCount: number;
+  onCart: () => void;
+  onCategory: (c: string) => void;
+  query?: string;
+  onQuery?: (q: string) => void;
+}) {
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchable = Boolean(onQuery);
+
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-6">
         <div className="text-sm">{brand}</div>
         <nav className="hidden items-center gap-5 text-sm text-foreground-muted md:flex">
           {CATEGORIES.slice(1).map((c) => (
-            <a key={c} href="#" onClick={(e) => e.preventDefault()} className="hover:text-foreground">{c}</a>
+            <a
+              key={c}
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                onCategory(c);
+              }}
+              className="hover:text-foreground"
+            >
+              {c}
+            </a>
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-1">
-          <IconButton aria-label="Search" icon={<Search />} variant="ghost" size="sm" />
+          {searchable && searchOpen ? (
+            <div className="flex items-center gap-1">
+              <Input
+                autoFocus
+                size="sm"
+                placeholder="Search products…"
+                value={query}
+                onChange={(e) => onQuery?.(e.target.value)}
+                className="w-48"
+              />
+              <IconButton
+                aria-label="Close search"
+                icon={<X />}
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  onQuery?.('');
+                  setSearchOpen(false);
+                }}
+              />
+            </div>
+          ) : (
+            <IconButton
+              aria-label="Search"
+              icon={<Search />}
+              variant="ghost"
+              size="sm"
+              onClick={searchable ? () => setSearchOpen(true) : undefined}
+            />
+          )}
           <button
             onClick={onCart}
             aria-label="Cart"
@@ -73,10 +159,49 @@ function ShopHeader({ brand, cartCount, onCart }: { brand: React.ReactNode; cart
   );
 }
 
-function Shop({ brand, onOpen, onCart, cartCount }: { brand: React.ReactNode; onOpen: () => void; onCart: () => void; cartCount: number }) {
+function Shop({
+  brand,
+  onOpen,
+  onCart,
+  cartCount,
+  category,
+  setCategory,
+}: {
+  brand: React.ReactNode;
+  onOpen: () => void;
+  onCart: () => void;
+  cartCount: number;
+  category: string;
+  setCategory: (c: string) => void;
+}) {
+  const [query, setQuery] = useState('');
+  const [wishlist, setWishlist] = useState<Set<string>>(new Set());
+
+  const products = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return PRODUCTS.filter(
+      (p) => (category === 'All' || p.tag === category) && (!q || p.name.toLowerCase().includes(q)),
+    );
+  }, [category, query]);
+
+  const toggleWish = (name: string) =>
+    setWishlist((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+
   return (
     <div className="min-h-screen bg-background">
-      <ShopHeader brand={brand} cartCount={cartCount} onCart={onCart} />
+      <ShopHeader
+        brand={brand}
+        cartCount={cartCount}
+        onCart={onCart}
+        onCategory={setCategory}
+        query={query}
+        onQuery={setQuery}
+      />
       <main className="mx-auto max-w-6xl px-6 py-10">
         <div className="flex items-end justify-between gap-4">
           <div>
@@ -85,11 +210,13 @@ function Shop({ brand, onOpen, onCart, cartCount }: { brand: React.ReactNode; on
           </div>
         </div>
         <div className="mt-6 flex flex-wrap gap-1.5">
-          {CATEGORIES.map((c, i) => (
+          {CATEGORIES.map((c) => (
             <button
               key={c}
+              onClick={() => setCategory(c)}
+              aria-pressed={category === c}
               className={`rounded-full border px-3 py-1 text-xs transition-colors ${
-                i === 0
+                category === c
                   ? 'border-accent bg-accent-soft text-on-accent-soft'
                   : 'border-border text-foreground-muted hover:border-border-strong hover:text-foreground'
               }`}
@@ -98,40 +225,81 @@ function Shop({ brand, onOpen, onCart, cartCount }: { brand: React.ReactNode; on
             </button>
           ))}
         </div>
-        <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-3">
-          {PRODUCTS.map((p) => (
-            <Card key={p.name} padding="none" className="group overflow-hidden">
-              <button onClick={onOpen} className="block w-full text-left">
+        {products.length === 0 ? (
+          <div className="mt-8 rounded-lg border border-border bg-card p-10 text-center">
+            <p className="text-sm font-medium">No products found</p>
+            <p className="mt-1 text-sm text-foreground-muted">Nothing matches “{query}” in {category}.</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-4"
+              onClick={() => {
+                setQuery('');
+                setCategory('All');
+              }}
+            >
+              Clear filters
+            </Button>
+          </div>
+        ) : (
+          <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-3">
+            {products.map((p) => (
+              <Card key={p.name} padding="none" className="group overflow-hidden">
                 <div className="relative">
-                  <Shot hue={p.hue} className="aspect-square w-full" />
-                  <span className="absolute right-2 top-2 inline-flex size-7 items-center justify-center rounded-full bg-background/80 text-foreground-muted backdrop-blur">
-                    <Heart className="size-3.5" aria-hidden />
-                  </span>
+                  <button onClick={onOpen} className="block w-full text-left">
+                    <Shot hue={p.hue} className="aspect-square w-full" />
+                  </button>
+                  <button
+                    onClick={() => toggleWish(p.name)}
+                    aria-label={wishlist.has(p.name) ? `Remove ${p.name} from wishlist` : `Add ${p.name} to wishlist`}
+                    aria-pressed={wishlist.has(p.name)}
+                    className={`absolute right-2 top-2 inline-flex size-7 items-center justify-center rounded-full bg-background/80 backdrop-blur transition-colors ${
+                      wishlist.has(p.name) ? 'text-danger-text' : 'text-foreground-muted hover:text-foreground'
+                    }`}
+                  >
+                    <Heart className={`size-3.5 ${wishlist.has(p.name) ? 'fill-current' : ''}`} aria-hidden />
+                  </button>
                 </div>
-                <div className="p-4">
+                <button onClick={onOpen} className="block w-full p-4 text-left">
                   <div className="flex items-center justify-between gap-2">
                     <Badge tone="neutral" variant="outline">{p.tag}</Badge>
                     <Stars rating={p.rating} />
                   </div>
                   <h3 className="mt-2 text-sm font-medium leading-snug text-foreground group-hover:text-accent">{p.name}</h3>
                   <div className="mt-1 font-semibold tabular text-foreground">{money(p.price)}</div>
-                </div>
-              </button>
-            </Card>
-          ))}
-        </div>
+                </button>
+              </Card>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
 }
 
-function Product({ brand, onCart, onBack, cartCount, addToCart }: { brand: React.ReactNode; onCart: () => void; onBack: () => void; cartCount: number; addToCart: () => void }) {
+function Product({
+  brand,
+  onCart,
+  onBack,
+  cartCount,
+  addToCart,
+  onCategory,
+}: {
+  brand: React.ReactNode;
+  onCart: () => void;
+  onBack: () => void;
+  cartCount: number;
+  addToCart: (name: string, qty: number) => void;
+  onCategory: (c: string) => void;
+}) {
   const p = PRODUCTS[0];
+  const [qty, setQty] = useState(1);
+
   return (
     <div className="min-h-screen bg-background">
-      <ShopHeader brand={brand} cartCount={cartCount} onCart={onCart} />
+      <ShopHeader brand={brand} cartCount={cartCount} onCart={onCart} onCategory={onCategory} />
       <main className="mx-auto max-w-5xl px-6 py-8">
-        <button onClick={onBack} className="mb-6 inline-flex items-center gap-1.5 text-sm text-foreground-muted hover:text-foreground">
+        <button onClick={onBack} className="mb-6 flex w-fit items-center gap-1.5 text-sm text-foreground-muted hover:text-foreground">
           <ArrowLeft className="size-4" aria-hidden /> Back to shop
         </button>
         <div className="grid gap-10 md:grid-cols-2">
@@ -156,12 +324,8 @@ function Product({ brand, onCart, onBack, cartCount, addToCart }: { brand: React
               Machined aluminium, recycled fabric, and a case that finally fits in a pocket.
             </p>
             <div className="mt-6 flex items-center gap-3">
-              <div className="inline-flex items-center rounded-md border border-border">
-                <IconButton aria-label="Decrease" icon={<Minus />} variant="ghost" size="sm" />
-                <span className="w-8 text-center text-sm tabular">1</span>
-                <IconButton aria-label="Increase" icon={<Plus />} variant="ghost" size="sm" />
-              </div>
-              <Button className="flex-1" onClick={addToCart}>
+              <QtyStepper qty={qty} onChange={setQty} />
+              <Button className="flex-1" onClick={() => addToCart(p.name, qty)}>
                 <ShoppingCart className="mr-1 size-4" aria-hidden /> Add to cart
               </Button>
             </div>
@@ -185,69 +349,114 @@ function Product({ brand, onCart, onBack, cartCount, addToCart }: { brand: React
   );
 }
 
-const CART_ITEMS = [
-  { name: 'Aura Wireless Headphones', price: 249, qty: 1, hue: 250 },
-  { name: 'Lumen Desk Lamp', price: 89, qty: 2, hue: 65 },
-];
+function CartScreen({
+  brand,
+  onShop,
+  cart,
+  setQty,
+  remove,
+  onCategory,
+}: {
+  brand: React.ReactNode;
+  onShop: () => void;
+  cart: Cart;
+  setQty: (name: string, qty: number) => void;
+  remove: (name: string) => void;
+  onCategory: (c: string) => void;
+}) {
+  const items = PRODUCTS.filter((p) => cart[p.name]);
+  const cartCount = Object.values(cart).reduce((s, q) => s + q, 0);
+  const subtotal = items.reduce((s, p) => s + p.price * cart[p.name], 0);
+  const shipping = items.length > 0 ? 9 : 0;
 
-function Cart({ brand, onShop, cartCount }: { brand: React.ReactNode; onShop: () => void; cartCount: number }) {
-  const subtotal = CART_ITEMS.reduce((s, i) => s + i.price * i.qty, 0);
-  const shipping = 9;
   return (
     <div className="min-h-screen bg-background">
-      <ShopHeader brand={brand} cartCount={cartCount} onCart={() => {}} />
+      <ShopHeader brand={brand} cartCount={cartCount} onCart={() => {}} onCategory={onCategory} />
       <main className="mx-auto max-w-5xl px-6 py-10">
         <h1 className="text-2xl font-semibold tracking-tight">Your cart</h1>
-        <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_20rem]">
-          <Card padding="none">
-            <ul className="divide-y divide-border">
-              {CART_ITEMS.map((it) => (
-                <li key={it.name} className="flex items-center gap-4 p-4">
-                  <Shot hue={it.hue} className="size-16 shrink-0 rounded-md" />
-                  <div className="min-w-0 flex-1">
-                    <div className="font-medium text-foreground">{it.name}</div>
-                    <div className="text-sm text-foreground-subtle">{money(it.price)}</div>
-                  </div>
-                  <div className="inline-flex items-center rounded-md border border-border">
-                    <IconButton aria-label="Decrease" icon={<Minus />} variant="ghost" size="sm" />
-                    <span className="w-8 text-center text-sm tabular">{it.qty}</span>
-                    <IconButton aria-label="Increase" icon={<Plus />} variant="ghost" size="sm" />
-                  </div>
-                  <div className="w-20 text-right font-medium tabular text-foreground">{money(it.price * it.qty)}</div>
-                  <IconButton aria-label="Remove" icon={<Trash2 />} variant="ghost" size="sm" />
-                </li>
-              ))}
-            </ul>
-          </Card>
-          <Card>
-            <CardContent className="space-y-3 pt-6">
-              <div className="flex justify-between text-sm">
-                <span className="text-foreground-muted">Subtotal</span>
-                <span className="tabular text-foreground">{money(subtotal)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-foreground-muted">Shipping</span>
-                <span className="tabular text-foreground">{money(shipping)}</span>
-              </div>
-              <Separator />
-              <div className="flex justify-between font-semibold">
-                <span>Total</span>
-                <span className="tabular">{money(subtotal + shipping)}</span>
-              </div>
-              <Button className="mt-2 w-full">Checkout</Button>
-              <Button variant="ghost" className="w-full" onClick={onShop}>
-                Continue shopping
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+        {items.length === 0 ? (
+          <div className="mt-6 rounded-lg border border-border bg-card p-12 text-center">
+            <ShoppingCart className="mx-auto size-8 text-foreground-subtle" aria-hidden />
+            <p className="mt-3 text-sm font-medium">Your cart is empty</p>
+            <p className="mt-1 text-sm text-foreground-muted">Browse the shop and add something you like.</p>
+            <Button size="sm" className="mt-4" onClick={onShop}>
+              Continue shopping
+            </Button>
+          </div>
+        ) : (
+          <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_20rem]">
+            <Card padding="none">
+              <ul className="divide-y divide-border">
+                {items.map((p) => (
+                  <li key={p.name} className="flex items-center gap-4 p-4">
+                    <Shot hue={p.hue} className="size-16 shrink-0 rounded-md" />
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium text-foreground">{p.name}</div>
+                      <div className="text-sm text-foreground-subtle">{money(p.price)}</div>
+                    </div>
+                    <QtyStepper qty={cart[p.name]} onChange={(q) => setQty(p.name, q)} />
+                    <div className="w-20 text-right font-medium tabular text-foreground">
+                      {money(p.price * cart[p.name])}
+                    </div>
+                    <IconButton
+                      aria-label={`Remove ${p.name}`}
+                      icon={<Trash2 />}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => remove(p.name)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </Card>
+            <Card>
+              <CardContent className="space-y-3 pt-6">
+                <div className="flex justify-between text-sm">
+                  <span className="text-foreground-muted">Subtotal</span>
+                  <span className="tabular text-foreground">{money(subtotal)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-foreground-muted">Shipping</span>
+                  <span className="tabular text-foreground">{money(shipping)}</span>
+                </div>
+                <Separator />
+                <div className="flex justify-between font-semibold">
+                  <span>Total</span>
+                  <span className="tabular">{money(subtotal + shipping)}</span>
+                </div>
+                <Button className="mt-2 w-full">Checkout</Button>
+                <Button variant="ghost" className="w-full" onClick={onShop}>
+                  Continue shopping
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </main>
     </div>
   );
 }
 
 export function EcommerceTemplate({ screen, setScreen, brand }: TemplateProps) {
-  const cartCount = 2;
+  const [cart, setCart] = useState<Cart>({
+    'Aura Wireless Headphones': 1,
+    'Lumen Desk Lamp': 2,
+  });
+  const [category, setCategory] = useState('All');
+  const cartCount = Object.values(cart).reduce((s, q) => s + q, 0);
+
+  const addToCart = (name: string, qty: number) => {
+    setCart((prev) => ({ ...prev, [name]: (prev[name] ?? 0) + qty }));
+    setScreen('cart');
+  };
+  const setQty = (name: string, qty: number) =>
+    setCart((prev) => (qty <= 0 ? removeKey(prev, name) : { ...prev, [name]: qty }));
+  const remove = (name: string) => setCart((prev) => removeKey(prev, name));
+  const goCategory = (c: string) => {
+    setCategory(c);
+    setScreen('shop');
+  };
+
   if (screen === 'product')
     return (
       <Product
@@ -255,9 +464,34 @@ export function EcommerceTemplate({ screen, setScreen, brand }: TemplateProps) {
         cartCount={cartCount}
         onBack={() => setScreen('shop')}
         onCart={() => setScreen('cart')}
-        addToCart={() => setScreen('cart')}
+        addToCart={addToCart}
+        onCategory={goCategory}
       />
     );
-  if (screen === 'cart') return <Cart brand={brand} cartCount={cartCount} onShop={() => setScreen('shop')} />;
-  return <Shop brand={brand} cartCount={cartCount} onOpen={() => setScreen('product')} onCart={() => setScreen('cart')} />;
+  if (screen === 'cart')
+    return (
+      <CartScreen
+        brand={brand}
+        cart={cart}
+        setQty={setQty}
+        remove={remove}
+        onShop={() => setScreen('shop')}
+        onCategory={goCategory}
+      />
+    );
+  return (
+    <Shop
+      brand={brand}
+      cartCount={cartCount}
+      onOpen={() => setScreen('product')}
+      onCart={() => setScreen('cart')}
+      category={category}
+      setCategory={setCategory}
+    />
+  );
+}
+
+function removeKey(cart: Cart, name: string): Cart {
+  const { [name]: _removed, ...rest } = cart;
+  return rest;
 }
