@@ -33,7 +33,15 @@ export default defineConfig({
         // a single chunk (React included), so there's no cross-chunk init order
         // to get wrong — route pages, blocks and the generated-props table are
         // split off separately via dynamic import().
-        manualChunks: (id) => (id.includes('node_modules') ? 'vendor' : undefined),
+        //
+        // Exception: lucide's per-icon modules. <Icon name="…"> imports them
+        // lazily via lucide-react/dynamicIconImports; folding them into vendor
+        // would inline the entire icon set (~900 kB). Returning undefined
+        // keeps each one its own lazy chunk.
+        manualChunks: (id) => {
+          if (/lucide-react.*icons/.test(id)) return undefined;
+          return id.includes('node_modules') ? 'vendor' : undefined;
+        },
       },
     },
   },

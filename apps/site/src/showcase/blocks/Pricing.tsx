@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Check } from 'lucide-react';
+import { Check } from '@/icons';
 import { Badge } from '@craftzbay/ui';
 import { Button } from '@craftzbay/ui';
 import { cn } from '@craftzbay/ui';

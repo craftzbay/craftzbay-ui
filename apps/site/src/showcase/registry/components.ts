@@ -56,6 +56,7 @@ import accordionDoc from '../components/Accordion.docs';
 
 import badgeDoc from '../components/Badge.docs';
 import avatarDoc from '../components/Avatar.docs';
+import iconDoc from '../components/Icon.docs';
 import tableDoc from '../components/Table.docs';
 import dataGridDoc from '../components/DataGrid.docs';
 import carouselDoc from '../components/Carousel.docs';
@@ -123,6 +124,7 @@ export const componentDocs: ComponentDoc[] = [
   // Data Display
   badgeDoc,
   avatarDoc,
+  iconDoc,
   tableDoc,
   dataGridDoc,
   carouselDoc,

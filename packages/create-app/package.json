@@ -1,6 +1,6 @@
 {
   "name": "@craftzbay/create-app",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Scaffold a new project preconfigured with @craftzbay/ui. Invoke via `npm create @craftzbay/app my-app`.",
   "license": "MIT",
   "author": "craftzbay",

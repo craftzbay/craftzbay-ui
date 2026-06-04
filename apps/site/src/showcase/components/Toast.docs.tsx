@@ -26,6 +26,45 @@ function TriggerDemo() {
   );
 }
 
+const VARIANT_COPY = {
+  default: { title: 'Heads up', description: 'A new version is available.' },
+  success: { title: 'Saved', description: 'All changes published.' },
+  warning: { title: 'Storage almost full', description: '90% of your quota is used.' },
+  danger: { title: 'Export failed', description: 'The server rejected the request.' },
+  info: { title: 'Syncing', description: 'Your workspace is being synced.' },
+} as const;
+
+function VariantsDemo() {
+  const { push } = useToast();
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-2">
+      {(Object.keys(VARIANT_COPY) as Array<keyof typeof VARIANT_COPY>).map((v) => (
+        <Button key={v} variant="outline" size="sm" onClick={() => push({ variant: v, ...VARIANT_COPY[v] })}>
+          {v}
+        </Button>
+      ))}
+    </div>
+  );
+}
+
+function ActionDemo() {
+  const { push } = useToast();
+  return (
+    <Button
+      variant="outline"
+      onClick={() =>
+        push({
+          title: 'Conversation archived',
+          description: 'You can restore it from the archive.',
+          action: { label: 'Undo', altText: 'Undo archive', onClick: () => push({ title: 'Restored', variant: 'success' }) },
+        })
+      }
+    >
+      Archive with undo
+    </Button>
+  );
+}
+
 const doc: ComponentDoc = {
   slug: 'toast',
   name: 'Toast',
@@ -50,15 +89,63 @@ const { push } = useToast();
 push({ title: 'Saved', description: 'All changes published.', variant: 'success' });`,
     },
     {
+      title: 'Variants',
+      description: 'One tone per outcome: default for neutral notices, success / warning / danger for results, info for ongoing state. Click to preview each.',
+      preview: <VariantsDemo />,
+      code: `const { push } = useToast();
+
+push({ variant: 'default', title: 'Heads up', description: 'A new version is available.' });
+push({ variant: 'success', title: 'Saved', description: 'All changes published.' });
+push({ variant: 'warning', title: 'Storage almost full', description: '90% of your quota is used.' });
+push({ variant: 'danger',  title: 'Export failed', description: 'The server rejected the request.' });
+push({ variant: 'info',    title: 'Syncing', description: 'Your workspace is being synced.' });`,
+    },
+    {
+      title: 'With action',
+      description: 'An optional action button — use for one-step recovery like Undo. altText is what screen readers announce.',
+      preview: <ActionDemo />,
+      code: `const { push } = useToast();
+
+push({
+  title: 'Conversation archived',
+  description: 'You can restore it from the archive.',
+  action: { label: 'Undo', altText: 'Undo archive', onClick: undo },
+});`,
+    },
+    {
       title: 'Static (preview)',
-      description: 'Renders a stationary toast for documentation / screenshots.',
+      description: 'Stationary toasts for documentation / screenshots — all five variants.',
       preview: (
         <ToastProvider duration={Infinity}>
           <ToastViewport className="!static !w-full !max-w-sm !p-0">
+            <Toast open variant="default">
+              <div>
+                <ToastTitle>Heads up</ToastTitle>
+                <ToastDescription>A new version is available.</ToastDescription>
+              </div>
+            </Toast>
             <Toast open variant="success">
               <div>
                 <ToastTitle>Saved</ToastTitle>
                 <ToastDescription>All changes published.</ToastDescription>
+              </div>
+            </Toast>
+            <Toast open variant="warning">
+              <div>
+                <ToastTitle>Storage almost full</ToastTitle>
+                <ToastDescription>90% of your quota is used.</ToastDescription>
+              </div>
+            </Toast>
+            <Toast open variant="danger">
+              <div>
+                <ToastTitle>Export failed</ToastTitle>
+                <ToastDescription>The server rejected the request.</ToastDescription>
+              </div>
+            </Toast>
+            <Toast open variant="info">
+              <div>
+                <ToastTitle>Syncing</ToastTitle>
+                <ToastDescription>Your workspace is being synced.</ToastDescription>
               </div>
             </Toast>
           </ToastViewport>
@@ -66,10 +153,11 @@ push({ title: 'Saved', description: 'All changes published.', variant: 'success'
       ),
       code: `<ToastProvider duration={Infinity}>
   <ToastViewport>
-    <Toast open variant="success">
-      <ToastTitle>Saved</ToastTitle>
-      <ToastDescription>All changes published.</ToastDescription>
-    </Toast>
+    <Toast open variant="default">…</Toast>
+    <Toast open variant="success">…</Toast>
+    <Toast open variant="warning">…</Toast>
+    <Toast open variant="danger">…</Toast>
+    <Toast open variant="info">…</Toast>
   </ToastViewport>
 </ToastProvider>`,
     },

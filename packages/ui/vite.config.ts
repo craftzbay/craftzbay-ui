@@ -49,7 +49,9 @@ export default defineConfig({
         'clsx',
         'cmdk',
         /^embla-carousel/,
-        'lucide-react',
+        // Regex: keeps subpaths external too — lucide-react/dynamicIconImports
+        // powers <Icon name="…">; a bare string only matches the root import.
+        /^lucide-react/,
         'react-day-picker',
         'react-hook-form',
         'tailwind-merge',

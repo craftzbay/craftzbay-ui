@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useState, type KeyboardEvent } from 'react';
-import { X } from 'lucide-react';
+import { X } from '@/icons';
 import { cn } from '@/lib/utils';
 
 export interface TagInputProps {
@@ -74,7 +74,9 @@ export const TagInput = forwardRef<HTMLDivElement, TagInputProps>(function TagIn
     <div
       ref={ref}
       className={cn(
-        'flex min-h-9 w-full flex-wrap items-center gap-1.5 rounded-md border bg-card px-2 py-1.5',
+        // Cap growth at ~3 chip rows and scroll inside — an unbounded field
+        // pushes the surrounding layout around as tags are added.
+        'flex max-h-24 min-h-9 w-full flex-wrap items-center gap-1.5 overflow-y-auto rounded-md border bg-card px-2 py-1.5',
         'transition-colors focus-within:border-ring focus-within:ring-2 focus-within:ring-ring',
         error ? 'border-danger focus-within:border-danger focus-within:ring-danger' : 'border-border',
         disabled && 'pointer-events-none opacity-50',

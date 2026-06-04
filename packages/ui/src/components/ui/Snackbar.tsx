@@ -1,5 +1,5 @@
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
-import { CheckCircle2, Info, AlertTriangle, XCircle, X } from 'lucide-react';
+import { CheckCircle2, Info, AlertTriangle, XCircle, X } from '@/icons';
 import { cn } from '@/lib/utils';
 import { cva, type VariantProps } from '@/lib/cva';
 

@@ -1,10 +1,60 @@
-import { forwardRef } from 'react';
-import { DayPicker, type DayPickerProps } from 'react-day-picker';
-import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { forwardRef, useMemo, type ChangeEvent } from 'react';
+import { DayPicker, type DayPickerProps, type DropdownProps } from 'react-day-picker';
+import * as SelectPrimitive from '@radix-ui/react-select';
+import { ChevronDown, ChevronLeft, ChevronRight } from '@/icons';
 import 'react-day-picker/style.css';
+import { Select, SelectContent, SelectItem } from './Select';
 import { cn } from '@/lib/utils';
 
 export type CalendarProps = DayPickerProps & { className?: string };
+
+/**
+ * Month / year dropdown rendered with the design-system Select instead of a
+ * native `<select>` — the native popup is unbounded (a century of years fills
+ * the screen on macOS) and can't be styled. Radix gives us a max-height,
+ * internal scrolling, and auto-scroll to the selected year.
+ */
+function CalendarDropdown({
+  options = [],
+  value,
+  onChange,
+  disabled,
+  'aria-label': ariaLabel,
+}: DropdownProps) {
+  const selected = options.find((opt) => opt.value === Number(value));
+
+  return (
+    <Select
+      value={value === undefined ? undefined : String(value)}
+      onValueChange={(v) => {
+        // RDP's handler expects a native select change event — fake the shape.
+        onChange?.({ target: { value: v } } as unknown as ChangeEvent<HTMLSelectElement>);
+      }}
+      disabled={disabled}
+    >
+      <SelectPrimitive.Trigger
+        aria-label={ariaLabel}
+        className={cn(
+          'inline-flex h-7 items-center gap-1 rounded-md border border-border bg-card px-2 text-sm font-medium text-foreground',
+          'outline-none hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring',
+          'disabled:pointer-events-none disabled:opacity-50',
+        )}
+      >
+        <SelectPrimitive.Value>{selected?.label}</SelectPrimitive.Value>
+        <SelectPrimitive.Icon asChild>
+          <ChevronDown className="size-3.5 opacity-60" aria-hidden />
+        </SelectPrimitive.Icon>
+      </SelectPrimitive.Trigger>
+      <SelectContent className="max-h-64">
+        {options.map((opt) => (
+          <SelectItem key={opt.value} value={String(opt.value)} disabled={opt.disabled}>
+            {opt.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
 
 /**
  * Standalone calendar surface. Used by DatePicker, but can also be embedded
@@ -17,9 +67,15 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
   // Bound the month/year dropdowns. Consumers can narrow this with
   // startMonth / endMonth; the default spans a century back to a decade ahead
   // so the year dropdown is useful for both birthdays and future scheduling.
-  const now = new Date();
-  const start = startMonth ?? new Date(now.getFullYear() - 100, 0, 1);
-  const end = endMonth ?? new Date(now.getFullYear() + 10, 11, 31);
+  // Memoised — fresh Date identities every render defeat RDP's internal
+  // memoisation and re-derive the navigable range on each paint.
+  const { start, end } = useMemo(() => {
+    const now = new Date();
+    return {
+      start: startMonth ?? new Date(now.getFullYear() - 100, 0, 1),
+      end: endMonth ?? new Date(now.getFullYear() + 10, 11, 31),
+    };
+  }, [startMonth, endMonth]);
 
   return (
     <DayPicker
@@ -33,18 +89,17 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
         months: 'relative flex flex-col gap-4 sm:flex-row sm:gap-6',
         month: 'flex flex-col gap-3',
         month_caption: 'relative flex h-8 items-center justify-center px-8',
-        // Dropdown layout: the visible pill is `dropdown_root` + `caption_label`
-        // (value text + caret); the native <select> sits transparent on top.
         dropdowns: 'flex items-center justify-center gap-2',
-        dropdown_root:
-          'relative inline-flex items-center rounded-md border border-border bg-card px-2 py-1 hover:bg-background-muted focus-within:ring-2 focus-within:ring-ring',
-        dropdown: 'absolute inset-0 cursor-pointer opacity-0',
         caption_label: 'flex items-center gap-1 text-sm font-medium',
-        nav: 'absolute inset-x-0 top-0 flex h-8 items-center justify-between',
+        // The caption is positioned and painted after the nav, so the nav must
+        // sit above it (z-10) for its buttons to receive clicks. The container
+        // itself ignores pointer events so the centred dropdowns underneath
+        // stay clickable — only the buttons opt back in.
+        nav: 'pointer-events-none absolute inset-x-0 top-0 z-10 flex h-8 items-center justify-between',
         button_previous:
-          'inline-flex h-7 w-7 items-center justify-center rounded-md text-foreground-muted hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring outline-none disabled:opacity-40 disabled:pointer-events-none',
+          'pointer-events-auto inline-flex h-7 w-7 items-center justify-center rounded-md text-foreground-muted hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring outline-none disabled:opacity-40 disabled:pointer-events-none',
         button_next:
-          'inline-flex h-7 w-7 items-center justify-center rounded-md text-foreground-muted hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring outline-none disabled:opacity-40 disabled:pointer-events-none',
+          'pointer-events-auto inline-flex h-7 w-7 items-center justify-center rounded-md text-foreground-muted hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring outline-none disabled:opacity-40 disabled:pointer-events-none',
         month_grid: 'w-full border-collapse',
         weekdays: 'grid grid-cols-7',
         weekday:
@@ -66,6 +121,7 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
         ...classNames,
       }}
       components={{
+        Dropdown: CalendarDropdown,
         Chevron: ({ orientation }) => {
           if (orientation === 'left') return <ChevronLeft className="size-4" />;
           if (orientation === 'right') return <ChevronRight className="size-4" />;

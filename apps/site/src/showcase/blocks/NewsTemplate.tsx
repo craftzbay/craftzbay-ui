@@ -1,4 +1,4 @@
-import { ArrowLeft, Menu, Search } from 'lucide-react';
+import { ArrowLeft, Menu, Search } from '@/icons';
 import { Avatar } from '@craftzbay/ui';
 import { Badge } from '@craftzbay/ui';
 import { Button } from '@craftzbay/ui';

@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useId, useRef, useState, type DragEvent as ReactDragEvent, type ReactNode } from 'react';
-import { File as FileIcon, Upload, X } from 'lucide-react';
+import { File as FileIcon, Upload, X } from '@/icons';
 import { cn } from '@/lib/utils';
 
 export interface FileUploadProps {

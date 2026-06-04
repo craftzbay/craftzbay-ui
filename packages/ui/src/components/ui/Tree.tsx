@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { ChevronRight, File as FileIcon, Folder, FolderOpen } from 'lucide-react';
+import { ChevronRight, File as FileIcon, Folder, FolderOpen } from '@/icons';
 import { cn } from '@/lib/utils';
 
 export interface TreeNode {

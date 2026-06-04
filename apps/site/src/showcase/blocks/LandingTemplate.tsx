@@ -1,4 +1,4 @@
-import { ArrowRight, BarChart3, Github, Lock, Plug, Sparkles, Star, Zap } from 'lucide-react';
+import { ArrowRight, BarChart3, Github, Lock, Plug, Sparkles, Star, Zap } from '@/icons';
 import { Avatar } from '@craftzbay/ui';
 import { Button } from '@craftzbay/ui';
 import { Card, CardContent } from '@craftzbay/ui';

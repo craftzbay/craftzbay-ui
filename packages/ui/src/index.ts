@@ -41,6 +41,7 @@ export * from './components/ui/DropdownMenu';
 export * from './components/ui/EmptyState';
 export * from './components/ui/ErrorState';
 export * from './components/ui/Form';
+export * from './components/ui/Icon';
 export * from './components/ui/IconButton';
 export * from './components/ui/Input';
 export * from './components/ui/Kbd';

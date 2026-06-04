@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
-import { ArrowRight, CheckCircle2, Mail } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Mail } from '@/icons';
 import { Button } from '@craftzbay/ui';
 import { Input } from '@craftzbay/ui';
 import { Alert } from '@craftzbay/ui';

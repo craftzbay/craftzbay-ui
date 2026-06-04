@@ -19,7 +19,7 @@ import {
   Trash2,
   User,
   Users,
-} from 'lucide-react';
+} from '@/icons';
 import {
   Avatar,
   Badge,

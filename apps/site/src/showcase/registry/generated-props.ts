@@ -2734,6 +2734,36 @@ export const generatedProps: Record<string, PropGroup[]> = {
       ]
     }
   ],
+  "Icon": [
+    {
+      "rows": [
+        {
+          "name": "name",
+          "type": "enum",
+          "required": true,
+          "description": "Lucide icon name in kebab-case, e.g. `name=\"calendar\"`. Autocompletes."
+        },
+        {
+          "name": "absoluteStrokeWidth",
+          "type": "boolean",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "fallback",
+          "type": "ReactNode",
+          "required": false,
+          "description": "Shown while the icon chunk loads (first use only — icons are cached). Defaults to an invisible square so layout doesn't shift."
+        },
+        {
+          "name": "size",
+          "type": "string | number",
+          "required": false,
+          "description": ""
+        }
+      ]
+    }
+  ],
   "IconButton": [
     {
       "rows": [

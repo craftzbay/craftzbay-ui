@@ -1,5 +1,13 @@
 # create-craftzbay-ui
 
+## 1.0.1
+
+### Patch Changes
+
+- Bump the scaffolded `@craftzbay/ui` dependency to `^0.8.1` — caret ranges on
+  0.x stay within the minor, so templates pinned to `^0.7.0` kept installing the
+  old release whose `styles.css` shipped no tokens, base layer, or utilities.
+
 ## 1.0.0
 
 ### Major Changes

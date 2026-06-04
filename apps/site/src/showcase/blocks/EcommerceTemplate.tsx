@@ -1,4 +1,4 @@
-import { ArrowLeft, Heart, Minus, Plus, Search, ShoppingCart, Star, Trash2 } from 'lucide-react';
+import { ArrowLeft, Heart, Minus, Plus, Search, ShoppingCart, Star, Trash2 } from '@/icons';
 import { Badge } from '@craftzbay/ui';
 import { Button } from '@craftzbay/ui';
 import { Card, CardContent } from '@craftzbay/ui';
