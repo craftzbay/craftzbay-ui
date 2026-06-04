@@ -6,6 +6,7 @@ function Demo() {
   const [v, setV] = useState<string | null>('ts');
   return (
     <Combobox
+      className="w-full max-w-xs"
       value={v}
       onChange={setV}
       options={[
@@ -35,6 +36,7 @@ const doc: ComponentDoc = {
       code: `const [v, setV] = useState<string | null>('ts');
 
 <Combobox
+  className="w-full max-w-xs"
   value={v}
   onChange={setV}
   options={[

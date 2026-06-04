@@ -5,7 +5,7 @@ import type { ComponentDoc } from '../registry/types';
 
 function SingleDemo() {
   const [d, setD] = useState<Date | undefined>(new Date());
-  return <DatePicker value={d} onChange={setD} placeholder="Pick a date" />;
+  return <DatePicker className="w-full max-w-xs" value={d} onChange={setD} placeholder="Pick a date" />;
 }
 
 function RangeDemo() {
@@ -13,7 +13,7 @@ function RangeDemo() {
     from: new Date(),
     to: new Date(Date.now() + 7 * 86400000),
   });
-  return <DateRangePicker value={range} onChange={setRange} placeholder="Pick a range" />;
+  return <DateRangePicker className="w-full max-w-xs" value={range} onChange={setRange} placeholder="Pick a range" />;
 }
 
 const doc: ComponentDoc = {
@@ -25,8 +25,8 @@ const doc: ComponentDoc = {
   exports: ['DatePicker', 'DateRangePicker'],
   sourceFile: 'DatePicker.tsx',
   examples: [
-    { title: 'Single date', preview: <SingleDemo />, code: `<DatePicker value={d} onChange={setD} placeholder="Pick a date" />` },
-    { title: 'Range', preview: <RangeDemo />, code: `<DateRangePicker value={range} onChange={setRange} placeholder="Pick a range" />` },
+    { title: 'Single date', preview: <SingleDemo />, code: `<DatePicker className="w-full max-w-xs" value={d} onChange={setD} placeholder="Pick a date" />` },
+    { title: 'Range', preview: <RangeDemo />, code: `<DateRangePicker className="w-full max-w-xs" value={range} onChange={setRange} placeholder="Pick a range" />` },
   ],
   api: [
     {
