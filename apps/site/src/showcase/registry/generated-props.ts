@@ -183,16 +183,20 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": ""
         },
         {
+          "name": "grid",
+          "type": "boolean",
+          "required": false,
+          "description": "Faint horizontal gridlines. Default true."
+        },
+        {
           "name": "height",
           "type": "number",
-          "default": "80",
           "required": false,
-          "description": "Defaults to 24px height per point + 60px padding."
+          "description": "Drawing height in px."
         },
         {
           "name": "width",
           "type": "string | number",
-          "default": "100%",
           "required": false,
           "description": "Defaults to fluid 100%."
         }
@@ -315,11 +319,18 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": ""
         },
         {
+          "name": "grid",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "description": "Faint horizontal gridlines. Default true."
+        },
+        {
           "name": "height",
           "type": "number",
-          "default": "100",
+          "default": "160",
           "required": false,
-          "description": "Defaults to 24px height per point + 60px padding."
+          "description": "Drawing height in px."
         },
         {
           "name": "width",
@@ -2867,11 +2878,18 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": ""
         },
         {
+          "name": "grid",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "description": "Faint horizontal gridlines. Default true."
+        },
+        {
           "name": "height",
           "type": "number",
-          "default": "80",
+          "default": "160",
           "required": false,
-          "description": "Defaults to 24px height per point + 60px padding."
+          "description": "Drawing height in px."
         },
         {
           "name": "width",
@@ -5094,7 +5112,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
     {
       "rows": [
         {
-          "name": "__@hasInstance@9945",
+          "name": "__@hasInstance@9949",
           "type": "(value: any) => boolean",
           "required": true,
           "description": "Determines whether the given value inherits from this function if this function was used as a constructor function. A constructor function can control which objects are recognized as its instances by 'instanceof' by overriding this method."

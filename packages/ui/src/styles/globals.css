@@ -557,6 +557,15 @@
     outline: none;
   }
 
+  /* Tailwind v4 preflight resets buttons to `cursor: default`; restore the
+     v3 behaviour so every enabled button (and Radix triggers rendered with
+     role="button") reads as clickable. Disabled state keeps the default
+     arrow — most components also set `disabled:pointer-events-none`. */
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
   /* Standardised focus ring — 2px ring + 2px offset, accent colour. ------ */
   .focus-ring {
     outline: 2px solid var(--ring);

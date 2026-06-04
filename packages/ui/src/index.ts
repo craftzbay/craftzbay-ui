@@ -2,6 +2,11 @@
  * Library entry — re-exports primitives, patterns, hooks, and utilities.
  */
 
+// Design-system CSS — compiled by the Tailwind Vite plugin into
+// dist-lib/styles.css so `import '@craftzbay/ui/styles.css'` actually ships
+// the tokens, base layer, and every utility the components reference.
+import './styles/globals.css';
+
 // Utilities
 export * from './lib/utils';
 export * from './lib/cva';
