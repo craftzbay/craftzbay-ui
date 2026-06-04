@@ -1,5 +1,20 @@
 # @craftzbay/ui
 
+## 0.9.0
+
+### Minor Changes
+
+- New `<Icon name="…">` component — any lucide icon by kebab-case name, code-split
+  and lazy-loaded (plus an `iconNames` export for pickers). Static icon imports
+  now bypass the lucide barrel so the full set never lands in consumer bundles.
+
+  Calendar/DatePicker fixes: month nav arrows were unclickable (caption painted
+  above them); month/year dropdowns are now bounded, scrollable design-system
+  Selects instead of the native full-screen `<select>`; switching month/year
+  renders immediately.
+
+  TagInput: growth capped at ~3 chip rows with internal scrolling.
+
 ## 0.8.1
 
 ### Patch Changes
