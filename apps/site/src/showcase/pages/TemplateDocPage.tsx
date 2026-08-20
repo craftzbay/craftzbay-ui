@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ExternalLink } from '@/icons';
 import { Spinner } from '@/components/ui/Spinner';
 import { cn } from '@/lib/utils';
@@ -16,7 +16,7 @@ interface TemplateDocPageProps {
 const WIDTHS = [
   { key: 'mobile', label: 'Mobile', hint: '375px', width: 375 },
   { key: 'tablet', label: 'Tablet', hint: '768px', width: 768 },
-  { key: 'desktop', label: 'Desktop', hint: 'Fill', width: null },
+  { key: 'desktop', label: 'Desktop', hint: '1280px', width: 1280 },
 ] as const;
 type WidthKey = (typeof WIDTHS)[number]['key'];
 
@@ -53,8 +53,23 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
     };
   }, [doc.slug, doc.screens]);
 
-  const frameWidth = WIDTHS.find((w) => w.key === width)?.width ?? null;
+  const frameWidth = WIDTHS.find((w) => w.key === width)?.width ?? 1280;
   const src = previewUrl(doc.slug, screen);
+
+  // The docs column is narrower than a real desktop viewport, so the frame
+  // keeps its true CSS width (the template's breakpoints stay honest) and is
+  // scaled down to fit. Mobile/tablet fit unscaled.
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [boxWidth, setBoxWidth] = useState(0);
+  useEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setBoxWidth(entry.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const scale = boxWidth > 0 ? Math.min(1, boxWidth / frameWidth) : 1;
+  const FRAME_HEIGHT = 720;
 
   return (
     <article className="max-w-4xl">
@@ -147,17 +162,27 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
           ))}
         </div>
       </div>
-      <div className="border-border bg-background-subtle overflow-x-auto rounded-lg border p-0">
+      <div
+        ref={boxRef}
+        className="border-border bg-background-subtle overflow-hidden rounded-lg border p-0"
+        style={{ height: Math.round(FRAME_HEIGHT * scale) }}
+      >
         <iframe
-          // Remount on screen change so the template opens at that screen.
-          key={`${doc.slug}/${screen}`}
+          // Remount on screen or width change so the template opens fresh at
+          // that viewport (no stale drawer/menu state carried across sizes).
+          key={`${doc.slug}/${screen}/${width}`}
           src={src}
           title={`${doc.name} preview`}
           loading="lazy"
-          style={{ width: frameWidth ?? '100%' }}
+          style={{
+            width: frameWidth,
+            height: FRAME_HEIGHT,
+            transform: `scale(${scale})`,
+            transformOrigin: 'top left',
+          }}
           className={cn(
-            'bg-background block h-[640px] max-w-full transition-[width] duration-[var(--duration-base)]',
-            frameWidth && 'border-border mx-auto border-x',
+            'bg-background block',
+            frameWidth < boxWidth && 'border-border mx-auto border-x',
           )}
         />
       </div>

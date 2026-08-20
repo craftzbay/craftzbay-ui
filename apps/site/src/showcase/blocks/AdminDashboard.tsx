@@ -36,6 +36,17 @@ export function AdminDashboard() {
     }
   });
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // The drawer only exists below lg; if the viewport grows past it (window
+  // resize, preview width toggle) close it so it never sits over the rail.
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const sync = () => {
+      if (mq.matches) setDrawerOpen(false);
+    };
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [search, setSearch] = useState('');
 
