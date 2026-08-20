@@ -74,7 +74,8 @@ function Shell() {
   useCommandPaletteShortcut(setCmdOpen);
 
   if (isFullBleedRoute(route) && route.kind === 'preview') {
-    return <PreviewPage slug={route.slug} initialScreen={route.screen} />;
+    // key: switching template from the preview dock must reset screen state.
+    return <PreviewPage key={route.slug} slug={route.slug} initialScreen={route.screen} />;
   }
 
   return (
@@ -184,7 +185,8 @@ function RouteView({ route }: { route: Route }) {
 
     case 'preview':
       // Handled by Shell before reaching here; kept so the switch is exhaustive.
-      return <PreviewPage slug={route.slug} initialScreen={route.screen} />;
+      // key: switching template from the preview dock must reset screen state.
+    return <PreviewPage key={route.slug} slug={route.slug} initialScreen={route.screen} />;
 
     case 'not-found':
       return <NotFound />;
