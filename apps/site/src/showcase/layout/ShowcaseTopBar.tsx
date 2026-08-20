@@ -58,7 +58,7 @@ export function ShowcaseTopBar({ onOpenPalette, current }: ShowcaseTopBarProps) 
             className="hidden h-8 w-44 items-center gap-2 rounded-md border border-border-input bg-card pr-1.5 pl-2.5 text-sm text-foreground-subtle outline-none transition-colors hover:border-border-strong hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:flex lg:w-56"
           >
             <Search className="size-4 shrink-0" aria-hidden />
-            <span className="flex-1 truncate text-left text-xs">Search components, guides…</span>
+            <span className="flex-1 truncate text-left text-xs">Search docs…</span>
             <Kbd className="shrink-0">⌘K</Kbd>
           </button>
 
