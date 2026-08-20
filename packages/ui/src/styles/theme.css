@@ -273,7 +273,8 @@
   /* Borders -------------------------------------------------------------- */
   --border: hsl(214 32% 91%);
   --border-strong: hsl(213 27% 84%);
-  --border-input: hsl(215 16% 58%); /* ≥3:1 on background — form control edges */
+  --border-input: hsl(215 16% 70%); /* ~2.1:1 — text fields sit as a white fill on the page, so the edge is not the only identifier; kept close to --border so fields match cards/tables */
+  --border-control: hsl(215 16% 58%); /* ≥3:1 — checkbox/radio/switch: no fill, the edge IS the control */
 
   /* Card / popover ------------------------------------------------------- */
   --card: hsl(0 0% 100%);
@@ -352,7 +353,8 @@
 
   --border: hsl(217 33% 17%);
   --border-strong: hsl(215 25% 27%);
-  --border-input: hsl(215 16% 42%);
+  --border-input: hsl(215 16% 32%);
+  --border-control: hsl(215 16% 42%);
 
   /* Floating/card surfaces sit one step above background-subtle for lift. */
   --card: hsl(222 47% 11%);
@@ -541,6 +543,7 @@
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --color-border-input: var(--border-input);
+  --color-border-control: var(--border-control);
 
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
