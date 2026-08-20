@@ -637,21 +637,7 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
             className="lg:hidden"
             onClick={onOpenDrawer}
           />
-          {layout === 'dual' ? (
-            // The panel header hosts the switcher; the bar carries the trail
-            // (≥lg) and collapses to the current page title below that.
-            <>
-              <PageCrumbs
-                page={page}
-                withModule
-                onNavigate={onNavigate}
-                className="hidden min-w-0 lg:block"
-              />
-              <span className="text-foreground truncate text-sm font-semibold lg:hidden">
-                {findNav(page)?.item.label ?? 'Home'}
-              </span>
-            </>
-          ) : layout === 'topnav' ? (
+          {layout === 'topnav' ? (
             // No sidebar header to host the switcher, so it lives in the bar.
             <WorkspaceSwitcher
               variant="bar"
@@ -659,13 +645,20 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
               onChange={(id) => onWorkspaceChange?.(id)}
             />
           ) : (
-            // Tenant is visible on every page, even with a single workspace.
-            <span className="flex min-w-0 items-center gap-2 text-sm">
-              <span className="text-foreground truncate font-semibold">{workspace.name}</span>
-              <Badge tone="neutral" variant="outline" className="hidden sm:inline-flex">
-                {workspace.plan}
-              </Badge>
-            </span>
+            // Sidebar/dual: the sidebar (or panel) header already shows the
+            // tenant, so the bar carries the trail (≥lg) and collapses to the
+            // current page title below that. Dual adds the module crumb.
+            <>
+              <PageCrumbs
+                page={page}
+                withModule={layout === 'dual'}
+                onNavigate={onNavigate}
+                className="hidden min-w-0 lg:block"
+              />
+              <span className="text-foreground truncate text-sm font-semibold lg:hidden">
+                {findNav(page)?.item.label ?? 'Home'}
+              </span>
+            </>
           )}
         </div>
       }
@@ -839,7 +832,7 @@ export function PageHeader({
   hideBreadcrumbs?: boolean;
 }) {
   const layout = useContext(AdminLayoutContext);
-  const hide = hideBreadcrumbs ?? layout === 'dual';
+  const hide = hideBreadcrumbs ?? layout !== 'topnav';
   return (
     <header className="mb-6">
       {!hide && <PageCrumbs page={page} onNavigate={onNavigate} className="mb-2" />}
