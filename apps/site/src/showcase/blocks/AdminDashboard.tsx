@@ -11,7 +11,9 @@ import { BillingPage, InboxPage, Members, SettingsPage, type MembersHandle } fro
  *
  *  · Shell: `Sidebar` (collapsible rail ≥lg, Sheet drawer below) + `TopNav`
  *    (tenant name, `/` search, notifications, profile) + `Breadcrumbs` on
- *    every page below the home.
+ *    every page below the home. `layout="topnav"` drops the rail and moves
+ *    primary navigation into the top bar as horizontal links (≤6 sections);
+ *    the drawer still serves viewports below lg.
  *  · Keyboard: ⌘K / Ctrl+K opens the command palette, `/` focuses search,
  *    Esc closes overlays and blurs the search field.
  *  · Pages live in ./admin/* — Projects is the full table pattern (sort,
@@ -24,7 +26,11 @@ import { BillingPage, InboxPage, Members, SettingsPage, type MembersHandle } fro
 
 const SIDEBAR_KEY = 'admin-template:sidebar-collapsed';
 
-export function AdminDashboard() {
+/** `sidebar` = collapsible rail (default); `topnav` = horizontal links, no rail. */
+export type AdminLayout = 'sidebar' | 'topnav';
+
+export function AdminDashboard({ layout = 'sidebar' }: { layout?: AdminLayout }) {
+  const hasRail = layout === 'sidebar';
   const { push } = useToast();
   const [page, setPage] = useState('overview');
   const [workspace, setWorkspace] = useState(WORKSPACES[0].id);
@@ -112,7 +118,11 @@ export function AdminDashboard() {
   const ws = WORKSPACES.find((w) => w.id === workspace) ?? WORKSPACES[0];
 
   return (
-    <div className="bg-background text-foreground flex h-screen overflow-hidden">
+    // h-dvh + min-h-0 down the column: flex children default to
+    // min-height:auto, so without it <main> grows to its content, overflows the
+    // shell, and any focus() on an off-screen row scrolls the overflow-hidden
+    // root itself (sidebar "scrolls away"). With min-h-0 only <main> scrolls.
+    <div className="bg-background text-foreground flex h-dvh overflow-hidden">
       <AppSidebar
         page={page}
         onNavigate={navigate}
@@ -122,9 +132,10 @@ export function AdminDashboard() {
         onCollapsedChange={onCollapsedChange}
         drawerOpen={drawerOpen}
         onDrawerOpenChange={setDrawerOpen}
+        rail={hasRail}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <AppTopNav
           ref={searchRef}
           workspace={ws}
@@ -134,8 +145,11 @@ export function AdminDashboard() {
           onSignOut={() => push({ title: 'Signed out', description: 'Demo — no real session.' })}
           searchValue={search}
           onSearchChange={onSearchChange}
+          layout={layout}
+          page={page}
+          onWorkspaceChange={setWorkspace}
         />
-        <main className="bg-background-subtle flex-1 overflow-y-auto p-4 md:p-6">
+        <main className="bg-background-subtle min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
           <div className="mx-auto max-w-[1440px]">
             {page === 'overview' && <Overview onNavigate={navigate} />}
             {page === 'analytics' && <Analytics onNavigate={navigate} />}
@@ -156,6 +170,7 @@ export function AdminDashboard() {
         onOpenChange={setPaletteOpen}
         onNavigate={navigate}
         onAction={runAction}
+        hasSidebar={hasRail}
       />
       <Toaster />
     </div>

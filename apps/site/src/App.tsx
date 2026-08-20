@@ -75,7 +75,12 @@ function Shell() {
 
   if (isFullBleedRoute(route) && route.kind === 'preview') {
     // key: switching template from the preview dock must reset screen state.
-    return <PreviewPage key={route.slug} slug={route.slug} initialScreen={route.screen} />;
+    return <PreviewPage
+        key={route.slug}
+        slug={route.slug}
+        initialScreen={route.screen}
+        initialVariant={route.variant}
+      />;
   }
 
   return (
@@ -186,7 +191,12 @@ function RouteView({ route }: { route: Route }) {
     case 'preview':
       // Handled by Shell before reaching here; kept so the switch is exhaustive.
       // key: switching template from the preview dock must reset screen state.
-    return <PreviewPage key={route.slug} slug={route.slug} initialScreen={route.screen} />;
+    return <PreviewPage
+        key={route.slug}
+        slug={route.slug}
+        initialScreen={route.screen}
+        initialVariant={route.variant}
+      />;
 
     case 'not-found':
       return <NotFound />;

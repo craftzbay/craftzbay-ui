@@ -15,6 +15,13 @@ export interface TemplateScreen {
   label: string;
 }
 
+/** An alternative shell/layout of the same template (e.g. sidebar vs top nav). */
+export interface TemplateVariant {
+  key: string;
+  label: string;
+  description?: string;
+}
+
 /** Props every template component receives from the preview host. */
 export interface TemplateProps {
   /** Active top-level screen key. */
@@ -23,6 +30,8 @@ export interface TemplateProps {
   setScreen: (screen: string) => void;
   /** Wordmark to render in the template's chrome. */
   brand: ReactNode;
+  /** Active layout variant key (see `BlockMeta.variants`); templates without variants ignore it. */
+  variant?: string;
 }
 
 export interface BlockMeta {
@@ -35,6 +44,13 @@ export interface BlockMeta {
   screens: TemplateScreen[];
   /** Design patterns the template demonstrates (design-research section names). */
   patterns?: string[];
+  /** Layout variants, switched from the preview dock / docs page. First is the default. */
+  variants?: TemplateVariant[];
+  /**
+   * `app` = viewport-locked shell (only its own panes scroll; the preview
+   * wrapper is h-dvh + overflow-hidden). `page` (default) = the document scrolls.
+   */
+  shell?: 'app' | 'page';
 }
 
 export const blockMeta: BlockMeta[] = [
@@ -45,9 +61,23 @@ export const blockMeta: BlockMeta[] = [
       'A complete admin app on the library Sidebar + TopNav shell: workspace switcher, ⌘K palette, Overview KPIs and charts, Projects (sortable, filterable, paginated CRUD with bulk actions), Inbox, Team, Reports and Settings.',
     useCases: ['SaaS back-office', 'Internal tools', 'Analytics console'],
     sourceFile: 'AdminDashboard.tsx',
+    shell: 'app',
     screens: [{ key: 'app', label: 'Dashboard' }],
+    variants: [
+      {
+        key: 'sidebar',
+        label: 'Sidebar rail',
+        description: 'Collapsible 240px rail, icon rail, drawer below lg',
+      },
+      {
+        key: 'topnav',
+        label: 'Top nav',
+        description: 'Horizontal primary nav, no rail — for ≤6 sections',
+      },
+    ],
     patterns: [
       'App shell — 256px sidebar, icon rail, drawer ≤1024px (10 · App shell)',
+      'Two shells: sidebar rail vs top nav — pick by section count (10 · App shell)',
       'Active nav = accent bar + weight + background; breadcrumbs at depth ≥2 (10 · Navigation)',
       'Overview: KPI row → chart → table; delta with arrow + sign + period (11 · KPI tile)',
       'Table: 3-state sort, filter chips, 300ms search, 25/50/100 pages, bulk bar, overflow actions (10 · Table)',

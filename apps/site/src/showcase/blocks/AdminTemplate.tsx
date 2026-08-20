@@ -1,4 +1,4 @@
-import { AdminDashboard } from './AdminDashboard';
+import { AdminDashboard, type AdminLayout } from './AdminDashboard';
 
 /**
  * Admin dashboard template — a complete admin console on the library's
@@ -8,7 +8,8 @@ import { AdminDashboard } from './AdminDashboard';
  * confirm-before-delete, empty + loading states); Team, Billing, Settings and
  * Inbox each have their own data and actions. Source: ./AdminDashboard.tsx +
  * ./admin/*. The authentication screens live in the "Authentication" template.
+ * `layout` picks the shell: `sidebar` (rail) or `topnav` (horizontal links).
  */
-export function AdminTemplate() {
-  return <AdminDashboard />;
+export function AdminTemplate({ layout = 'sidebar' }: { layout?: AdminLayout }) {
+  return <AdminDashboard layout={layout} />;
 }

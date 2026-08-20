@@ -58,11 +58,17 @@ import { NAV, NOTIFICATIONS, USER, WORKSPACES, findNav, type Workspace } from '.
 export function WorkspaceSwitcher({
   value,
   onChange,
+  variant = 'sidebar',
 }: {
   value: string;
   onChange: (id: string) => void;
+  /** `sidebar` fills the rail header (collapses with it); `bar` is a compact top-bar trigger. */
+  variant?: 'sidebar' | 'bar';
 }) {
-  const { collapsed } = useSidebar();
+  // Outside a Sidebar the context defaults to `collapsed: false`, so the bar
+  // variant is safe without a provider.
+  const { collapsed: railCollapsed } = useSidebar();
+  const collapsed = variant === 'sidebar' && railCollapsed;
   const ws = WORKSPACES.find((w) => w.id === value) ?? WORKSPACES[0];
   return (
     <DropdownMenu>
@@ -71,27 +77,38 @@ export function WorkspaceSwitcher({
           type="button"
           aria-label={collapsed ? `Workspace: ${ws.name}` : undefined}
           className={cn(
-            'flex h-10 w-full items-center gap-2.5 rounded-md text-left transition-colors outline-none',
+            'flex items-center gap-2.5 rounded-md text-left transition-colors outline-none',
             'hover:bg-background-muted focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
-            collapsed ? 'justify-center px-0' : 'px-1.5',
+            variant === 'bar' ? 'h-9 px-1.5' : 'h-10 w-full',
+            variant === 'sidebar' && (collapsed ? 'justify-center px-0' : 'px-1.5'),
           )}
         >
           <Avatar
-            size="md"
+            size={variant === 'bar' ? 'sm' : 'md'}
             fallback={ws.initial}
             alt=""
             className="rounded-md [&_span]:rounded-md"
           />
-          {!collapsed && (
+          {variant === 'bar' ? (
             <>
-              <span className="min-w-0 flex-1 leading-tight">
-                <span className="text-foreground block truncate text-sm font-semibold">
-                  {ws.name}
-                </span>
-                <span className="text-foreground-subtle block text-xs">{ws.plan} plan</span>
-              </span>
+              <span className="text-foreground truncate text-sm font-semibold">{ws.name}</span>
+              <Badge tone="neutral" variant="outline" className="hidden sm:inline-flex">
+                {ws.plan}
+              </Badge>
               <ChevronsUpDown className="text-foreground-subtle size-4 shrink-0" aria-hidden />
             </>
+          ) : (
+            !collapsed && (
+              <>
+                <span className="min-w-0 flex-1 leading-tight">
+                  <span className="text-foreground block truncate text-sm font-semibold">
+                    {ws.name}
+                  </span>
+                  <span className="text-foreground-subtle block text-xs">{ws.plan} plan</span>
+                </span>
+                <ChevronsUpDown className="text-foreground-subtle size-4 shrink-0" aria-hidden />
+              </>
+            )
           )}
         </button>
       </DropdownMenuTrigger>
@@ -195,6 +212,8 @@ export interface AppSidebarProps {
   /** Mobile drawer state (below lg). */
   drawerOpen: boolean;
   onDrawerOpenChange: (open: boolean) => void;
+  /** Render the desktop rail (≥lg). The `topnav` shell sets this false and keeps only the drawer. */
+  rail?: boolean;
 }
 
 /**
@@ -210,6 +229,7 @@ export function AppSidebar({
   onCollapsedChange,
   drawerOpen,
   onDrawerOpenChange,
+  rail = true,
 }: AppSidebarProps) {
   const navigate = (key: string) => {
     onNavigate(key);
@@ -217,17 +237,19 @@ export function AppSidebar({
   };
   return (
     <>
-      <Sidebar
-        collapsed={collapsed}
-        onCollapsedChange={onCollapsedChange}
-        header={<WorkspaceSwitcher value={workspace} onChange={onWorkspaceChange} />}
-        footer={<UserCard />}
-        // The library default is `hidden md:flex`; the admin shell promotes the
-        // breakpoint to lg and serves a drawer below it.
-        className="md:hidden lg:flex"
-      >
-        <NavItems page={page} onNavigate={navigate} />
-      </Sidebar>
+      {rail && (
+        <Sidebar
+          collapsed={collapsed}
+          onCollapsedChange={onCollapsedChange}
+          header={<WorkspaceSwitcher value={workspace} onChange={onWorkspaceChange} />}
+          footer={<UserCard />}
+          // The library default is `hidden md:flex`; the admin shell promotes the
+          // breakpoint to lg and serves a drawer below it.
+          className="md:hidden lg:flex"
+        >
+          <NavItems page={page} onNavigate={navigate} />
+        </Sidebar>
+      )}
 
       <Sheet open={drawerOpen} onOpenChange={onDrawerOpenChange}>
         <SheetContent side="left" className="w-64 p-0" showClose={false}>
@@ -246,6 +268,52 @@ export function AppSidebar({
 }
 
 /* ---------------------------------------------------------------------------
+ *  Horizontal primary nav — the `topnav` shell. Sections are flattened to
+ *  their items (≤6 here); Settings and Billing stay in the profile menu.
+ *  Active = accent bar + weight, never colour alone. Visible ≥lg only; below
+ *  that the hamburger opens the same drawer as the sidebar shell.
+ * ------------------------------------------------------------------------ */
+
+const TOPNAV_KEYS = ['overview', 'analytics', 'projects', 'inbox', 'members', 'reports'];
+
+function TopNavItems({ page, onNavigate }: { page: string; onNavigate: (key: string) => void }) {
+  const items = NAV.flatMap((s) => s.items).filter((it) => TOPNAV_KEYS.includes(it.key));
+  return (
+    // The library nav slot shows from md; this shell needs lg for six links +
+    // a workspace switcher + search, so the wrapper hides itself below lg.
+    <div className="hidden lg:contents">
+      {items.map((it) => {
+        const active = page === it.key;
+        return (
+          <button
+            key={it.key}
+            type="button"
+            onClick={() => onNavigate(it.key)}
+            aria-current={active ? 'page' : undefined}
+            className={cn(
+              'relative inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm outline-none',
+              'transition-colors duration-[var(--duration-fast)]',
+              'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
+              'after:bg-accent after:absolute after:inset-x-3 after:-bottom-2.5 after:h-0.5 after:rounded-full after:opacity-0',
+              active
+                ? 'text-foreground font-semibold after:opacity-100'
+                : 'text-foreground-muted hover:text-foreground font-medium',
+            )}
+          >
+            {it.label}
+            {it.count != null && (
+              <Badge tone={active ? 'accent' : 'neutral'} className="tabular">
+                {it.count}
+              </Badge>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------------------
  *  Top bar — tenant name, search (`/`), ⌘K hint, notifications, profile
  * ------------------------------------------------------------------------ */
 
@@ -257,10 +325,26 @@ export interface AppTopNavProps {
   onSignOut: () => void;
   searchValue: string;
   onSearchChange: (q: string) => void;
+  /** `sidebar` (default) shows the tenant name; `topnav` adds primary links + the workspace switcher. */
+  layout?: 'sidebar' | 'topnav';
+  /** Active page — needed for the `topnav` links' active state. */
+  page?: string;
+  onWorkspaceChange?: (id: string) => void;
 }
 
 export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function AppTopNav(
-  { workspace, onOpenDrawer, onOpenPalette, onNavigate, onSignOut, searchValue, onSearchChange },
+  {
+    workspace,
+    onOpenDrawer,
+    onOpenPalette,
+    onNavigate,
+    onSignOut,
+    searchValue,
+    onSearchChange,
+    layout = 'sidebar',
+    page = '',
+    onWorkspaceChange,
+  },
   searchRef,
 ) {
   const unread = NOTIFICATIONS.filter((n) => n.unread).length;
@@ -278,15 +362,25 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
             className="lg:hidden"
             onClick={onOpenDrawer}
           />
-          {/* Tenant is visible on every page, even with a single workspace. */}
-          <span className="flex items-center gap-2 text-sm">
-            <span className="text-foreground font-semibold">{workspace.name}</span>
-            <Badge tone="neutral" variant="outline" className="hidden sm:inline-flex">
-              {workspace.plan}
-            </Badge>
-          </span>
+          {layout === 'topnav' ? (
+            // No rail to host the switcher, so it lives in the bar.
+            <WorkspaceSwitcher
+              variant="bar"
+              value={workspace.id}
+              onChange={(id) => onWorkspaceChange?.(id)}
+            />
+          ) : (
+            // Tenant is visible on every page, even with a single workspace.
+            <span className="flex items-center gap-2 text-sm">
+              <span className="text-foreground font-semibold">{workspace.name}</span>
+              <Badge tone="neutral" variant="outline" className="hidden sm:inline-flex">
+                {workspace.plan}
+              </Badge>
+            </span>
+          )}
         </div>
       }
+      nav={layout === 'topnav' ? <TopNavItems page={page} onNavigate={onNavigate} /> : undefined}
       search={
         <Input
           ref={searchRef}
@@ -479,11 +573,14 @@ export function AdminPalette({
   onOpenChange,
   onNavigate,
   onAction,
+  hasSidebar = true,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onNavigate: (key: string) => void;
   onAction: (action: 'new-project' | 'invite' | 'toggle-sidebar') => void;
+  /** False in the `topnav` shell — there is no rail to toggle. */
+  hasSidebar?: boolean;
 }) {
   const run = (fn: () => void) => () => {
     onOpenChange(false);
@@ -502,9 +599,11 @@ export function AdminPalette({
           <CommandItem onSelect={run(() => onAction('invite'))}>
             <User /> Invite teammate
           </CommandItem>
-          <CommandItem onSelect={run(() => onAction('toggle-sidebar'))}>
-            <Menu /> Toggle sidebar
-          </CommandItem>
+          {hasSidebar && (
+            <CommandItem onSelect={run(() => onAction('toggle-sidebar'))}>
+              <Menu /> Toggle sidebar
+            </CommandItem>
+          )}
         </CommandGroup>
         {NAV.map((section) => (
           <CommandGroup key={section.label} heading={section.label}>

@@ -11,6 +11,7 @@
  *   #catalog                → legacy: full mini-demo wall
  *   #preview/auth-signin    → full-bleed live preview of a template
  *   #preview/auth/signup    → …opened at a specific screen
+ *   #preview/admin/app/topnav → …at a specific screen + layout variant
  *   anything else           → 404
  */
 
@@ -23,7 +24,7 @@ export type Route =
   | { kind: 'template'; slug: string }
   | { kind: 'guides-index' }
   | { kind: 'guide'; slug: string }
-  | { kind: 'preview'; slug: string; screen?: string }
+  | { kind: 'preview'; slug: string; screen?: string; variant?: string }
   | { kind: 'not-found' };
 
 export function parseHash(hash: string): Route {
@@ -35,11 +36,16 @@ export function parseHash(hash: string): Route {
   if (raw === 'templates') return { kind: 'templates-index' };
   if (raw === 'guides' || raw === 'docs') return { kind: 'guides-index' };
 
-  const [section, slug, screen] = raw.split('/');
+  const [section, slug, screen, variant] = raw.split('/');
   if (section === 'components' && slug) return { kind: 'component', slug };
   if (section === 'templates' && slug) return { kind: 'template', slug };
   if ((section === 'guides' || section === 'docs') && slug) return { kind: 'guide', slug };
-  if (section === 'preview' && slug) return screen ? { kind: 'preview', slug, screen } : { kind: 'preview', slug };
+  if (section === 'preview' && slug) {
+    const route: Route = { kind: 'preview', slug };
+    if (screen) route.screen = screen;
+    if (variant) route.variant = variant;
+    return route;
+  }
 
   // Back-compat: legacy single-segment hashes like #dashboard, #auth-signin,
   // #settings used to be top-level pattern keys. Map them to live previews.
@@ -80,7 +86,11 @@ export function routeToHash(route: Route): string {
     case 'guide':
       return `guides/${route.slug}`;
     case 'preview':
-      return route.screen ? `preview/${route.slug}/${route.screen}` : `preview/${route.slug}`;
+      return (
+        `preview/${route.slug}` +
+        (route.screen ? `/${route.screen}` : '') +
+        (route.screen && route.variant ? `/${route.variant}` : '')
+      );
     case 'not-found':
       return '404';
   }
@@ -96,10 +106,13 @@ export function isFullBleedRoute(route: Route): boolean {
  * `target="_blank"` so a template opens in its own browser tab, isolated from
  * the showcase chrome — the headline behaviour of the Templates section.
  */
-export function previewUrl(slug: string, screen?: string): string {
+export function previewUrl(slug: string, screen?: string, variant?: string): string {
   const base =
     typeof window === 'undefined'
       ? ''
       : `${window.location.origin}${window.location.pathname}${window.location.search}`;
-  return `${base}#${routeToHash(screen ? { kind: 'preview', slug, screen } : { kind: 'preview', slug })}`;
+  const route: Route = { kind: 'preview', slug };
+  if (screen) route.screen = screen;
+  if (screen && variant) route.variant = variant;
+  return `${base}#${routeToHash(route)}`;
 }

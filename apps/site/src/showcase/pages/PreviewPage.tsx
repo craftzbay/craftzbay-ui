@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState } from 'react';
 import { ArrowLeft, Check, ChevronDown } from '@/icons';
 import { Spinner } from '@/components/ui/Spinner';
+import { cn } from '@/lib/utils';
 import { blockMeta, getBlockMeta } from '../blocks/meta';
 import { routeToHash } from '../routing';
 import {
@@ -23,13 +24,27 @@ const BlockPreview = lazy(() => import('../blocks/Preview'));
  * the live accent + theme controls. Navigation between a template's screens
  * happens inside the template itself.
  */
-export function PreviewPage({ slug, initialScreen }: { slug: string; initialScreen?: string }) {
+export function PreviewPage({
+  slug,
+  initialScreen,
+  initialVariant,
+}: {
+  slug: string;
+  initialScreen?: string;
+  /** Layout variant key from the route (`#preview/<slug>/<screen>/<variant>`). */
+  initialVariant?: string;
+}) {
   const doc = getBlockMeta(slug);
   const [screen, setScreen] = useState(
     () =>
       (initialScreen && doc?.screens.some((s) => s.key === initialScreen)
         ? initialScreen
         : doc?.screens[0]?.key) ?? 'home',
+  );
+  const [variant, setVariant] = useState<string | undefined>(() =>
+    initialVariant && doc?.variants?.some((v) => v.key === initialVariant)
+      ? initialVariant
+      : doc?.variants?.[0]?.key,
   );
   // When the template page embeds this route in an iframe, the docs page
   // already owns the controls — hide the dock.
@@ -38,7 +53,14 @@ export function PreviewPage({ slug, initialScreen }: { slug: string; initialScre
   if (!doc) return <NotFound />;
 
   return (
-    <div className="min-h-screen bg-background">
+    // App shells lock to the viewport so a leaking pane can never scroll the
+    // document; page-style templates keep normal document scroll.
+    <div
+      className={cn(
+        'bg-background',
+        doc.shell === 'app' ? 'h-dvh overflow-hidden' : 'min-h-screen',
+      )}
+    >
       <Suspense
         fallback={
           <div className="flex h-[60vh] items-center justify-center">
@@ -46,7 +68,7 @@ export function PreviewPage({ slug, initialScreen }: { slug: string; initialScre
           </div>
         }
       >
-        <BlockPreview slug={slug} screen={screen} setScreen={setScreen} />
+        <BlockPreview slug={slug} screen={screen} setScreen={setScreen} variant={variant} />
       </Suspense>
 
       {/* Floating preview dock — bottom-right so the template renders edge to
@@ -96,6 +118,32 @@ export function PreviewPage({ slug, initialScreen }: { slug: string; initialScre
                   <DropdownMenuItem key={sc.key} onSelect={() => setScreen(sc.key)}>
                     <span className="flex-1">{sc.label}</span>
                     {sc.key === screen && <Check className="size-4 text-accent" aria-hidden />}
+                  </DropdownMenuItem>
+                ))}
+              </>
+            )}
+            {doc.variants && doc.variants.length > 1 && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Layout</DropdownMenuLabel>
+                {doc.variants.map((v) => (
+                  <DropdownMenuItem
+                    key={v.key}
+                    role="menuitemradio"
+                    aria-checked={v.key === variant}
+                    title={v.description}
+                    onSelect={() => {
+                      setVariant(v.key);
+                      window.location.hash = routeToHash({
+                        kind: 'preview',
+                        slug,
+                        screen,
+                        variant: v.key,
+                      });
+                    }}
+                  >
+                    <span className="flex-1">{v.label}</span>
+                    {v.key === variant && <Check className="size-4 text-accent" aria-hidden />}
                   </DropdownMenuItem>
                 ))}
               </>

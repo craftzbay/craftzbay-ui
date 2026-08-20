@@ -40,9 +40,11 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
   const [source, setSource] = useState<string | null>(null);
   const [screen, setScreen] = useState(doc.screens[0]?.key ?? 'home');
   const [width, setWidth] = useState<WidthKey>('desktop');
+  const [variant, setVariant] = useState<string | undefined>(doc.variants?.[0]?.key);
 
   useEffect(() => {
     setScreen(doc.screens[0]?.key ?? 'home');
+    setVariant(doc.variants?.[0]?.key);
     let alive = true;
     setSource(null);
     import('../blocks/sources').then((m) => {
@@ -51,10 +53,10 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
     return () => {
       alive = false;
     };
-  }, [doc.slug, doc.screens]);
+  }, [doc.slug, doc.screens, doc.variants]);
 
   const frameWidth = WIDTHS.find((w) => w.key === width)?.width ?? 1280;
-  const src = previewUrl(doc.slug, screen);
+  const src = previewUrl(doc.slug, screen, variant);
 
   // The docs column is narrower than a real desktop viewport, so the frame
   // keeps its true CSS width (the template's breakpoints stay honest) and is
@@ -147,19 +149,37 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
         ) : (
           <span />
         )}
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Preview width">
-          {WIDTHS.map((w) => (
-            <button
-              key={w.key}
-              type="button"
-              onClick={() => setWidth(w.key)}
-              aria-pressed={w.key === width}
-              className={pillClass(w.key === width)}
-              title={w.hint}
-            >
-              {w.label}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center gap-3">
+          {doc.variants && doc.variants.length > 1 && (
+            <div className="flex flex-wrap gap-1.5" role="group" aria-label="Layout">
+              {doc.variants.map((v) => (
+                <button
+                  key={v.key}
+                  type="button"
+                  onClick={() => setVariant(v.key)}
+                  aria-pressed={v.key === variant}
+                  className={pillClass(v.key === variant)}
+                  title={v.description}
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="flex flex-wrap gap-1.5" role="group" aria-label="Preview width">
+            {WIDTHS.map((w) => (
+              <button
+                key={w.key}
+                type="button"
+                onClick={() => setWidth(w.key)}
+                aria-pressed={w.key === width}
+                className={pillClass(w.key === width)}
+                title={w.hint}
+              >
+                {w.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
       <div
@@ -170,7 +190,7 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
         <iframe
           // Remount on screen or width change so the template opens fresh at
           // that viewport (no stale drawer/menu state carried across sizes).
-          key={`${doc.slug}/${screen}/${width}`}
+          key={`${doc.slug}/${screen}/${variant ?? ''}/${width}`}
           src={src}
           title={`${doc.name} preview`}
           loading="lazy"
@@ -189,7 +209,7 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
       <p className="text-foreground-subtle mt-2 text-xs">
         Interactive. For the full-screen version,{' '}
         <a
-          href={previewUrl(doc.slug, screen)}
+          href={previewUrl(doc.slug, screen, variant)}
           target="_blank"
           rel="noreferrer"
           className="text-accent focus-visible:ring-ring rounded-sm outline-none hover:underline focus-visible:ring-2"
