@@ -22,7 +22,7 @@ import { useFieldIds } from '@/hooks/use-field-ids';
 const field = cva(
   [
     'group inline-flex items-center w-full',
-    'rounded-md border border-input bg-card text-sm',
+    'rounded-md border border-border-input bg-card text-sm',
     'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)]',
     'has-disabled:opacity-50 has-disabled:pointer-events-none',
     'focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-background',
