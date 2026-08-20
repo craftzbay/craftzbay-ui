@@ -626,7 +626,9 @@
     line-height: var(--text-base--line-height);
     font-weight: var(--font-weight-normal);
     /* Long Cyrillic words / URLs must never overflow their container. */
-    overflow-wrap: anywhere;
+    /* break-word, not anywhere: `anywhere` shrinks min-content so flex/table
+       columns collapse to one character on narrow screens (Cyrillic or not). */
+    overflow-wrap: break-word;
     font-synthesis: none;
   }
 
