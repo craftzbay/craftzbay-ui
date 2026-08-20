@@ -15,6 +15,7 @@ import {
 } from '@/icons';
 import { useModifierKey } from '@/hooks/use-modifier-key';
 import { useTheme, type Theme } from '../../theme/theme-context';
+import { MonitorIcon, NEXT_THEME, THEME_LABEL } from '../../theme/Controls';
 import {
   Avatar,
   Badge,
@@ -706,10 +707,10 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
             />
           </Tooltip>
 
-          <Tooltip label={theme === 'light' ? 'Dark mode' : 'Light mode'}>
+          <Tooltip label={`Theme: ${THEME_LABEL[theme]}`}>
             <IconButton
-              aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-              icon={theme === 'light' ? <Moon /> : <Sun />}
+              aria-label={`Theme: ${THEME_LABEL[theme]}. Switch to ${THEME_LABEL[NEXT_THEME[theme]].toLowerCase()}`}
+              icon={theme === 'light' ? <Sun /> : theme === 'dark' ? <Moon /> : <MonitorIcon />}
               variant="ghost"
               size="sm"
               onClick={toggleTheme}
@@ -801,6 +802,7 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
               <DropdownMenuRadioGroup value={theme} onValueChange={(v) => setTheme(v as Theme)}>
                 <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="system">System</DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={onSignOut}>

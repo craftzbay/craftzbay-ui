@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import {
   Copy,
   Download,
@@ -52,6 +52,7 @@ import {
   type Project,
   type ProjectStatus,
 } from './data';
+import { readHashParams, useHashParams } from './use-hash-params';
 import { PageHeader } from './shell';
 import { FilterChip, ProjectDialog, useDebounced } from './projects-parts';
 
@@ -64,8 +65,54 @@ import { FilterChip, ProjectDialog, useDebounced } from './projects-parts';
  * ========================================================================== */
 
 const PAGE_SIZES = [25, 50, 100];
-type Sort = { key: 'name' | 'status' | 'owner' | 'updatedAt'; direction: 'asc' | 'desc' } | null;
+type SortKey = 'name' | 'status' | 'owner' | 'updatedAt';
+type Sort = { key: SortKey; direction: 'asc' | 'desc' } | null;
 type StatusFilter = 'all' | ProjectStatus;
+const DEFAULT_SORT: NonNullable<Sort> = { key: 'updatedAt', direction: 'desc' };
+/** URL ↔ sort key (`updated` reads better than `updatedAt` in a link). */
+const SORT_PARAM: Record<SortKey, string> = {
+  name: 'name',
+  status: 'status',
+  owner: 'owner',
+  updatedAt: 'updated',
+};
+
+/** Initial list state from the hash tail: `?q=&status=&owner=&sort=&dir=&p=&size=`. */
+function readInitialState() {
+  const params = readHashParams();
+  const statusParam = params.get('status')?.toLowerCase();
+  const status = STATUSES.find((s) => s.toLowerCase() === statusParam) ?? 'all';
+  const sortKey = (Object.keys(SORT_PARAM) as SortKey[]).find(
+    (k) => SORT_PARAM[k] === params.get('sort'),
+  );
+  const dir = params.get('dir') === 'asc' ? 'asc' : 'desc';
+  const sort: Sort =
+    params.get('sort') === 'none'
+      ? null
+      : sortKey
+        ? { key: sortKey, direction: dir }
+        : DEFAULT_SORT;
+  const p = Number(params.get('p'));
+  const size = Number(params.get('size'));
+  return {
+    query: params.get('q') ?? '',
+    status: status as StatusFilter,
+    owner: params.get('owner') ?? 'all',
+    sort,
+    page: Number.isInteger(p) && p > 1 ? p : 1,
+    pageSize: PAGE_SIZES.includes(size) ? size : PAGE_SIZES[0],
+  };
+}
+
+/**
+ * Below md the table scrolls horizontally; the checkbox + name cells stick to
+ * the left edge so each row keeps its identity. Solid `bg-card` (the table
+ * surface) hides the cells scrolling underneath; selected rows use the row tint.
+ */
+const STICKY_CHECK =
+  'max-md:sticky max-md:left-0 max-md:z-10 max-md:w-12 max-md:bg-card max-md:group-data-[selected]:bg-accent-soft';
+const STICKY_NAME =
+  'max-md:sticky max-md:left-12 max-md:z-10 max-md:bg-card max-md:group-data-[selected]:bg-accent-soft';
 
 /* ---------------------------------------------------------------------------
  *  Page
@@ -82,13 +129,16 @@ export const Projects = forwardRef<
 >(function Projects({ onNavigate, globalQuery }, ref) {
   const { push } = useToast();
   const [items, setItems] = useState<Project[]>(SEED_PROJECTS);
-  const [query, setQuery] = useState('');
+  // Filter/sort/page state seeds from the URL and is written back on change,
+  // so a filtered view survives reload and can be shared as a link.
+  const [initial] = useState(readInitialState);
+  const [query, setQuery] = useState(initial.query);
   const debouncedQuery = useDebounced(query.trim().toLowerCase());
-  const [status, setStatus] = useState<StatusFilter>('all');
-  const [owner, setOwner] = useState<string>('all');
-  const [sort, setSort] = useState<Sort>({ key: 'updatedAt', direction: 'desc' });
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
+  const [status, setStatus] = useState<StatusFilter>(initial.status);
+  const [owner, setOwner] = useState<string>(initial.owner);
+  const [sort, setSort] = useState<Sort>(initial.sort);
+  const [page, setPage] = useState(initial.page);
+  const [pageSize, setPageSize] = useState(initial.pageSize);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Project | null>(null);
@@ -102,10 +152,26 @@ export const Projects = forwardRef<
     },
   }));
 
-  // The top-bar search feeds this page's query.
+  // The top-bar search feeds this page's query (skip mount so a `?q=` deep
+  // link isn't wiped by the empty top-bar field).
+  const mounted = useRef(false);
   useEffect(() => {
-    setQuery(globalQuery);
+    if (mounted.current) setQuery(globalQuery);
+    mounted.current = true;
   }, [globalQuery]);
+
+  useHashParams({
+    q: query.trim() || undefined,
+    status: status === 'all' ? undefined : status.toLowerCase(),
+    owner: owner === 'all' ? undefined : owner,
+    sort: sort === null ? 'none' : sort.key === DEFAULT_SORT.key ? undefined : SORT_PARAM[sort.key],
+    dir:
+      sort && !(sort.key === DEFAULT_SORT.key && sort.direction === DEFAULT_SORT.direction)
+        ? sort.direction
+        : undefined,
+    p: page > 1 ? page : undefined,
+    size: pageSize === PAGE_SIZES[0] ? undefined : pageSize,
+  });
 
   const owners = useMemo(() => Array.from(new Set(items.map((p) => p.owner))).sort(), [items]);
 
@@ -420,7 +486,7 @@ export const Projects = forwardRef<
             <Table>
               <TableHeader className={cn(selected.size > 0 && 'sr-only')}>
                 <TableRow>
-                  <TableHead>
+                  <TableHead className={STICKY_CHECK}>
                     <Checkbox
                       aria-label="Select all on this page"
                       checked={allOnPage ? true : someOnPage ? 'indeterminate' : false}
@@ -428,7 +494,12 @@ export const Projects = forwardRef<
                       disabled={loading || rows.length === 0}
                     />
                   </TableHead>
-                  <TableSortHeader sortKey="name" currentSort={sort} onSortChange={onSort}>
+                  <TableSortHeader
+                    sortKey="name"
+                    currentSort={sort}
+                    onSortChange={onSort}
+                    className={STICKY_NAME}
+                  >
                     Name
                   </TableSortHeader>
                   <TableSortHeader sortKey="status" currentSort={sort} onSortChange={onSort}>
@@ -483,8 +554,8 @@ export const Projects = forwardRef<
                       const rel = formatRelative(p.updatedAt);
                       const isSelected = selected.has(p.id);
                       return (
-                        <TableRow key={p.id} selected={isSelected}>
-                          <TableCell>
+                        <TableRow key={p.id} selected={isSelected} className="group">
+                          <TableCell className={STICKY_CHECK}>
                             <Checkbox
                               aria-label={`Select ${p.name}`}
                               checked={isSelected}
@@ -492,7 +563,10 @@ export const Projects = forwardRef<
                             />
                           </TableCell>
                           <TableCell
-                            className="text-foreground max-w-[280px] truncate font-medium"
+                            className={cn(
+                              'text-foreground max-w-[280px] truncate font-medium',
+                              STICKY_NAME,
+                            )}
                             title={p.name}
                           >
                             {p.name}

@@ -151,7 +151,8 @@ export const MODULES: NavModule[] = [
 
 /**
  * Pages that exist only as destinations (no full demo UI yet). Rendered by
- * `StubPage` with a breadcrumb and a descriptive empty state.
+ * `StubPage` with a breadcrumb and a descriptive empty state. (`apikeys` is
+ * deliberately absent — it renders the permission-denied state instead.)
  */
 export interface StubSpec {
   title: string;
@@ -245,13 +246,6 @@ export const STUB_PAGES: Record<string, StubSpec> = {
     emptyDescription:
       'Owner, Admin, Member and Viewer are built in. Custom roles arrive with the Enterprise plan.',
     icon: Lock,
-  },
-  apikeys: {
-    title: 'API keys',
-    subtitle: 'Tokens that let other systems call your workspace.',
-    emptyTitle: 'No API keys',
-    emptyDescription: 'Create a key to integrate with CI, webhooks or a partner system.',
-    icon: Key,
   },
 };
 

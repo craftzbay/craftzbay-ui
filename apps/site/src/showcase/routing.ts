@@ -13,6 +13,7 @@
  *   #preview/auth/signup    → …opened at a specific screen
  *   #preview/admin/app/topnav → …at a specific screen + layout variant
  *   #preview/admin/app/sidebar/projects → …at an in-app page (app shells)
+ *   #preview/admin/app/sidebar/projects?status=blocked&p=2 → …page state tail (ignored here)
  *   anything else           → 404
  */
 
@@ -29,7 +30,9 @@ export type Route =
   | { kind: 'not-found' };
 
 export function parseHash(hash: string): Route {
-  const raw = hash.replace(/^#/, '');
+  // Strip a query-style tail (`#preview/admin/app/sidebar/projects?status=…`) —
+  // list state the admin template keeps in the URL; the router ignores it.
+  const raw = hash.replace(/^#/, '').split('?')[0];
   if (!raw) return { kind: 'home' };
 
   if (raw === 'catalog') return { kind: 'catalog' };

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Toaster, useCommandPaletteShortcut, useToast } from '@craftzbay/ui';
+import { ConfirmationDialog, Toaster, useCommandPaletteShortcut, useToast } from '@craftzbay/ui';
 import { ALL_SECTIONS, STUB_PAGES, WORKSPACES, findModule } from './admin/data';
 import {
   AdminLayoutContext,
@@ -14,10 +14,13 @@ import {
   BillingPage,
   InboxPage,
   Members,
+  PermissionDeniedPage,
   SettingsPage,
   StubPage,
   type MembersHandle,
 } from './admin/pages';
+import { UnsavedContext } from './admin/unsaved';
+import { writeHash } from './admin/use-hash-params';
 
 /* =============================================================================
  *  AdminDashboard — a complete admin console on the library's app shell.
@@ -34,7 +37,12 @@ import {
  *    Esc closes overlays and blurs the search field.
  *  · Pages live in ./admin/* — Projects is the full table pattern (sort,
  *    filter chips, debounced search, 25/50/100 pagination, bulk bar,
- *    confirm-before-delete, first-run vs filtered empty, skeleton).
+ *    confirm-before-delete, first-run vs filtered empty, skeleton). Its list
+ *    state lives in the URL (`…/projects?status=blocked&p=2`); the active page
+ *    is mirrored into the preview hash too, so every view is a deep link.
+ *  · Guards: Settings › Profile registers its dirty flag (`useUnsavedGuard`);
+ *    `navigate()` then confirms "Discard changes?" and the tab warns on close.
+ *    API keys renders the permission-denied (403) state.
  *
  *  Copy the folder, swap the demo data for your API, and wire `page` to your
  *  router.
@@ -124,28 +132,46 @@ export function AdminDashboard({
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  const navigate = (key: string) => {
+  // Mirror the active page into the preview hash (replaceState — no history
+  // spam) so reload / share lands on the same page. Only when hosted at the
+  // preview route; the template itself stays router-agnostic.
+  useEffect(() => {
+    const m = /^#(preview\/admin)(?:\/|$|\?)/.exec(window.location.hash);
+    if (m) writeHash({}, `${m[1]}/app/${layout}/${page}`);
+  }, [layout, page]);
+
+  // Unsaved-changes guard: a page registers `dirty`; navigation then asks first.
+  const [dirty, setDirty] = useState(false);
+  const [pendingNav, setPendingNav] = useState<(() => void) | null>(null);
+  const go = (key: string) => {
     setPage(key);
     setModule(findModule(key).key);
     setDrawerOpen(false);
   };
+  const guarded = (key: string, then?: () => void) => {
+    const run = () => {
+      go(key);
+      then?.();
+    };
+    if (dirty && key !== page) setPendingNav(() => run);
+    else run();
+  };
+  const navigate = (key: string) => guarded(key);
 
   // Global search lands on the Projects list.
   const onSearchChange = (q: string) => {
     setSearch(q);
-    if (q && page !== 'projects') setPage('projects');
+    if (q && page !== 'projects') guarded('projects');
   };
 
   const runAction = (action: 'new-project' | 'invite' | 'toggle-sidebar') => {
     switch (action) {
       case 'new-project':
-        setPage('projects');
         // Defer until the page has mounted its handle.
-        window.setTimeout(() => projectsRef.current?.create(), 0);
+        guarded('projects', () => window.setTimeout(() => projectsRef.current?.create(), 0));
         break;
       case 'invite':
-        setPage('members');
-        window.setTimeout(() => membersRef.current?.invite(), 0);
+        guarded('members', () => window.setTimeout(() => membersRef.current?.invite(), 0));
         break;
       case 'toggle-sidebar':
         onCollapsedChange(!collapsed);
@@ -161,62 +187,84 @@ export function AdminDashboard({
     // shell, and any focus() on an off-screen row scrolls the overflow-hidden
     // root itself (sidebar "scrolls away"). With min-h-0 only <main> scrolls.
     <AdminLayoutContext.Provider value={layout}>
-      <div className="bg-background text-foreground flex h-dvh overflow-hidden">
-        <AppSidebar
-          page={page}
-          onNavigate={navigate}
-          workspace={workspace}
-          onWorkspaceChange={setWorkspace}
-          collapsed={collapsed}
-          onCollapsedChange={onCollapsedChange}
-          drawerOpen={drawerOpen}
-          onDrawerOpenChange={setDrawerOpen}
-          mode={SIDEBAR_MODE[layout]}
-          module={module}
-          onModuleChange={setModule}
-        />
-
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <AppTopNav
-            ref={searchRef}
-            workspace={ws}
-            onOpenDrawer={() => setDrawerOpen(true)}
-            onOpenPalette={() => setPaletteOpen(true)}
-            onNavigate={navigate}
-            onSignOut={() => push({ title: 'Signed out', description: 'Demo — no real session.' })}
-            searchValue={search}
-            onSearchChange={onSearchChange}
-            layout={layout}
+      <UnsavedContext.Provider value={setDirty}>
+        <div className="bg-background text-foreground flex h-dvh overflow-hidden">
+          <AppSidebar
             page={page}
+            onNavigate={navigate}
+            workspace={workspace}
             onWorkspaceChange={setWorkspace}
+            collapsed={collapsed}
+            onCollapsedChange={onCollapsedChange}
+            drawerOpen={drawerOpen}
+            onDrawerOpenChange={setDrawerOpen}
+            mode={SIDEBAR_MODE[layout]}
+            module={module}
+            onModuleChange={setModule}
           />
-          <main className="bg-background-subtle min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
-            <div className="mx-auto max-w-[1440px]">
-              {page === 'overview' && <Overview onNavigate={navigate} />}
-              {page === 'analytics' && <Analytics onNavigate={navigate} />}
-              {page === 'projects' && (
-                <Projects ref={projectsRef} onNavigate={navigate} globalQuery={search} />
-              )}
-              {page === 'inbox' && <InboxPage onNavigate={navigate} />}
-              {page === 'members' && <Members ref={membersRef} onNavigate={navigate} />}
-              {page === 'reports' && <Reports onNavigate={navigate} />}
-              {page === 'settings' && <SettingsPage onNavigate={navigate} />}
-              {page === 'billing' && <BillingPage onNavigate={navigate} />}
-              {page in STUB_PAGES && <StubPage page={page} onNavigate={navigate} />}
-            </div>
-          </main>
-        </div>
 
-        <AdminPalette
-          open={paletteOpen}
-          onOpenChange={setPaletteOpen}
-          onNavigate={navigate}
-          onAction={runAction}
-          hasSidebar={hasRail}
-          sections={layout === 'dual' ? ALL_SECTIONS : undefined}
-        />
-        <Toaster />
-      </div>
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+            <AppTopNav
+              ref={searchRef}
+              workspace={ws}
+              onOpenDrawer={() => setDrawerOpen(true)}
+              onOpenPalette={() => setPaletteOpen(true)}
+              onNavigate={navigate}
+              onSignOut={() =>
+                push({ title: 'Signed out', description: 'Demo — no real session.' })
+              }
+              searchValue={search}
+              onSearchChange={onSearchChange}
+              layout={layout}
+              page={page}
+              onWorkspaceChange={setWorkspace}
+            />
+            <main className="bg-background-subtle min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
+              <div className="mx-auto max-w-[1440px]">
+                {page === 'overview' && <Overview onNavigate={navigate} />}
+                {page === 'analytics' && <Analytics onNavigate={navigate} />}
+                {page === 'projects' && (
+                  <Projects ref={projectsRef} onNavigate={navigate} globalQuery={search} />
+                )}
+                {page === 'inbox' && <InboxPage onNavigate={navigate} />}
+                {page === 'members' && <Members ref={membersRef} onNavigate={navigate} />}
+                {page === 'reports' && <Reports onNavigate={navigate} />}
+                {page === 'settings' && <SettingsPage onNavigate={navigate} />}
+                {page === 'billing' && <BillingPage onNavigate={navigate} />}
+                {page === 'apikeys' && <PermissionDeniedPage onNavigate={navigate} />}
+                {page in STUB_PAGES && <StubPage page={page} onNavigate={navigate} />}
+              </div>
+            </main>
+          </div>
+
+          <AdminPalette
+            open={paletteOpen}
+            onOpenChange={setPaletteOpen}
+            onNavigate={navigate}
+            onAction={runAction}
+            hasSidebar={hasRail}
+            sections={layout === 'dual' ? ALL_SECTIONS : undefined}
+          />
+          <ConfirmationDialog
+            open={pendingNav !== null}
+            onOpenChange={(open) => {
+              if (!open) setPendingNav(null);
+            }}
+            title="Discard changes?"
+            description="Your profile edits haven't been saved. Leaving this page will lose them."
+            cancelLabel="Keep editing"
+            confirmLabel="Discard"
+            confirmVariant="destructive"
+            onConfirm={() => {
+              const run = pendingNav;
+              setPendingNav(null);
+              setDirty(false);
+              run?.();
+            }}
+          />
+          <Toaster />
+        </div>
+      </UnsavedContext.Provider>
     </AdminLayoutContext.Provider>
   );
 }

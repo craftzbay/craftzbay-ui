@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useState } from 'react';
-import { Mail, Plus, Trash2 } from '@/icons';
+import { Lock, Mail, Plus, Trash2 } from '@/icons';
 import {
   Avatar,
   Badge,
@@ -46,6 +46,7 @@ import {
 } from './data';
 import { PageHeader } from './shell';
 import { useTheme, type Theme } from '../../theme/theme-context';
+import { useUnsavedGuard } from './unsaved';
 
 /* =============================================================================
  *  Admin template — Inbox, Team, Settings, Billing
@@ -354,6 +355,8 @@ export function SettingsPage({ onNavigate }: { onNavigate: (key: string) => void
   const { theme, setTheme } = useTheme();
   const [dirty, setDirty] = useState(false);
   const [savedAt, setSavedAt] = useState<string | null>(null);
+  // Warn before the tab closes and before in-app navigation while unsaved.
+  useUnsavedGuard(dirty);
   return (
     <div className="max-w-2xl">
       <PageHeader
@@ -427,6 +430,7 @@ export function SettingsPage({ onNavigate }: { onNavigate: (key: string) => void
             >
               <RadioItem value="light" label="Light" />
               <RadioItem value="dark" label="Dark" />
+              <RadioItem value="system" label="System" />
             </RadioGroup>
           </CardContent>
         </Card>
@@ -555,6 +559,52 @@ export function StubPage({
         action={
           <Button variant="secondary" onClick={() => onNavigate('settings')}>
             Open settings
+          </Button>
+        }
+      />
+    </div>
+  );
+}
+
+/**
+ * Permission denied (403). Not an error page — the route exists, this account
+ * just can't see it. Say what is restricted, who can grant it, and offer the
+ * request as the primary action so the user isn't left at a dead end.
+ */
+export function PermissionDeniedPage({ onNavigate }: { onNavigate: (key: string) => void }) {
+  const { push } = useToast();
+  const [requested, setRequested] = useState(false);
+  return (
+    <div className="max-w-2xl">
+      <PageHeader
+        page="apikeys"
+        title="API keys"
+        subtitle="Tokens that let other systems call your workspace."
+        onNavigate={onNavigate}
+      />
+      <EmptyState
+        role="status"
+        icon={<Lock />}
+        title="You don't have access"
+        description="API keys are limited to the Owner and Admin roles. A workspace Owner can grant you the Admin role from Team."
+        action={
+          <Button
+            disabled={requested}
+            onClick={() => {
+              setRequested(true);
+              push({
+                variant: 'success',
+                title: 'Access requested',
+                description: 'The workspace Owner has been notified.',
+              });
+            }}
+          >
+            {requested ? 'Request sent' : 'Request access'}
+          </Button>
+        }
+        secondaryAction={
+          <Button variant="ghost" onClick={() => onNavigate('members')}>
+            View team
           </Button>
         }
       />

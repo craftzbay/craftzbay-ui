@@ -19,11 +19,20 @@ import { brandPresets, type BrandName } from '@craftzbay/ui';
  *  `brandPresets`. Both persist to localStorage and re-hydrate on the next tab.
  * --------------------------------------------------------------------------- */
 
-export type Theme = 'light' | 'dark';
+export type Theme = 'light' | 'dark' | 'system';
+export type ResolvedTheme = 'light' | 'dark';
+
+const THEMES: Theme[] = ['light', 'dark', 'system'];
+const isTheme = (v: unknown): v is Theme => THEMES.includes(v as Theme);
+const DARK_MQ = '(prefers-color-scheme: dark)';
 
 interface ThemeContextValue {
+  /** Stored preference — `system` follows the OS setting. */
   theme: Theme;
+  /** What is actually painted (`system` resolved against the OS). */
+  resolvedTheme: ResolvedTheme;
   setTheme: (t: Theme) => void;
+  /** Cycle light → dark → system. */
   toggleTheme: () => void;
   brand: BrandName;
   setBrand: (b: BrandName) => void;
@@ -47,8 +56,18 @@ function applyBrand(brand: BrandName) {
 }
 
 function readInitialTheme(): Theme {
-  if (typeof document === 'undefined') return 'light';
-  return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+  if (typeof window === 'undefined') return 'system';
+  try {
+    const stored = localStorage.getItem(THEME_KEY);
+    if (isTheme(stored)) return stored;
+  } catch {}
+  return 'system';
+}
+
+function resolveTheme(theme: Theme): ResolvedTheme {
+  if (theme !== 'system') return theme;
+  if (typeof window === 'undefined') return 'light';
+  return window.matchMedia(DARK_MQ).matches ? 'dark' : 'light';
 }
 
 function readInitialBrand(): BrandName {
@@ -62,14 +81,24 @@ function readInitialBrand(): BrandName {
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(readInitialTheme);
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => resolveTheme(theme));
   const [brand, setBrandState] = useState<BrandName>(readInitialBrand);
 
+  // Paint the resolved theme; while on `system`, follow OS changes live.
   useEffect(() => {
-    const root = document.documentElement;
-    root.classList.toggle('dark', theme === 'dark');
+    const apply = () => {
+      const resolved = resolveTheme(theme);
+      setResolvedTheme(resolved);
+      document.documentElement.classList.toggle('dark', resolved === 'dark');
+    };
+    apply();
     try {
       localStorage.setItem(THEME_KEY, theme);
     } catch {}
+    if (theme !== 'system') return;
+    const mq = window.matchMedia(DARK_MQ);
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
   }, [theme]);
 
   useEffect(() => {
@@ -83,9 +112,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // changes it (and vice-versa) via the storage event.
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
-      if (e.key === THEME_KEY && (e.newValue === 'light' || e.newValue === 'dark')) {
-        setThemeState(e.newValue);
-      }
+      if (e.key === THEME_KEY && isTheme(e.newValue)) setThemeState(e.newValue);
       if (e.key === BRAND_KEY && e.newValue && e.newValue in brandPresets) {
         setBrandState(e.newValue as BrandName);
       }
@@ -97,12 +124,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const value = useMemo<ThemeContextValue>(
     () => ({
       theme,
+      resolvedTheme,
       setTheme: setThemeState,
-      toggleTheme: () => setThemeState((t) => (t === 'light' ? 'dark' : 'light')),
+      toggleTheme: () => setThemeState((t) => THEMES[(THEMES.indexOf(t) + 1) % THEMES.length]),
       brand,
       setBrand: setBrandState,
     }),
-    [theme, brand],
+    [theme, resolvedTheme, brand],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

@@ -11,7 +11,7 @@ const FEATURED = ['button', 'input', 'dialog', 'data-grid', 'card', 'toast', 'co
 
 export function HomePage() {
   return (
-    <main className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
+    <main id="main" tabIndex={-1} className="mx-auto max-w-6xl px-6 py-16 outline-none lg:py-24">
       {/* Hero */}
       <div className="max-w-3xl">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-foreground-muted">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Toaster } from '@/components/ui/Toast';
 import { TooltipProvider } from '@/components/ui/Tooltip';
 import { useCommandPaletteShortcut } from '@/components/ui/CommandPalette';
@@ -28,6 +28,7 @@ import { NotFound } from './showcase/pages/NotFound';
 import { getComponentDoc } from './showcase/registry/components';
 import { getTemplateDoc } from './showcase/registry/templates';
 import { getGuideDoc } from './showcase/registry/guides';
+import { getBlockMeta } from './showcase/blocks/meta';
 
 /* -----------------------------------------------------------------------------
  *  Root showcase shell.
@@ -64,10 +65,22 @@ function Shell() {
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
-  // Reset scroll on navigation so deep pages don't open mid-scroll.
+  // SPA route change = a new "page": set the document title, reset scroll and
+  // move focus to <main> so screen readers announce the new content (07 · SPA).
   const scrollKey = `${route.kind}/${'slug' in route ? route.slug : ''}`;
+  const firstRender = useRef(true);
   useEffect(() => {
+    const page = routeTitle(route);
+    document.title = page ? `${page} — @craftzbay/ui` : '@craftzbay/ui';
+    if (route.kind === 'preview') return;
     window.scrollTo(0, 0);
+    // Keep the browser's initial focus on first load; only move it on navigation.
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    document.getElementById('main')?.focus({ preventScroll: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scrollKey]);
 
   const [cmdOpen, setCmdOpen] = useState(false);
@@ -86,6 +99,7 @@ function Shell() {
 
   return (
     <div className="bg-background text-foreground flex min-h-screen flex-col">
+      <SkipLink />
       <ShowcaseTopBar onOpenPalette={() => setCmdOpen(true)} current={route} />
       <div className="flex-1">
         <RouteView route={route} />
@@ -93,6 +107,51 @@ function Shell() {
       <ShowcaseFooter />
       <ShowcasePalette open={cmdOpen} onOpenChange={setCmdOpen} />
     </div>
+  );
+}
+
+/** Human page name for `document.title`; empty on the home page. */
+function routeTitle(route: Route): string {
+  switch (route.kind) {
+    case 'home':
+      return '';
+    case 'catalog':
+    case 'components-index':
+      return 'Components';
+    case 'component':
+      return getComponentDoc(route.slug)?.name ?? 'Components';
+    case 'templates-index':
+      return 'Templates';
+    case 'template':
+      return getTemplateDoc(route.slug)?.name ?? 'Templates';
+    case 'guides-index':
+      return 'Guides';
+    case 'guide':
+      return getGuideDoc(route.slug)?.title ?? 'Guides';
+    case 'preview':
+      return getBlockMeta(route.slug)?.name ?? 'Preview';
+    case 'not-found':
+      return 'Page not found';
+  }
+}
+
+/**
+ * First focusable on every docs page. Visually hidden until focused. The
+ * click is handled in JS because a plain `href="#main"` would be read as a
+ * hash route by the showcase router.
+ */
+function SkipLink() {
+  return (
+    <a
+      href="#main"
+      onClick={(e) => {
+        e.preventDefault();
+        document.getElementById('main')?.focus();
+      }}
+      className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[var(--z-toast)] focus:rounded-md focus:bg-card focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-foreground focus:shadow-md focus:outline-none focus:ring-2 focus:ring-ring"
+    >
+      Skip to content
+    </a>
   );
 }
 

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { ArrowLeft, Check, ChevronDown } from '@/icons';
 import { Spinner } from '@/components/ui/Spinner';
 import { cn } from '@/lib/utils';
@@ -53,6 +53,11 @@ export function PreviewPage({
   // already owns the controls — hide the dock.
   const embedded = typeof window !== 'undefined' && window.self !== window.top;
 
+  // Each template preview is its own tab — name it.
+  useEffect(() => {
+    if (doc) document.title = `${doc.name} — @craftzbay/ui`;
+  }, [doc]);
+
   if (!doc) return <NotFound />;
 
   return (
@@ -83,7 +88,7 @@ export function PreviewPage({
       {/* Floating preview dock — bottom-right so the template renders edge to
           edge like a real deployment. */}
       {!embedded && (
-      <div className="fixed bottom-4 right-4 z-[var(--z-toast)] flex items-center gap-2 rounded-full border border-border bg-background/90 py-1.5 pl-3 pr-1.5 shadow-lg backdrop-blur">
+      <div className="fixed bottom-4 right-4 z-[var(--z-toast)] flex items-center gap-2 rounded-full border border-border bg-card py-1.5 pl-3 pr-1.5 shadow-lg">
         <a
           href={`#${routeToHash({ kind: 'template', slug })}`}
           className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground-muted transition-colors hover:text-foreground"

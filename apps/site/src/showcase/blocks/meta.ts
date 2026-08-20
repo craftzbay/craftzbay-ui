@@ -90,6 +90,10 @@ export const blockMeta: BlockMeta[] = [
       'Destructive actions confirm with the verb on the button (10 · Destructive)',
       'First-run vs filtered empty state; skeleton loading (10 · Empty states)',
       '⌘K palette, `/` search, Esc, tenant name in the top bar (10 · Keyboard · Multi-tenant)',
+      'Filter, sort and page state live in the URL — reload and share a filtered list (10 · URL state)',
+      'Permission denied: Admin › Security › API keys says what is restricted, who grants it, and offers “Request access” (10 · Empty states · 403)',
+      'Unsaved-changes guard: Settings › Profile warns on tab close and confirms “Discard changes?” before in-app navigation (10 · Forms)',
+      'Theme: Light / Dark / System (follows the OS) from the profile menu and Settings › Appearance (07 · Preferences)',
     ],
   },
   {

@@ -46,14 +46,18 @@ export function DocLayout({
         crossKindSections={crossKindSections}
       />
 
-      <main className="min-w-0 flex-1 px-4 py-6 md:px-10 md:py-10">
+      <main
+        id="main"
+        tabIndex={-1}
+        className="min-w-0 flex-1 px-4 py-6 outline-none md:px-10 md:py-10"
+      >
         {/* Mobile sheet trigger — visible only < md */}
         <div className="mb-4 md:hidden">
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
               <button
                 type="button"
-                className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground-muted outline-none transition-colors hover:bg-background-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="border-border bg-card text-foreground-muted hover:bg-background-muted hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
               >
                 <Menu className="size-4" />
                 Browse

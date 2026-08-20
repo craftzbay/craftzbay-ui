@@ -186,7 +186,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "name": "colors",
           "type": "string[]",
           "required": false,
-          "description": "Per-series colours. Defaults to the categorical token list below. TODO(globals.css): add `--chart-1..6` tokens and switch the defaults."
+          "description": "Per-series colours. Defaults to `--chart-1..6` (categorical; never the accent)."
         },
         {
           "name": "data",
@@ -217,6 +217,24 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "boolean",
           "required": false,
           "description": "Y-axis tick labels + first/last x labels. Default true."
+        },
+        {
+          "name": "showTableToggle",
+          "type": "boolean",
+          "required": false,
+          "description": "Show a small \"View as table\" toggle that reveals the fallback table."
+        },
+        {
+          "name": "state",
+          "type": "enum",
+          "required": false,
+          "description": "Replace the drawing with a loading skeleton / empty / error message."
+        },
+        {
+          "name": "tableFallback",
+          "type": "boolean",
+          "required": false,
+          "description": "Render a visually-hidden `<table>` of the data after the SVG so screen readers and copy/paste get the numbers. Default true."
         },
         {
           "name": "title",
@@ -353,7 +371,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "string[]",
           "default": "[\n  'var(--chart-1)',\n  'var(--chart-2)',\n  'var(--chart-3)',\n  'var(--chart-4)',\n  'var(--chart-5)',\n  'var(--chart-6)',\n]",
           "required": false,
-          "description": "Per-series colours. Defaults to the categorical token list below. TODO(globals.css): add `--chart-1..6` tokens and switch the defaults."
+          "description": "Per-series colours. Defaults to `--chart-1..6` (categorical; never the accent)."
         },
         {
           "name": "data",
@@ -387,6 +405,25 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "default": "true",
           "required": false,
           "description": "Y-axis tick labels + first/last x labels. Default true."
+        },
+        {
+          "name": "showTableToggle",
+          "type": "boolean",
+          "required": false,
+          "description": "Show a small \"View as table\" toggle that reveals the fallback table."
+        },
+        {
+          "name": "state",
+          "type": "enum",
+          "required": false,
+          "description": "Replace the drawing with a loading skeleton / empty / error message."
+        },
+        {
+          "name": "tableFallback",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "description": "Render a visually-hidden `<table>` of the data after the SVG so screen readers and copy/paste get the numbers. Default true."
         },
         {
           "name": "title",
@@ -3001,7 +3038,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "string[]",
           "default": "[\n  'var(--chart-1)',\n  'var(--chart-2)',\n  'var(--chart-3)',\n  'var(--chart-4)',\n  'var(--chart-5)',\n  'var(--chart-6)',\n]",
           "required": false,
-          "description": "Per-series colours. Defaults to the categorical token list below. TODO(globals.css): add `--chart-1..6` tokens and switch the defaults."
+          "description": "Per-series colours. Defaults to `--chart-1..6` (categorical; never the accent)."
         },
         {
           "name": "data",
@@ -3035,6 +3072,25 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "default": "true",
           "required": false,
           "description": "Y-axis tick labels + first/last x labels. Default true."
+        },
+        {
+          "name": "showTableToggle",
+          "type": "boolean",
+          "required": false,
+          "description": "Show a small \"View as table\" toggle that reveals the fallback table."
+        },
+        {
+          "name": "state",
+          "type": "enum",
+          "required": false,
+          "description": "Replace the drawing with a loading skeleton / empty / error message."
+        },
+        {
+          "name": "tableFallback",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "description": "Render a visually-hidden `<table>` of the data after the SVG so screen readers and copy/paste get the numbers. Default true."
         },
         {
           "name": "title",
@@ -3580,6 +3636,30 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "string | null",
           "required": false,
           "description": ""
+        }
+      ]
+    }
+  ],
+  "RelativeTime": [
+    {
+      "rows": [
+        {
+          "name": "date",
+          "type": "string | number | Date",
+          "required": true,
+          "description": "The instant to describe."
+        },
+        {
+          "name": "absolute",
+          "type": "FormatDateOptions",
+          "required": false,
+          "description": "Options for the absolute `title` (tooltip)."
+        },
+        {
+          "name": "now",
+          "type": "number | Date",
+          "required": false,
+          "description": "Reference \"now\". Default `Date.now()` at render — pass one for stable SSR/tests."
         }
       ]
     }
@@ -4188,6 +4268,13 @@ export const generatedProps: Record<string, PropGroup[]> = {
   "Skeleton": [
     {
       "rows": [
+        {
+          "name": "delay",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "description": "Render nothing until this many ms have elapsed, so sub-300ms loads never flash a placeholder. Default 0 (render immediately)."
+        },
         {
           "name": "variant",
           "type": "enum",
@@ -5404,7 +5491,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
     {
       "rows": [
         {
-          "name": "__@hasInstance@10053",
+          "name": "__@hasInstance@10058",
           "type": "(value: any) => boolean",
           "required": true,
           "description": "Determines whether the given value inherits from this function if this function was used as a constructor function. A constructor function can control which objects are recognized as its instances by 'instanceof' by overriding this method."

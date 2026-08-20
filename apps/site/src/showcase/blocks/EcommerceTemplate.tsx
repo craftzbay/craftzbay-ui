@@ -254,14 +254,14 @@ function Shop({
             {products.map((p) => (
               <Card key={p.name} padding="none" className="group overflow-hidden">
                 <div className="relative">
-                  <button onClick={onOpen} className="block w-full text-left">
+                  <button onClick={onOpen} aria-label={`View ${p.name}`} className="block w-full text-left">
                     <Shot hue={p.hue} className="aspect-square w-full" />
                   </button>
                   <button
                     onClick={() => toggleWish(p.name)}
                     aria-label={wishlist.has(p.name) ? `Remove ${p.name} from wishlist` : `Add ${p.name} to wishlist`}
                     aria-pressed={wishlist.has(p.name)}
-                    className={`absolute right-2 top-2 inline-flex size-7 items-center justify-center rounded-full bg-background/80 backdrop-blur transition-colors ${
+                    className={`absolute right-2 top-2 inline-flex size-7 items-center justify-center rounded-full bg-card transition-colors ${
                       wishlist.has(p.name) ? 'text-danger-text' : 'text-foreground-muted hover:text-foreground'
                     }`}
                   >

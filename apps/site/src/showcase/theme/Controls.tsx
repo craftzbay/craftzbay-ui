@@ -12,13 +12,37 @@ import { cn } from '@/lib/utils';
 import { BRANDS } from '../site.config';
 import { useTheme } from './theme-context';
 
-/** Light/dark toggle — shares the same look in the top bar and the preview chrome. */
+/** Lucide `monitor` outline — not in the library's curated icon set, so drawn inline. */
+export function MonitorIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <rect width="20" height="14" x="2" y="3" rx="2" />
+      <line x1="8" x2="16" y1="21" y2="21" />
+      <line x1="12" x2="12" y1="17" y2="21" />
+    </svg>
+  );
+}
+
+export const THEME_LABEL = { light: 'Light', dark: 'Dark', system: 'System' } as const;
+export const NEXT_THEME = { light: 'dark', dark: 'system', system: 'light' } as const;
+
+/** Theme cycle (light → dark → system) — shares the same look in the top bar and the preview chrome. */
 export function ThemeToggle({ className }: { className?: string }) {
   const { theme, toggleTheme } = useTheme();
   return (
     <IconButton
-      aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-      icon={theme === 'light' ? <Moon /> : <Sun />}
+      aria-label={`Theme: ${THEME_LABEL[theme]}. Switch to ${THEME_LABEL[NEXT_THEME[theme]].toLowerCase()}`}
+      icon={theme === 'light' ? <Sun /> : theme === 'dark' ? <Moon /> : <MonitorIcon />}
       size="sm"
       variant="ghost"
       onClick={toggleTheme}
@@ -33,7 +57,10 @@ function Swatch({ color, className }: { color: string; className?: string }) {
   return (
     <span
       aria-hidden
-      className={cn('inline-block size-3 shrink-0 rounded-full ring-1 ring-inset ring-black/10', className)}
+      className={cn(
+        'inline-block size-3 shrink-0 rounded-full ring-1 ring-black/10 ring-inset',
+        className,
+      )}
       style={{ backgroundColor: color }}
     />
   );
@@ -54,7 +81,7 @@ export function BrandSwitcher({ compact = false }: { compact?: boolean }) {
         <button
           type="button"
           className={cn(
-            'inline-flex h-8 items-center gap-2 rounded-md border border-border bg-card px-2.5 text-sm text-foreground-muted transition-colors hover:bg-background-muted hover:text-foreground',
+            'border-border bg-card text-foreground-muted hover:bg-background-muted hover:text-foreground inline-flex h-8 items-center gap-2 rounded-md border px-2.5 text-sm transition-colors',
           )}
           aria-label={`Accent colour: ${active.label}`}
         >
@@ -74,11 +101,11 @@ export function BrandSwitcher({ compact = false }: { compact?: boolean }) {
           >
             <Swatch color={b.swatch} className="mt-0.5" />
             <span className="flex min-w-0 flex-col">
-              <span className="flex items-center gap-1.5 font-medium text-foreground">
+              <span className="text-foreground flex items-center gap-1.5 font-medium">
                 {b.label}
-                {b.name === brand && <Check className="size-3.5 text-accent" aria-hidden />}
+                {b.name === brand && <Check className="text-accent size-3.5" aria-hidden />}
               </span>
-              <span className="text-xs text-foreground-subtle">{b.description}</span>
+              <span className="text-foreground-subtle text-xs">{b.description}</span>
             </span>
           </DropdownMenuItem>
         ))}
