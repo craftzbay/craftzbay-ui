@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Toaster, useCommandPaletteShortcut, useToast } from '@craftzbay/ui';
-import { ALL_SECTIONS, WORKSPACES, findModule } from './admin/data';
+import { ALL_SECTIONS, STUB_PAGES, WORKSPACES, findModule } from './admin/data';
 import { AdminPalette, AppSidebar, AppTopNav, type AppSidebarMode } from './admin/shell';
 import { Analytics, Overview, Reports } from './admin/overview';
 import { Projects, type ProjectsHandle } from './admin/projects';
@@ -45,18 +45,8 @@ const SIDEBAR_MODE: Record<AdminLayout, AppSidebarMode> = {
   dual: 'dual',
 };
 
-const PAGES = [
-  'overview',
-  'analytics',
-  'projects',
-  'inbox',
-  'members',
-  'reports',
-  'settings',
-  'billing',
-  'audit',
-  'roles',
-];
+/** Every navigable page key across all modules (the `sidebar`/`topnav` NAV is a subset). */
+const PAGES = ALL_SECTIONS.flatMap((s) => s.items.map((i) => i.key));
 
 export function AdminDashboard({
   layout = 'sidebar',
@@ -205,22 +195,7 @@ export function AdminDashboard({
             {page === 'reports' && <Reports onNavigate={navigate} />}
             {page === 'settings' && <SettingsPage onNavigate={navigate} />}
             {page === 'billing' && <BillingPage onNavigate={navigate} />}
-            {page === 'audit' && (
-              <StubPage
-                page="audit"
-                title="Audit log"
-                subtitle="Who did what, and when."
-                onNavigate={navigate}
-              />
-            )}
-            {page === 'roles' && (
-              <StubPage
-                page="roles"
-                title="Roles"
-                subtitle="Permission sets assigned to members."
-                onNavigate={navigate}
-              />
-            )}
+            {page in STUB_PAGES && <StubPage page={page} onNavigate={navigate} />}
           </div>
         </main>
       </div>

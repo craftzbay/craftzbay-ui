@@ -1,15 +1,26 @@
 import type { ComponentType } from 'react';
 import {
   BarChart3,
+  ChartPie,
   CreditCard,
+  File,
   FileText,
   Folder,
+  Handshake,
   Home,
+  ImageIcon,
   Inbox,
+  Kanban,
+  Key,
   LayoutGrid,
   Lock,
+  MessageSquare,
+  Receipt,
   Settings as SettingsIcon,
+  Tags,
+  User,
   Users,
+  Wallet,
 } from '@/icons';
 
 /* =============================================================================
@@ -56,10 +67,11 @@ export const NAV: NavSection[] = [
 ];
 
 /**
- * Top-level module for the `dual` (icon rail + panel) shell. The rail lists
+ * Top-level modules for the `dual` (icon rail + panel) shell. The rail lists
  * modules; the panel shows the active module's sections. `Workspace` reuses
- * the NAV sections verbatim; `Admin` adds the back-office areas (Audit log,
- * Roles) that only a product with many areas grows into.
+ * the NAV sections verbatim and `Admin` its Account section; the rest are the
+ * back-office areas a product with many surfaces grows into. Page keys are
+ * unique across modules — `findModule` relies on it.
  */
 export interface NavModule {
   key: string;
@@ -71,6 +83,55 @@ export interface NavModule {
 export const MODULES: NavModule[] = [
   { key: 'workspace', label: 'Workspace', icon: LayoutGrid, sections: NAV.slice(0, 2) },
   {
+    key: 'crm',
+    label: 'CRM',
+    icon: Users,
+    sections: [
+      {
+        label: 'Sales',
+        items: [
+          { key: 'customers', label: 'Customers', icon: User },
+          { key: 'deals', label: 'Deals', icon: Handshake, count: 3 },
+          { key: 'pipeline', label: 'Pipeline', icon: Kanban },
+        ],
+      },
+      { label: 'Audience', items: [{ key: 'segments', label: 'Segments', icon: Tags }] },
+    ],
+  },
+  {
+    key: 'finance',
+    label: 'Finance',
+    icon: Wallet,
+    sections: [
+      {
+        label: 'Money',
+        items: [
+          { key: 'invoices', label: 'Invoices', icon: Receipt },
+          { key: 'payments', label: 'Payments', icon: CreditCard },
+        ],
+      },
+      { label: 'Insights', items: [{ key: 'fin-reports', label: 'Reports', icon: ChartPie }] },
+    ],
+  },
+  {
+    key: 'content',
+    label: 'Content',
+    icon: FileText,
+    sections: [
+      {
+        label: 'Library',
+        items: [
+          { key: 'pages', label: 'Pages', icon: File },
+          { key: 'media', label: 'Media', icon: ImageIcon },
+        ],
+      },
+      {
+        label: 'Community',
+        items: [{ key: 'comments', label: 'Comments', icon: MessageSquare, count: 5 }],
+      },
+    ],
+  },
+  {
     key: 'admin',
     label: 'Admin',
     icon: Lock,
@@ -81,11 +142,118 @@ export const MODULES: NavModule[] = [
         items: [
           { key: 'audit', label: 'Audit log', icon: FileText },
           { key: 'roles', label: 'Roles', icon: Users },
+          { key: 'apikeys', label: 'API keys', icon: Key },
         ],
       },
     ],
   },
 ];
+
+/**
+ * Pages that exist only as destinations (no full demo UI yet). Rendered by
+ * `StubPage` with a breadcrumb and a descriptive empty state.
+ */
+export interface StubSpec {
+  title: string;
+  subtitle: string;
+  emptyTitle: string;
+  emptyDescription: string;
+  icon: ComponentType<{ className?: string }>;
+}
+export const STUB_PAGES: Record<string, StubSpec> = {
+  customers: {
+    title: 'Customers',
+    subtitle: 'Every account that has signed up or been imported.',
+    emptyTitle: 'No customers yet',
+    emptyDescription: 'Import a CSV or connect your billing provider to see accounts here.',
+    icon: User,
+  },
+  deals: {
+    title: 'Deals',
+    subtitle: 'Open opportunities and their owners.',
+    emptyTitle: 'No open deals',
+    emptyDescription: 'Deals you or your team create will be tracked here with stage and value.',
+    icon: Handshake,
+  },
+  pipeline: {
+    title: 'Pipeline',
+    subtitle: 'Deals by stage, from lead to closed.',
+    emptyTitle: 'Pipeline is empty',
+    emptyDescription: 'Add a deal to see it move across Lead, Qualified, Proposal and Won.',
+    icon: Kanban,
+  },
+  segments: {
+    title: 'Segments',
+    subtitle: 'Saved customer filters for campaigns and reports.',
+    emptyTitle: 'No segments',
+    emptyDescription: 'Save a customer filter to reuse it in campaigns and exports.',
+    icon: Tags,
+  },
+  invoices: {
+    title: 'Invoices',
+    subtitle: 'Issued, paid and overdue invoices.',
+    emptyTitle: 'No invoices',
+    emptyDescription: 'Invoices are generated automatically at the start of each billing cycle.',
+    icon: Receipt,
+  },
+  payments: {
+    title: 'Payments',
+    subtitle: 'Incoming payments and payouts.',
+    emptyTitle: 'No payments recorded',
+    emptyDescription: 'Connect a payment provider to reconcile transactions here.',
+    icon: CreditCard,
+  },
+  'fin-reports': {
+    title: 'Reports',
+    subtitle: 'Revenue, churn and cash-flow summaries.',
+    emptyTitle: 'No reports yet',
+    emptyDescription: 'Monthly revenue and churn reports appear after the first billing cycle.',
+    icon: ChartPie,
+  },
+  pages: {
+    title: 'Pages',
+    subtitle: 'Published and draft pages.',
+    emptyTitle: 'No pages',
+    emptyDescription: 'Create a page to publish it on your site or docs portal.',
+    icon: File,
+  },
+  media: {
+    title: 'Media',
+    subtitle: 'Images, video and files used across pages.',
+    emptyTitle: 'Library is empty',
+    emptyDescription: 'Upload images or files to reuse them in pages and posts.',
+    icon: ImageIcon,
+  },
+  comments: {
+    title: 'Comments',
+    subtitle: 'Moderation queue for reader comments.',
+    emptyTitle: 'Nothing to moderate',
+    emptyDescription: 'New comments wait here until approved or removed.',
+    icon: MessageSquare,
+  },
+  audit: {
+    title: 'Audit log',
+    subtitle: 'Who did what, and when.',
+    emptyTitle: 'No events yet',
+    emptyDescription: 'Sign-ins, permission changes and exports will be listed here.',
+    icon: FileText,
+  },
+  roles: {
+    title: 'Roles',
+    subtitle: 'Permission sets assigned to members.',
+    emptyTitle: 'Default roles only',
+    emptyDescription:
+      'Owner, Admin, Member and Viewer are built in. Custom roles arrive with the Enterprise plan.',
+    icon: Lock,
+  },
+  apikeys: {
+    title: 'API keys',
+    subtitle: 'Tokens that let other systems call your workspace.',
+    emptyTitle: 'No API keys',
+    emptyDescription: 'Create a key to integrate with CI, webhooks or a partner system.',
+    icon: Key,
+  },
+};
 
 /** Every section across modules — the `dual` shell's palette and breadcrumbs read this. */
 export const ALL_SECTIONS: NavSection[] = MODULES.flatMap((m) => m.sections);

@@ -243,12 +243,16 @@ function RailButton({
         aria-current={active ? 'page' : undefined}
         onClick={onClick}
         className={cn(
-          'inline-flex size-10 items-center justify-center rounded-md outline-none [&_svg]:size-5',
+          'relative inline-flex size-10 items-center justify-center rounded-md outline-none [&_svg]:size-5',
           'transition-colors duration-[var(--duration-fast)]',
           'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
+          // Active = accent bar on the rail's left edge + background + accent
+          // icon, never colour alone. The bar sits outside the 40px button so
+          // it hugs the rail edge (button is centred in a 56px rail → 8px gap).
+          'before:bg-accent before:absolute before:top-2 before:bottom-2 before:-left-2 before:w-0.5 before:rounded-r-full before:opacity-0',
           active
-            ? 'bg-accent-subtle text-accent-subtle-foreground'
-            : 'text-foreground-muted hover:bg-background-muted hover:text-foreground',
+            ? 'bg-background-muted text-accent before:opacity-100'
+            : 'text-foreground-muted hover:bg-surface-hover hover:text-foreground',
         )}
       >
         {icon}
@@ -283,9 +287,10 @@ export function AppRail({
           Scrollbar hidden, edge fades signal overflow. */}
       <div className="relative min-h-0 w-full flex-1">
         <div
-          className="flex h-full w-full flex-col items-center gap-1 overflow-y-auto overscroll-contain py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex h-full w-full [scrollbar-width:none] flex-col items-center gap-1 overflow-y-auto overscroll-contain py-0.5 [&::-webkit-scrollbar]:hidden"
           style={{
-            maskImage: 'linear-gradient(to bottom, transparent, #000 10px, #000 calc(100% - 10px), transparent)',
+            maskImage:
+              'linear-gradient(to bottom, transparent, #000 10px, #000 calc(100% - 10px), transparent)',
           }}
         >
           {MODULES.map((m) => {
@@ -330,7 +335,7 @@ function ModuleTabs({
     <div
       role="group"
       aria-label="Modules"
-      className="bg-background-muted flex w-full snap-x gap-0.5 overflow-x-auto rounded-md p-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="bg-background-muted flex w-full snap-x [scrollbar-width:none] gap-0.5 overflow-x-auto rounded-md p-0.5 [&::-webkit-scrollbar]:hidden"
     >
       {MODULES.map((m) => {
         const Icon = m.icon;
@@ -341,8 +346,14 @@ function ModuleTabs({
             type="button"
             aria-pressed={active}
             onClick={() => onModuleChange(m.key)}
+            // Five tabs overflow a 256px drawer; keep the active one in view.
+            ref={
+              active
+                ? (el) => el?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+                : undefined
+            }
             className={cn(
-              'inline-flex h-8 flex-1 shrink-0 snap-start items-center justify-center gap-1.5 rounded-[5px] px-3 text-sm whitespace-nowrap outline-none [&_svg]:size-4',
+              'inline-flex h-8 shrink-0 snap-start items-center justify-center gap-1.5 rounded-[5px] px-2.5 text-sm whitespace-nowrap outline-none [&_svg]:size-4',
               'transition-colors duration-[var(--duration-fast)]',
               'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-1',
               active

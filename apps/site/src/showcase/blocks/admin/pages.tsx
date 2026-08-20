@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useState } from 'react';
-import { FileText, Lock, Mail, Plus, Trash2 } from '@/icons';
+import { Mail, Plus, Trash2 } from '@/icons';
 import {
   Avatar,
   Badge,
@@ -33,7 +33,15 @@ import {
   cn,
   useToast,
 } from '@craftzbay/ui';
-import { INVOICES, ROLES, SEED_MEMBERS, SEED_MESSAGES, type Member, type Message } from './data';
+import {
+  INVOICES,
+  ROLES,
+  SEED_MEMBERS,
+  SEED_MESSAGES,
+  STUB_PAGES,
+  type Member,
+  type Message,
+} from './data';
 import { PageHeader } from './shell';
 
 /* =============================================================================
@@ -499,32 +507,28 @@ export function BillingPage({ onNavigate }: { onNavigate: (key: string) => void 
 }
 
 /* ---------------------------------------------------------------------------
- *  Placeholder pages for the `dual` shell's Admin module (Audit log, Roles) —
- *  they exist so the second rail module has real destinations.
+ *  Placeholder pages for the `dual` shell's extra modules (CRM, Finance,
+ *  Content, Security) — real destinations with a breadcrumb and an empty
+ *  state, driven by `STUB_PAGES`.
  * ------------------------------------------------------------------------ */
 
 export function StubPage({
   page,
-  title,
-  subtitle,
   onNavigate,
 }: {
-  page: 'audit' | 'roles';
-  title: string;
-  subtitle: string;
+  page: string;
   onNavigate: (key: string) => void;
 }) {
+  const spec = STUB_PAGES[page];
+  if (!spec) return null;
+  const Icon = spec.icon;
   return (
     <div className="max-w-2xl">
-      <PageHeader page={page} title={title} subtitle={subtitle} onNavigate={onNavigate} />
+      <PageHeader page={page} title={spec.title} subtitle={spec.subtitle} onNavigate={onNavigate} />
       <EmptyState
-        icon={page === 'audit' ? <FileText /> : <Lock />}
-        title={page === 'audit' ? 'No events yet' : 'Default roles only'}
-        description={
-          page === 'audit'
-            ? 'Sign-ins, permission changes and exports will be listed here.'
-            : 'Owner, Admin, Member and Viewer are built in. Custom roles arrive with the Enterprise plan.'
-        }
+        icon={<Icon />}
+        title={spec.emptyTitle}
+        description={spec.emptyDescription}
         action={
           <Button variant="secondary" onClick={() => onNavigate('settings')}>
             Open settings
