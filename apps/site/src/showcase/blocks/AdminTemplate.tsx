@@ -8,7 +8,7 @@ import { AdminDashboard, type AdminLayout } from './AdminDashboard';
  * confirm-before-delete, empty + loading states); Team, Billing, Settings and
  * Inbox each have their own data and actions. Source: ./AdminDashboard.tsx +
  * ./admin/*. The authentication screens live in the "Authentication" template.
- * `layout` picks the shell: `sidebar` (rail) or `topnav` (horizontal links).
+ * `layout` picks the shell: `sidebar` (rail), `topnav` (horizontal links) or `dual` (icon rail + panel).
  */
 export function AdminTemplate({
   layout = 'sidebar',

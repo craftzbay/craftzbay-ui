@@ -6,6 +6,8 @@ import {
   Folder,
   Home,
   Inbox,
+  LayoutGrid,
+  Lock,
   Settings as SettingsIcon,
   Users,
 } from '@/icons';
@@ -53,8 +55,51 @@ export const NAV: NavSection[] = [
   },
 ];
 
+/**
+ * Top-level module for the `dual` (icon rail + panel) shell. The rail lists
+ * modules; the panel shows the active module's sections. `Workspace` reuses
+ * the NAV sections verbatim; `Admin` adds the back-office areas (Audit log,
+ * Roles) that only a product with many areas grows into.
+ */
+export interface NavModule {
+  key: string;
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+  sections: NavSection[];
+}
+
+export const MODULES: NavModule[] = [
+  { key: 'workspace', label: 'Workspace', icon: LayoutGrid, sections: NAV.slice(0, 2) },
+  {
+    key: 'admin',
+    label: 'Admin',
+    icon: Lock,
+    sections: [
+      NAV[2],
+      {
+        label: 'Security',
+        items: [
+          { key: 'audit', label: 'Audit log', icon: FileText },
+          { key: 'roles', label: 'Roles', icon: Users },
+        ],
+      },
+    ],
+  },
+];
+
+/** Every section across modules — the `dual` shell's palette and breadcrumbs read this. */
+export const ALL_SECTIONS: NavSection[] = MODULES.flatMap((m) => m.sections);
+
+/** Module that owns a page (unknown keys → the first module). */
+export function findModule(pageKey: string): NavModule {
+  return (
+    MODULES.find((m) => m.sections.some((s) => s.items.some((i) => i.key === pageKey))) ??
+    MODULES[0]
+  );
+}
+
 export function findNav(key: string): { section: NavSection; item: NavItem } | undefined {
-  for (const section of NAV) {
+  for (const section of ALL_SECTIONS) {
     const item = section.items.find((i) => i.key === key);
     if (item) return { section, item };
   }

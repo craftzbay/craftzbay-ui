@@ -28,7 +28,12 @@ export default function BlockPreview({
   const props = { screen, setScreen, brand: <BrandMark />, variant };
   switch (slug) {
     case 'admin':
-      return <AdminTemplate layout={variant === 'topnav' ? 'topnav' : 'sidebar'} initialPage={page} />;
+      return (
+        <AdminTemplate
+          layout={variant === 'topnav' || variant === 'dual' ? variant : 'sidebar'}
+          initialPage={page}
+        />
+      );
     case 'auth':
       return <AuthTemplate {...props} />;
     case 'landing':

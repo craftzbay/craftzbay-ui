@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useState } from 'react';
-import { Mail, Plus, Trash2 } from '@/icons';
+import { FileText, Lock, Mail, Plus, Trash2 } from '@/icons';
 import {
   Avatar,
   Badge,
@@ -494,6 +494,43 @@ export function BillingPage({ onNavigate }: { onNavigate: (key: string) => void 
           </TableBody>
         </Table>
       </Card>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------------------
+ *  Placeholder pages for the `dual` shell's Admin module (Audit log, Roles) —
+ *  they exist so the second rail module has real destinations.
+ * ------------------------------------------------------------------------ */
+
+export function StubPage({
+  page,
+  title,
+  subtitle,
+  onNavigate,
+}: {
+  page: 'audit' | 'roles';
+  title: string;
+  subtitle: string;
+  onNavigate: (key: string) => void;
+}) {
+  return (
+    <div className="max-w-2xl">
+      <PageHeader page={page} title={title} subtitle={subtitle} onNavigate={onNavigate} />
+      <EmptyState
+        icon={page === 'audit' ? <FileText /> : <Lock />}
+        title={page === 'audit' ? 'No events yet' : 'Default roles only'}
+        description={
+          page === 'audit'
+            ? 'Sign-ins, permission changes and exports will be listed here.'
+            : 'Owner, Admin, Member and Viewer are built in. Custom roles arrive with the Enterprise plan.'
+        }
+        action={
+          <Button variant="secondary" onClick={() => onNavigate('settings')}>
+            Open settings
+          </Button>
+        }
+      />
     </div>
   );
 }

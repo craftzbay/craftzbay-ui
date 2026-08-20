@@ -43,7 +43,16 @@ import {
   cn,
   useSidebar,
 } from '@craftzbay/ui';
-import { NAV, NOTIFICATIONS, USER, WORKSPACES, findNav, type Workspace } from './data';
+import {
+  MODULES,
+  NAV,
+  NOTIFICATIONS,
+  USER,
+  WORKSPACES,
+  findNav,
+  type NavSection,
+  type Workspace,
+} from './data';
 
 /* =============================================================================
  *  Admin template — app shell built from the library Sidebar + TopNav +
@@ -141,11 +150,19 @@ export function WorkspaceSwitcher({
  *  Navigation list — shared by the desktop rail and the mobile drawer
  * ------------------------------------------------------------------------ */
 
-function NavItems({ page, onNavigate }: { page: string; onNavigate: (key: string) => void }) {
+function NavItems({
+  page,
+  onNavigate,
+  sections = NAV,
+}: {
+  page: string;
+  onNavigate: (key: string) => void;
+  sections?: NavSection[];
+}) {
   const { collapsed } = useSidebar();
   return (
     <>
-      {NAV.map((section) => (
+      {sections.map((section) => (
         <SidebarSection key={section.label} label={section.label}>
           {section.items.map((it) => {
             const active = page === it.key;
@@ -202,6 +219,142 @@ function UserCard() {
   );
 }
 
+/* ---------------------------------------------------------------------------
+ *  `dual` shell — icon rail of modules (56px) + 240px panel of the active
+ *  module's sections. Two-tier navigation for products with many areas.
+ * ------------------------------------------------------------------------ */
+
+function RailButton({
+  label,
+  icon,
+  active,
+  onClick,
+}: {
+  label: string;
+  icon: ReactNode;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <Tooltip label={label} side="right">
+      <button
+        type="button"
+        aria-label={label}
+        aria-current={active ? 'page' : undefined}
+        onClick={onClick}
+        className={cn(
+          'inline-flex size-10 items-center justify-center rounded-md outline-none [&_svg]:size-5',
+          'transition-colors duration-[var(--duration-fast)]',
+          'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
+          active
+            ? 'bg-accent-subtle text-accent-subtle-foreground'
+            : 'text-foreground-muted hover:bg-background-muted hover:text-foreground',
+        )}
+      >
+        {icon}
+      </button>
+    </Tooltip>
+  );
+}
+
+export function AppRail({
+  module,
+  onModuleChange,
+  onNavigate,
+}: {
+  module: string;
+  onModuleChange: (key: string) => void;
+  onNavigate: (key: string) => void;
+}) {
+  return (
+    <nav
+      aria-label="Modules"
+      className="border-border bg-background-subtle hidden w-14 shrink-0 flex-col items-center gap-1 border-r py-2 lg:flex"
+    >
+      {/* Brand mark — the rail is the only chrome that never scrolls away. */}
+      <span
+        aria-hidden
+        className="bg-foreground text-background mb-2 inline-flex size-8 items-center justify-center rounded-md text-sm font-semibold"
+      >
+        A
+      </span>
+      {MODULES.map((m) => {
+        const Icon = m.icon;
+        return (
+          <RailButton
+            key={m.key}
+            label={m.label}
+            icon={<Icon />}
+            active={m.key === module}
+            onClick={() => onModuleChange(m.key)}
+          />
+        );
+      })}
+      <div className="mt-auto">
+        <Tooltip label={`${USER.name} — Settings`} side="right">
+          <button
+            type="button"
+            aria-label={`${USER.name}, open settings`}
+            onClick={() => onNavigate('settings')}
+            className="hover:bg-background-muted focus-visible:ring-ring focus-visible:ring-offset-background inline-flex size-10 items-center justify-center rounded-md outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          >
+            <Avatar size="sm" fallback={USER.initials} alt="" status="online" />
+          </button>
+        </Tooltip>
+      </div>
+    </nav>
+  );
+}
+
+/** Segmented module strip — the drawer's stand-in for the rail below lg. */
+function ModuleTabs({
+  module,
+  onModuleChange,
+}: {
+  module: string;
+  onModuleChange: (key: string) => void;
+}) {
+  return (
+    <div
+      role="group"
+      aria-label="Modules"
+      className="bg-background-muted flex w-full gap-0.5 rounded-md p-0.5"
+    >
+      {MODULES.map((m) => {
+        const Icon = m.icon;
+        const active = m.key === module;
+        return (
+          <button
+            key={m.key}
+            type="button"
+            aria-pressed={active}
+            onClick={() => onModuleChange(m.key)}
+            className={cn(
+              'inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-[5px] text-sm outline-none [&_svg]:size-4',
+              'transition-colors duration-[var(--duration-fast)]',
+              'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-1',
+              active
+                ? 'bg-background text-foreground font-medium shadow-sm'
+                : 'text-foreground-muted hover:text-foreground',
+            )}
+          >
+            <Icon aria-hidden />
+            {m.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function PanelHeader({ label }: { label: string }) {
+  // Module name, distinct from the uppercase section labels below it.
+  return <h2 className="text-foreground truncate text-sm font-semibold">{label}</h2>;
+}
+
+/** `rail` = collapsible sidebar (≥lg); `dual` = icon rail + module panel; `none` = drawer only. */
+export type AppSidebarMode = 'rail' | 'dual' | 'none';
+
 export interface AppSidebarProps {
   page: string;
   onNavigate: (key: string) => void;
@@ -212,8 +365,11 @@ export interface AppSidebarProps {
   /** Mobile drawer state (below lg). */
   drawerOpen: boolean;
   onDrawerOpenChange: (open: boolean) => void;
-  /** Render the desktop rail (≥lg). The `topnav` shell sets this false and keeps only the drawer. */
-  rail?: boolean;
+  /** Desktop chrome (≥lg). Every mode keeps the drawer below lg. */
+  mode?: AppSidebarMode;
+  /** Active module for `dual`. */
+  module?: string;
+  onModuleChange?: (key: string) => void;
 }
 
 /**
@@ -229,15 +385,33 @@ export function AppSidebar({
   onCollapsedChange,
   drawerOpen,
   onDrawerOpenChange,
-  rail = true,
+  mode = 'rail',
+  module = MODULES[0].key,
+  onModuleChange = () => {},
 }: AppSidebarProps) {
   const navigate = (key: string) => {
     onNavigate(key);
     onDrawerOpenChange(false);
   };
+  const dual = mode === 'dual';
+  const activeModule = MODULES.find((m) => m.key === module) ?? MODULES[0];
+  const sections = dual ? activeModule.sections : NAV;
   return (
     <>
-      {rail && (
+      {dual && (
+        <>
+          <AppRail module={module} onModuleChange={onModuleChange} onNavigate={navigate} />
+          <Sidebar
+            aria-label={`${activeModule.label} navigation`}
+            header={<PanelHeader label={activeModule.label} />}
+            // Panel is fixed-width: no collapse control (the rail already is the icon tier).
+            className="md:hidden lg:flex [&>button:last-child]:hidden"
+          >
+            <NavItems page={page} onNavigate={navigate} sections={sections} />
+          </Sidebar>
+        </>
+      )}
+      {mode === 'rail' && (
         <Sidebar
           collapsed={collapsed}
           onCollapsedChange={onCollapsedChange}
@@ -255,11 +429,22 @@ export function AppSidebar({
         <SheetContent side="left" className="w-64 p-0" showClose={false}>
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <Sidebar
-            header={<WorkspaceSwitcher value={workspace} onChange={onWorkspaceChange} />}
+            header={
+              dual ? (
+                <ModuleTabs module={module} onModuleChange={onModuleChange} />
+              ) : (
+                <WorkspaceSwitcher value={workspace} onChange={onWorkspaceChange} />
+              )
+            }
             footer={<UserCard />}
             className="flex h-full w-full border-r-0"
           >
-            <NavItems page={page} onNavigate={navigate} />
+            {dual && (
+              <div className="px-4 pb-2">
+                <PanelHeader label={activeModule.label} />
+              </div>
+            )}
+            <NavItems page={page} onNavigate={navigate} sections={sections} />
           </Sidebar>
         </SheetContent>
       </Sheet>
@@ -325,8 +510,8 @@ export interface AppTopNavProps {
   onSignOut: () => void;
   searchValue: string;
   onSearchChange: (q: string) => void;
-  /** `sidebar` (default) shows the tenant name; `topnav` adds primary links + the workspace switcher. */
-  layout?: 'sidebar' | 'topnav';
+  /** `sidebar` (default) shows the tenant name; `topnav` adds primary links; `topnav` and `dual` host the workspace switcher. */
+  layout?: 'sidebar' | 'topnav' | 'dual';
   /** Active page — needed for the `topnav` links' active state. */
   page?: string;
   onWorkspaceChange?: (id: string) => void;
@@ -362,8 +547,8 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
             className="lg:hidden"
             onClick={onOpenDrawer}
           />
-          {layout === 'topnav' ? (
-            // No rail to host the switcher, so it lives in the bar.
+          {layout !== 'sidebar' ? (
+            // No sidebar header to host the switcher, so it lives in the bar.
             <WorkspaceSwitcher
               variant="bar"
               value={workspace.id}
@@ -574,13 +759,16 @@ export function AdminPalette({
   onNavigate,
   onAction,
   hasSidebar = true,
+  sections = NAV,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onNavigate: (key: string) => void;
   onAction: (action: 'new-project' | 'invite' | 'toggle-sidebar') => void;
-  /** False in the `topnav` shell — there is no rail to toggle. */
+  /** False in the `topnav` / `dual` shells — there is no rail to toggle. */
   hasSidebar?: boolean;
+  /** Navigation groups to list; the `dual` shell passes every module's sections. */
+  sections?: NavSection[];
 }) {
   const run = (fn: () => void) => () => {
     onOpenChange(false);
@@ -605,7 +793,7 @@ export function AdminPalette({
             </CommandItem>
           )}
         </CommandGroup>
-        {NAV.map((section) => (
+        {sections.map((section) => (
           <CommandGroup key={section.label} heading={section.label}>
             {section.items.map((it) => {
               const Icon = it.icon;

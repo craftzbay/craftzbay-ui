@@ -1,10 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { Toaster, useCommandPaletteShortcut, useToast } from '@craftzbay/ui';
-import { WORKSPACES } from './admin/data';
-import { AdminPalette, AppSidebar, AppTopNav } from './admin/shell';
+import { ALL_SECTIONS, WORKSPACES, findModule } from './admin/data';
+import { AdminPalette, AppSidebar, AppTopNav, type AppSidebarMode } from './admin/shell';
 import { Analytics, Overview, Reports } from './admin/overview';
 import { Projects, type ProjectsHandle } from './admin/projects';
-import { BillingPage, InboxPage, Members, SettingsPage, type MembersHandle } from './admin/pages';
+import {
+  BillingPage,
+  InboxPage,
+  Members,
+  SettingsPage,
+  StubPage,
+  type MembersHandle,
+} from './admin/pages';
 
 /* =============================================================================
  *  AdminDashboard — a complete admin console on the library's app shell.
@@ -13,7 +20,10 @@ import { BillingPage, InboxPage, Members, SettingsPage, type MembersHandle } fro
  *    (tenant name, `/` search, notifications, profile) + `Breadcrumbs` on
  *    every page below the home. `layout="topnav"` drops the rail and moves
  *    primary navigation into the top bar as horizontal links (≤6 sections);
- *    the drawer still serves viewports below lg.
+ *    the drawer still serves viewports below lg. `layout="dual"` is the
+ *    two-tier shell: a 56px icon rail of modules + a 240px panel with the
+ *    active module's sections (Slack / Linear style); below lg the drawer
+ *    carries both tiers (module tabs above the list).
  *  · Keyboard: ⌘K / Ctrl+K opens the command palette, `/` focuses search,
  *    Esc closes overlays and blurs the search field.
  *  · Pages live in ./admin/* — Projects is the full table pattern (sort,
@@ -26,10 +36,27 @@ import { BillingPage, InboxPage, Members, SettingsPage, type MembersHandle } fro
 
 const SIDEBAR_KEY = 'admin-template:sidebar-collapsed';
 
-/** `sidebar` = collapsible rail (default); `topnav` = horizontal links, no rail. */
-export type AdminLayout = 'sidebar' | 'topnav';
+/** `sidebar` = collapsible rail (default); `topnav` = horizontal links, no rail; `dual` = icon rail + module panel. */
+export type AdminLayout = 'sidebar' | 'topnav' | 'dual';
 
-const PAGES = ['overview', 'analytics', 'projects', 'inbox', 'members', 'reports', 'settings', 'billing'];
+const SIDEBAR_MODE: Record<AdminLayout, AppSidebarMode> = {
+  sidebar: 'rail',
+  topnav: 'none',
+  dual: 'dual',
+};
+
+const PAGES = [
+  'overview',
+  'analytics',
+  'projects',
+  'inbox',
+  'members',
+  'reports',
+  'settings',
+  'billing',
+  'audit',
+  'roles',
+];
 
 export function AdminDashboard({
   layout = 'sidebar',
@@ -44,6 +71,9 @@ export function AdminDashboard({
   const [page, setPage] = useState(() =>
     initialPage && PAGES.includes(initialPage) ? initialPage : 'overview',
   );
+  // `dual` only: which module the panel shows. Navigating to a page selects
+  // its module; clicking the rail only switches the panel.
+  const [module, setModule] = useState(() => findModule(page).key);
   const [workspace, setWorkspace] = useState(WORKSPACES[0].id);
   const [collapsed, setCollapsed] = useState(() => {
     try {
@@ -100,6 +130,7 @@ export function AdminDashboard({
 
   const navigate = (key: string) => {
     setPage(key);
+    setModule(findModule(key).key);
     setDrawerOpen(false);
   };
 
@@ -143,7 +174,9 @@ export function AdminDashboard({
         onCollapsedChange={onCollapsedChange}
         drawerOpen={drawerOpen}
         onDrawerOpenChange={setDrawerOpen}
-        rail={hasRail}
+        mode={SIDEBAR_MODE[layout]}
+        module={module}
+        onModuleChange={setModule}
       />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -172,6 +205,22 @@ export function AdminDashboard({
             {page === 'reports' && <Reports onNavigate={navigate} />}
             {page === 'settings' && <SettingsPage onNavigate={navigate} />}
             {page === 'billing' && <BillingPage onNavigate={navigate} />}
+            {page === 'audit' && (
+              <StubPage
+                page="audit"
+                title="Audit log"
+                subtitle="Who did what, and when."
+                onNavigate={navigate}
+              />
+            )}
+            {page === 'roles' && (
+              <StubPage
+                page="roles"
+                title="Roles"
+                subtitle="Permission sets assigned to members."
+                onNavigate={navigate}
+              />
+            )}
           </div>
         </main>
       </div>
@@ -182,6 +231,7 @@ export function AdminDashboard({
         onNavigate={navigate}
         onAction={runAction}
         hasSidebar={hasRail}
+        sections={layout === 'dual' ? ALL_SECTIONS : undefined}
       />
       <Toaster />
     </div>

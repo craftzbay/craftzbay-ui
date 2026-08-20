@@ -74,10 +74,16 @@ export const blockMeta: BlockMeta[] = [
         label: 'Top nav',
         description: 'Horizontal primary nav, no rail — for ≤6 sections',
       },
+      {
+        key: 'dual',
+        label: 'Rail + panel',
+        description:
+          'Icon rail for modules + 240px panel for the active module’s sections — for products with many areas',
+      },
     ],
     patterns: [
       'App shell — 256px sidebar, icon rail, drawer ≤1024px (10 · App shell)',
-      'Two shells: sidebar rail vs top nav — pick by section count (10 · App shell)',
+      'Three shells: sidebar rail, top nav, or icon rail + panel — pick by section count (10 · App shell)',
       'Active nav = accent bar + weight + background; breadcrumbs at depth ≥2 (10 · Navigation)',
       'Overview: KPI row → chart → table; delta with arrow + sign + period (11 · KPI tile)',
       'Table: 3-state sort, filter chips, 300ms search, 25/50/100 pages, bulk bar, overflow actions (10 · Table)',
