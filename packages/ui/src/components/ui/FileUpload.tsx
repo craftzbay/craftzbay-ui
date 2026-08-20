@@ -121,7 +121,7 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(function F
         onDrop={onDrop}
         className={cn(
           'group relative flex cursor-pointer flex-col items-center justify-center gap-2',
-          'border-border bg-background-subtle rounded-md border border-dashed px-6 py-8',
+          'border-border-input bg-background-subtle rounded-md border border-dashed px-6 py-8',
           'text-center transition-colors',
           'hover:border-border-strong hover:bg-background-muted',
           'focus-within:ring-ring focus-within:ring-offset-background focus-within:ring-2 focus-within:ring-offset-2',

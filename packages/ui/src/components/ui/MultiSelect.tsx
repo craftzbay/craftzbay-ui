@@ -174,7 +174,7 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
                 'focus-within:ring-offset-background focus-within:ring-2 focus-within:ring-offset-2',
                 isError
                   ? 'border-danger focus-within:border-danger focus-within:ring-danger'
-                  : 'border-border focus-within:border-accent focus-within:ring-ring',
+                  : 'border-border-input focus-within:border-accent focus-within:ring-ring',
                 disabled && 'pointer-events-none opacity-50',
               )}
               onClick={() => {
@@ -285,7 +285,7 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
                         aria-hidden
                         className={cn(
                           'flex size-4 items-center justify-center rounded-sm border',
-                          isSelected ? 'border-accent bg-accent text-on-accent' : 'border-border',
+                          isSelected ? 'border-accent bg-accent text-on-accent' : 'border-border-input',
                         )}
                       >
                         {isSelected && <Check className="size-3" aria-hidden />}

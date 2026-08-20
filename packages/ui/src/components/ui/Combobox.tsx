@@ -183,7 +183,7 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(function Combo
                 triggerPaddingRight,
                 isError
                   ? 'border-danger focus-visible:border-danger focus-visible:ring-danger'
-                  : 'border-border focus-visible:border-accent focus-visible:ring-ring',
+                  : 'border-border-input focus-visible:border-accent focus-visible:ring-ring',
               )}
             >
               <span

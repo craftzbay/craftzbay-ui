@@ -79,7 +79,7 @@ function PickerTrigger({
             'disabled:cursor-not-allowed disabled:opacity-50',
             error
               ? 'border-danger focus-visible:border-danger focus-visible:ring-danger'
-              : 'border-border focus-visible:border-accent focus-visible:ring-ring',
+              : 'border-border-input focus-visible:border-accent focus-visible:ring-ring',
             !hasValue && 'text-foreground-subtle',
           )}
         >

@@ -124,7 +124,7 @@ export const TagInput = forwardRef<HTMLDivElement, TagInputProps>(function TagIn
           'focus-within:ring-offset-background focus-within:ring-2 focus-within:ring-offset-2',
           isError
             ? 'border-danger focus-within:border-danger focus-within:ring-danger'
-            : 'border-border focus-within:border-accent focus-within:ring-ring',
+            : 'border-border-input focus-within:border-accent focus-within:ring-ring',
           disabled && 'pointer-events-none opacity-50',
         )}
       >
