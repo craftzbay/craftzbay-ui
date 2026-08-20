@@ -112,11 +112,11 @@ export function Calendar({
         month_grid: 'w-full border-collapse',
         weekdays: 'grid grid-cols-7',
         weekday:
-          'h-8 w-9 text-center text-[11px] font-medium uppercase tracking-wide text-foreground-subtle',
+          'h-8 w-9 text-center text-xs font-medium uppercase tracking-wide text-foreground-subtle',
         week: 'mt-0.5 grid grid-cols-7',
         day: 'relative h-9 w-9 p-0 text-center',
         day_button:
-          'inline-flex h-9 w-9 items-center justify-center rounded-md text-sm hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring outline-none aria-selected:bg-accent aria-selected:text-on-accent aria-selected:hover:bg-accent-700',
+          'inline-flex h-9 w-9 items-center justify-center rounded-md text-sm hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring outline-none aria-selected:bg-accent aria-selected:text-on-accent aria-selected:hover:bg-accent-hover',
         today: '[&_button]:border [&_button]:border-border',
         outside: 'text-foreground-subtle',
         disabled: 'opacity-40 pointer-events-none',

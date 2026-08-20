@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  forwardRef,
-  type ComponentPropsWithoutRef,
-  type ElementRef,
-} from 'react';
+import { forwardRef, type ComponentPropsWithoutRef, type ElementRef } from 'react';
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import { ChevronDown } from '@/icons';
 import { cn } from '@/lib/utils';
@@ -32,7 +28,11 @@ export const AccordionItem = forwardRef<
   ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
 >(function AccordionItem({ className, ...props }, ref) {
   return (
-    <AccordionPrimitive.Item ref={ref} className={cn('border-b border-border', className)} {...props} />
+    <AccordionPrimitive.Item
+      ref={ref}
+      className={cn('border-border border-b', className)}
+      {...props}
+    />
   );
 });
 AccordionItem.displayName = 'AccordionItem';
@@ -46,10 +46,10 @@ export const AccordionTrigger = forwardRef<
       <AccordionPrimitive.Trigger
         ref={ref}
         className={cn(
-          'flex flex-1 items-center justify-between gap-2 py-4 text-left text-sm font-medium text-foreground',
-          'outline-none transition-colors duration-[var(--duration-fast)]',
+          'text-foreground flex flex-1 items-center justify-between gap-2 py-4 text-left text-sm font-medium',
+          'transition-colors duration-[var(--duration-fast)] outline-none',
           'hover:text-accent',
-          'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+          'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
           '[&[data-state=open]>svg]:rotate-180',
           className,
         )}
@@ -57,7 +57,7 @@ export const AccordionTrigger = forwardRef<
       >
         {children}
         <ChevronDown
-          className="size-4 shrink-0 text-foreground-subtle transition-transform duration-[var(--duration-base)]"
+          className="text-foreground-subtle size-4 shrink-0 transition-transform duration-[var(--duration-base)]"
           aria-hidden
         />
       </AccordionPrimitive.Trigger>
@@ -74,12 +74,16 @@ export const AccordionContent = forwardRef<
     <AccordionPrimitive.Content
       ref={ref}
       className={cn(
-        'overflow-hidden text-sm text-foreground-muted',
+        'text-foreground-muted overflow-hidden text-sm',
+        // Deliberate motion exception: height animates (layout property). Radix only
+        // keeps Content mounted through CSS *animations*, so a grid-rows transition
+        // would cut the close. The panel is short and nothing below it reflows
+        // except by design; `prefers-reduced-motion` disables it globally.
         'data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down',
       )}
       {...props}
     >
-      <div className={cn('pb-4 pt-0', className)}>{children}</div>
+      <div className={cn('pt-0 pb-4', className)}>{children}</div>
     </AccordionPrimitive.Content>
   );
 });

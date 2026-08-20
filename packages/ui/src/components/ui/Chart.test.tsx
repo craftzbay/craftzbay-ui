@@ -12,7 +12,7 @@ const data = [
 describe('Chart', () => {
   it('uses the caption as the accessible name and adds a desc summary', () => {
     render(<LineChart data={data} caption="Revenue" />);
-    const svg = screen.getByRole('img', { name: 'Revenue' });
+    const svg = screen.getByRole('group', { name: 'Revenue' });
     const desc = svg.querySelector('desc');
     expect(desc?.textContent).toContain('min 900');
     expect(desc?.textContent).toContain('max 3400');
@@ -21,7 +21,7 @@ describe('Chart', () => {
 
   it('falls back to aria-label / title and warns when nothing is given', () => {
     render(<BarChart data={data} aria-label="Signups" />);
-    expect(screen.getByRole('img', { name: 'Signups' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Signups' })).toBeInTheDocument();
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     render(<BarChart data={data} />);
     expect(warn).toHaveBeenCalled();
@@ -30,9 +30,9 @@ describe('Chart', () => {
 
   it('renders abbreviated y ticks and first/last x labels', () => {
     render(<LineChart data={data} caption="Revenue" />);
-    expect(screen.getByText('3.4K')).toBeInTheDocument();
-    expect(screen.getByText('Jan')).toBeInTheDocument();
-    expect(screen.getByText('Mar')).toBeInTheDocument();
+    expect(screen.getByText('4K')).toBeInTheDocument(); // nice tick above 3400
+    expect(screen.getAllByText('Jan').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Mar').length).toBeGreaterThan(0);
     expect(abbreviateNumber(3_400_000)).toBe('3.4M');
   });
 
@@ -42,7 +42,7 @@ describe('Chart', () => {
         caption="Two"
         series={[
           { name: 'A', data },
-          { name: 'B', data: data.map((d) => ({ ...d, y: d.y / 2 })) },
+          { name: 'B', data: data.map((d) => ({ ...d, y: (d.y ?? 0) / 2 })) },
         ]}
       />,
     );

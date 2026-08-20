@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { act, render, screen } from '@testing-library/react';
 import { axe } from 'jest-axe';
 import { Snackbar } from '../Snackbar';
 import { Spinner } from '../Spinner';
@@ -11,14 +11,20 @@ import { Toast, ToastDescription, ToastProvider, ToastTitle, ToastViewport } fro
 
 describe('Feedback (smoke)', () => {
   it('Snackbar renders title + body + close', () => {
-    render(<Snackbar variant="info" title="Heads up" onClose={() => {}}>Body</Snackbar>);
+    render(
+      <Snackbar variant="info" title="Heads up" onClose={() => {}}>
+        Body
+      </Snackbar>,
+    );
     expect(screen.getByText('Heads up')).toBeInTheDocument();
     expect(screen.getByText('Body')).toBeInTheDocument();
   });
 
   it('Snackbar is axe-clean', async () => {
     const { container } = render(
-      <Snackbar variant="success" title="Saved" onClose={() => {}}>OK</Snackbar>,
+      <Snackbar variant="success" title="Saved" onClose={() => {}}>
+        OK
+      </Snackbar>,
     );
     expect(await axe(container)).toHaveNoViolations();
   });
@@ -38,6 +44,20 @@ describe('Feedback (smoke)', () => {
     expect(screen.getByRole('progressbar', { name: 'Storage' })).toBeInTheDocument();
   });
 
+  it('Skeleton with delay renders nothing until elapsed', async () => {
+    vi.useFakeTimers();
+    try {
+      const { container } = render(<Skeleton delay={200} className="h-4" />);
+      expect(container.firstChild).toBeNull();
+      await act(async () => {
+        vi.advanceTimersByTime(250);
+      });
+      expect(container.firstChild).not.toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('Skeleton renders', () => {
     const { container } = render(<Skeleton className="h-4 w-24" />);
     expect(container.firstChild).toBeInTheDocument();
@@ -51,9 +71,7 @@ describe('Feedback (smoke)', () => {
   });
 
   it('EmptyState is axe-clean', async () => {
-    const { container } = render(
-      <EmptyState title="Empty" description="Nothing here yet." />,
-    );
+    const { container } = render(<EmptyState title="Empty" description="Nothing here yet." />);
     expect(await axe(container)).toHaveNoViolations();
   });
 

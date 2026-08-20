@@ -160,7 +160,7 @@ export const TagInput = forwardRef<HTMLDivElement, TagInputProps>(function TagIn
           aria-label={ariaLabel}
           aria-invalid={isError || undefined}
           aria-describedby={describedBy}
-          className="placeholder:text-foreground-subtle min-w-[8ch] flex-1 bg-transparent text-sm outline-none"
+          className="placeholder:text-foreground-subtle min-w-[8ch] flex-1 bg-transparent text-lg outline-none md:text-sm"
         />
       </div>
       {hasErrorMessage ? (

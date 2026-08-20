@@ -1,12 +1,20 @@
 'use client';
 
-import { forwardRef, useId, type ComponentPropsWithoutRef, type ElementRef, type ReactNode } from 'react';
+import {
+  forwardRef,
+  useId,
+  type ComponentPropsWithoutRef,
+  type ElementRef,
+  type ReactNode,
+} from 'react';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { Check, Minus } from '@/icons';
 import { cn } from '@/lib/utils';
 
-export interface CheckboxProps
-  extends Omit<ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>, 'asChild'> {
+export interface CheckboxProps extends Omit<
+  ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>,
+  'asChild'
+> {
   /** Visible label rendered to the right of the box. */
   label?: ReactNode;
   /** Secondary description rendered below the label. */
@@ -33,7 +41,10 @@ export interface CheckboxProps
  * @dont Use a Checkbox for mutually exclusive choices — use RadioGroup.
  */
 export const Checkbox = forwardRef<ElementRef<typeof CheckboxPrimitive.Root>, CheckboxProps>(
-  function Checkbox({ className, label, description, error, hideLabel, id, disabled, ...props }, ref) {
+  function Checkbox(
+    { className, label, description, error, hideLabel, id, disabled, ...props },
+    ref,
+  ) {
     const autoId = useId();
     const fieldId = id ?? autoId;
     const descId = description ? `${fieldId}-desc` : undefined;
@@ -49,9 +60,11 @@ export const Checkbox = forwardRef<ElementRef<typeof CheckboxPrimitive.Root>, Ch
             aria-describedby={errorId ?? descId}
             aria-invalid={Boolean(error) || undefined}
             className={cn(
-              'peer mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-sm border',
+              'peer relative mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-sm border',
+              // WCAG 2.5.8: 16px visual box, ≥24px hit area via an invisible inset halo.
+              'before:absolute before:-inset-1.5 before:content-[""]',
               'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)]',
-              'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+              'focus-visible:ring-ring focus-visible:ring-offset-background outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
               'data-[state=checked]:bg-accent data-[state=checked]:border-accent data-[state=checked]:text-on-accent',
               'data-[state=indeterminate]:bg-accent data-[state=indeterminate]:border-accent data-[state=indeterminate]:text-on-accent',
               'disabled:cursor-not-allowed disabled:opacity-50',
@@ -73,14 +86,14 @@ export const Checkbox = forwardRef<ElementRef<typeof CheckboxPrimitive.Root>, Ch
               <label
                 htmlFor={fieldId}
                 className={cn(
-                  'text-sm text-foreground select-none',
-                  disabled && 'opacity-50 cursor-not-allowed',
+                  'text-foreground text-sm select-none',
+                  disabled && 'cursor-not-allowed opacity-50',
                 )}
               >
                 {label}
               </label>
               {description && (
-                <p id={descId} className="text-xs text-foreground-subtle">
+                <p id={descId} className="text-foreground-subtle text-xs">
                   {description}
                 </p>
               )}
@@ -88,7 +101,7 @@ export const Checkbox = forwardRef<ElementRef<typeof CheckboxPrimitive.Root>, Ch
           )}
         </div>
         {error && (
-          <p id={errorId} role="alert" className="text-xs text-danger-text">
+          <p id={errorId} role="alert" className="text-danger-text text-xs">
             {error}
           </p>
         )}

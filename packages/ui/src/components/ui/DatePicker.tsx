@@ -73,7 +73,7 @@ function PickerTrigger({
           aria-invalid={Boolean(error) || undefined}
           aria-describedby={error ? errorId : undefined}
           className={cn(
-            'bg-card inline-flex h-9 w-full items-center justify-start gap-2 rounded-md border px-3 text-left text-sm',
+            'bg-card inline-flex h-9 w-full items-center justify-start gap-2 rounded-md border px-3 text-left text-lg md:text-sm',
             'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)]',
             'focus-visible:ring-offset-background outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
             'disabled:cursor-not-allowed disabled:opacity-50',

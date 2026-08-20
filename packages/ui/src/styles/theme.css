@@ -16,7 +16,10 @@
  *   Light mode
  *     foreground (neutral-900)                 on background (white)         → 17.9:1
  *     foreground-muted (neutral-600)           on background (white)         →  7.4:1
- *     foreground-subtle (neutral-500)          on background (white)         →  4.7:1
+ *     foreground-subtle (hsl 215 16% 45%)      on background (white)         →  5.1:1
+ *     foreground-subtle                        on background-muted           →  4.6:1 (was 4.3 at 47%)
+ *     amber preset accent (oklch .56 .14 65) + white text                    →  4.8:1 (was 3.8 at L .62)
+ *     chart-1 (hsl 217 70% 50%)                on background (white)         →  5.0:1 (no longer aliases --accent)
  *     accent-600 text                          on background (white)         →  7.7:1
  *     accent-600 bg + white text                                             →  7.7:1
  *     success-solid bg + white text                                          →  5.2:1
@@ -268,7 +271,7 @@
   /* Text ----------------------------------------------------------------- */
   --foreground: hsl(222 47% 11%);
   --foreground-muted: hsl(215 19% 35%);
-  --foreground-subtle: hsl(215 16% 47%);
+  --foreground-subtle: hsl(215 16% 45%); /* ≥4.5:1 on background-muted too */
 
   /* Borders -------------------------------------------------------------- */
   --border: hsl(214 32% 91%);
@@ -296,7 +299,7 @@
   --overlay: hsl(229 50% 6% / 0.6);
   --tooltip: hsl(222 47% 11%);
   --tooltip-foreground: hsl(210 40% 98%);
-  --chart-1: var(--accent);
+  --chart-1: hsl(217 70% 50%); /* categorical blue — never the accent, so series ≠ interactive */
   --chart-2: hsl(162 66% 29%);
   --chart-3: hsl(38 92% 40%);
   --chart-4: hsl(0 72% 45%);
@@ -372,7 +375,7 @@
   --overlay: hsl(229 50% 6% / 0.7);
   --tooltip: hsl(210 40% 98%);
   --tooltip-foreground: hsl(222 47% 11%);
-  --chart-1: var(--accent);
+  --chart-1: hsl(217 80% 68%);
   --chart-2: hsl(162 60% 55%);
   --chart-3: hsl(38 92% 60%);
   --chart-4: hsl(0 80% 68%);
@@ -497,7 +500,7 @@
   --color-accent-800: oklch(0.46 0.12 65);
 }
 :root[data-accent='amber'] {
-  --accent: oklch(0.62 0.14 65);
+  --accent: oklch(0.56 0.14 65); /* 4.8:1 with white text (0.62 was 3.8:1) */
   --accent-subtle: oklch(0.96 0.04 75);
   --accent-subtle-foreground: oklch(0.48 0.12 65);
   --ring: oklch(0.66 0.14 65);

@@ -24,11 +24,13 @@ const iconButton = cva(
           'bg-background-muted text-foreground border border-border-input hover:bg-surface-hover active:bg-surface-active',
         outline:
           'border border-border-input bg-transparent text-foreground hover:bg-background-muted',
-        ghost: 'bg-transparent text-foreground-muted hover:bg-background-muted hover:text-foreground',
+        ghost:
+          'bg-transparent text-foreground-muted hover:bg-background-muted hover:text-foreground',
         destructive: 'bg-danger text-on-danger hover:bg-danger-hover active:bg-danger-active',
       },
       size: {
-        sm: 'h-7 w-7 [&_svg]:size-3.5',
+        // 28px visual, 36px hit area via an invisible halo (WCAG 2.5.8 ≥24px).
+        sm: 'relative h-7 w-7 [&_svg]:size-3.5 before:absolute before:-inset-1 before:content-[""]',
         md: 'h-8 w-8 [&_svg]:size-4',
         lg: 'h-10 w-10 [&_svg]:size-5',
       },
@@ -41,8 +43,7 @@ const iconButton = cva(
 );
 
 export interface IconButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof iconButton> {
+  extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof iconButton> {
   /**
    * Accessible label for screen readers. **Required** — an icon-only button
    * with no label is invisible to assistive tech.

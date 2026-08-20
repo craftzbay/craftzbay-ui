@@ -213,7 +213,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
             type="button"
             onClick={handleClear}
             aria-label={strings.input.clear}
-            className="text-foreground-subtle hover:text-foreground focus-visible:ring-ring flex items-center rounded-sm outline-none focus-visible:ring-2"
+            className="text-foreground-subtle hover:text-foreground focus-visible:ring-ring -m-1 flex size-6 items-center justify-center rounded-sm outline-none focus-visible:ring-2"
           >
             <X className="size-4" aria-hidden />
           </button>
@@ -225,7 +225,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
             onClick={() => setShowPassword((p) => !p)}
             aria-label={showPassword ? strings.input.hidePassword : strings.input.showPassword}
             aria-pressed={showPassword}
-            className="text-foreground-subtle hover:text-foreground focus-visible:ring-ring flex items-center rounded-sm outline-none focus-visible:ring-2"
+            className="text-foreground-subtle hover:text-foreground focus-visible:ring-ring -m-1 flex size-6 items-center justify-center rounded-sm outline-none focus-visible:ring-2"
           >
             {showPassword ? (
               <EyeOff className="size-4" aria-hidden />

@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  forwardRef,
-  type ComponentPropsWithoutRef,
-  type ElementRef,
-} from 'react';
+import { forwardRef, type ComponentPropsWithoutRef, type ElementRef } from 'react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { cn } from '@/lib/utils';
 
@@ -24,8 +20,8 @@ export const PopoverContent = forwardRef<
         align={align}
         sideOffset={sideOffset}
         className={cn(
-          'z-[var(--z-popover)] min-w-72 max-w-sm rounded-lg border border-border bg-popover p-4 text-popover-foreground shadow-md',
-          'outline-none',
+          'border-border bg-popover text-popover-foreground z-[var(--z-popover)] max-w-sm min-w-72 rounded-lg border p-4 shadow-md',
+          'focus-visible:ring-ring outline-none focus-visible:ring-2',
           'data-[state=open]:animate-in data-[state=closed]:animate-out',
           'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
           'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',

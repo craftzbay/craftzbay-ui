@@ -56,6 +56,25 @@ export interface UiStrings {
   };
   avatar: { status: string; more: string };
   tree: { label: string };
+  chart: {
+    series: string;
+    noData: string;
+    loading: string;
+    empty: string;
+    error: string;
+    viewAsTable: string;
+    hideTable: string;
+    tableCaption: string;
+  };
+  relativeTime: {
+    justNow: string;
+    minutesAgo: string;
+    hoursAgo: string;
+    daysAgo: string;
+    inMinutes: string;
+    inHours: string;
+    inDays: string;
+  };
 }
 
 export type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };
@@ -124,6 +143,25 @@ export const defaultStrings: UiStrings = {
   },
   avatar: { status: 'Status: {status}', more: '{n} more' },
   tree: { label: 'Tree' },
+  chart: {
+    series: 'Series {n}',
+    noData: 'no data',
+    loading: 'Loading chart…',
+    empty: 'No data to display.',
+    error: "Couldn't load this chart.",
+    viewAsTable: 'View as table',
+    hideTable: 'Hide table',
+    tableCaption: 'Data table for {name}',
+  },
+  relativeTime: {
+    justNow: 'just now',
+    minutesAgo: '{n} min ago',
+    hoursAgo: '{n} h ago',
+    daysAgo: '{n} d ago',
+    inMinutes: 'in {n} min',
+    inHours: 'in {n} h',
+    inDays: 'in {n} d',
+  },
 };
 
 /** Expand `{name}` placeholders. Unknown placeholders are left as-is. */

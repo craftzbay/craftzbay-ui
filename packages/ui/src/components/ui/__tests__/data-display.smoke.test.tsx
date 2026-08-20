@@ -139,13 +139,90 @@ describe('Data Display (smoke)', () => {
   });
 
   it('LineChart renders figure with caption', () => {
-    render(<LineChart data={[{ x: 0, y: 1 }, { x: 1, y: 2 }]} caption="Trend" />);
+    render(
+      <LineChart
+        data={[
+          { x: 0, y: 1 },
+          { x: 1, y: 2 },
+        ]}
+        caption="Trend"
+      />,
+    );
     expect(screen.getByText('Trend')).toBeInTheDocument();
   });
 
   it('BarChart renders', () => {
-    const { container } = render(<BarChart data={[{ x: 0, y: 1 }, { x: 1, y: 2 }]} caption="Bars" />);
+    const { container } = render(
+      <BarChart
+        data={[
+          { x: 0, y: 1 },
+          { x: 1, y: 2 },
+        ]}
+        caption="Bars"
+      />,
+    );
     expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('Charts are axe-clean with focusable points and a table fallback', async () => {
+    const { container } = render(
+      <div>
+        <LineChart
+          series={[
+            {
+              name: 'A',
+              data: [
+                { x: 'Jan', y: 1 },
+                { x: 'Feb', y: 2 },
+              ],
+            },
+          ]}
+          caption="Trend"
+          showTableToggle
+        />
+        <BarChart
+          data={[
+            { x: 0, y: 1 },
+            { x: 1, y: 2 },
+          ]}
+          caption="Bars"
+        />
+      </div>,
+    );
+    const table = container.querySelector('table[data-chart-table]');
+    expect(table).toHaveClass('sr-only');
+    expect(table?.querySelectorAll('tbody tr')).toHaveLength(2);
+    expect(screen.getByRole('img', { name: 'A — Feb: 2' })).toHaveAttribute('tabindex', '0');
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it('LineChart breaks the path at null gaps and uses nice ticks', () => {
+    const { container } = render(
+      <LineChart
+        data={[
+          { x: 0, y: 100 },
+          { x: 1, y: null },
+          { x: 2, y: 754.5 },
+          { x: 3, y: 300 },
+        ]}
+        caption="Gaps"
+      />,
+    );
+    const line = container.querySelector('path[stroke]')!;
+    expect(line.getAttribute('d')!.match(/M/g)).toHaveLength(2);
+    const yTicks = Array.from(container.querySelectorAll('.tabular span')).map(
+      (e) => e.textContent,
+    );
+    expect(yTicks).toEqual(['800', '600', '400', '200', '0']);
+    expect(container.querySelectorAll('circle')).toHaveLength(3);
+  });
+
+  it('Chart state renders empty / error text instead of the SVG', () => {
+    const { container, rerender } = render(<LineChart data={[]} caption="S" state="empty" />);
+    expect(container.querySelector('svg')).toBeNull();
+    expect(screen.getByRole('status')).toHaveTextContent('No data to display.');
+    rerender(<LineChart data={[]} caption="S" state="error" />);
+    expect(screen.getByRole('alert')).toBeInTheDocument();
   });
 
   it('Kbd renders inline kbd element', () => {

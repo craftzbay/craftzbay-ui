@@ -2,10 +2,16 @@
 
 import { forwardRef, type HTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
+import { useDelayedLoading } from '@/hooks/use-delayed-loading';
 
 export interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
   /** Predefined silhouette presets. */
   variant?: 'text' | 'circle' | 'card' | 'avatar';
+  /**
+   * Render nothing until this many ms have elapsed, so sub-300ms loads never
+   * flash a placeholder. Default 0 (render immediately).
+   */
+  delay?: number;
 }
 
 /**
@@ -26,20 +32,22 @@ export interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
  *
  * @do Match the silhouette of the eventual content so the layout doesn't
  *      shift when data arrives.
- * @dont Show a full-page skeleton for sub-300ms loads — use a single Spinner.
+ * @dont Show a full-page skeleton for sub-300ms loads — use `delay={300}` or a single Spinner.
  */
 export const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>(function Skeleton(
-  { className, variant, ...props },
+  { className, variant, delay = 0, ...props },
   ref,
 ) {
+  const show = useDelayedLoading(delay);
+  if (!show) return null;
   return (
     <div
       ref={ref}
       aria-hidden
       className={cn(
-        'animate-pulse bg-background-muted',
+        'bg-background-muted animate-pulse',
         variant === 'text' && 'h-3 rounded-sm',
-        variant === 'circle' && 'rounded-full aspect-square',
+        variant === 'circle' && 'aspect-square rounded-full',
         variant === 'avatar' && 'size-8 rounded-full',
         variant === 'card' && 'rounded-lg',
         !variant && 'rounded-md',

@@ -115,7 +115,10 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(function Combo
   const [selectedOption, setSelectedOption] = useState<ComboboxOption | null>(null);
 
   // Resolve options: static or async-loaded.
-  const items = useMemo(() => (loadOptions ? loaded : (options ?? [])), [loadOptions, loaded, options]);
+  const items = useMemo(
+    () => (loadOptions ? loaded : (options ?? [])),
+    [loadOptions, loaded, options],
+  );
 
   useEffect(() => {
     if (!loadOptions || !open) return;
@@ -228,7 +231,7 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(function Combo
                   value={query}
                   onValueChange={setQuery}
                   placeholder={searchPlaceholder}
-                  className="placeholder:text-foreground-subtle flex h-9 w-full bg-transparent py-2 text-sm outline-none"
+                  className="placeholder:text-foreground-subtle flex h-9 w-full bg-transparent py-2 text-lg outline-none md:text-sm"
                 />
                 {loading && (
                   <Loader2 className="text-foreground-subtle size-4 animate-spin" aria-hidden />

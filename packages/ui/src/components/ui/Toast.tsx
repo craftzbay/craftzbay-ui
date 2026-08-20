@@ -24,8 +24,10 @@ export const ToastViewport = forwardRef<
     <ToastPrimitive.Viewport
       ref={ref}
       className={cn(
-        'fixed bottom-0 right-0 z-[var(--z-toast)] flex max-h-screen w-full flex-col-reverse gap-2 p-6',
-        'sm:bottom-auto sm:top-4 sm:right-4 sm:max-w-sm sm:flex-col',
+        'fixed right-0 bottom-0 z-[var(--z-toast)] flex max-h-screen w-full flex-col-reverse gap-2 p-6',
+        // Respect notched/home-indicator insets (consumers set viewport-fit=cover).
+        'pr-[max(1.5rem,env(safe-area-inset-right))] pb-[max(1.5rem,env(safe-area-inset-bottom))] pl-[max(1.5rem,env(safe-area-inset-left))]',
+        'sm:top-4 sm:right-4 sm:bottom-auto sm:max-w-sm sm:flex-col',
         className,
       )}
       {...props}
@@ -61,26 +63,26 @@ const toast = cva(
 
 const iconMap = {
   default: null,
-  success: <CheckCircle2 className="size-5 text-success-text shrink-0 mt-0.5" aria-hidden />,
-  warning: <AlertTriangle className="size-5 text-warning-text shrink-0 mt-0.5" aria-hidden />,
-  danger: <XCircle className="size-5 text-danger-text shrink-0 mt-0.5" aria-hidden />,
-  info: <Info className="size-5 text-info-text shrink-0 mt-0.5" aria-hidden />,
+  success: <CheckCircle2 className="text-success-text mt-0.5 size-5 shrink-0" aria-hidden />,
+  warning: <AlertTriangle className="text-warning-text mt-0.5 size-5 shrink-0" aria-hidden />,
+  danger: <XCircle className="text-danger-text mt-0.5 size-5 shrink-0" aria-hidden />,
+  info: <Info className="text-info-text mt-0.5 size-5 shrink-0" aria-hidden />,
 } satisfies Record<'default' | 'success' | 'warning' | 'danger' | 'info', ReactElement | null>;
 
 export interface ToastProps
-  extends ComponentPropsWithoutRef<typeof ToastPrimitive.Root>,
-    VariantProps<typeof toast> {}
+  extends ComponentPropsWithoutRef<typeof ToastPrimitive.Root>, VariantProps<typeof toast> {}
 
-export const Toast = forwardRef<ElementRef<typeof ToastPrimitive.Root>, ToastProps>(
-  function Toast({ className, variant = 'default', children, ...props }, ref) {
-    return (
-      <ToastPrimitive.Root ref={ref} className={cn(toast({ variant }), className)} {...props}>
-        {iconMap[variant ?? 'default']}
-        <div className="flex-1 space-y-1">{children}</div>
-      </ToastPrimitive.Root>
-    );
-  },
-);
+export const Toast = forwardRef<ElementRef<typeof ToastPrimitive.Root>, ToastProps>(function Toast(
+  { className, variant = 'default', children, ...props },
+  ref,
+) {
+  return (
+    <ToastPrimitive.Root ref={ref} className={cn(toast({ variant }), className)} {...props}>
+      {iconMap[variant ?? 'default']}
+      <div className="flex-1 space-y-1">{children}</div>
+    </ToastPrimitive.Root>
+  );
+});
 Toast.displayName = 'Toast';
 
 export const ToastTitle = forwardRef<
@@ -88,11 +90,7 @@ export const ToastTitle = forwardRef<
   ComponentPropsWithoutRef<typeof ToastPrimitive.Title>
 >(function ToastTitle({ className, ...props }, ref) {
   return (
-    <ToastPrimitive.Title
-      ref={ref}
-      className={cn('text-sm font-medium', className)}
-      {...props}
-    />
+    <ToastPrimitive.Title ref={ref} className={cn('text-sm font-medium', className)} {...props} />
   );
 });
 ToastTitle.displayName = 'ToastTitle';
@@ -120,8 +118,8 @@ export const ToastAction = forwardRef<
       ref={ref}
       className={cn(
         'inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-current bg-transparent px-3 text-sm font-medium',
-        'transition-colors hover:bg-current/10 outline-none',
-        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card',
+        'transition-colors outline-none hover:bg-current/10',
+        'focus-visible:ring-ring focus-visible:ring-offset-card focus-visible:ring-2 focus-visible:ring-offset-2',
         className,
       )}
       {...props}
@@ -138,11 +136,11 @@ export const ToastClose = forwardRef<
   return (
     <ToastPrimitive.Close
       ref={ref}
-      aria-label={props["aria-label"] ?? strings.toast.close}
+      aria-label={props['aria-label'] ?? strings.toast.close}
       className={cn(
-        'absolute right-2 top-2 inline-flex size-7 items-center justify-center rounded-md text-foreground-subtle',
-        'opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground',
-        'outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring',
+        'text-foreground-subtle absolute top-2 right-2 inline-flex size-7 items-center justify-center rounded-md',
+        'hover:text-foreground opacity-0 transition-opacity group-hover:opacity-100',
+        'focus-visible:ring-ring outline-none focus-visible:opacity-100 focus-visible:ring-2',
         className,
       )}
       toast-close=""
@@ -198,11 +196,7 @@ export function Toaster() {
           {t.title && <ToastTitle>{t.title}</ToastTitle>}
           {t.description && <ToastDescription>{t.description}</ToastDescription>}
           {t.action && (
-            <ToastAction
-              altText={t.action.altText}
-              onClick={t.action.onClick}
-              className="mt-1"
-            >
+            <ToastAction altText={t.action.altText} onClick={t.action.onClick} className="mt-1">
               {t.action.label}
             </ToastAction>
           )}

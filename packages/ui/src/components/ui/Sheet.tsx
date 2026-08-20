@@ -30,7 +30,7 @@ const SheetOverlay = forwardRef<
     <DialogPrimitive.Overlay
       ref={ref}
       className={cn(
-        'fixed inset-0 z-[var(--z-overlay)] bg-overlay',
+        'bg-overlay fixed inset-0 z-[var(--z-overlay)]',
         'data-[state=open]:animate-in data-[state=closed]:animate-out',
         'data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0',
         className,
@@ -45,6 +45,8 @@ const sheet = cva(
   [
     'fixed z-[var(--z-modal)] bg-card text-card-foreground shadow-lg',
     'flex flex-col gap-4 p-6',
+    // Safe-area insets for notched devices (consumers set viewport-fit=cover).
+    'pb-[max(1.5rem,env(safe-area-inset-bottom))] pl-[max(1.5rem,env(safe-area-inset-left))] pr-[max(1.5rem,env(safe-area-inset-right))]',
     'data-[state=open]:animate-in data-[state=closed]:animate-out',
     'data-[state=closed]:duration-[var(--duration-base)] data-[state=open]:duration-[var(--duration-slow)]',
   ],
@@ -64,8 +66,7 @@ const sheet = cva(
 );
 
 export interface SheetContentProps
-  extends ComponentPropsWithoutRef<typeof DialogPrimitive.Content>,
-    VariantProps<typeof sheet> {
+  extends ComponentPropsWithoutRef<typeof DialogPrimitive.Content>, VariantProps<typeof sheet> {
   showClose?: boolean;
 }
 
@@ -83,9 +84,9 @@ export const SheetContent = forwardRef<
           <DialogPrimitive.Close
             aria-label={strings.sheet.close}
             className={cn(
-              'absolute right-4 top-4 inline-flex size-8 items-center justify-center rounded-md text-foreground-subtle',
+              'text-foreground-subtle absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-md',
               'hover:bg-background-muted hover:text-foreground',
-              'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card',
+              'focus-visible:ring-ring focus-visible:ring-offset-card outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
               'transition-colors duration-[var(--duration-fast)]',
             )}
           >
@@ -106,7 +107,10 @@ SheetHeader.displayName = 'SheetHeader';
 export function SheetFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('mt-auto flex flex-col-reverse gap-2 pt-4 sm:flex-row sm:justify-end', className)}
+      className={cn(
+        'mt-auto flex flex-col-reverse gap-2 pt-4 sm:flex-row sm:justify-end',
+        className,
+      )}
       {...props}
     />
   );
@@ -120,7 +124,7 @@ export const SheetTitle = forwardRef<
   return (
     <DialogPrimitive.Title
       ref={ref}
-      className={cn('text-lg font-semibold text-foreground leading-tight', className)}
+      className={cn('text-foreground text-lg leading-tight font-semibold', className)}
       {...props}
     />
   );
@@ -134,7 +138,7 @@ export const SheetDescription = forwardRef<
   return (
     <DialogPrimitive.Description
       ref={ref}
-      className={cn('text-sm text-foreground-muted', className)}
+      className={cn('text-foreground-muted text-sm', className)}
       {...props}
     />
   );

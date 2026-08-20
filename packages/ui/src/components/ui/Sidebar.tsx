@@ -82,11 +82,13 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
 
   return (
     <SidebarContext.Provider value={{ collapsed }}>
-      <aside
+      <nav
         ref={ref}
         aria-label={props['aria-label'] ?? strings.sidebar.label}
         className={cn(
           'border-border bg-background-subtle sticky top-0 hidden h-screen shrink-0 flex-col gap-2 border-r md:flex',
+          // Deliberate motion exception: the rail's own width transitions (layout).
+          // Only the rail and the main column it flanks move; no content inside reflows.
           'transition-[width] duration-[var(--duration-base)] ease-[var(--ease-out)]',
           collapsed ? 'w-14' : 'w-60',
           className,
@@ -122,9 +124,11 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
           ) : (
             <ChevronsLeft className="size-4" aria-hidden />
           )}
-          {!collapsed && <span className="text-xs font-medium">{strings.sidebar.collapseShort}</span>}
+          {!collapsed && (
+            <span className="text-xs font-medium">{strings.sidebar.collapseShort}</span>
+          )}
         </button>
-      </aside>
+      </nav>
     </SidebarContext.Provider>
   );
 });

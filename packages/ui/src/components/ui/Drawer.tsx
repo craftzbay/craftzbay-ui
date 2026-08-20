@@ -30,20 +30,21 @@ export const DrawerOverlay = forwardRef<
   return (
     <DrawerPrimitive.Overlay
       ref={ref}
-      className={cn('fixed inset-0 z-[var(--z-overlay)] bg-overlay', className)}
+      className={cn('bg-overlay fixed inset-0 z-[var(--z-overlay)]', className)}
       {...props}
     />
   );
 });
 DrawerOverlay.displayName = 'DrawerOverlay';
 
+// Edge-anchored sides pad by the matching safe-area inset (consumers set viewport-fit=cover).
 const directionStyles: Record<Direction, string> = {
   bottom:
-    'inset-x-0 bottom-0 mt-24 flex h-auto max-h-[90vh] flex-col rounded-t-xl border-t border-border',
+    'inset-x-0 bottom-0 mt-24 flex h-auto max-h-[90vh] flex-col rounded-t-xl border-t border-border pb-[env(safe-area-inset-bottom)]',
   top: 'inset-x-0 top-0 mb-24 flex h-auto max-h-[90vh] flex-col rounded-b-xl border-b border-border',
-  left: 'inset-y-0 left-0 flex h-full w-[420px] max-w-[90vw] flex-col rounded-r-xl border-r border-border',
+  left: 'inset-y-0 left-0 flex h-full w-[420px] max-w-[90vw] flex-col rounded-r-xl border-r border-border pl-[env(safe-area-inset-left)]',
   right:
-    'inset-y-0 right-0 flex h-full w-[420px] max-w-[90vw] flex-col rounded-l-xl border-l border-border',
+    'inset-y-0 right-0 flex h-full w-[420px] max-w-[90vw] flex-col rounded-l-xl border-l border-border pr-[env(safe-area-inset-right)]',
 };
 
 const handleStyles: Record<Direction, string> = {

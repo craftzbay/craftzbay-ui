@@ -67,4 +67,23 @@ export const mnStrings: UiStrings = {
   },
   avatar: { status: 'Төлөв: {status}', more: 'бусад {n}' },
   tree: { label: 'Мод' },
+  chart: {
+    series: '{n}-р цуваа',
+    noData: 'өгөгдөл алга',
+    loading: 'График ачаалж байна…',
+    empty: 'Харуулах өгөгдөл алга.',
+    error: 'Графикийг ачаалж чадсангүй.',
+    viewAsTable: 'Хүснэгтээр харах',
+    hideTable: 'Хүснэгтийг нуух',
+    tableCaption: '{name} — өгөгдлийн хүснэгт',
+  },
+  relativeTime: {
+    justNow: 'дөнгөж сая',
+    minutesAgo: '{n} мин өмнө',
+    hoursAgo: '{n} цаг өмнө',
+    daysAgo: '{n} өдрийн өмнө',
+    inMinutes: '{n} мин дараа',
+    inHours: '{n} цагийн дараа',
+    inDays: '{n} өдрийн дараа',
+  },
 };

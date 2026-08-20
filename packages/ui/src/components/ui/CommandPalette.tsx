@@ -28,7 +28,7 @@ export const Command = forwardRef<
     <CommandPrimitive
       ref={ref}
       className={cn(
-        'flex h-full w-full flex-col overflow-hidden rounded-lg bg-popover text-popover-foreground',
+        'bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-lg',
         className,
       )}
       {...props}
@@ -42,12 +42,12 @@ export const CommandInput = forwardRef<
   ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(function CommandInput({ className, ...props }, ref) {
   return (
-    <div className="flex items-center gap-2 border-b border-border px-3" cmdk-input-wrapper="">
-      <Search className="size-4 shrink-0 text-foreground-subtle" aria-hidden />
+    <div className="border-border flex items-center gap-2 border-b px-3" cmdk-input-wrapper="">
+      <Search className="text-foreground-subtle size-4 shrink-0" aria-hidden />
       <CommandPrimitive.Input
         ref={ref}
         className={cn(
-          'flex h-11 w-full bg-transparent py-3 text-sm outline-none',
+          'flex h-11 w-full bg-transparent py-3 text-lg outline-none md:text-sm',
           'placeholder:text-foreground-subtle disabled:cursor-not-allowed disabled:opacity-50',
           className,
         )}
@@ -79,7 +79,7 @@ export const CommandEmpty = forwardRef<
   return (
     <CommandPrimitive.Empty
       ref={ref}
-      className="py-8 text-center text-sm text-foreground-subtle"
+      className="text-foreground-subtle py-8 text-center text-sm"
       {...props}
     />
   );
@@ -94,7 +94,7 @@ export const CommandGroup = forwardRef<
     <CommandPrimitive.Group
       ref={ref}
       className={cn(
-        'overflow-hidden text-foreground p-1',
+        'text-foreground overflow-hidden p-1',
         '[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5',
         '[&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium',
         '[&_[cmdk-group-heading]]:text-foreground-subtle',
@@ -113,7 +113,7 @@ export const CommandSeparator = forwardRef<
   return (
     <CommandPrimitive.Separator
       ref={ref}
-      className={cn('-mx-1 my-1 h-px bg-border', className)}
+      className={cn('bg-border -mx-1 my-1 h-px', className)}
       {...props}
     />
   );
@@ -128,10 +128,10 @@ export const CommandItem = forwardRef<
     <CommandPrimitive.Item
       ref={ref}
       className={cn(
-        'relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-foreground outline-none',
+        'text-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none',
         'data-[selected=true]:bg-background-muted data-[selected=true]:text-foreground',
         'data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50',
-        '[&_svg]:size-4 [&_svg]:text-foreground-subtle',
+        '[&_svg]:text-foreground-subtle [&_svg]:size-4',
         className,
       )}
       {...props}
@@ -140,11 +140,17 @@ export const CommandItem = forwardRef<
 });
 CommandItem.displayName = 'CommandItem';
 
-export function CommandShortcut({ children, className }: { children: ReactNode; className?: string }) {
+export function CommandShortcut({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <span
       className={cn(
-        'ml-auto inline-flex items-center gap-0.5 text-xs tracking-widest text-foreground-subtle font-mono',
+        'text-foreground-subtle ml-auto inline-flex items-center gap-0.5 font-mono text-xs tracking-widest',
         className,
       )}
     >
@@ -172,7 +178,7 @@ export function CommandDialog({ open, onOpenChange, children, title }: CommandDi
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay
           className={cn(
-            'fixed inset-0 z-[var(--z-overlay)] bg-overlay',
+            'bg-overlay fixed inset-0 z-[var(--z-overlay)]',
             'data-[state=open]:animate-in data-[state=closed]:animate-out',
             'data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0',
           )}
@@ -180,9 +186,9 @@ export function CommandDialog({ open, onOpenChange, children, title }: CommandDi
         <DialogPrimitive.Content
           aria-describedby={undefined}
           className={cn(
-            'fixed left-1/2 top-[20%] z-[var(--z-modal)] -translate-x-1/2',
+            'fixed top-[20%] left-1/2 z-[var(--z-modal)] -translate-x-1/2',
             'w-[calc(100%-2rem)] max-w-[640px] overflow-hidden',
-            'rounded-lg border border-border bg-popover text-popover-foreground shadow-lg',
+            'border-border bg-popover text-popover-foreground rounded-lg border shadow-lg',
             'data-[state=open]:animate-in data-[state=closed]:animate-out',
             'data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0',
             'data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95',

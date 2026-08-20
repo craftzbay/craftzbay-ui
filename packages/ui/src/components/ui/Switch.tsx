@@ -10,8 +10,10 @@ import {
 import * as SwitchPrimitive from '@radix-ui/react-switch';
 import { cn } from '@/lib/utils';
 
-export interface SwitchProps
-  extends Omit<ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>, 'asChild'> {
+export interface SwitchProps extends Omit<
+  ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>,
+  'asChild'
+> {
   /** Inline label rendered to the right. */
   label?: ReactNode;
   /** Secondary description rendered below the label. */
@@ -24,8 +26,9 @@ export interface SwitchProps
   hideLabel?: boolean;
 }
 
+// `sm` is 28×16 visually; the `before:` halo lifts its hit area to ≥24px tall (WCAG 2.5.8).
 const trackSize = {
-  sm: 'h-4 w-7',
+  sm: 'h-4 w-7 before:absolute before:-inset-x-1 before:-inset-y-1.5 before:content-[""]',
   md: 'h-5 w-9',
 } as const;
 const thumbSize = {
@@ -77,9 +80,9 @@ export const Switch = forwardRef<ElementRef<typeof SwitchPrimitive.Root>, Switch
         disabled={disabled}
         aria-describedby={descId}
         className={cn(
-          'peer inline-flex shrink-0 items-center rounded-full border-2 border-transparent',
+          'peer relative inline-flex shrink-0 items-center rounded-full border-2 border-transparent',
           'transition-colors duration-[var(--duration-base)] ease-[var(--ease-out)]',
-          'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+          'focus-visible:ring-ring focus-visible:ring-offset-background outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
           'disabled:cursor-not-allowed disabled:opacity-50',
           'data-[state=checked]:bg-accent data-[state=unchecked]:bg-switch-track-off',
           trackSize[size],
@@ -88,7 +91,7 @@ export const Switch = forwardRef<ElementRef<typeof SwitchPrimitive.Root>, Switch
       >
         <SwitchPrimitive.Thumb
           className={cn(
-            'pointer-events-none block rounded-full bg-switch-thumb shadow-sm',
+            'bg-switch-thumb pointer-events-none block rounded-full shadow-sm',
             'transition-transform duration-[var(--duration-base)] ease-[var(--ease-out)]',
             'translate-x-0',
             thumbSize[size],
@@ -101,15 +104,12 @@ export const Switch = forwardRef<ElementRef<typeof SwitchPrimitive.Root>, Switch
       <div className={cn('flex flex-col gap-0.5 select-none', hideLabel && 'sr-only')}>
         <label
           htmlFor={fieldId}
-          className={cn(
-            'text-sm text-foreground',
-            disabled && 'opacity-50 cursor-not-allowed',
-          )}
+          className={cn('text-foreground text-sm', disabled && 'cursor-not-allowed opacity-50')}
         >
           {label}
         </label>
         {description && (
-          <p id={descId} className="text-xs text-foreground-subtle">
+          <p id={descId} className="text-foreground-subtle text-xs">
             {description}
           </p>
         )}

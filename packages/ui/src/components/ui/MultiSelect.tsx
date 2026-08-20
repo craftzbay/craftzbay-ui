@@ -226,7 +226,7 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
                   aria-autocomplete="list"
                   aria-invalid={isError || undefined}
                   aria-describedby={describedBy}
-                  className="placeholder:text-foreground-subtle min-w-[6ch] flex-1 bg-transparent text-sm outline-none"
+                  className="placeholder:text-foreground-subtle min-w-[6ch] flex-1 bg-transparent text-lg outline-none md:text-sm"
                   disabled={disabled}
                 />
               </div>
@@ -285,7 +285,9 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
                         aria-hidden
                         className={cn(
                           'flex size-4 items-center justify-center rounded-sm border',
-                          isSelected ? 'border-accent bg-accent text-on-accent' : 'border-border-input',
+                          isSelected
+                            ? 'border-accent bg-accent text-on-accent'
+                            : 'border-border-input',
                         )}
                       >
                         {isSelected && <Check className="size-3" aria-hidden />}
