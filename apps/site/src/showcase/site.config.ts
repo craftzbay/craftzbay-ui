@@ -6,7 +6,7 @@
 import type { BrandName } from '@craftzbay/ui';
 
 export const PKG_NAME = '@craftzbay/ui';
-export const VERSION = '0.8.0';
+export const VERSION = '0.10.0';
 
 export const GITHUB_URL = 'https://github.com/craftzbay/craftzbay-ui';
 export const NPM_URL = 'https://www.npmjs.com/package/@craftzbay/ui';

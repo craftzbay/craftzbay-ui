@@ -1,4 +1,6 @@
 import { cn } from '@/lib/utils';
+import { Search } from '@/icons';
+import { Kbd } from '@/components/ui/Kbd';
 import { routeToHash, type Route } from '../routing';
 import { GITHUB_URL, NPM_URL } from '../site.config';
 import { BrandMark } from '../components/BrandMark';
@@ -52,12 +54,12 @@ export function ShowcaseTopBar({ onOpenPalette, current }: ShowcaseTopBarProps) 
           <button
             type="button"
             onClick={onOpenPalette}
-            className="hidden h-8 items-center gap-2 rounded-md border border-border bg-card px-2.5 text-sm text-foreground-muted outline-none transition-colors hover:bg-background-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:flex"
+            aria-label="Search (⌘K)"
+            className="hidden h-8 w-44 items-center gap-2 rounded-md border border-border-input bg-card pr-1.5 pl-2.5 text-sm text-foreground-subtle outline-none transition-colors hover:border-border-strong hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:flex lg:w-56"
           >
-            <span className="text-xs">Search…</span>
-            <span className="rounded border border-border bg-background px-1.5 py-0.5 font-mono text-xs text-foreground-subtle">
-              ⌘K
-            </span>
+            <Search className="size-4 shrink-0" aria-hidden />
+            <span className="flex-1 truncate text-left text-xs">Search components, guides…</span>
+            <Kbd className="shrink-0">⌘K</Kbd>
           </button>
 
           <BrandSwitcher />
