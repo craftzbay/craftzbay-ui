@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import { Search } from '@/icons';
 import { Kbd } from '@/components/ui/Kbd';
+import { useModifierKey } from '@/hooks/use-modifier-key';
 import { routeToHash, type Route } from '../routing';
 import { GITHUB_URL, NPM_URL } from '../site.config';
 import { BrandMark } from '../components/BrandMark';
@@ -19,6 +20,7 @@ const NAV: { label: string; route: Route; matchKinds: Route['kind'][] }[] = [
 
 /** Persistent top bar shared by Home + docs pages (hidden on preview tabs). */
 export function ShowcaseTopBar({ onOpenPalette, current }: ShowcaseTopBarProps) {
+  const mod = useModifierKey();
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-6 px-6">
@@ -54,12 +56,12 @@ export function ShowcaseTopBar({ onOpenPalette, current }: ShowcaseTopBarProps) 
           <button
             type="button"
             onClick={onOpenPalette}
-            aria-label="Search (⌘K)"
+            aria-label={`Search (${mod.label}+K)`}
             className="hidden h-8 w-44 items-center gap-2 rounded-md border border-border-input bg-card pr-1.5 pl-2.5 text-sm text-foreground-subtle outline-none transition-colors hover:border-border-strong hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:flex lg:w-56"
           >
             <Search className="size-4 shrink-0" aria-hidden />
             <span className="flex-1 truncate text-left text-xs">Search docs…</span>
-            <Kbd className="shrink-0">⌘K</Kbd>
+            <Kbd className="shrink-0">{mod.symbol} K</Kbd>
           </button>
 
           <BrandSwitcher />

@@ -11,6 +11,7 @@ import {
   Settings as SettingsIcon,
   User,
 } from '@/icons';
+import { useModifierKey } from '@/hooks/use-modifier-key';
 import {
   Avatar,
   Badge,
@@ -263,6 +264,7 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
   searchRef,
 ) {
   const unread = NOTIFICATIONS.filter((n) => n.unread).length;
+  const mod = useModifierKey();
   return (
     <TopNav
       className="bg-background supports-[backdrop-filter]:bg-background"
@@ -311,7 +313,7 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
       }
       actions={
         <>
-          <Tooltip label="Command palette (⌘K)">
+          <Tooltip label={`Command palette (${mod.label}+K)`}>
             <IconButton
               aria-label="Open command palette"
               icon={<Search />}

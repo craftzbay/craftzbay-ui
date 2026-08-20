@@ -17,6 +17,7 @@ export { mnStrings } from './lib/strings.mn';
 export * from './hooks/use-media-query';
 export * from './hooks/use-toast';
 export * from './hooks/use-field-ids';
+export * from './hooks/use-modifier-key';
 export { useStrings } from './hooks/use-strings';
 
 // Icons (namespaced to avoid name collisions with consumer apps).
