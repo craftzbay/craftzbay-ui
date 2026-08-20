@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Toaster, useCommandPaletteShortcut, useToast } from '@craftzbay/ui';
 import { ALL_SECTIONS, STUB_PAGES, WORKSPACES, findModule } from './admin/data';
-import { AdminPalette, AppSidebar, AppTopNav, type AppSidebarMode } from './admin/shell';
+import {
+  AdminLayoutContext,
+  AdminPalette,
+  AppSidebar,
+  AppTopNav,
+  type AppSidebarMode,
+} from './admin/shell';
 import { Analytics, Overview, Reports } from './admin/overview';
 import { Projects, type ProjectsHandle } from './admin/projects';
 import {
@@ -154,61 +160,63 @@ export function AdminDashboard({
     // min-height:auto, so without it <main> grows to its content, overflows the
     // shell, and any focus() on an off-screen row scrolls the overflow-hidden
     // root itself (sidebar "scrolls away"). With min-h-0 only <main> scrolls.
-    <div className="bg-background text-foreground flex h-dvh overflow-hidden">
-      <AppSidebar
-        page={page}
-        onNavigate={navigate}
-        workspace={workspace}
-        onWorkspaceChange={setWorkspace}
-        collapsed={collapsed}
-        onCollapsedChange={onCollapsedChange}
-        drawerOpen={drawerOpen}
-        onDrawerOpenChange={setDrawerOpen}
-        mode={SIDEBAR_MODE[layout]}
-        module={module}
-        onModuleChange={setModule}
-      />
-
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <AppTopNav
-          ref={searchRef}
-          workspace={ws}
-          onOpenDrawer={() => setDrawerOpen(true)}
-          onOpenPalette={() => setPaletteOpen(true)}
-          onNavigate={navigate}
-          onSignOut={() => push({ title: 'Signed out', description: 'Demo — no real session.' })}
-          searchValue={search}
-          onSearchChange={onSearchChange}
-          layout={layout}
+    <AdminLayoutContext.Provider value={layout}>
+      <div className="bg-background text-foreground flex h-dvh overflow-hidden">
+        <AppSidebar
           page={page}
+          onNavigate={navigate}
+          workspace={workspace}
           onWorkspaceChange={setWorkspace}
+          collapsed={collapsed}
+          onCollapsedChange={onCollapsedChange}
+          drawerOpen={drawerOpen}
+          onDrawerOpenChange={setDrawerOpen}
+          mode={SIDEBAR_MODE[layout]}
+          module={module}
+          onModuleChange={setModule}
         />
-        <main className="bg-background-subtle min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
-          <div className="mx-auto max-w-[1440px]">
-            {page === 'overview' && <Overview onNavigate={navigate} />}
-            {page === 'analytics' && <Analytics onNavigate={navigate} />}
-            {page === 'projects' && (
-              <Projects ref={projectsRef} onNavigate={navigate} globalQuery={search} />
-            )}
-            {page === 'inbox' && <InboxPage onNavigate={navigate} />}
-            {page === 'members' && <Members ref={membersRef} onNavigate={navigate} />}
-            {page === 'reports' && <Reports onNavigate={navigate} />}
-            {page === 'settings' && <SettingsPage onNavigate={navigate} />}
-            {page === 'billing' && <BillingPage onNavigate={navigate} />}
-            {page in STUB_PAGES && <StubPage page={page} onNavigate={navigate} />}
-          </div>
-        </main>
-      </div>
 
-      <AdminPalette
-        open={paletteOpen}
-        onOpenChange={setPaletteOpen}
-        onNavigate={navigate}
-        onAction={runAction}
-        hasSidebar={hasRail}
-        sections={layout === 'dual' ? ALL_SECTIONS : undefined}
-      />
-      <Toaster />
-    </div>
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <AppTopNav
+            ref={searchRef}
+            workspace={ws}
+            onOpenDrawer={() => setDrawerOpen(true)}
+            onOpenPalette={() => setPaletteOpen(true)}
+            onNavigate={navigate}
+            onSignOut={() => push({ title: 'Signed out', description: 'Demo — no real session.' })}
+            searchValue={search}
+            onSearchChange={onSearchChange}
+            layout={layout}
+            page={page}
+            onWorkspaceChange={setWorkspace}
+          />
+          <main className="bg-background-subtle min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
+            <div className="mx-auto max-w-[1440px]">
+              {page === 'overview' && <Overview onNavigate={navigate} />}
+              {page === 'analytics' && <Analytics onNavigate={navigate} />}
+              {page === 'projects' && (
+                <Projects ref={projectsRef} onNavigate={navigate} globalQuery={search} />
+              )}
+              {page === 'inbox' && <InboxPage onNavigate={navigate} />}
+              {page === 'members' && <Members ref={membersRef} onNavigate={navigate} />}
+              {page === 'reports' && <Reports onNavigate={navigate} />}
+              {page === 'settings' && <SettingsPage onNavigate={navigate} />}
+              {page === 'billing' && <BillingPage onNavigate={navigate} />}
+              {page in STUB_PAGES && <StubPage page={page} onNavigate={navigate} />}
+            </div>
+          </main>
+        </div>
+
+        <AdminPalette
+          open={paletteOpen}
+          onOpenChange={setPaletteOpen}
+          onNavigate={navigate}
+          onAction={runAction}
+          hasSidebar={hasRail}
+          sections={layout === 'dual' ? ALL_SECTIONS : undefined}
+        />
+        <Toaster />
+      </div>
+    </AdminLayoutContext.Provider>
   );
 }

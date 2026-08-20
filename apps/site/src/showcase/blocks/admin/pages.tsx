@@ -19,6 +19,8 @@ import {
   EmptyState,
   IconButton,
   Input,
+  RadioGroup,
+  RadioItem,
   Select,
   SelectContent,
   SelectItem,
@@ -43,6 +45,7 @@ import {
   type Message,
 } from './data';
 import { PageHeader } from './shell';
+import { useTheme, type Theme } from '../../theme/theme-context';
 
 /* =============================================================================
  *  Admin template — Inbox, Team, Settings, Billing
@@ -348,6 +351,7 @@ const NOTIFICATION_ROWS = [
  *  autosave (inline "Saved") for the toggles. */
 export function SettingsPage({ onNavigate }: { onNavigate: (key: string) => void }) {
   const { push } = useToast();
+  const { theme, setTheme } = useTheme();
   const [dirty, setDirty] = useState(false);
   const [savedAt, setSavedAt] = useState<string | null>(null);
   return (
@@ -405,6 +409,25 @@ export function SettingsPage({ onNavigate }: { onNavigate: (key: string) => void
                 </Button>
               </div>
             </form>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Appearance</CardTitle>
+            <CardDescription>Applies immediately and follows you across tabs.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RadioGroup
+              aria-label="Theme"
+              orientation="horizontal"
+              value={theme}
+              onValueChange={(v) => setTheme(v as Theme)}
+              className="gap-6"
+            >
+              <RadioItem value="light" label="Light" />
+              <RadioItem value="dark" label="Dark" />
+            </RadioGroup>
           </CardContent>
         </Card>
 

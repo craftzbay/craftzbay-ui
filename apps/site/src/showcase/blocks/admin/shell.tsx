@@ -1,4 +1,4 @@
-import { forwardRef, type ReactNode } from 'react';
+import { createContext, forwardRef, useContext, type ReactNode } from 'react';
 import {
   Bell,
   Check,
@@ -6,12 +6,15 @@ import {
   CreditCard,
   LogOut,
   Menu,
+  Moon,
   Plus,
   Search,
+  Sun,
   Settings as SettingsIcon,
   User,
 } from '@/icons';
 import { useModifierKey } from '@/hooks/use-modifier-key';
+import { useTheme, type Theme } from '../../theme/theme-context';
 import {
   Avatar,
   Badge,
@@ -27,6 +30,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   IconButton,
@@ -49,6 +54,7 @@ import {
   NOTIFICATIONS,
   USER,
   WORKSPACES,
+  findModule,
   findNav,
   type NavSection,
   type Workspace,
@@ -375,6 +381,57 @@ function PanelHeader({ label }: { label: string }) {
   return <h2 className="text-foreground truncate text-sm font-semibold">{label}</h2>;
 }
 
+/* ---------------------------------------------------------------------------
+ *  Breadcrumb trail — Home › [Module ›] Section › Page. The module crumb is
+ *  only meaningful in `dual`, where the rail owns that tier. `href` carries the
+ *  page key so `renderLink` can route through `onNavigate`.
+ * ------------------------------------------------------------------------ */
+
+export function pageCrumbs(page: string, withModule = false) {
+  const nav = findNav(page);
+  if (!nav || page === 'overview') return null;
+  const mod = findModule(page);
+  return [
+    { label: 'Home', href: 'overview' },
+    ...(withModule ? [{ label: mod.label, href: mod.sections[0].items[0].key }] : []),
+    { label: nav.section.label },
+    { label: nav.item.label },
+  ];
+}
+
+export function PageCrumbs({
+  page,
+  withModule,
+  onNavigate,
+  className,
+}: {
+  page: string;
+  withModule?: boolean;
+  onNavigate?: (key: string) => void;
+  className?: string;
+}) {
+  const crumbs = pageCrumbs(page, withModule);
+  if (!crumbs) return null;
+  return (
+    <Breadcrumbs
+      items={crumbs}
+      className={className}
+      renderLink={(href, children) => (
+        <button
+          type="button"
+          onClick={() => onNavigate?.(href)}
+          className="hover:text-foreground focus-visible:ring-ring rounded-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+        >
+          {children}
+        </button>
+      )}
+    />
+  );
+}
+
+/** Shell layout, so `PageHeader` knows when the top bar already shows the trail. */
+export const AdminLayoutContext = createContext<'sidebar' | 'topnav' | 'dual'>('sidebar');
+
 /** `rail` = collapsible sidebar (≥lg); `dual` = icon rail + module panel; `none` = drawer only. */
 export type AppSidebarMode = 'rail' | 'dual' | 'none';
 
@@ -426,7 +483,14 @@ export function AppSidebar({
           <AppRail module={module} onModuleChange={onModuleChange} onNavigate={navigate} />
           <Sidebar
             aria-label={`${activeModule.label} navigation`}
-            header={<PanelHeader label={activeModule.label} />}
+            // The tenant lives here (as in the `rail` header); the module is
+            // named by the rail tooltip and the breadcrumb, plus this sr-only heading.
+            header={
+              <>
+                <h2 className="sr-only">{activeModule.label}</h2>
+                <WorkspaceSwitcher value={workspace} onChange={onWorkspaceChange} />
+              </>
+            }
             // Panel is fixed-width: no collapse control (the rail already is the icon tier).
             className="md:hidden lg:flex [&>button:last-child]:hidden"
           >
@@ -533,7 +597,7 @@ export interface AppTopNavProps {
   onSignOut: () => void;
   searchValue: string;
   onSearchChange: (q: string) => void;
-  /** `sidebar` (default) shows the tenant name; `topnav` adds primary links; `topnav` and `dual` host the workspace switcher. */
+  /** `sidebar` (default) shows the tenant name; `topnav` adds primary links + the workspace switcher; `dual` shows the breadcrumb trail. */
   layout?: 'sidebar' | 'topnav' | 'dual';
   /** Active page — needed for the `topnav` links' active state. */
   page?: string;
@@ -557,6 +621,8 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
 ) {
   const unread = NOTIFICATIONS.filter((n) => n.unread).length;
   const mod = useModifierKey();
+  // Site-wide theme (same store as the preview dock), so both stay in sync.
+  const { theme, setTheme, toggleTheme } = useTheme();
   return (
     <TopNav
       className="bg-background supports-[backdrop-filter]:bg-background"
@@ -570,7 +636,21 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
             className="lg:hidden"
             onClick={onOpenDrawer}
           />
-          {layout !== 'sidebar' ? (
+          {layout === 'dual' ? (
+            // The panel header hosts the switcher; the bar carries the trail
+            // (≥lg) and collapses to the current page title below that.
+            <>
+              <PageCrumbs
+                page={page}
+                withModule
+                onNavigate={onNavigate}
+                className="hidden min-w-0 lg:block"
+              />
+              <span className="text-foreground truncate text-sm font-semibold lg:hidden">
+                {findNav(page)?.item.label ?? 'Home'}
+              </span>
+            </>
+          ) : layout === 'topnav' ? (
             // No sidebar header to host the switcher, so it lives in the bar.
             <WorkspaceSwitcher
               variant="bar"
@@ -623,6 +703,16 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
               size="sm"
               className="md:hidden"
               onClick={onOpenPalette}
+            />
+          </Tooltip>
+
+          <Tooltip label={theme === 'light' ? 'Dark mode' : 'Light mode'}>
+            <IconButton
+              aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+              icon={theme === 'light' ? <Moon /> : <Sun />}
+              variant="ghost"
+              size="sm"
+              onClick={toggleTheme}
             />
           </Tooltip>
 
@@ -705,6 +795,14 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
                 <CreditCard className="size-4" aria-hidden /> Billing
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuLabel className="text-foreground-subtle text-xs font-normal">
+                Theme
+              </DropdownMenuLabel>
+              <DropdownMenuRadioGroup value={theme} onValueChange={(v) => setTheme(v as Theme)}>
+                <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+              <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={onSignOut}>
                 <LogOut className="size-4" aria-hidden /> Sign out
               </DropdownMenuItem>
@@ -728,39 +826,21 @@ export function PageHeader({
   subtitle,
   actions,
   onNavigate,
+  hideBreadcrumbs,
 }: {
   page: string;
   title: ReactNode;
   subtitle?: ReactNode;
   actions?: ReactNode;
   onNavigate?: (key: string) => void;
+  /** Defaults to true in the `dual` shell, whose top bar already shows the trail. */
+  hideBreadcrumbs?: boolean;
 }) {
-  const nav = findNav(page);
-  const crumbs =
-    nav && page !== 'overview'
-      ? [
-          { label: 'Home', href: '#overview' },
-          { label: nav.section.label },
-          { label: nav.item.label },
-        ]
-      : null;
+  const layout = useContext(AdminLayoutContext);
+  const hide = hideBreadcrumbs ?? layout === 'dual';
   return (
     <header className="mb-6">
-      {crumbs && (
-        <Breadcrumbs
-          items={crumbs}
-          className="mb-2"
-          renderLink={(_, children) => (
-            <button
-              type="button"
-              onClick={() => onNavigate?.('overview')}
-              className="hover:text-foreground focus-visible:ring-ring rounded-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-            >
-              {children}
-            </button>
-          )}
-        />
-      )}
+      {!hide && <PageCrumbs page={page} onNavigate={onNavigate} className="mb-2" />}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
           <h1 className="text-foreground text-2xl font-semibold tracking-tight">{title}</h1>
