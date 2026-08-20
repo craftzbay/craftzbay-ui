@@ -278,19 +278,31 @@ export function AppRail({
       >
         A
       </span>
-      {MODULES.map((m) => {
-        const Icon = m.icon;
-        return (
-          <RailButton
-            key={m.key}
-            label={m.label}
-            icon={<Icon />}
-            active={m.key === module}
-            onClick={() => onModuleChange(m.key)}
-          />
-        );
-      })}
-      <div className="mt-auto">
+      {/* Modules scroll independently when there are more than fit (short
+          laptops, many areas); brand above and the user below stay pinned.
+          Scrollbar hidden, edge fades signal overflow. */}
+      <div className="relative min-h-0 w-full flex-1">
+        <div
+          className="flex h-full w-full flex-col items-center gap-1 overflow-y-auto overscroll-contain py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          style={{
+            maskImage: 'linear-gradient(to bottom, transparent, #000 10px, #000 calc(100% - 10px), transparent)',
+          }}
+        >
+          {MODULES.map((m) => {
+            const Icon = m.icon;
+            return (
+              <RailButton
+                key={m.key}
+                label={m.label}
+                icon={<Icon />}
+                active={m.key === module}
+                onClick={() => onModuleChange(m.key)}
+              />
+            );
+          })}
+        </div>
+      </div>
+      <div className="mt-1 shrink-0">
         <Tooltip label={`${USER.name} — Settings`} side="right">
           <button
             type="button"
@@ -318,7 +330,7 @@ function ModuleTabs({
     <div
       role="group"
       aria-label="Modules"
-      className="bg-background-muted flex w-full gap-0.5 rounded-md p-0.5"
+      className="bg-background-muted flex w-full snap-x gap-0.5 overflow-x-auto rounded-md p-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       {MODULES.map((m) => {
         const Icon = m.icon;
@@ -330,7 +342,7 @@ function ModuleTabs({
             aria-pressed={active}
             onClick={() => onModuleChange(m.key)}
             className={cn(
-              'inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-[5px] text-sm outline-none [&_svg]:size-4',
+              'inline-flex h-8 flex-1 shrink-0 snap-start items-center justify-center gap-1.5 rounded-[5px] px-3 text-sm whitespace-nowrap outline-none [&_svg]:size-4',
               'transition-colors duration-[var(--duration-fast)]',
               'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-1',
               active
