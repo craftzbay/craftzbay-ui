@@ -1,0 +1,632 @@
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import {
+  Copy,
+  Download,
+  Folder,
+  Inbox,
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+  Upload,
+  X,
+} from '@/icons';
+import {
+  Badge,
+  Button,
+  Card,
+  Checkbox,
+  ConfirmationDialog,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  EmptyState,
+  IconButton,
+  Input,
+  Pagination,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  Skeleton,
+  Switch,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableSortHeader,
+  Tooltip,
+  cn,
+  useToast,
+} from '@craftzbay/ui';
+import {
+  SEED_PROJECTS,
+  STATUSES,
+  STATUS_TONE,
+  formatRelative,
+  type Project,
+  type ProjectStatus,
+} from './data';
+import { PageHeader } from './shell';
+import { FilterChip, ProjectDialog, useDebounced } from './projects-parts';
+
+/* =============================================================================
+ *  Admin template — Projects: the list→detail table pattern in full.
+ *  Sort (asc → desc → none) · filter chips with applied count · debounced
+ *  search with clear · 25/50/100 pagination · checkbox selection + sticky bulk
+ *  bar · ≤2 inline row actions + overflow menu (Delete last, destructive) ·
+ *  confirm before delete · first-run vs filtered empty states · skeleton.
+ * ========================================================================== */
+
+const PAGE_SIZES = [25, 50, 100];
+type Sort = { key: 'name' | 'status' | 'owner' | 'updatedAt'; direction: 'asc' | 'desc' } | null;
+type StatusFilter = 'all' | ProjectStatus;
+
+/* ---------------------------------------------------------------------------
+ *  Page
+ * ------------------------------------------------------------------------ */
+
+export interface ProjectsHandle {
+  /** Open the "new project" dialog (used by the ⌘K palette). */
+  create: () => void;
+}
+
+export const Projects = forwardRef<
+  ProjectsHandle,
+  { onNavigate: (key: string) => void; globalQuery: string }
+>(function Projects({ onNavigate, globalQuery }, ref) {
+  const { push } = useToast();
+  const [items, setItems] = useState<Project[]>(SEED_PROJECTS);
+  const [query, setQuery] = useState('');
+  const debouncedQuery = useDebounced(query.trim().toLowerCase());
+  const [status, setStatus] = useState<StatusFilter>('all');
+  const [owner, setOwner] = useState<string>('all');
+  const [sort, setSort] = useState<Sort>({ key: 'updatedAt', direction: 'desc' });
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<Project | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<Project[] | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useImperativeHandle(ref, () => ({
+    create: () => {
+      setEditing(null);
+      setDialogOpen(true);
+    },
+  }));
+
+  // The top-bar search feeds this page's query.
+  useEffect(() => {
+    setQuery(globalQuery);
+  }, [globalQuery]);
+
+  const owners = useMemo(() => Array.from(new Set(items.map((p) => p.owner))).sort(), [items]);
+
+  const filtered = useMemo(() => {
+    const q = debouncedQuery.length >= 2 ? debouncedQuery : '';
+    const rows = items.filter(
+      (p) =>
+        (status === 'all' || p.status === status) &&
+        (owner === 'all' || p.owner === owner) &&
+        (!q || p.name.toLowerCase().includes(q) || p.owner.toLowerCase().includes(q)),
+    );
+    if (!sort) return rows;
+    const dir = sort.direction === 'asc' ? 1 : -1;
+    return [...rows].sort((a, b) => String(a[sort.key]).localeCompare(String(b[sort.key])) * dir);
+  }, [items, debouncedQuery, status, owner, sort]);
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const current = Math.min(page, pageCount);
+  const rows = filtered.slice((current - 1) * pageSize, current * pageSize);
+
+  const appliedFilters =
+    (status !== 'all' ? 1 : 0) + (owner !== 'all' ? 1 : 0) + (debouncedQuery.length >= 2 ? 1 : 0);
+  const clearFilters = () => {
+    setStatus('all');
+    setOwner('all');
+    setQuery('');
+    setPage(1);
+  };
+
+  // Sort cycle: asc → desc → none. TableSortHeader asks for asc after desc;
+  // we read that third click as "clear".
+  const onSort = (key: string, direction: 'asc' | 'desc') => {
+    if (sort?.key === key && sort.direction === 'desc' && direction === 'asc') setSort(null);
+    else setSort({ key: key as NonNullable<Sort>['key'], direction });
+  };
+
+  const pageIds = rows.map((r) => r.id);
+  const allOnPage = pageIds.length > 0 && pageIds.every((id) => selected.has(id));
+  const someOnPage = pageIds.some((id) => selected.has(id));
+  const toggleAll = (checked: boolean) =>
+    setSelected((s) => {
+      const next = new Set(s);
+      pageIds.forEach((id) => (checked ? next.add(id) : next.delete(id)));
+      return next;
+    });
+  const toggleOne = (id: number, checked: boolean) =>
+    setSelected((s) => {
+      const next = new Set(s);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+
+  const save = (data: { name: string; status: ProjectStatus; owner: string }) => {
+    const now = new Date().toISOString();
+    if (editing) {
+      setItems((xs) =>
+        xs.map((x) => (x.id === editing.id ? { ...x, ...data, updatedAt: now } : x)),
+      );
+      push({ variant: 'success', title: 'Project updated', description: data.name });
+    } else {
+      setItems((xs) => [
+        { id: Math.max(0, ...xs.map((x) => x.id)) + 1, updatedAt: now, ...data },
+        ...xs,
+      ]);
+      push({ variant: 'success', title: 'Project created', description: data.name });
+    }
+  };
+  const duplicate = (p: Project) => {
+    setItems((xs) => [
+      {
+        ...p,
+        id: Math.max(0, ...xs.map((x) => x.id)) + 1,
+        name: `${p.name} (copy)`,
+        updatedAt: new Date().toISOString(),
+      },
+      ...xs,
+    ]);
+    push({ variant: 'success', title: 'Project duplicated', description: `${p.name} (copy)` });
+  };
+  const archive = (ps: Project[]) => {
+    const ids = new Set(ps.map((p) => p.id));
+    setItems((xs) => xs.map((x) => (ids.has(x.id) ? { ...x, status: 'Archived' } : x)));
+    setSelected(new Set());
+    push({ title: ps.length === 1 ? 'Project archived' : `${ps.length} projects archived` });
+  };
+  const confirmDelete = () => {
+    if (!pendingDelete) return;
+    const ids = new Set(pendingDelete.map((p) => p.id));
+    setItems((xs) => xs.filter((x) => !ids.has(x.id)));
+    setSelected((s) => new Set([...s].filter((id) => !ids.has(id))));
+    push({
+      variant: 'success',
+      title:
+        pendingDelete.length === 1 ? 'Project deleted' : `${pendingDelete.length} projects deleted`,
+      description: pendingDelete.length === 1 ? pendingDelete[0].name : undefined,
+    });
+    setPendingDelete(null);
+  };
+
+  const selectedRows = items.filter((p) => selected.has(p.id));
+  const firstRun = items.length === 0;
+  const filteredEmpty = !firstRun && filtered.length === 0;
+
+  return (
+    <div>
+      <PageHeader
+        page="projects"
+        title="Projects"
+        subtitle={
+          <span aria-live="polite">
+            {filtered.length === items.length
+              ? `${items.length} projects`
+              : `${filtered.length} of ${items.length} projects`}
+          </span>
+        }
+        actions={
+          <>
+            {/* Demo-only: preview the loading state. */}
+            <Switch
+              size="sm"
+              label="Loading"
+              labelPosition="before"
+              checked={loading}
+              onCheckedChange={setLoading}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              leadingIcon={<Download />}
+              className="hidden sm:inline-flex"
+            >
+              Export
+            </Button>
+            <Button
+              size="sm"
+              leadingIcon={<Plus />}
+              onClick={() => {
+                setEditing(null);
+                setDialogOpen(true);
+              }}
+            >
+              New project
+            </Button>
+          </>
+        }
+        onNavigate={onNavigate}
+      />
+
+      {firstRun ? (
+        <EmptyState
+          title="No projects yet"
+          description="Projects group issues, docs and releases for one product. Create your first one or import from another tool."
+          action={
+            <Button
+              leadingIcon={<Plus />}
+              onClick={() => {
+                setEditing(null);
+                setDialogOpen(true);
+              }}
+            >
+              New project
+            </Button>
+          }
+          secondaryAction={
+            <Button
+              variant="outline"
+              leadingIcon={<Upload />}
+              onClick={() => setItems(SEED_PROJECTS)}
+            >
+              Import
+            </Button>
+          }
+          className="min-h-[320px]"
+        />
+      ) : (
+        <>
+          {/* Toolbar: search + filters + applied-count */}
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <Input
+              type="search"
+              label="Search projects"
+              hideLabel
+              size="sm"
+              placeholder="Search projects…"
+              prefix={<Search className="size-4" aria-hidden />}
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setPage(1);
+              }}
+              clearable
+              onClear={() => setQuery('')}
+              className="w-full max-w-xs"
+            />
+            <Select
+              value={status}
+              onValueChange={(v) => {
+                setStatus(v as StatusFilter);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger size="sm" aria-label="Status" placeholder="Status" className="w-36" />
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                {STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={owner}
+              onValueChange={(v) => {
+                setOwner(v);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger size="sm" aria-label="Owner" placeholder="Owner" className="w-36" />
+              <SelectContent>
+                <SelectItem value="all">All owners</SelectItem>
+                {owners.map((o) => (
+                  <SelectItem key={o} value={o}>
+                    {o}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {appliedFilters > 0 && (
+              <Badge tone="accent" className="tabular">
+                Filters ({appliedFilters})
+              </Badge>
+            )}
+          </div>
+
+          {/* Applied filter chips */}
+          {appliedFilters > 0 && (
+            <div className="mb-3 flex flex-wrap items-center gap-2" aria-label="Applied filters">
+              {status !== 'all' && (
+                <FilterChip onRemove={() => setStatus('all')}>Status: {status}</FilterChip>
+              )}
+              {owner !== 'all' && (
+                <FilterChip onRemove={() => setOwner('all')}>Owner: {owner}</FilterChip>
+              )}
+              {debouncedQuery.length >= 2 && (
+                <FilterChip onRemove={() => setQuery('')}>Search: “{query}”</FilterChip>
+              )}
+              {appliedFilters >= 2 && (
+                <Button variant="link" size="sm" onClick={clearFilters}>
+                  Clear all
+                </Button>
+              )}
+            </div>
+          )}
+
+          <Card padding="none" className="relative overflow-hidden">
+            {/* Sticky bulk-action bar replaces the header while rows are selected. */}
+            {selected.size > 0 && (
+              <div
+                role="toolbar"
+                aria-label="Bulk actions"
+                className="border-border bg-accent-soft text-on-accent-soft sticky top-0 z-20 flex flex-wrap items-center gap-2 border-b px-3 py-2 text-sm"
+              >
+                <Checkbox
+                  aria-label="Deselect all"
+                  checked={allOnPage ? true : someOnPage ? 'indeterminate' : false}
+                  onCheckedChange={(c) => toggleAll(c === true)}
+                />
+                <span className="tabular font-medium">{selected.size} selected</span>
+                <div className="ml-2 flex items-center gap-1">
+                  <Button variant="outline" size="sm" leadingIcon={<Download />}>
+                    Export
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    leadingIcon={<Inbox />}
+                    onClick={() => archive(selectedRows)}
+                  >
+                    Archive
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    leadingIcon={<Trash2 />}
+                    onClick={() => setPendingDelete(selectedRows)}
+                  >
+                    Delete
+                  </Button>
+                </div>
+                {selected.size < filtered.length && (
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="ml-auto"
+                    onClick={() => setSelected(new Set(filtered.map((p) => p.id)))}
+                  >
+                    Select all {filtered.length}
+                  </Button>
+                )}
+                <IconButton
+                  aria-label="Clear selection"
+                  icon={<X />}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelected(new Set())}
+                />
+              </div>
+            )}
+
+            <Table>
+              <TableHeader className={cn(selected.size > 0 && 'sr-only')}>
+                <TableRow>
+                  <TableHead>
+                    <Checkbox
+                      aria-label="Select all on this page"
+                      checked={allOnPage ? true : someOnPage ? 'indeterminate' : false}
+                      onCheckedChange={(c) => toggleAll(c === true)}
+                      disabled={loading || rows.length === 0}
+                    />
+                  </TableHead>
+                  <TableSortHeader sortKey="name" currentSort={sort} onSortChange={onSort}>
+                    Name
+                  </TableSortHeader>
+                  <TableSortHeader sortKey="status" currentSort={sort} onSortChange={onSort}>
+                    Status
+                  </TableSortHeader>
+                  <TableSortHeader
+                    sortKey="owner"
+                    currentSort={sort}
+                    onSortChange={onSort}
+                    className="hidden md:table-cell"
+                  >
+                    Owner
+                  </TableSortHeader>
+                  <TableSortHeader
+                    sortKey="updatedAt"
+                    currentSort={sort}
+                    onSortChange={onSort}
+                    className="hidden sm:table-cell [&>button]:justify-end"
+                  >
+                    Updated
+                  </TableSortHeader>
+                  <TableHead className="w-24 text-right">
+                    <span className="sr-only">Actions</span>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading
+                  ? Array.from({ length: 6 }, (_, i) => (
+                      <TableRow key={`sk-${i}`} aria-hidden>
+                        <TableCell>
+                          <Skeleton className="size-4" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton variant="text" className="w-40" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-5 w-20 rounded-full" />
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          <Skeleton variant="text" className="w-24" />
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell">
+                          <Skeleton variant="text" className="ml-auto w-16" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="ml-auto size-8" />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  : rows.map((p) => {
+                      const rel = formatRelative(p.updatedAt);
+                      const isSelected = selected.has(p.id);
+                      return (
+                        <TableRow key={p.id} selected={isSelected}>
+                          <TableCell>
+                            <Checkbox
+                              aria-label={`Select ${p.name}`}
+                              checked={isSelected}
+                              onCheckedChange={(c) => toggleOne(p.id, c === true)}
+                            />
+                          </TableCell>
+                          <TableCell
+                            className="text-foreground max-w-[280px] truncate font-medium"
+                            title={p.name}
+                          >
+                            {p.name}
+                          </TableCell>
+                          <TableCell>
+                            <Badge tone={STATUS_TONE[p.status]} dot>
+                              {p.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-foreground-muted hidden md:table-cell">
+                            {p.owner}
+                          </TableCell>
+                          <TableCell
+                            className="tabular text-foreground-subtle hidden text-right sm:table-cell"
+                            title={rel.title}
+                          >
+                            {rel.label}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center justify-end gap-0.5">
+                              <Tooltip label="Edit">
+                                <IconButton
+                                  aria-label={`Edit ${p.name}`}
+                                  icon={<Pencil />}
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditing(p);
+                                    setDialogOpen(true);
+                                  }}
+                                />
+                              </Tooltip>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <IconButton
+                                    aria-label={`More actions for ${p.name}`}
+                                    icon={<MoreHorizontal />}
+                                    variant="ghost"
+                                    size="sm"
+                                  />
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onSelect={() => duplicate(p)}>
+                                    <Copy className="size-4" aria-hidden /> Duplicate
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onSelect={() => archive([p])}
+                                    disabled={p.status === 'Archived'}
+                                  >
+                                    <Inbox className="size-4" aria-hidden /> Archive
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    destructive
+                                    onSelect={() => setPendingDelete([p])}
+                                  >
+                                    <Trash2 className="size-4" aria-hidden /> Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                {!loading && filteredEmpty && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="p-0">
+                      {/* Filtered-empty: header + chips stay so the filter can be undone. */}
+                      <EmptyState
+                        icon={<Folder />}
+                        title="No projects match"
+                        description={
+                          debouncedQuery.length >= 2
+                            ? `Nothing matches “${query}” with the current filters.`
+                            : 'Nothing matches the current filters.'
+                        }
+                        action={
+                          <Button variant="outline" size="sm" onClick={clearFilters}>
+                            Clear filters
+                          </Button>
+                        }
+                        className="min-h-[200px] rounded-none border-0 bg-transparent"
+                      />
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </Card>
+
+          {!filteredEmpty && (
+            <Pagination
+              className="mt-4"
+              page={current}
+              pageCount={pageCount}
+              onPageChange={setPage}
+              totalItems={filtered.length}
+              pageSize={pageSize}
+              pageSizeOptions={PAGE_SIZES}
+              labels={{
+                showing: (from, to, total) => `${from}–${to} / ${total.toLocaleString('en-US')}`,
+              }}
+              onPageSizeChange={(s) => {
+                setPageSize(s);
+                setPage(1);
+              }}
+            />
+          )}
+        </>
+      )}
+
+      <ProjectDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        initial={editing}
+        onSave={save}
+      />
+
+      <ConfirmationDialog
+        open={pendingDelete !== null}
+        onOpenChange={(o) => !o && setPendingDelete(null)}
+        title={
+          pendingDelete && pendingDelete.length === 1
+            ? `Delete “${pendingDelete[0].name}”?`
+            : `Delete ${pendingDelete?.length ?? 0} projects?`
+        }
+        description="This permanently removes the project and its issues, docs and releases. This cannot be undone."
+        confirmLabel={
+          pendingDelete && pendingDelete.length === 1 ? 'Delete project' : 'Delete projects'
+        }
+        confirmVariant="destructive"
+        onConfirm={confirmDelete}
+      />
+    </div>
+  );
+});

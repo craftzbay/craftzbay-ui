@@ -1,4 +1,6 @@
-import { forwardRef, useMemo, type ChangeEvent } from 'react';
+'use client';
+
+import { useMemo, type ChangeEvent } from 'react';
 import { DayPicker, type DayPickerProps, type DropdownProps } from 'react-day-picker';
 import * as SelectPrimitive from '@radix-ui/react-select';
 import { ChevronDown, ChevronLeft, ChevronRight } from '@/icons';
@@ -35,8 +37,8 @@ function CalendarDropdown({
       <SelectPrimitive.Trigger
         aria-label={ariaLabel}
         className={cn(
-          'inline-flex h-7 items-center gap-1 rounded-md border border-border bg-card px-2 text-sm font-medium text-foreground',
-          'outline-none hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring',
+          'border-border bg-card text-foreground inline-flex h-7 items-center gap-1 rounded-md border px-2 text-sm font-medium',
+          'hover:bg-background-muted focus-visible:ring-ring outline-none focus-visible:ring-2',
           'disabled:pointer-events-none disabled:opacity-50',
         )}
       >
@@ -59,11 +61,18 @@ function CalendarDropdown({
 /**
  * Standalone calendar surface. Used by DatePicker, but can also be embedded
  * directly in popovers, sheets, or inline forms. Wraps `react-day-picker` v9.
+ *
+ * Not a forwardRef: RDP v9's `DayPicker` is a plain function component and
+ * exposes no root ref, so a forwarded ref would silently be dropped.
  */
-export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calendar(
-  { className, classNames, captionLayout = 'dropdown', startMonth, endMonth, ...props },
-  _ref,
-) {
+export function Calendar({
+  className,
+  classNames,
+  captionLayout = 'dropdown',
+  startMonth,
+  endMonth,
+  ...props
+}: CalendarProps) {
   // Bound the month/year dropdowns. Consumers can narrow this with
   // startMonth / endMonth; the default spans a century back to a decade ahead
   // so the year dropdown is useful for both birthdays and future scheduling.
@@ -83,7 +92,7 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
       captionLayout={captionLayout}
       startMonth={start}
       endMonth={end}
-      className={cn('inline-block rounded-lg border border-border bg-card p-3', className)}
+      className={cn('border-border bg-card inline-block rounded-lg border p-3', className)}
       classNames={{
         root: 'rdp',
         months: 'relative flex flex-col gap-4 sm:flex-row sm:gap-6',
@@ -111,10 +120,8 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
         today: '[&_button]:border [&_button]:border-border',
         outside: 'text-foreground-subtle',
         disabled: 'opacity-40 pointer-events-none',
-        range_start:
-          '[&_button]:bg-accent [&_button]:text-on-accent [&_button]:rounded-r-none',
-        range_end:
-          '[&_button]:bg-accent [&_button]:text-on-accent [&_button]:rounded-l-none',
+        range_start: '[&_button]:bg-accent [&_button]:text-on-accent [&_button]:rounded-r-none',
+        range_end: '[&_button]:bg-accent [&_button]:text-on-accent [&_button]:rounded-l-none',
         range_middle:
           '[&_button]:bg-accent-soft [&_button]:text-foreground [&_button]:rounded-none',
         hidden: 'invisible',
@@ -132,4 +139,5 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
       {...props}
     />
   );
-});
+}
+Calendar.displayName = 'Calendar';

@@ -59,7 +59,7 @@ const DEFAULT_TIERS: PricingTier[] = [
       'SSO via Google & Microsoft',
       'Audit log (30 days)',
     ],
-    cta: 'Start 14-day trial',
+    cta: 'Start free',
     highlighted: true,
   },
   {
@@ -79,7 +79,8 @@ const DEFAULT_TIERS: PricingTier[] = [
 ];
 
 /**
- * Pricing grid. Defaults to a 3-tier demo if `tiers` is omitted.
+ * Pricing grid. Defaults to a 3-tier demo if `tiers` is omitted. Renders an
+ * `h2` so it slots into a landing page under the single `h1`; tiers are `h3`.
  *
  * @example
  *   <Pricing
@@ -100,9 +101,9 @@ export function Pricing({
 }: PricingProps = {}) {
   const cols = tiers.length;
   return (
-    <div className={cn('mx-auto max-w-5xl space-y-8 py-16', className)}>
+    <section aria-labelledby="pricing-title" className={cn('mx-auto max-w-5xl space-y-8 px-6 py-16', className)}>
       <header className="space-y-3 text-center">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground">{title}</h1>
+        <h2 id="pricing-title" className="text-3xl font-semibold tracking-tight text-foreground">{title}</h2>
         {subtitle && <p className="mx-auto max-w-xl text-sm text-foreground-muted">{subtitle}</p>}
       </header>
 
@@ -125,7 +126,7 @@ export function Pricing({
           >
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-semibold text-foreground">{tier.name}</h2>
+                <h3 className="text-base font-semibold text-foreground">{tier.name}</h3>
                 {tier.highlighted && <Badge tone="accent">{highlightedLabel}</Badge>}
               </div>
               {tier.description && (
@@ -159,6 +160,6 @@ export function Pricing({
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

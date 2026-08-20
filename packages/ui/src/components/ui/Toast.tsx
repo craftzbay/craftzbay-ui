@@ -1,3 +1,5 @@
+'use client';
+
 import {
   forwardRef,
   useEffect,
@@ -8,6 +10,7 @@ import {
 import * as ToastPrimitive from '@radix-ui/react-toast';
 import { AlertTriangle, CheckCircle2, Info, X, XCircle } from '@/icons';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
 import { cva, type VariantProps } from '@/lib/cva';
 import { useToast } from '@/hooks/use-toast';
 
@@ -131,10 +134,11 @@ export const ToastClose = forwardRef<
   ElementRef<typeof ToastPrimitive.Close>,
   ComponentPropsWithoutRef<typeof ToastPrimitive.Close>
 >(function ToastClose({ className, ...props }, ref) {
+  const strings = useStrings();
   return (
     <ToastPrimitive.Close
       ref={ref}
-      aria-label="Close"
+      aria-label={props["aria-label"] ?? strings.toast.close}
       className={cn(
         'absolute right-2 top-2 inline-flex size-7 items-center justify-center rounded-md text-foreground-subtle',
         'opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground',
@@ -178,8 +182,9 @@ export function Toaster() {
     return () => timers.forEach((id) => window.clearTimeout(id));
   }, [toasts, remove]);
 
+  const strings = useStrings();
   return (
-    <ToastProvider>
+    <ToastProvider label={strings.toast.region}>
       {toasts.map((t) => (
         <Toast
           key={t.id}

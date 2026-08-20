@@ -1,3 +1,5 @@
+'use client';
+
 import {
   forwardRef,
   type ComponentPropsWithoutRef,
@@ -7,6 +9,7 @@ import {
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from '@/icons';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
 import { cva, type VariantProps } from '@/lib/cva';
 
 /* -----------------------------------------------------------------------------
@@ -27,7 +30,7 @@ const SheetOverlay = forwardRef<
     <DialogPrimitive.Overlay
       ref={ref}
       className={cn(
-        'fixed inset-0 z-[var(--z-overlay)] bg-neutral-950/60 backdrop-blur-[2px]',
+        'fixed inset-0 z-[var(--z-overlay)] bg-overlay',
         'data-[state=open]:animate-in data-[state=closed]:animate-out',
         'data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0',
         className,
@@ -70,6 +73,7 @@ export const SheetContent = forwardRef<
   ElementRef<typeof DialogPrimitive.Content>,
   SheetContentProps
 >(function SheetContent({ className, children, side = 'right', showClose = true, ...props }, ref) {
+  const strings = useStrings();
   return (
     <SheetPortal>
       <SheetOverlay />
@@ -77,7 +81,7 @@ export const SheetContent = forwardRef<
         {children}
         {showClose && (
           <DialogPrimitive.Close
-            aria-label="Close"
+            aria-label={strings.sheet.close}
             className={cn(
               'absolute right-4 top-4 inline-flex size-8 items-center justify-center rounded-md text-foreground-subtle',
               'hover:bg-background-muted hover:text-foreground',

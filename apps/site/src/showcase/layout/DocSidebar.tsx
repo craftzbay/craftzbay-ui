@@ -168,7 +168,7 @@ export function DocSidebar({
           onClear={() => setQuery('')}
         />
         {isSearching && flatResults.length > 0 && (
-          <p className="mt-1.5 px-2 text-[10px] text-foreground-subtle">
+          <p className="mt-1.5 px-2 text-xs text-foreground-subtle">
             ↑↓ to navigate · ↵ to open · Esc to clear
           </p>
         )}
@@ -203,13 +203,13 @@ export function DocSidebar({
         <div key={`${section.kind}-${section.title}`} className="mb-6">
           {isSearching && (
             <div className="mb-2 flex items-center justify-between px-2">
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-foreground-subtle">
+              <div className="text-xs font-semibold uppercase tracking-wider text-foreground-subtle">
                 {KIND_LABEL[section.kind]}
               </div>
               {section.kind !== current?.kind && (
                 <a
                   href={`#${routeToHash(indexRouteFor(section.kind))}`}
-                  className="inline-flex items-center gap-0.5 text-[10px] text-foreground-subtle hover:text-accent"
+                  className="inline-flex items-center gap-0.5 text-xs text-foreground-subtle hover:text-accent"
                 >
                   Open <ArrowRight className="size-2.5" aria-hidden />
                 </a>
@@ -219,7 +219,7 @@ export function DocSidebar({
           {section.groups.map((group) => (
             <div key={group.name} className="mb-3">
               {!isSearching && (
-                <div className="mb-1 px-2 text-[10px] font-medium uppercase tracking-wide text-foreground-subtle/80">
+                <div className="mb-1 px-2 text-xs font-medium uppercase tracking-wide text-foreground-subtle/80">
                   {group.name}
                 </div>
               )}

@@ -1,3 +1,5 @@
+'use client';
+
 import {
   forwardRef,
   useEffect,
@@ -10,6 +12,7 @@ import { Command as CommandPrimitive } from 'cmdk';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { Search } from '@/icons';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
 
 /* -----------------------------------------------------------------------------
  *  CommandPalette is a Dialog hosting a `cmdk` Command. It supports grouped
@@ -162,13 +165,14 @@ export interface CommandDialogProps {
   title?: string;
 }
 
-export function CommandDialog({ open, onOpenChange, children, title = 'Command palette' }: CommandDialogProps) {
+export function CommandDialog({ open, onOpenChange, children, title }: CommandDialogProps) {
+  const strings = useStrings();
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay
           className={cn(
-            'fixed inset-0 z-[var(--z-overlay)] bg-neutral-950/60 backdrop-blur-[2px]',
+            'fixed inset-0 z-[var(--z-overlay)] bg-overlay',
             'data-[state=open]:animate-in data-[state=closed]:animate-out',
             'data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0',
           )}
@@ -184,7 +188,9 @@ export function CommandDialog({ open, onOpenChange, children, title = 'Command p
             'data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95',
           )}
         >
-          <DialogPrimitive.Title className="sr-only">{title}</DialogPrimitive.Title>
+          <DialogPrimitive.Title className="sr-only">
+            {title ?? strings.commandDialog.title}
+          </DialogPrimitive.Title>
           <Command>{children}</Command>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

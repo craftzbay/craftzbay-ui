@@ -14,13 +14,22 @@ const doc: ComponentDoc = {
   group: 'Overlays',
   description:
     '⌘K-style command surface. Use for app-wide search + jump-to + quick actions. CommandDialog wraps it in a modal; useCommandPaletteShortcut wires ⌘K / Ctrl+K.',
-  exports: ['Command', 'CommandInput', 'CommandList', 'CommandEmpty', 'CommandGroup', 'CommandItem', 'CommandDialog', 'useCommandPaletteShortcut'],
+  exports: [
+    'Command',
+    'CommandInput',
+    'CommandList',
+    'CommandEmpty',
+    'CommandGroup',
+    'CommandItem',
+    'CommandDialog',
+    'useCommandPaletteShortcut',
+  ],
   sourceFile: 'CommandPalette.tsx',
   examples: [
     {
       title: 'Inline',
       preview: (
-        <Command className="w-full max-w-md rounded-md border border-border bg-card">
+        <Command className="border-border bg-card w-full max-w-md rounded-md border">
           <CommandInput placeholder="Type a command…" />
           <CommandList className="max-h-40">
             <CommandEmpty>No results.</CommandEmpty>
@@ -51,8 +60,12 @@ const doc: ComponentDoc = {
       title: 'Modal (CommandDialog)',
       description: 'Mount once at the root and toggle from anywhere.',
       preview: (
-        <div className="text-sm text-foreground-muted">
-          Press <kbd className="rounded border border-border bg-background-muted px-1.5 py-0.5 text-xs">⌘ K</kbd> to open the showcase palette.
+        <div className="text-foreground-muted text-sm">
+          Press{' '}
+          <kbd className="border-border bg-background-muted rounded border px-1.5 py-0.5 text-xs">
+            ⌘ K
+          </kbd>{' '}
+          to open the showcase palette.
         </div>
       ),
       code: `const [open, setOpen] = useState(false);
@@ -67,10 +80,26 @@ useCommandPaletteShortcut(setOpen);
   api: [
     {
       rows: [
-        { name: 'CommandInput', type: 'component', description: 'Bound search input. Filters items by their `value` prop.' },
-        { name: 'CommandItem.value', type: 'string', description: 'String used for type-ahead matching.' },
-        { name: 'CommandItem.onSelect', type: '() => void', description: 'Fires on click / Enter.' },
-        { name: 'useCommandPaletteShortcut', type: '(setOpen: (b: boolean) => void) => void', description: 'Wires ⌘K / Ctrl+K to toggle the dialog.' },
+        {
+          name: 'CommandInput',
+          type: 'component',
+          description: 'Bound search input. Filters items by their `value` prop.',
+        },
+        {
+          name: 'CommandItem.value',
+          type: 'string',
+          description: 'String used for type-ahead matching.',
+        },
+        {
+          name: 'CommandItem.onSelect',
+          type: '() => void',
+          description: 'Fires on click / Enter.',
+        },
+        {
+          name: 'useCommandPaletteShortcut',
+          type: '(setOpen: (b: boolean) => void) => void',
+          description: 'Wires ⌘K / Ctrl+K to toggle the dialog.',
+        },
       ],
     },
   ],
@@ -78,9 +107,15 @@ useCommandPaletteShortcut(setOpen);
     'Built on cmdk — proper combobox + listbox semantics.',
     'Arrow keys navigate, Enter selects, Esc closes.',
   ],
-  related: [
-    { slug: 'dropdown-menu', reason: 'For small, fixed action lists.' },
+  keyboard: [
+    { key: '⌘K / Ctrl+K', action: 'Open the palette (via `useCommandPaletteShortcut`).' },
+    { key: 'Type', action: 'Fuzzy-filter items across all groups.' },
+    { key: 'ArrowDown / ArrowUp', action: 'Move the highlighted item.' },
+    { key: 'Home / End', action: 'Jump to the first / last item.' },
+    { key: 'Enter', action: 'Run the highlighted item.' },
+    { key: 'Esc', action: 'Close the palette.' },
   ],
+  related: [{ slug: 'dropdown-menu', reason: 'For small, fixed action lists.' }],
 };
 
 export default doc;

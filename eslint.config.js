@@ -1,0 +1,30 @@
+// @ts-check
+import tseslint from 'typescript-eslint';
+import reactHooks from 'eslint-plugin-react-hooks';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
+
+export default tseslint.config(
+  {
+    ignores: [
+      '**/dist/**',
+      '**/dist-lib/**',
+      '**/node_modules/**',
+      '**/*.d.ts',
+      'apps/site/src/generated/**',
+      'packages/create-app/templates/**',
+    ],
+  },
+  ...tseslint.configs.recommended,
+  jsxA11y.flatConfigs.recommended,
+  {
+    files: ['**/*.{ts,tsx}'],
+    plugins: { 'react-hooks': reactHooks },
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+      ],
+    },
+  },
+);

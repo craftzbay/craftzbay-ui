@@ -1,7 +1,9 @@
+'use client';
+
 import {
   forwardRef,
   useCallback,
-  useId,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -12,6 +14,9 @@ import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { Command as CommandPrimitive } from 'cmdk';
 import { Check, ChevronsUpDown, X } from '@/icons';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
+import { formatString } from '@/lib/strings';
+import { useFieldIds } from '@/hooks/use-field-ids';
 
 export interface MultiSelectOption {
   /** Stable, unique value submitted in `onChange`. */
@@ -47,6 +52,8 @@ export interface MultiSelectProps {
   clearable?: boolean;
   /** Disable the entire field. */
   disabled?: boolean;
+  /** Consumer-supplied id for the search input (label association). */
+  id?: string;
   className?: string;
 }
 
@@ -55,7 +62,7 @@ export interface MultiSelectProps {
  *
  * Keyboard:
  *   - Backspace on the input with empty query removes the last chip
- *   - Enter / Space toggles the highlighted option
+ *   - ArrowUp / ArrowDown move the highlight, Enter toggles the highlighted option
  *   - Escape closes the menu
  *
  * @example Tag picker
@@ -83,28 +90,38 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
     label,
     helperText,
     error,
-    placeholder = 'Select…',
-    emptyText = 'No results.',
+    placeholder: placeholderProp,
+    emptyText: emptyTextProp,
     maxVisibleChips = 3,
     clearable = true,
     disabled,
+    id,
     className,
   },
   ref,
 ) {
-  const autoId = useId();
-  const fieldId = autoId;
-  const helperId = `${autoId}-helper`;
-  const errorId = `${autoId}-error`;
+  const strings = useStrings();
+  const placeholder = placeholderProp ?? strings.multiSelect.placeholder;
+  const emptyText = emptyTextProp ?? strings.multiSelect.empty;
+  const isError = Boolean(error);
+  const { fieldId, helperId, errorId, describedBy } = useFieldIds(id, {
+    hasHelper: Boolean(helperText),
+    hasError: isError,
+  });
 
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const fieldRef = useRef<HTMLDivElement>(null);
+  // cmdk assigns its own id to the list (ours is ignored), so read it back
+  // once the portal mounts to keep aria-controls truthful.
+  const listRef = useRef<HTMLDivElement>(null);
+  const [listId, setListId] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    if (open) setListId(listRef.current?.id);
+  }, [open]);
 
-  const selected = useMemo(
-    () => options.filter((o) => value.includes(o.value)),
-    [options, value],
-  );
+  const selected = useMemo(() => options.filter((o) => value.includes(o.value)), [options, value]);
 
   const toggle = useCallback(
     (v: string) => {
@@ -116,168 +133,187 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
 
   const clear = useCallback(() => onChange([]), [onChange]);
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && query === '' && value.length > 0) {
       onChange(value.slice(0, -1));
+    } else if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !open) {
+      setOpen(true);
     }
   };
 
+  const filtered = useMemo(
+    () => options.filter((o) => o.label.toLowerCase().includes(query.toLowerCase())),
+    [options, query],
+  );
+
   const visibleChips = selected.slice(0, maxVisibleChips);
   const overflow = selected.length - visibleChips.length;
-  const isError = Boolean(error);
 
   return (
     <div ref={ref} className={cn('flex flex-col gap-1.5', className)}>
       {label && (
-        <label htmlFor={fieldId} className="text-sm font-medium text-foreground">
+        <label htmlFor={fieldId} className="text-foreground text-sm font-medium">
           {label}
         </label>
       )}
 
-      <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
-        <PopoverPrimitive.Trigger asChild>
-          <div
-            role="combobox"
-            aria-expanded={open}
-            aria-controls={`${fieldId}-list`}
-            aria-haspopup="listbox"
-            id={fieldId}
-            tabIndex={disabled ? -1 : 0}
-            onKeyDown={handleKeyDown}
-            aria-disabled={disabled || undefined}
-            aria-invalid={isError || undefined}
-            aria-describedby={isError ? errorId : helperText ? helperId : undefined}
-            className={cn(
-              'flex h-9 w-full cursor-text items-center gap-1.5 overflow-hidden rounded-md border bg-card px-2 py-1 text-sm',
-              'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)]',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-              isError
-                ? 'border-danger focus-visible:border-danger focus-visible:ring-danger'
-                : 'border-border focus-visible:border-accent focus-visible:ring-ring',
-              disabled && 'opacity-50 pointer-events-none',
-            )}
-            onClick={() => inputRef.current?.focus()}
-          >
-            <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden">
-              {visibleChips.length === 0 && (
-                <span className="truncate px-1 text-foreground-subtle">{placeholder}</span>
+      {/* The Command root wraps the whole field so cmdk's root keydown handler
+          (ArrowUp/Down/Enter) sees the input even though the list is portaled.
+          A plain <input> is used instead of Command.Input because cmdk forces
+          its own id / aria-* on that element, breaking the label association. */}
+      <CommandPrimitive shouldFilter={false} className="flex w-full flex-col">
+        <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
+          <PopoverPrimitive.Anchor asChild>
+            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- click-to-focus wrapper; the <input role="combobox"> inside owns keyboard handling */}
+            <div
+              ref={fieldRef}
+              aria-disabled={disabled || undefined}
+              className={cn(
+                'bg-card flex h-9 w-full cursor-text items-center gap-1.5 overflow-hidden rounded-md border px-2 py-1 text-sm',
+                'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)]',
+                'focus-within:ring-offset-background focus-within:ring-2 focus-within:ring-offset-2',
+                isError
+                  ? 'border-danger focus-within:border-danger focus-within:ring-danger'
+                  : 'border-border focus-within:border-accent focus-within:ring-ring',
+                disabled && 'pointer-events-none opacity-50',
               )}
-              {visibleChips.map((opt) => (
-                <span
-                  key={opt.value}
-                  className="inline-flex max-w-[10rem] shrink-0 items-center gap-1 rounded-md bg-accent-soft px-1.5 py-0.5 text-xs font-medium text-on-accent-soft"
-                >
-                  <span className="truncate">{opt.label}</span>
+              onClick={() => {
+                inputRef.current?.focus();
+                if (!disabled) setOpen(true);
+              }}
+            >
+              <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden">
+                {visibleChips.map((opt) => (
+                  <span
+                    key={opt.value}
+                    className="bg-accent-soft text-on-accent-soft inline-flex max-w-[10rem] shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium"
+                  >
+                    <span className="truncate" title={opt.label}>
+                      {opt.label}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label={formatString(strings.multiSelect.remove, { label: opt.label })}
+                      className="text-on-accent-soft hover:text-foreground focus-visible:ring-ring inline-flex items-center rounded-sm outline-none focus-visible:ring-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggle(opt.value);
+                      }}
+                    >
+                      <X className="size-3" aria-hidden />
+                    </button>
+                  </span>
+                ))}
+                {overflow > 0 && (
+                  <span className="bg-background-muted text-foreground-muted shrink-0 rounded-md px-1.5 py-0.5 text-xs font-medium">
+                    +{overflow}
+                  </span>
+                )}
+                <input
+                  ref={inputRef}
+                  id={fieldId}
+                  type="text"
+                  autoComplete="off"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onFocus={() => setOpen(true)}
+                  onKeyDown={handleKeyDown}
+                  placeholder={visibleChips.length === 0 ? placeholder : undefined}
+                  role="combobox"
+                  aria-expanded={open}
+                  aria-controls={open ? listId : undefined}
+                  aria-haspopup="listbox"
+                  aria-autocomplete="list"
+                  aria-invalid={isError || undefined}
+                  aria-describedby={describedBy}
+                  className="placeholder:text-foreground-subtle min-w-[6ch] flex-1 bg-transparent text-sm outline-none"
+                  disabled={disabled}
+                />
+              </div>
+              <span className="flex shrink-0 items-center gap-1 pl-1">
+                {clearable && selected.length > 0 && (
                   <button
                     type="button"
-                    aria-label={`Remove ${opt.label}`}
-                    className="inline-flex items-center text-on-accent-soft hover:text-foreground"
+                    aria-label={strings.multiSelect.clearAll}
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggle(opt.value);
+                      clear();
                     }}
+                    className="text-foreground-subtle hover:text-foreground focus-visible:ring-ring rounded-sm outline-none focus-visible:ring-2"
                   >
-                    <X className="size-3" aria-hidden />
+                    <X className="size-4" aria-hidden />
                   </button>
-                </span>
-              ))}
-              {overflow > 0 && (
-                <span className="shrink-0 rounded-md bg-background-muted px-1.5 py-0.5 text-xs font-medium text-foreground-muted">
-                  +{overflow}
-                </span>
-              )}
-              <input
-                ref={inputRef}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onFocus={() => setOpen(true)}
-                className="min-w-[6ch] flex-1 bg-transparent text-sm outline-none placeholder:text-foreground-subtle"
-                disabled={disabled}
-              />
+                )}
+                <ChevronsUpDown className="text-foreground-subtle size-4" aria-hidden />
+              </span>
             </div>
-            <span className="flex shrink-0 items-center gap-1 pl-1">
-              {clearable && selected.length > 0 && (
-                <button
-                  type="button"
-                  aria-label="Clear all"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    clear();
-                  }}
-                  className="text-foreground-subtle hover:text-foreground"
-                >
-                  <X className="size-4" aria-hidden />
-                </button>
-              )}
-              <ChevronsUpDown className="size-4 text-foreground-subtle" aria-hidden />
-            </span>
-          </div>
-        </PopoverPrimitive.Trigger>
+          </PopoverPrimitive.Anchor>
 
-        <PopoverPrimitive.Portal>
-          <PopoverPrimitive.Content
-            align="start"
-            sideOffset={4}
-            className={cn(
-              'z-[var(--z-popover)] w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-md',
-              'data-[state=open]:animate-in data-[state=closed]:animate-out',
-              'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-              'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
-            )}
-            onOpenAutoFocus={(e) => e.preventDefault()}
-          >
-            <CommandPrimitive shouldFilter={false} className="flex h-full w-full flex-col">
-              <CommandPrimitive.List
-                id={`${fieldId}-list`}
-                className="max-h-64 overflow-y-auto p-1"
-              >
-                {options
-                  .filter((o) => o.label.toLowerCase().includes(query.toLowerCase()))
-                  .map((opt) => {
-                    const isSelected = value.includes(opt.value);
-                    return (
-                      <CommandPrimitive.Item
-                        key={opt.value}
-                        value={opt.value}
-                        disabled={opt.disabled}
-                        onSelect={() => toggle(opt.value)}
+          <PopoverPrimitive.Portal>
+            <PopoverPrimitive.Content
+              align="start"
+              sideOffset={4}
+              className={cn(
+                'border-border bg-popover text-popover-foreground z-[var(--z-popover)] w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-lg border shadow-md',
+                'data-[state=open]:animate-in data-[state=closed]:animate-out',
+                'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+                'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
+              )}
+              onOpenAutoFocus={(e) => e.preventDefault()}
+              onInteractOutside={(e) => {
+                // Clicks inside the anchor (chips, clear) must not close the menu.
+                const target = e.target as Node | null;
+                if (target && fieldRef.current?.contains(target)) e.preventDefault();
+              }}
+            >
+              <CommandPrimitive.List ref={listRef} className="max-h-64 overflow-y-auto p-1">
+                {filtered.map((opt) => {
+                  const isSelected = value.includes(opt.value);
+                  return (
+                    <CommandPrimitive.Item
+                      key={opt.value}
+                      value={opt.value}
+                      disabled={opt.disabled}
+                      onSelect={() => toggle(opt.value)}
+                      className={cn(
+                        'text-foreground flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm',
+                        'data-[selected=true]:bg-background-muted',
+                        'data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50',
+                      )}
+                    >
+                      <span
+                        aria-hidden
                         className={cn(
-                          'flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-foreground',
-                          'data-[selected=true]:bg-background-muted',
-                          'data-[disabled=true]:opacity-50 data-[disabled=true]:pointer-events-none',
+                          'flex size-4 items-center justify-center rounded-sm border',
+                          isSelected ? 'border-accent bg-accent text-on-accent' : 'border-border',
                         )}
                       >
-                        <span
-                          aria-hidden
-                          className={cn(
-                            'flex size-4 items-center justify-center rounded-sm border',
-                            isSelected ? 'border-accent bg-accent text-on-accent' : 'border-border',
-                          )}
-                        >
-                          {isSelected && <Check className="size-3" aria-hidden />}
-                        </span>
-                        <span className="flex-1">{opt.label}</span>
-                        {opt.description && (
-                          <span className="text-xs text-foreground-subtle">{opt.description}</span>
-                        )}
-                      </CommandPrimitive.Item>
-                    );
-                  })}
-                <CommandPrimitive.Empty className="px-2 py-6 text-center text-sm text-foreground-subtle">
-                  {emptyText}
-                </CommandPrimitive.Empty>
+                        {isSelected && <Check className="size-3" aria-hidden />}
+                      </span>
+                      <span className="flex-1">{opt.label}</span>
+                      {opt.description && (
+                        <span className="text-foreground-subtle text-xs">{opt.description}</span>
+                      )}
+                    </CommandPrimitive.Item>
+                  );
+                })}
+                {filtered.length === 0 && (
+                  <CommandPrimitive.Empty className="text-foreground-subtle px-2 py-6 text-center text-sm">
+                    {emptyText}
+                  </CommandPrimitive.Empty>
+                )}
               </CommandPrimitive.List>
-            </CommandPrimitive>
-          </PopoverPrimitive.Content>
-        </PopoverPrimitive.Portal>
-      </PopoverPrimitive.Root>
+            </PopoverPrimitive.Content>
+          </PopoverPrimitive.Portal>
+        </PopoverPrimitive.Root>
+      </CommandPrimitive>
 
       {error ? (
-        <p id={errorId} role="alert" className="text-xs text-danger-text">
+        <p id={errorId} role="alert" className="text-danger-text text-xs">
           {error}
         </p>
       ) : helperText ? (
-        <p id={helperId} className="text-xs text-foreground-subtle">
+        <p id={helperId} className="text-foreground-subtle text-xs">
           {helperText}
         </p>
       ) : null}

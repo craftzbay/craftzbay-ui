@@ -1,3 +1,5 @@
+'use client';
+
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { Loader2 } from '@/icons';
 import { cn } from '@/lib/utils';
@@ -17,13 +19,13 @@ const iconButton = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-accent text-on-accent hover:bg-accent-700 active:bg-accent-800',
+        primary: 'bg-accent text-on-accent hover:bg-accent-hover active:bg-accent-active',
         secondary:
-          'bg-background-muted text-foreground border border-border hover:bg-neutral-200 dark:hover:bg-neutral-800',
+          'bg-background-muted text-foreground border border-border hover:bg-surface-hover active:bg-surface-active',
         outline:
           'border border-border bg-transparent text-foreground hover:bg-background-muted',
         ghost: 'bg-transparent text-foreground-muted hover:bg-background-muted hover:text-foreground',
-        destructive: 'bg-danger text-on-danger hover:bg-danger-700 active:bg-danger-800',
+        destructive: 'bg-danger text-on-danger hover:bg-danger-hover active:bg-danger-active',
       },
       size: {
         sm: 'h-7 w-7 [&_svg]:size-3.5',

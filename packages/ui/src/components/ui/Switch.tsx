@@ -1,3 +1,5 @@
+'use client';
+
 import {
   forwardRef,
   useId,
@@ -79,14 +81,14 @@ export const Switch = forwardRef<ElementRef<typeof SwitchPrimitive.Root>, Switch
           'transition-colors duration-[var(--duration-base)] ease-[var(--ease-out)]',
           'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           'disabled:cursor-not-allowed disabled:opacity-50',
-          'data-[state=checked]:bg-accent data-[state=unchecked]:bg-neutral-300 dark:data-[state=unchecked]:bg-neutral-700',
+          'data-[state=checked]:bg-accent data-[state=unchecked]:bg-switch-track-off',
           trackSize[size],
         )}
         {...props}
       >
         <SwitchPrimitive.Thumb
           className={cn(
-            'pointer-events-none block rounded-full bg-white shadow-sm',
+            'pointer-events-none block rounded-full bg-switch-thumb shadow-sm',
             'transition-transform duration-[var(--duration-base)] ease-[var(--ease-out)]',
             'translate-x-0',
             thumbSize[size],

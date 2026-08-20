@@ -110,8 +110,8 @@ const responsive: GuideDoc = {
 
 const migration: GuideDoc = {
   slug: 'migration',
-  title: 'Migration (0.4 → 0.6)',
-  description: 'Upgrade notes — all changes are backwards-compatible, but new props unlock real templates.',
+  title: 'Migration guide',
+  description: 'Upgrade notes by release (0.4 → 0.6). Later releases are additive — see the changelog for details.',
   body: <MigrationBody />,
 };
 

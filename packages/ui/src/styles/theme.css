@@ -1,0 +1,777 @@
+/* @craftzbay/ui theme — tokens, semantic vars, dark variant, base layer. No `@import 'tailwindcss'` here:
+ * consumers with Tailwind v4 import this AFTER tailwindcss (+ tw-animate-css for animate-in/out utilities). */
+/* =============================================================================
+ * Refined-Minimal Design System — Tailwind v4 token definitions
+ *
+ * Architecture:
+ *   1. Raw palette + typographic + spatial primitives live in `@theme`.
+ *   2. Semantic tokens (background/foreground/border/etc.) are CSS custom
+ *      properties on `:root` and `.dark`, exposed to Tailwind via
+ *      `@theme inline` so utilities like `bg-background` work and swap with
+ *      the `dark` class on `<html>`.
+ *   3. Components must reference semantic tokens, never raw palette steps.
+ *
+ * Contrast notes (WCAG AA target = 4.5:1 body / 3:1 large text + UI).
+ * Ratios computed from the hsl() values below (relative luminance, WCAG 2.x):
+ *   Light mode
+ *     foreground (neutral-900)                 on background (white)         → 17.9:1
+ *     foreground-muted (neutral-600)           on background (white)         →  7.4:1
+ *     foreground-subtle (neutral-500)          on background (white)         →  4.7:1
+ *     accent-600 text                          on background (white)         →  7.7:1
+ *     accent-600 bg + white text                                             →  7.7:1
+ *     success-solid bg + white text                                          →  5.2:1
+ *     warning-solid bg + white text                                          →  4.6:1
+ *     danger-solid bg + white text                                           →  4.8:1
+ *     border-input (hsl 215 16% 58%)           on background (white)         →  3.2:1 (UI)
+ *     border (neutral-200) / border-strong (neutral-300)                     →  decorative (1.3 / 1.7)
+ *   Dark mode
+ *     foreground (neutral-50)                  on background (neutral-950)   → 18.8:1
+ *     foreground-muted (neutral-300)           on background (neutral-950)   → 13.3:1
+ *     foreground-subtle (neutral-400)          on background (neutral-950)   →  7.7:1
+ *     accent-400 text                          on background (neutral-950)   →  5.4:1
+ *     accent-400 bg + neutral-950 text                                       →  5.4:1
+ *     success/warning/danger-solid + neutral-950 text                        →  9.0 / 9.3 / 5.2:1
+ *     border-input (hsl 215 16% 42%)           on background (neutral-950)   →  3.5:1 (UI)
+ * ============================================================================= */
+
+/* Geist + Geist Mono are loaded via a <link> in index.html (Google Fonts). */
+
+/* The dark variant flips on the `dark` class anywhere up the tree. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* -----------------------------------------------------------------------------
+ *  Raw tokens — palette, type, space, radius, shadow, motion, z-index
+ * --------------------------------------------------------------------------- */
+@theme {
+  /* Font families ---------------------------------------------------------- */
+  --font-sans:
+    'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  --font-mono:
+    'Geist Mono', ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+
+  /* Type scale — paired size + line-height + tracking ---------------------- */
+  --text-xs: 0.75rem; /* 12 */
+  --text-xs--line-height: 1rem; /* 16 */
+  --text-xs--letter-spacing: 0.005em;
+
+  --text-sm: 0.8125rem; /* 13 — UI default */
+  --text-sm--line-height: 1.25rem; /* 20 */
+  --text-sm--letter-spacing: 0;
+
+  --text-base: 0.875rem; /* 14 — body */
+  --text-base--line-height: 1.5rem; /* 24 — 1.71 */
+  --text-base--letter-spacing: 0;
+
+  --text-md: 0.9375rem; /* 15 */
+  --text-md--line-height: 1.5rem;
+
+  --text-lg: 1rem; /* 16 */
+  --text-lg--line-height: 1.5rem;
+  --text-lg--letter-spacing: -0.005em;
+
+  --text-xl: 1.125rem; /* 18 */
+  --text-xl--line-height: 1.75rem;
+  --text-xl--letter-spacing: -0.01em;
+
+  --text-2xl: 1.375rem; /* 22 */
+  --text-2xl--line-height: 1.875rem;
+  --text-2xl--letter-spacing: -0.015em;
+
+  --text-3xl: 1.75rem; /* 28 */
+  --text-3xl--line-height: 2.125rem;
+  --text-3xl--letter-spacing: -0.02em;
+
+  --text-4xl: 2.25rem; /* 36 */
+  --text-4xl--line-height: 2.5rem;
+  --text-4xl--letter-spacing: -0.025em;
+
+  --text-5xl: 3rem; /* 48 */
+  --text-5xl--line-height: 1.1;
+  --text-5xl--letter-spacing: -0.03em;
+
+  --text-6xl: 3.75rem; /* 60 */
+  --text-6xl--line-height: 1.05;
+  --text-6xl--letter-spacing: -0.035em;
+
+  --text-7xl: 4.5rem; /* 72 */
+  --text-7xl--line-height: 1.05;
+  --text-7xl--letter-spacing: -0.04em;
+
+  /* Font weights — restricted to three. ------------------------------------ */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* Spacing scale (rem) — disciplined, no orphan steps. -------------------- */
+  --spacing-0: 0rem;
+  --spacing-px: 1px;
+  --spacing-0_5: 0.125rem;
+  --spacing-1: 0.25rem;
+  --spacing-1_5: 0.375rem;
+  --spacing-2: 0.5rem;
+  --spacing-2_5: 0.625rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+  --spacing-24: 6rem;
+  --spacing-32: 8rem;
+
+  /* Border radius — modest. ------------------------------------------------ */
+  --radius-none: 0px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* Shadow — neutral, whisper-soft. Reserved for floating surfaces. -------- */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-sm:
+    0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+  --shadow-md:
+    0 4px 8px -2px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+  --shadow-lg:
+    0 12px 24px -6px rgb(0 0 0 / 0.08), 0 4px 8px -4px rgb(0 0 0 / 0.04);
+  --shadow-xl:
+    0 24px 48px -12px rgb(0 0 0 / 0.12), 0 8px 16px -8px rgb(0 0 0 / 0.06);
+
+  /* Z-index scale — semantic. ---------------------------------------------- */
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-overlay: 1200;
+  --z-modal: 1300;
+  --z-popover: 1400;
+  --z-toast: 1500;
+  --z-tooltip: 1600;
+
+  /* Motion ---------------------------------------------------------------- */
+  --duration-fast: 120ms;
+  --duration-base: 160ms;
+  --duration-slow: 240ms;
+
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Breakpoints ----------------------------------------------------------- */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+  /* ============================================================================
+   * Raw palette — cool-gray neutrals + graphite-indigo accent + semantic ramps.
+   *
+   * Light- and dark-mode surface choices live further down, in the
+   * `:root` / `.dark` blocks. These raw steps are stable across modes.
+   * ========================================================================== */
+
+  /* Neutral — cool gray (hue ≈ 220°) -------------------------------------- */
+  --color-neutral-50: hsl(210 40% 98%);   /* #f8fafc */
+  --color-neutral-100: hsl(210 40% 96%);  /* #f1f5f9 */
+  --color-neutral-200: hsl(214 32% 91%);  /* #e2e8f0 */
+  --color-neutral-300: hsl(213 27% 84%);  /* #cbd5e1 */
+  --color-neutral-400: hsl(215 20% 65%);  /* #94a3b8 */
+  --color-neutral-500: hsl(215 16% 47%);  /* #64748b */
+  --color-neutral-600: hsl(215 19% 35%);  /* #475569 */
+  --color-neutral-700: hsl(215 25% 27%);  /* #334155 */
+  --color-neutral-800: hsl(217 33% 17%);  /* #1e293b */
+  --color-neutral-900: hsl(222 47% 11%);  /* #0f172a */
+  --color-neutral-950: hsl(229 50% 6%);   /* #0a0d14  (slightly warmer than slate-950) */
+
+  /* Accent — graphite indigo (desaturated indigo, hue ≈ 238°) ------------- */
+  --color-accent-50: hsl(232 100% 97%);   /* #eef2ff */
+  --color-accent-100: hsl(232 87% 94%);   /* #e0e6ff */
+  --color-accent-200: hsl(233 79% 87%);   /* #c7d0fb */
+  --color-accent-300: hsl(234 71% 78%);   /* #a5b1f7 */
+  --color-accent-400: hsl(238 60% 67%);   /* #828df0 */
+  --color-accent-500: hsl(238 55% 58%);   /* #6371df */
+  --color-accent-600: hsl(238 50% 49%);   /* #4e5fc4 */
+  --color-accent-700: hsl(238 48% 40%);   /* #4350a7 */
+  --color-accent-800: hsl(238 43% 32%);   /* #3a4385 */
+  --color-accent-900: hsl(238 40% 26%);   /* #312f6c */
+  --color-accent-950: hsl(238 50% 16%);   /* #1c1d50 */
+
+  /* Success — emerald, muted -------------------------------------------- */
+  --color-success-50: hsl(152 76% 96%);
+  --color-success-100: hsl(152 71% 91%);
+  --color-success-200: hsl(152 64% 80%);
+  --color-success-300: hsl(154 60% 64%);
+  --color-success-400: hsl(157 55% 50%);
+  --color-success-500: hsl(160 60% 42%);
+  --color-success-600: hsl(161 64% 33%);
+  --color-success-700: hsl(163 70% 26%);
+  --color-success-800: hsl(163 70% 18%);
+  --color-success-900: hsl(164 75% 12%);
+  --color-success-950: hsl(165 80% 6%);
+
+  /* Warning — amber, muted ---------------------------------------------- */
+  --color-warning-50: hsl(48 100% 96%);
+  --color-warning-100: hsl(48 96% 89%);
+  --color-warning-200: hsl(45 95% 78%);
+  --color-warning-300: hsl(40 92% 65%);
+  --color-warning-400: hsl(35 90% 56%);
+  --color-warning-500: hsl(30 85% 48%);
+  --color-warning-600: hsl(26 80% 40%);
+  --color-warning-700: hsl(23 75% 33%);
+  --color-warning-800: hsl(22 70% 26%);
+  --color-warning-900: hsl(22 65% 19%);
+  --color-warning-950: hsl(20 60% 10%);
+
+  /* Danger — red, muted -------------------------------------------------- */
+  --color-danger-50: hsl(0 86% 97%);
+  --color-danger-100: hsl(0 93% 94%);
+  --color-danger-200: hsl(0 96% 89%);
+  --color-danger-300: hsl(0 94% 82%);
+  --color-danger-400: hsl(0 91% 71%);
+  --color-danger-500: hsl(0 84% 60%);
+  --color-danger-600: hsl(0 72% 51%);
+  --color-danger-700: hsl(0 74% 42%);
+  --color-danger-800: hsl(0 70% 35%);
+  --color-danger-900: hsl(0 63% 31%);
+  --color-danger-950: hsl(0 75% 15%);
+
+  /* Info — re-use the accent. Documented intentionally so future authors do not
+     introduce a fifth hue for informational state. ----------------------- */
+  --color-info-50: var(--color-accent-50);
+  --color-info-100: var(--color-accent-100);
+  --color-info-200: var(--color-accent-200);
+  --color-info-300: var(--color-accent-300);
+  --color-info-400: var(--color-accent-400);
+  --color-info-500: var(--color-accent-500);
+  --color-info-600: var(--color-accent-600);
+  --color-info-700: var(--color-accent-700);
+  --color-info-800: var(--color-accent-800);
+  --color-info-900: var(--color-accent-900);
+  --color-info-950: var(--color-accent-950);
+}
+
+/* -----------------------------------------------------------------------------
+ *  Semantic tokens — bound to mode via :root and .dark.
+ *  These are the names components should reference (bg-background, text-foreground, ...).
+ * --------------------------------------------------------------------------- */
+:root {
+  /* Surfaces ------------------------------------------------------------- */
+  --background: hsl(0 0% 100%);
+  --background-subtle: hsl(210 40% 98%);
+  --background-muted: hsl(210 40% 96%);
+
+  /* Text ----------------------------------------------------------------- */
+  --foreground: hsl(222 47% 11%);
+  --foreground-muted: hsl(215 19% 35%);
+  --foreground-subtle: hsl(215 16% 47%);
+
+  /* Borders -------------------------------------------------------------- */
+  --border: hsl(214 32% 91%);
+  --border-strong: hsl(213 27% 84%);
+  --border-input: hsl(215 16% 58%); /* ≥3:1 on background — form control edges */
+
+  /* Card / popover ------------------------------------------------------- */
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(222 47% 11%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(222 47% 11%);
+
+  /* Accent — semantic action ------------------------------------------- */
+  --accent: hsl(238 50% 49%); /* accent-600  */
+  --accent-foreground: hsl(0 0% 100%);
+  --accent-subtle: hsl(232 100% 97%); /* accent-50  */
+  --accent-subtle-foreground: hsl(238 48% 40%); /* accent-700 */
+  /* Hover/active derive from --accent so brand / data-accent presets follow. */
+  --accent-hover: color-mix(in oklab, var(--accent) 88%, black);
+  --accent-active: color-mix(in oklab, var(--accent) 78%, black);
+
+  /* Interaction surfaces ------------------------------------------------ */
+  --surface-hover: hsl(214 32% 91%); /* neutral-200 */
+  --surface-active: hsl(213 27% 84%); /* neutral-300 */
+  --overlay: hsl(229 50% 6% / 0.6);
+  --tooltip: hsl(222 47% 11%);
+  --tooltip-foreground: hsl(210 40% 98%);
+  --chart-1: var(--accent);
+  --chart-2: hsl(162 66% 29%);
+  --chart-3: hsl(38 92% 40%);
+  --chart-4: hsl(0 72% 45%);
+  --chart-5: hsl(215 16% 47%);
+  --chart-6: hsl(262 52% 55%);
+  --switch-track-off: hsl(213 27% 84%);
+  --switch-thumb: hsl(0 0% 100%);
+
+  /* Status — 4-step mini scales ----------------------------------------- */
+  --success-subtle: hsl(152 76% 96%);
+  --success-border: hsl(152 64% 80%);
+  --success-foreground: hsl(163 70% 26%);
+  --success-solid: hsl(162 66% 29%); /* darkened from success-600 so white text ≥4.5:1 */
+  --on-success: hsl(0 0% 100%);
+
+  --warning-subtle: hsl(48 100% 96%);
+  --warning-border: hsl(45 95% 78%);
+  --warning-foreground: hsl(23 75% 33%);
+  --warning-solid: hsl(26 80% 40%);
+  --on-warning: hsl(0 0% 100%);
+
+  --danger-subtle: hsl(0 86% 97%);
+  --danger-border: hsl(0 96% 89%);
+  --danger-foreground: hsl(0 74% 42%);
+  --danger-solid: hsl(0 72% 51%);
+  --on-danger: hsl(0 0% 100%);
+  --danger-hover: color-mix(in oklab, var(--danger-solid) 88%, black);
+  --danger-active: color-mix(in oklab, var(--danger-solid) 78%, black);
+
+  --info-subtle: hsl(232 100% 97%);
+  --info-border: hsl(233 79% 87%);
+  --info-foreground: hsl(238 48% 40%);
+  --info-solid: hsl(238 50% 49%);
+  --on-info: hsl(0 0% 100%);
+
+  /* Focus ring ----------------------------------------------------------- */
+  --ring: hsl(238 55% 58%); /* accent-500 */
+  --ring-offset: hsl(0 0% 100%);
+
+  /* Selection ----------------------------------------------------------- */
+  --selection: hsl(232 100% 94%);
+  --selection-foreground: hsl(238 48% 40%);
+}
+
+.dark {
+  --background: hsl(229 50% 6%);
+  --background-subtle: hsl(222 47% 9%);
+  --background-muted: hsl(217 33% 13%);
+
+  --foreground: hsl(210 40% 98%);
+  --foreground-muted: hsl(213 27% 84%);
+  --foreground-subtle: hsl(215 20% 65%);
+
+  --border: hsl(217 33% 17%);
+  --border-strong: hsl(215 25% 27%);
+  --border-input: hsl(215 16% 42%);
+
+  /* Floating/card surfaces sit one step above background-subtle for lift. */
+  --card: hsl(222 47% 11%);
+  --card-foreground: hsl(210 40% 98%);
+  --popover: hsl(222 47% 11%);
+  --popover-foreground: hsl(210 40% 98%);
+
+  --accent: hsl(238 60% 67%); /* accent-400 — 5.4:1 with neutral-950 text and as text on bg */
+  --accent-foreground: hsl(229 50% 6%);
+  --accent-subtle: hsl(238 50% 16%); /* accent-950 */
+  --accent-subtle-foreground: hsl(234 71% 78%); /* accent-300 */
+  --accent-hover: color-mix(in oklab, var(--accent) 88%, white);
+  --accent-active: color-mix(in oklab, var(--accent) 78%, white);
+
+  --surface-hover: hsl(217 33% 17%); /* neutral-800 */
+  --surface-active: hsl(215 25% 27%); /* neutral-700 */
+  --overlay: hsl(229 50% 6% / 0.7);
+  --tooltip: hsl(210 40% 98%);
+  --tooltip-foreground: hsl(222 47% 11%);
+  --chart-1: var(--accent);
+  --chart-2: hsl(162 60% 55%);
+  --chart-3: hsl(38 92% 60%);
+  --chart-4: hsl(0 80% 68%);
+  --chart-5: hsl(215 20% 65%);
+  --chart-6: hsl(262 70% 75%);
+  --switch-track-off: hsl(215 25% 27%);
+  --switch-thumb: hsl(0 0% 100%);
+
+  --success-subtle: hsl(165 80% 8%);
+  --success-border: hsl(163 70% 18%);
+  --success-foreground: hsl(154 60% 64%);
+  --success-solid: hsl(157 55% 50%);
+  --on-success: hsl(229 50% 6%);
+
+  --warning-subtle: hsl(20 60% 10%);
+  --warning-border: hsl(22 70% 26%);
+  --warning-foreground: hsl(40 92% 65%);
+  --warning-solid: hsl(35 90% 56%);
+  --on-warning: hsl(229 50% 6%);
+
+  --danger-subtle: hsl(0 75% 12%);
+  --danger-border: hsl(0 70% 35%);
+  --danger-foreground: hsl(0 91% 71%);
+  --danger-solid: hsl(0 84% 60%);
+  --on-danger: hsl(229 50% 6%);
+  --danger-hover: color-mix(in oklab, var(--danger-solid) 88%, white);
+  --danger-active: color-mix(in oklab, var(--danger-solid) 78%, white);
+
+  --info-subtle: hsl(238 50% 16%);
+  --info-border: hsl(238 43% 32%);
+  --info-foreground: hsl(234 71% 78%);
+  --info-solid: hsl(238 60% 67%);
+  --on-info: hsl(229 50% 6%);
+
+  --ring: hsl(238 60% 67%); /* accent-400 */
+  --ring-offset: hsl(229 50% 6%);
+
+  --selection: hsl(238 43% 32%);
+  --selection-foreground: hsl(232 100% 97%);
+}
+
+/* -----------------------------------------------------------------------------
+ *  Accent presets — opt in by setting `data-accent="<name>"` on <html>.
+ *
+ *  Only the accent ramp changes; everything else (neutrals, status colours) is
+ *  shared. The hover/active steps (`--color-accent-700/800`) are mode-agnostic;
+ *  the semantic `--accent` / `--accent-subtle` / `--accent-subtle-foreground` /
+ *  `--ring` have a light value (:root[data-accent]) and a brightened dark value
+ *  (.dark[data-accent], listed second so it wins in dark mode). Applied pre-paint
+ *  by theme-init.js, so switching accent never flashes.
+ * --------------------------------------------------------------------------- */
+[data-accent='blue'] {
+  --color-accent-700: oklch(0.47 0.16 250);
+  --color-accent-800: oklch(0.39 0.14 250);
+}
+:root[data-accent='blue'] {
+  --accent: oklch(0.55 0.16 250);
+  --accent-subtle: oklch(0.96 0.03 250);
+  --accent-subtle-foreground: oklch(0.45 0.15 250);
+  --ring: oklch(0.62 0.16 250);
+}
+.dark[data-accent='blue'] {
+  --accent: oklch(0.64 0.15 250);
+  --accent-subtle: oklch(0.24 0.06 250);
+  --accent-subtle-foreground: oklch(0.82 0.1 250);
+  --ring: oklch(0.68 0.15 250);
+}
+
+[data-accent='violet'] {
+  --color-accent-700: oklch(0.45 0.18 295);
+  --color-accent-800: oklch(0.38 0.16 295);
+}
+:root[data-accent='violet'] {
+  --accent: oklch(0.53 0.2 295);
+  --accent-subtle: oklch(0.96 0.03 295);
+  --accent-subtle-foreground: oklch(0.46 0.18 295);
+  --ring: oklch(0.6 0.2 295);
+}
+.dark[data-accent='violet'] {
+  --accent: oklch(0.64 0.18 295);
+  --accent-subtle: oklch(0.25 0.07 295);
+  --accent-subtle-foreground: oklch(0.83 0.12 295);
+  --ring: oklch(0.68 0.18 295);
+}
+
+[data-accent='emerald'] {
+  --color-accent-700: oklch(0.47 0.13 160);
+  --color-accent-800: oklch(0.39 0.12 160);
+}
+:root[data-accent='emerald'] {
+  --accent: oklch(0.55 0.13 160);
+  --accent-subtle: oklch(0.96 0.03 160);
+  --accent-subtle-foreground: oklch(0.42 0.12 160);
+  --ring: oklch(0.6 0.13 160);
+}
+.dark[data-accent='emerald'] {
+  --accent: oklch(0.64 0.14 160);
+  --accent-subtle: oklch(0.23 0.05 160);
+  --accent-subtle-foreground: oklch(0.8 0.12 160);
+  --ring: oklch(0.68 0.14 160);
+}
+
+[data-accent='rose'] {
+  --color-accent-700: oklch(0.49 0.18 12);
+  --color-accent-800: oklch(0.41 0.16 12);
+}
+:root[data-accent='rose'] {
+  --accent: oklch(0.57 0.19 12);
+  --accent-subtle: oklch(0.96 0.03 12);
+  --accent-subtle-foreground: oklch(0.48 0.18 12);
+  --ring: oklch(0.62 0.19 12);
+}
+.dark[data-accent='rose'] {
+  --accent: oklch(0.65 0.18 12);
+  --accent-subtle: oklch(0.25 0.07 12);
+  --accent-subtle-foreground: oklch(0.83 0.12 12);
+  --ring: oklch(0.7 0.18 12);
+}
+
+[data-accent='amber'] {
+  --color-accent-700: oklch(0.54 0.13 65);
+  --color-accent-800: oklch(0.46 0.12 65);
+}
+:root[data-accent='amber'] {
+  --accent: oklch(0.62 0.14 65);
+  --accent-subtle: oklch(0.96 0.04 75);
+  --accent-subtle-foreground: oklch(0.48 0.12 65);
+  --ring: oklch(0.66 0.14 65);
+}
+.dark[data-accent='amber'] {
+  --accent: oklch(0.66 0.14 65);
+  --accent-subtle: oklch(0.26 0.05 70);
+  --accent-subtle-foreground: oklch(0.85 0.12 80);
+  --ring: oklch(0.72 0.14 65);
+}
+
+/* -----------------------------------------------------------------------------
+ *  Semantic colour names exposed to Tailwind utilities.
+ *
+ *  Naming convention:
+ *    bg-<status>           solid surface (button fill, badge fill)
+ *    text-on-<status>      foreground on a solid surface
+ *    bg-<status>-soft      subtle / tinted surface
+ *    text-<status>         standalone status text or text on a soft surface
+ *    border-<status>       border matched to a soft surface
+ *
+ *  This keeps utility class names readable in JSX (no `bg-accent-bg`).
+ *  Raw scale (`bg-accent-500`, `bg-success-100`, …) is still available
+ *  for the rare case a designer needs a specific step.
+ * --------------------------------------------------------------------------- */
+@theme inline {
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-background: var(--background);
+  --color-background-subtle: var(--background-subtle);
+  --color-background-muted: var(--background-muted);
+
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-border-input: var(--border-input);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-accent: var(--accent);
+  --color-on-accent: var(--accent-foreground);
+  --color-accent-soft: var(--accent-subtle);
+  --color-on-accent-soft: var(--accent-subtle-foreground);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-active: var(--accent-active);
+
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-active: var(--surface-active);
+  --color-overlay: var(--overlay);
+  --color-tooltip: var(--tooltip);
+  --color-tooltip-foreground: var(--tooltip-foreground);
+  --color-switch-track-off: var(--switch-track-off);
+  --color-switch-thumb: var(--switch-thumb);
+
+  --color-success: var(--success-solid);
+  --color-on-success: var(--on-success);
+  --color-success-soft: var(--success-subtle);
+  --color-success-text: var(--success-foreground);
+  --color-success-border-soft: var(--success-border);
+
+  --color-warning: var(--warning-solid);
+  --color-on-warning: var(--on-warning);
+  --color-warning-soft: var(--warning-subtle);
+  --color-warning-text: var(--warning-foreground);
+  --color-warning-border-soft: var(--warning-border);
+
+  --color-danger: var(--danger-solid);
+  --color-on-danger: var(--on-danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-danger-active: var(--danger-active);
+  --color-danger-soft: var(--danger-subtle);
+  --color-danger-text: var(--danger-foreground);
+  --color-danger-border-soft: var(--danger-border);
+
+  --color-info: var(--info-solid);
+  --color-on-info: var(--on-info);
+  --color-info-soft: var(--info-subtle);
+  --color-info-text: var(--info-foreground);
+  --color-info-border-soft: var(--info-border);
+
+  --color-ring: var(--ring);
+}
+
+/* -----------------------------------------------------------------------------
+ *  Base layer — sensible global defaults.
+ * --------------------------------------------------------------------------- */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: var(--border);
+  }
+
+  html {
+    font-family: var(--font-sans);
+    font-feature-settings:
+      'cv11' on, /* Geist: stylistic single-storey a in numbers context */
+      'ss03' on, /* Geist: alternate G */
+      'rlig' on;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  :root {
+    color-scheme: light;
+  }
+  .dark {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    font-weight: var(--font-weight-normal);
+    /* Long Cyrillic words / URLs must never overflow their container. */
+    overflow-wrap: anywhere;
+    font-synthesis: none;
+  }
+
+  ::selection {
+    background-color: var(--selection);
+    color: var(--selection-foreground);
+  }
+
+  /* Visible default focus indicator. Components that draw their own
+     `focus-visible:ring-*` set `outline-none` locally to avoid doubling. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* tw-animate-css `animate-in` / `animate-out` defaults. Set as the
+     overridable `--tw-*` fallbacks so `duration-*` / `ease-*` utilities on
+     the same element still win. */
+  .animate-in,
+  .animate-out {
+    --tw-duration: var(--duration-base);
+    --tw-ease: var(--ease-out);
+  }
+
+  /* Tailwind v4 preflight resets buttons to `cursor: default`; restore the
+     v3 behaviour so every enabled button (and Radix triggers rendered with
+     role="button") reads as clickable. Disabled state keeps the default
+     arrow — most components also set `disabled:pointer-events-none`. */
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* Standardised focus ring — 2px ring + 2px offset, accent colour. ------ */
+  .focus-ring {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--ring-offset);
+  }
+
+  /* Numbers and tabular data use tabular-nums by default for alignment. -- */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Honour reduced-motion globally. -------------------------------------- */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Global subtle scrollbars — thin, transparent track, only visible on
+     hover of the scroll container. Applies to every scrollable surface
+     unless a component explicitly opts out. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  *:hover {
+    scrollbar-color: color-mix(in oklab, var(--color-border-strong) 60%, transparent)
+      transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background-color 0.15s ease;
+  }
+  *:hover::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklab, var(--color-border-strong) 60%, transparent);
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-border-strong);
+  }
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+ *  Utilities — tiny refined-minimal helpers reused across components.
+ * --------------------------------------------------------------------------- */
+@keyframes progress-indeterminate {
+  0% {
+    transform: translateX(-100%) scaleX(0.6);
+  }
+  50% {
+    transform: translateX(0%) scaleX(0.4);
+  }
+  100% {
+    transform: translateX(100%) scaleX(0.6);
+  }
+}
+
+@layer utilities {
+  /* Indeterminate <Progress> bar sweep. */
+  .animate-progress-indeterminate {
+    animation: progress-indeterminate 1.4s ease-in-out infinite;
+  }
+
+  /* Standard focus ring as a utility. */
+  .ring-focus {
+    @apply outline-none;
+    box-shadow:
+      0 0 0 2px var(--ring-offset),
+      0 0 0 4px var(--ring);
+  }
+
+  /* Hairline border that respects color-mix for subpixel rendering. */
+  .border-hairline {
+    border-width: 1px;
+    border-style: solid;
+  }
+
+  /* Truncate to 1, 2, 3 lines. */
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}

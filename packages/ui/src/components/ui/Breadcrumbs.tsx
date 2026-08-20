@@ -1,6 +1,9 @@
+'use client';
+
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { ChevronRight, MoreHorizontal } from '@/icons';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
 
 export interface BreadcrumbItem {
   /** Visible label. */
@@ -37,6 +40,7 @@ export const Breadcrumbs = forwardRef<HTMLElement, BreadcrumbsProps>(function Br
   { items, maxItems = 4, renderLink, className, ...props },
   ref,
 ) {
+  const strings = useStrings();
   const shouldCollapse = items.length > maxItems;
   const displayItems =
     !shouldCollapse
@@ -44,7 +48,7 @@ export const Breadcrumbs = forwardRef<HTMLElement, BreadcrumbsProps>(function Br
       : [items[0], { collapsed: true } as const, ...items.slice(-2)];
 
   return (
-    <nav ref={ref} aria-label="Breadcrumb" className={cn('text-sm', className)} {...props}>
+    <nav ref={ref} aria-label={props['aria-label'] ?? strings.breadcrumbs.label} className={cn('text-sm', className)} {...props}>
       <ol className="flex flex-wrap items-center gap-1.5 text-foreground-subtle">
         {displayItems.map((it, i) => {
           const isLast = i === displayItems.length - 1;

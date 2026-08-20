@@ -1,3 +1,5 @@
+'use client';
+
 import {
   forwardRef,
   type ComponentPropsWithoutRef,
@@ -8,6 +10,7 @@ import {
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from '@/icons';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
 import { Button, type ButtonProps } from './Button';
 
 export const Dialog = DialogPrimitive.Root;
@@ -23,7 +26,7 @@ export const DialogOverlay = forwardRef<
     <DialogPrimitive.Overlay
       ref={ref}
       className={cn(
-        'fixed inset-0 z-[var(--z-overlay)] bg-neutral-950/60 backdrop-blur-[2px]',
+        'fixed inset-0 z-[var(--z-overlay)] bg-overlay',
         'data-[state=open]:animate-in data-[state=closed]:animate-out',
         'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
         className,
@@ -46,6 +49,7 @@ export const DialogContent = forwardRef<
   ElementRef<typeof DialogPrimitive.Content>,
   DialogContentProps
 >(function DialogContent({ className, children, showClose = true, size = 'md', ...props }, ref) {
+  const strings = useStrings();
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -68,7 +72,7 @@ export const DialogContent = forwardRef<
         {children}
         {showClose && (
           <DialogPrimitive.Close
-            aria-label="Close"
+            aria-label={strings.dialog.close}
             className={cn(
               'absolute right-4 top-4 inline-flex size-8 items-center justify-center rounded-md text-foreground-subtle',
               'hover:bg-background-muted hover:text-foreground',
@@ -173,12 +177,13 @@ export function ConfirmationDialog({
   onOpenChange,
   title,
   description,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel,
+  cancelLabel,
   confirmVariant = 'primary',
   onConfirm,
   loading,
 }: ConfirmationDialogProps) {
+  const strings = useStrings();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent size="sm">
@@ -188,10 +193,10 @@ export function ConfirmationDialog({
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">{cancelLabel}</Button>
+            <Button variant="outline">{cancelLabel ?? strings.confirmationDialog.cancel}</Button>
           </DialogClose>
           <Button variant={confirmVariant} loading={loading} onClick={onConfirm}>
-            {confirmLabel}
+            {confirmLabel ?? strings.confirmationDialog.confirm}
           </Button>
         </DialogFooter>
       </DialogContent>

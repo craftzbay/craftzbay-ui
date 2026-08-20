@@ -107,7 +107,7 @@ describe('Inputs (smoke)', () => {
 
   it('DatePicker renders trigger', () => {
     render(<DatePicker onChange={() => {}} placeholder="Pick a date" />);
-    expect(screen.getByRole('button')).toBeInTheDocument();
+    expect(screen.getByRole('combobox')).toBeInTheDocument();
   });
 
   it('Calendar renders grid', () => {

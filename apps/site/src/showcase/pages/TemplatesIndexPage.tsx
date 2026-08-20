@@ -122,7 +122,7 @@ export function TemplatesIndexPage() {
                     {doc.useCases.map((u, i) => (
                       <span
                         key={i}
-                        className={`rounded-full border px-2 py-0.5 text-[11px] ${
+                        className={`rounded-full border px-2 py-0.5 text-xs ${
                           active.has(u)
                             ? 'border-accent bg-accent-soft text-on-accent-soft'
                             : 'border-border bg-background text-foreground-subtle'

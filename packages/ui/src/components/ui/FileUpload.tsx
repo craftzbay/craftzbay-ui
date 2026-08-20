@@ -1,6 +1,20 @@
-import { forwardRef, useCallback, useId, useRef, useState, type DragEvent as ReactDragEvent, type ReactNode } from 'react';
+'use client';
+
+import {
+  forwardRef,
+  useCallback,
+  useId,
+  useRef,
+  useState,
+  type DragEvent as ReactDragEvent,
+  type ReactNode,
+} from 'react';
 import { File as FileIcon, Upload, X } from '@/icons';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
+import { formatString } from '@/lib/strings';
+
+export type FileRejectReason = 'size' | 'type';
 
 export interface FileUploadProps {
   /** Accepted file types, e.g. `image/*` or `.pdf,.docx`. */
@@ -13,6 +27,8 @@ export interface FileUploadProps {
   value?: File[];
   /** Called when files are added or removed. */
   onChange?: (files: File[]) => void;
+  /** Called with the files that were dropped because of `maxSize` or `accept`. */
+  onReject?: (files: File[], reason: FileRejectReason) => void;
   /** Helper text inside the drop zone. */
   hint?: ReactNode;
   /** Disable the picker entirely. */
@@ -26,14 +42,32 @@ function formatSize(bytes: number) {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
+/** Mirror the browser's `accept` matching for dropped files (which skip the picker filter). */
+function matchesAccept(file: File, accept?: string): boolean {
+  if (!accept) return true;
+  const rules = accept
+    .split(',')
+    .map((r) => r.trim().toLowerCase())
+    .filter(Boolean);
+  if (!rules.length) return true;
+  const name = file.name.toLowerCase();
+  const type = file.type.toLowerCase();
+  return rules.some((rule) => {
+    if (rule.startsWith('.')) return name.endsWith(rule);
+    if (rule.endsWith('/*')) return type.startsWith(rule.slice(0, -1));
+    return type === rule;
+  });
+}
+
 /**
  * Drag-and-drop file picker with an inline file list. Uncontrolled by default;
  * pass `value` + `onChange` to control externally.
  */
 export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(function FileUpload(
-  { accept, multiple, maxSize, value, onChange, hint, disabled, className },
+  { accept, multiple, maxSize, value, onChange, onReject, hint, disabled, className },
   ref,
 ) {
+  const strings = useStrings();
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
   const [internal, setInternal] = useState<File[]>([]);
@@ -50,12 +84,20 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(function F
 
   const addFiles = useCallback(
     (incoming: FileList | File[]) => {
-      const arr = Array.from(incoming).filter(
-        (f) => !maxSize || f.size <= maxSize,
-      );
-      update(multiple ? [...files, ...arr] : arr.slice(0, 1));
+      const accepted: File[] = [];
+      const tooLarge: File[] = [];
+      const wrongType: File[] = [];
+      for (const f of Array.from(incoming)) {
+        if (!matchesAccept(f, accept)) wrongType.push(f);
+        else if (maxSize && f.size > maxSize) tooLarge.push(f);
+        else accepted.push(f);
+      }
+      if (wrongType.length) onReject?.(wrongType, 'type');
+      if (tooLarge.length) onReject?.(tooLarge, 'size');
+      if (!accepted.length) return;
+      update(multiple ? [...files, ...accepted] : accepted.slice(0, 1));
     },
-    [files, maxSize, multiple, update],
+    [accept, files, maxSize, multiple, onReject, update],
   );
 
   const remove = (idx: number) => update(files.filter((_, i) => i !== idx));
@@ -79,17 +121,18 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(function F
         onDrop={onDrop}
         className={cn(
           'group relative flex cursor-pointer flex-col items-center justify-center gap-2',
-          'rounded-md border border-dashed border-border bg-background-subtle px-6 py-8',
+          'border-border bg-background-subtle rounded-md border border-dashed px-6 py-8',
           'text-center transition-colors',
           'hover:border-border-strong hover:bg-background-muted',
+          'focus-within:ring-ring focus-within:ring-offset-background focus-within:ring-2 focus-within:ring-offset-2',
           over && 'border-accent bg-accent-soft',
           disabled && 'pointer-events-none opacity-50',
         )}
       >
-        <Upload className="size-5 text-foreground-muted" aria-hidden />
+        <Upload className="text-foreground-muted size-5" aria-hidden />
         <div className="space-y-1">
-          <p className="text-sm font-medium">Drop files here, or click to browse</p>
-          {hint && <p className="text-xs text-foreground-muted">{hint}</p>}
+          <p className="text-sm font-medium">{strings.fileUpload.drop}</p>
+          {hint && <p className="text-foreground-muted text-xs">{hint}</p>}
         </div>
         <input
           ref={inputRef}
@@ -99,7 +142,11 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(function F
           multiple={multiple}
           disabled={disabled}
           className="sr-only"
-          onChange={(e) => e.target.files && addFiles(e.target.files)}
+          onChange={(e) => {
+            if (e.target.files) addFiles(e.target.files);
+            // Allow re-selecting the same file after removing it.
+            e.target.value = '';
+          }}
         />
       </label>
 
@@ -108,20 +155,22 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(function F
           {files.map((file, idx) => (
             <li
               key={`${file.name}-${idx}`}
-              className="flex items-center gap-3 rounded-md border border-border bg-card px-3 py-2"
+              className="border-border bg-card flex items-center gap-3 rounded-md border px-3 py-2"
             >
-              <FileIcon className="size-4 shrink-0 text-foreground-muted" aria-hidden />
+              <FileIcon className="text-foreground-muted size-4 shrink-0" aria-hidden />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm">{file.name}</p>
-                <p className="text-xs text-foreground-muted">{formatSize(file.size)}</p>
+                <p className="truncate text-sm" title={file.name}>
+                  {file.name}
+                </p>
+                <p className="text-foreground-muted text-xs">{formatSize(file.size)}</p>
               </div>
               <button
                 type="button"
                 onClick={() => remove(idx)}
-                className="rounded p-1 text-foreground-muted hover:bg-background-muted hover:text-foreground"
-                aria-label={`Remove ${file.name}`}
+                className="text-foreground-muted hover:bg-background-muted hover:text-foreground focus-visible:ring-ring rounded-sm p-1 outline-none focus-visible:ring-2"
+                aria-label={formatString(strings.fileUpload.remove, { name: file.name })}
               >
-                <X className="size-4" />
+                <X className="size-4" aria-hidden />
               </button>
             </li>
           ))}
@@ -130,3 +179,4 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(function F
     </div>
   );
 });
+FileUpload.displayName = 'FileUpload';

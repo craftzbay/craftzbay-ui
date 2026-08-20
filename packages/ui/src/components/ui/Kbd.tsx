@@ -1,3 +1,5 @@
+'use client';
+
 import { forwardRef, type HTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -24,9 +26,9 @@ export const Kbd = forwardRef<HTMLElement, KbdProps>(function Kbd(
     <kbd
       ref={ref}
       className={cn(
-        'inline-flex items-center justify-center rounded border border-border bg-background-subtle font-mono',
+        'inline-flex items-center justify-center rounded-sm border border-border bg-background-subtle font-mono',
         'text-foreground-muted shadow-xs',
-        size === 'sm' ? 'h-5 min-w-5 px-1 text-[10px]' : 'h-6 min-w-6 px-1.5 text-xs',
+        size === 'sm' ? 'h-5 min-w-5 px-1 text-xs' : 'h-6 min-w-6 px-1.5 text-xs',
         className,
       )}
       {...props}

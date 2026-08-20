@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
 import { axe } from 'jest-axe';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../Card';
 import { Separator } from '../Separator';
@@ -31,6 +32,28 @@ describe('Layout (smoke)', () => {
       </Card>,
     );
     expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it('interactive Card with onClick is a keyboard-operable button', async () => {
+    const onClick = vi.fn();
+    const { container } = render(
+      <Card variant="interactive" onClick={onClick}>
+        Open
+      </Card>,
+    );
+    const card = screen.getByRole('button', { name: 'Open' });
+    expect(card).toHaveAttribute('tabindex', '0');
+    fireEvent.keyDown(card, { key: 'Enter' });
+    fireEvent.keyDown(card, { key: ' ' });
+    fireEvent.click(card);
+    expect(onClick).toHaveBeenCalledTimes(3);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it('non-interactive Card stays a plain div', () => {
+    render(<Card>Static</Card>);
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.getByText('Static')).not.toHaveAttribute('tabindex');
   });
 
   it('Separator renders both orientations', () => {

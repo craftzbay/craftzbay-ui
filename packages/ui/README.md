@@ -15,19 +15,77 @@ primitives — Button through DataGrid — plus composed patterns
 ## Install
 
 ```bash
-pnpm add @craftzbay/ui
+pnpm add @craftzbay/ui            # peers: react ^18 || ^19, react-dom ^18 || ^19
 ```
 
+**1. Fonts** — Geist + Geist Mono are referenced by the tokens but not bundled. Add to `<head>`:
+
+```html
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+  rel="stylesheet"
+/>
+```
+
+**2. CSS** — pick one:
+
+```css
+/* a) No Tailwind in your app: one precompiled sheet (tokens + base + every utility the components use) */
+@import '@craftzbay/ui/styles.css';
+
+/* b) Your app already uses Tailwind v4: share the tokens and let Tailwind compile the library's classes */
+@import 'tailwindcss';
+@import '@craftzbay/ui/theme.css';
+@source "../node_modules/@craftzbay/ui/dist-lib";
+```
+
+**3. Dark mode** — toggle the `dark` class on `<html>`; every token flips. Set it before first paint to avoid a flash.
+
+**4. Providers** — `<Toaster />` once near the root if you use `toast()`; wrap the app in `<TooltipProvider>` if you use `Tooltip`. Nothing else is required.
+
 ```tsx
-import { Button, Dialog, Toast } from '@craftzbay/ui';
-import '@craftzbay/ui/styles.css';
+import { Button, Toaster, TooltipProvider, toast } from '@craftzbay/ui';
 
 export function App() {
-  return <Button variant="primary">Save</Button>;
+  return (
+    <TooltipProvider>
+      <Button onClick={() => toast({ title: 'Saved' })}>Save</Button>
+      <Toaster />
+    </TooltipProvider>
+  );
 }
 ```
 
-Peer dependencies: `react@>=18`, `react-dom@>=18`.
+**Next.js App Router** — components use hooks/context, so import them from a file marked `'use client'` (or re-export the ones you need from a local `components/ui.ts` with that directive). Put the CSS import and fonts in `app/layout.tsx`.
+
+**Name-addressed icons** — `Icons.*` (curated, tree-shaken) ships in the main entry. The lazy `<Icon name="…">` + `iconNames` list lives in a separate entry so its ~1500-icon import map never enters your bundle unless asked for:
+
+```tsx
+import { Icon } from '@craftzbay/ui/icon';
+<Icon name="calendar" className="size-4" />;
+```
+
+The package is ESM-only, ships one module per component (`sideEffects` limited to CSS), so `import { Button }` pulls in about 8 KB gzipped — no calendar, drawer, or form dependencies.
+
+## Localisation (Mongolian built in)
+
+Every built-in string (close/dismiss labels, placeholders, "No results.", pagination summary, error-state copy…) is typed in `UiStrings` and read through `useStrings()`. Defaults are English; a full Mongolian set ships as `mnStrings`.
+
+```tsx
+import { DesignSystemProvider, mnStrings } from '@craftzbay/ui';
+<DesignSystemProvider strings={mnStrings}>…</DesignSystemProvider>; // whole library in Mongolian
+<DesignSystemProvider strings={{ dialog: { close: 'Schließen' } }}>…</DesignSystemProvider>; // partial override, deep-merged over defaults
+```
+
+Precedence is per-component props (`placeholder`, `labels`, `aria-label`) → nearest provider → `defaultStrings`. Templates use `{name}` placeholders, e.g. `pagination.showing: '{from}–{to} / {total}'`.
+
+## Design rules
+
+This library implements the [craftzbay design-research](https://github.com/craftzbay/design-research) guidelines
+([rendered site](https://craftzbay.github.io/design-research/)) — colour, type, spacing, components, accessibility, tokens.
+The library-specific distillation is [`docs/PHILOSOPHY.md`](./docs/PHILOSOPHY.md).
 
 ## Local development
 
@@ -47,7 +105,7 @@ Inside `packages/ui` itself, `pnpm build` produces the distributable bundle and
 ## Tech stack
 
 - **Tailwind CSS v4** — tokens defined in `@theme` in `src/styles/globals.css`
-- **React 18** + **TypeScript 5.7**
+- **React 18 / 19** + **TypeScript 5.7**
 - **Radix UI** primitives for accessibility-correct overlays
 - **class-variance-authority** + `cn()` (`clsx` + `tailwind-merge`)
 - **Lucide** icons (16 / 20px, 1.5 stroke)
@@ -78,6 +136,7 @@ docs/
 ## Component index
 
 ### Inputs
+
 - [Input](./src/components/ui/Input.tsx) — text / email / password / number / search with prefix, suffix, error
 - [Textarea](./src/components/ui/Textarea.tsx) — auto-resize multi-line input
 - [Select](./src/components/ui/Select.tsx) — single-choice menu (Radix)
@@ -91,11 +150,13 @@ docs/
 - [Form primitives](./src/components/ui/Form.tsx) — react-hook-form bindings
 
 ### Buttons
+
 - [Button](./src/components/ui/Button.tsx) — primary · secondary · outline · ghost · destructive · link
 - [IconButton](./src/components/ui/IconButton.tsx) — square icon-only variant
 - [Pagination](./src/components/ui/Pagination.tsx) — numbered + jumps + page-size
 
 ### Feedback
+
 - [Alert](./src/components/ui/Alert.tsx) — inline banner, dismissible
 - [Toast](./src/components/ui/Toast.tsx) + `useToast` hook
 - [Spinner](./src/components/ui/Spinner.tsx) — accent / neutral / on-accent tones
@@ -105,6 +166,7 @@ docs/
 - [ErrorState](./src/components/ui/ErrorState.tsx) — 404 / 500 / generic
 
 ### Navigation
+
 - [TopNav](./src/components/ui/TopNav.tsx) + `TopNavLink`
 - [Sidebar](./src/components/ui/Sidebar.tsx) + `SidebarSection` + `SidebarItem` + `SidebarGroup`
 - [Breadcrumbs](./src/components/ui/Breadcrumbs.tsx) — with overflow ellipsis
@@ -112,12 +174,14 @@ docs/
 - [Stepper](./src/components/ui/Stepper.tsx) — horizontal + vertical
 
 ### Layout
+
 - [Card](./src/components/ui/Card.tsx) + `CardHeader/Title/Description/Content/Footer`
 - [Separator](./src/components/ui/Separator.tsx)
 - [ScrollArea](./src/components/ui/ScrollArea.tsx) — Radix-backed styled scroll
 - [Accordion](./src/components/ui/Accordion.tsx) — single + multiple
 
 ### Overlays
+
 - [Dialog](./src/components/ui/Dialog.tsx) + `ConfirmationDialog`
 - [Sheet](./src/components/ui/Sheet.tsx) — left / right / top / bottom
 - [Popover](./src/components/ui/Popover.tsx)
@@ -127,12 +191,14 @@ docs/
 - [CommandPalette](./src/components/ui/CommandPalette.tsx) — ⌘K palette
 
 ### Data display
+
 - [Table](./src/components/ui/Table.tsx) + `TableSortHeader`
 - [DataGrid](./src/components/ui/DataGrid.tsx) — column visibility, filter, sortable
 - [Badge](./src/components/ui/Badge.tsx) — subtle + outline, 6 tones
 - [Avatar](./src/components/ui/Avatar.tsx) + `AvatarGroup`
 
 ### Typography
+
 - [Kbd](./src/components/ui/Kbd.tsx) — keyboard shortcut indicator
 
 ## Blocks (page templates)

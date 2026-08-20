@@ -3,16 +3,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import {
-  cancel,
-  confirm,
-  intro,
-  isCancel,
-  log,
-  outro,
-  select,
-  text,
-} from '@clack/prompts';
+import { cancel, confirm, intro, isCancel, log, outro, select, text } from '@clack/prompts';
 import kleur from 'kleur';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -26,11 +17,14 @@ interface Template {
 
 const TEMPLATES: Template[] = [
   { id: 'vite-blank', label: 'Vite + Blank', hint: 'Minimal Vite + React + @craftzbay/ui starter' },
-  { id: 'vite-dashboard', label: 'Vite + Dashboard', hint: 'AppShell + Dashboard template, ready to wire data' },
+  {
+    id: 'vite-dashboard',
+    label: 'Vite + Dashboard',
+    hint: 'Sidebar + TopNav dashboard shell, ready to wire data',
+  },
 ];
 
-const PKG_MANAGERS = ['pnpm', 'npm', 'yarn', 'bun'] as const;
-type PackageManager = (typeof PKG_MANAGERS)[number];
+type PackageManager = 'pnpm' | 'npm' | 'yarn' | 'bun';
 
 function detectPackageManager(): PackageManager {
   const ua = process.env.npm_config_user_agent ?? '';
@@ -115,7 +109,8 @@ function walk(srcDir: string, destDir: string, projectName: string) {
     // npm replaces `package.json` in the published tarball if named raw.
     // Templates ship it as `_package.json` so npm doesn't mistake it for
     // the CLI's own manifest; rename on copy.
-    const destName = entry === '_package.json' ? 'package.json' : entry === '_gitignore' ? '.gitignore' : entry;
+    const destName =
+      entry === '_package.json' ? 'package.json' : entry === '_gitignore' ? '.gitignore' : entry;
     const destPath = path.join(destDir, destName);
     const stat = statSync(srcPath);
     if (stat.isDirectory()) {

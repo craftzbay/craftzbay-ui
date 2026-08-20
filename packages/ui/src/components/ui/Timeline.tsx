@@ -1,7 +1,9 @@
-import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
+'use client';
+
+import { forwardRef, type HTMLAttributes, type ReactNode, type TimeHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
-export interface TimelineProps extends HTMLAttributes<HTMLOListElement> {}
+export type TimelineProps = HTMLAttributes<HTMLOListElement>;
 
 export const Timeline = forwardRef<HTMLOListElement, TimelineProps>(function Timeline(
   { className, children, ...props },
@@ -13,6 +15,7 @@ export const Timeline = forwardRef<HTMLOListElement, TimelineProps>(function Tim
     </ol>
   );
 });
+Timeline.displayName = 'Timeline';
 
 export interface TimelineItemProps extends HTMLAttributes<HTMLLIElement> {
   /** Optional bullet override. Default: small accent dot. */
@@ -28,21 +31,35 @@ export const TimelineItem = forwardRef<HTMLLIElement, TimelineItemProps>(functio
   return (
     <li ref={ref} className={cn('relative flex gap-4 pb-1', className)} {...props}>
       <div className="relative flex shrink-0 flex-col items-center">
-        <div className="flex size-6 items-center justify-center rounded-full border border-border bg-card text-foreground-muted">
-          {bullet ?? <span className="size-2 rounded-full bg-accent" aria-hidden />}
+        <div className="border-border bg-card text-foreground-muted flex size-6 items-center justify-center rounded-full border">
+          {bullet ?? <span className="bg-accent size-2 rounded-full" aria-hidden />}
         </div>
-        {!isLast && <span className="mt-1 flex-1 w-px bg-border" aria-hidden />}
+        {!isLast && <span className="bg-border mt-1 w-px flex-1" aria-hidden />}
       </div>
       <div className="min-w-0 flex-1 pb-4">{children}</div>
     </li>
   );
 });
+TimelineItem.displayName = 'TimelineItem';
 
-export function TimelineTime({ className, children }: { className?: string; children: ReactNode }) {
+export interface TimelineTimeProps extends TimeHTMLAttributes<HTMLTimeElement> {
+  /** Machine-readable value (ISO 8601). Defaults to `children` when it is a string. */
+  dateTime?: string;
+  children: ReactNode;
+}
+
+export function TimelineTime({ className, children, dateTime, ...props }: TimelineTimeProps) {
   return (
-    <p className={cn('text-xs text-foreground-subtle', className)}>{children}</p>
+    <time
+      dateTime={dateTime ?? (typeof children === 'string' ? children : undefined)}
+      className={cn('text-foreground-subtle block text-xs', className)}
+      {...props}
+    >
+      {children}
+    </time>
   );
 }
+TimelineTime.displayName = 'TimelineTime';
 
 export function TimelineTitle({
   className,
@@ -53,6 +70,7 @@ export function TimelineTitle({
 }) {
   return <p className={cn('text-sm font-medium', className)}>{children}</p>;
 }
+TimelineTitle.displayName = 'TimelineTitle';
 
 export function TimelineDescription({
   className,
@@ -61,5 +79,6 @@ export function TimelineDescription({
   className?: string;
   children: ReactNode;
 }) {
-  return <p className={cn('mt-0.5 text-sm text-foreground-muted', className)}>{children}</p>;
+  return <p className={cn('text-foreground-muted mt-0.5 text-sm', className)}>{children}</p>;
 }
+TimelineDescription.displayName = 'TimelineDescription';

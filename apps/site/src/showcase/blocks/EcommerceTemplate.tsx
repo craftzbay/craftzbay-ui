@@ -6,6 +6,7 @@ import { Card, CardContent } from '@craftzbay/ui';
 import { IconButton } from '@craftzbay/ui';
 import { Input } from '@craftzbay/ui';
 import { Separator } from '@craftzbay/ui';
+import { cn } from '@craftzbay/ui';
 import type { TemplateProps } from './meta';
 
 /**
@@ -29,14 +30,9 @@ type Cart = Record<string, number>;
 
 const money = (n: number) => `$${n.toFixed(2)}`;
 
-function Shot({ hue, className }: { hue: number; className?: string }) {
-  return (
-    <div
-      aria-hidden
-      className={className}
-      style={{ background: `linear-gradient(140deg, oklch(0.92 0.05 ${hue}), oklch(0.78 0.1 ${hue + 30}))` }}
-    />
-  );
+/** Product image placeholder — neutral block that reserves the photo's box. */
+function Shot({ className }: { hue?: number; className?: string }) {
+  return <div aria-hidden className={cn('bg-background-muted', className)} />;
 }
 
 function Stars({ rating }: { rating: number }) {
@@ -97,23 +93,21 @@ function ShopHeader({
         <div className="text-sm">{brand}</div>
         <nav className="hidden items-center gap-5 text-sm text-foreground-muted md:flex">
           {CATEGORIES.slice(1).map((c) => (
-            <a
+            <button
               key={c}
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                onCategory(c);
-              }}
+              type="button"
+              onClick={() => onCategory(c)}
               className="hover:text-foreground"
             >
               {c}
-            </a>
+            </button>
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-1">
           {searchable && searchOpen ? (
             <div className="flex items-center gap-1">
               <Input
+                // eslint-disable-next-line jsx-a11y/no-autofocus -- field is revealed by the user's own "search" click; focusing it is the expected result
                 autoFocus
                 size="sm"
                 placeholder="Search products…"
@@ -148,7 +142,7 @@ function ShopHeader({
           >
             <ShoppingCart className="size-4" aria-hidden />
             {cartCount > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 inline-flex min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-medium text-on-accent">
+              <span className="absolute -right-0.5 -top-0.5 inline-flex min-w-4 items-center justify-center rounded-full bg-accent px-1 text-xs font-medium text-on-accent">
                 {cartCount}
               </span>
             )}

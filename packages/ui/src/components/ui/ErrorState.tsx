@@ -1,5 +1,9 @@
+'use client';
+
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
+import type { UiStrings } from '@/lib/strings';
 import { NotFound, ServerError, ConnectionLost } from '@/illustrations';
 import { Button } from './Button';
 
@@ -21,23 +25,23 @@ export interface ErrorStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 't
   onRetry?: () => void;
 }
 
-const presets = {
+const presets = (s: UiStrings) => ({
   '404': {
     illustration: <NotFound className="size-32" />,
-    title: 'Page not found',
-    description: "We couldn't find what you were looking for.",
+    title: s.errorState.notFoundTitle,
+    description: s.errorState.notFoundDescription,
   },
   '500': {
     illustration: <ServerError className="size-32" />,
-    title: 'Something went wrong',
-    description: "We're looking into it. Please try again in a moment.",
+    title: s.errorState.serverTitle,
+    description: s.errorState.serverDescription,
   },
   generic: {
     illustration: <ConnectionLost className="size-32" />,
-    title: 'Unexpected error',
-    description: 'Something interrupted this action.',
+    title: s.errorState.genericTitle,
+    description: s.errorState.genericDescription,
   },
-} as const;
+});
 
 /**
  * Page-level error placeholder. Pair with `onRetry` for transient failures.
@@ -64,11 +68,11 @@ export const ErrorState = forwardRef<HTMLDivElement, ErrorStateProps>(function E
   { variant = 'generic', title, description, illustration, action, onRetry, className, ...props },
   ref,
 ) {
-  const preset = presets[variant];
+  const strings = useStrings();
+  const preset = presets(strings)[variant];
   return (
     <div
       ref={ref}
-      role="alert"
       className={cn(
         'flex flex-col items-center justify-center gap-3 rounded-lg border border-border bg-background-subtle p-10 text-center',
         className,
@@ -86,7 +90,7 @@ export const ErrorState = forwardRef<HTMLDivElement, ErrorStateProps>(function E
         <div className="mt-2 flex items-center gap-2">
           {action ?? (
             <Button onClick={onRetry} variant="outline">
-              Try again
+              {strings.errorState.tryAgain}
             </Button>
           )}
         </div>

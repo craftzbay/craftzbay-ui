@@ -38,10 +38,25 @@ const doc: ComponentDoc = {
   api: [
     {
       rows: [
-        { name: 'orientation', type: `'horizontal' | 'vertical'`, default: `'horizontal'`, description: 'Layout direction.' },
-        { name: 'decorative', type: 'boolean', default: 'true', description: 'When false, exposes role="separator" to a11y tree.' },
+        {
+          name: 'orientation',
+          type: `'horizontal' | 'vertical'`,
+          default: `'horizontal'`,
+          description: 'Layout direction.',
+        },
+        {
+          name: 'decorative',
+          type: 'boolean',
+          default: 'true',
+          description: 'When false, exposes role="separator" to a11y tree.',
+        },
       ],
     },
+  ],
+  accessibility: [
+    'Decorative by default (Radix sets role="none"), so it is invisible to screen readers.',
+    'Pass `decorative={false}` when it divides two meaningful regions — it then renders role="separator" with aria-orientation.',
+    'Never rely on a separator as the only grouping cue; use headings or landmarks for structure.',
   ],
 };
 

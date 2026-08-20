@@ -10,12 +10,17 @@ import './styles/globals.css';
 // Utilities
 export * from './lib/utils';
 export * from './lib/cva';
+export { defaultStrings, formatString, type UiStrings, type DeepPartial } from './lib/strings';
+export { mnStrings } from './lib/strings.mn';
 
 // Hooks
 export * from './hooks/use-media-query';
 export * from './hooks/use-toast';
+export * from './hooks/use-field-ids';
+export { useStrings } from './hooks/use-strings';
 
-// Icons (namespaced to avoid name collisions with consumer apps)
+// Icons (namespaced to avoid name collisions with consumer apps).
+// The name-addressed <Icon name="…"> lives in the '@craftzbay/ui/icon' entry.
 export * as Icons from './icons';
 
 // Illustrations — refined-minimal line art for empty / error / 404 states
@@ -41,7 +46,6 @@ export * from './components/ui/DropdownMenu';
 export * from './components/ui/EmptyState';
 export * from './components/ui/ErrorState';
 export * from './components/ui/Form';
-export * from './components/ui/Icon';
 export * from './components/ui/IconButton';
 export * from './components/ui/Input';
 export * from './components/ui/Kbd';

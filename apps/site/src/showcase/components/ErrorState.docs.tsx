@@ -56,7 +56,7 @@ const doc: ComponentDoc = {
     },
   ],
   accessibility: [
-    'Renders as role="alert" so screen readers announce the error immediately.',
+    'Renders without a live-region role — it is static page content, not an interruption. Wrap it in role="alert" yourself only when the error appears asynchronously and must be announced.',
   ],
   related: [
     { slug: 'empty-state', reason: 'For non-error "nothing here yet" cases.' },

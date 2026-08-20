@@ -15,9 +15,17 @@ const BlockPreview = lazy(() => import('../blocks/Preview'));
  * the live accent + theme controls. Navigation between a template's screens
  * happens inside the template itself.
  */
-export function PreviewPage({ slug }: { slug: string }) {
+export function PreviewPage({ slug, initialScreen }: { slug: string; initialScreen?: string }) {
   const doc = getBlockMeta(slug);
-  const [screen, setScreen] = useState(() => doc?.screens[0]?.key ?? 'home');
+  const [screen, setScreen] = useState(
+    () =>
+      (initialScreen && doc?.screens.some((s) => s.key === initialScreen)
+        ? initialScreen
+        : doc?.screens[0]?.key) ?? 'home',
+  );
+  // When the template page embeds this route in an iframe, the docs page
+  // already owns the controls — hide the dock.
+  const embedded = typeof window !== 'undefined' && window.self !== window.top;
 
   if (!doc) return <NotFound />;
 
@@ -35,6 +43,7 @@ export function PreviewPage({ slug }: { slug: string }) {
 
       {/* Floating preview dock — bottom-right so the template renders edge to
           edge like a real deployment. */}
+      {!embedded && (
       <div className="fixed bottom-4 right-4 z-[var(--z-toast)] flex items-center gap-2 rounded-full border border-border bg-background/90 py-1.5 pl-3 pr-1.5 shadow-lg backdrop-blur">
         <a
           href={`#${routeToHash({ kind: 'template', slug })}`}
@@ -51,6 +60,7 @@ export function PreviewPage({ slug }: { slug: string }) {
         <BrandSwitcher />
         <ThemeToggle />
       </div>
+      )}
     </div>
   );
 }

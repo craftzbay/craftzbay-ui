@@ -1,3 +1,5 @@
+'use client';
+
 import {
   forwardRef,
   type ComponentPropsWithoutRef,
@@ -59,7 +61,7 @@ export const Progress = forwardRef<ElementRef<typeof ProgressPrimitive.Root>, Pr
           className={cn(
             'h-full w-full flex-1 transition-transform',
             fillTone[tone],
-            indeterminate && 'animate-[progressIndeterminate_1.4s_ease-in-out_infinite] origin-left',
+            indeterminate && 'animate-progress-indeterminate origin-left',
           )}
           style={
             indeterminate
@@ -67,14 +69,6 @@ export const Progress = forwardRef<ElementRef<typeof ProgressPrimitive.Root>, Pr
               : { transform: `translateX(-${100 - (value ?? 0)}%)` }
           }
         />
-        {/* Keyframes inline so consumers don't need to register them globally. */}
-        <style>{`
-          @keyframes progressIndeterminate {
-            0% { transform: translateX(-100%) scaleX(0.6); }
-            50% { transform: translateX(0%) scaleX(0.4); }
-            100% { transform: translateX(100%) scaleX(0.6); }
-          }
-        `}</style>
       </ProgressPrimitive.Root>
     );
   },

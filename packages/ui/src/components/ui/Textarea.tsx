@@ -1,3 +1,5 @@
+'use client';
+
 import {
   forwardRef,
   useCallback,
@@ -114,7 +116,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
         aria-invalid={Boolean(error) || undefined}
         aria-describedby={error ? errorId : helperText ? helperId : undefined}
         className={cn(
-          'rounded-md border bg-card px-3 py-2 text-sm text-foreground',
+          'rounded-md border bg-card px-3 py-2 text-lg md:text-sm text-foreground',
           'placeholder:text-foreground-subtle',
           'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)]',
           'outline-none',
@@ -123,7 +125,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
           'disabled:opacity-50 disabled:cursor-not-allowed',
           error
             ? 'border-danger focus-visible:border-danger focus-visible:ring-danger'
-            : 'border-border focus-visible:border-accent',
+            : 'border-border-input focus-visible:border-accent',
           autoResize ? 'resize-none' : 'resize-y min-h-20',
         )}
         {...props}

@@ -15,7 +15,14 @@ const doc: ComponentDoc = {
   group: 'Overlays',
   description:
     'Action menu opened from a trigger button. Supports labels, separators, keyboard shortcuts, submenus. For ⌘K-style quick actions, use CommandPalette.',
-  exports: ['DropdownMenu', 'DropdownMenuTrigger', 'DropdownMenuContent', 'DropdownMenuItem', 'DropdownMenuLabel', 'DropdownMenuSeparator'],
+  exports: [
+    'DropdownMenu',
+    'DropdownMenuTrigger',
+    'DropdownMenuContent',
+    'DropdownMenuItem',
+    'DropdownMenuLabel',
+    'DropdownMenuSeparator',
+  ],
   sourceFile: 'DropdownMenu.tsx',
   examples: [
     {
@@ -53,21 +60,52 @@ const doc: ComponentDoc = {
     {
       title: 'DropdownMenuContent',
       rows: [
-        { name: 'side', type: `'top' | 'right' | 'bottom' | 'left'`, default: `'bottom'`, description: 'Anchor side.' },
-        { name: 'align', type: `'start' | 'center' | 'end'`, default: `'start'`, description: 'Alignment.' },
+        {
+          name: 'side',
+          type: `'top' | 'right' | 'bottom' | 'left'`,
+          default: `'bottom'`,
+          description: 'Anchor side.',
+        },
+        {
+          name: 'align',
+          type: `'start' | 'center' | 'end'`,
+          default: `'start'`,
+          description: 'Alignment.',
+        },
       ],
     },
     {
       title: 'DropdownMenuItem',
       rows: [
-        { name: 'onSelect', type: '(e: Event) => void', description: 'Fires on click / Enter / Space.' },
-        { name: 'disabled', type: 'boolean', default: 'false', description: 'Skip in keyboard nav.' },
+        {
+          name: 'onSelect',
+          type: '(e: Event) => void',
+          description: 'Fires on click / Enter / Space.',
+        },
+        {
+          name: 'disabled',
+          type: 'boolean',
+          default: 'false',
+          description: 'Skip in keyboard nav.',
+        },
       ],
     },
   ],
   accessibility: [
     'Backed by @radix-ui/react-dropdown-menu — arrow-key navigation, type-ahead, submenu Right/Left.',
     'Esc closes; focus returns to the trigger.',
+  ],
+  keyboard: [
+    {
+      key: 'Enter / Space / ArrowDown',
+      action: 'On the trigger: open the menu and focus the first item.',
+    },
+    { key: 'ArrowDown / ArrowUp', action: 'Move focus to the next / previous item (wraps).' },
+    { key: 'Home / End', action: 'Jump to the first / last item.' },
+    { key: 'ArrowRight / ArrowLeft', action: 'Open / close a submenu.' },
+    { key: 'Enter / Space', action: 'Select the focused item and close the menu.' },
+    { key: 'Esc', action: 'Close the menu and return focus to the trigger.' },
+    { key: 'A–Z', action: 'Typeahead — focus the next item starting with that letter.' },
   ],
   related: [
     { slug: 'context-menu', reason: 'Same menu, opened from right-click.' },

@@ -1,4 +1,4 @@
-import { Folder, Plus } from '@/icons';
+import { Folder, Plus, Search } from '@/icons';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
 import * as Illustrations from '@/illustrations';
@@ -20,7 +20,11 @@ const doc: ComponentDoc = {
         <EmptyState
           title="No projects yet"
           description="Create your first project to get started."
-          action={<Button size="sm" leadingIcon={<Plus />}>New project</Button>}
+          action={
+            <Button size="sm" leadingIcon={<Plus />}>
+              New project
+            </Button>
+          }
         />
       ),
       code: `<EmptyState
@@ -31,7 +35,8 @@ const doc: ComponentDoc = {
     },
     {
       title: 'Compact (icon)',
-      description: 'Pass `icon` for a small Lucide glyph in a 48 px circular container. Use for table cells and sidebar panes.',
+      description:
+        'Pass `icon` for a small Lucide glyph in a 48 px circular container. Use for table cells and sidebar panes.',
       preview: (
         <EmptyState
           icon={<Folder className="size-6" />}
@@ -63,22 +68,100 @@ const doc: ComponentDoc = {
   description="Try a different search term or clear your filters."
 />`,
     },
+    {
+      title: 'States',
+      description:
+        'First-run vs. filtered. First-run explains the value and offers the create action; a filtered-empty result keeps it compact and offers to clear the filter.',
+      preview: (
+        <div className="grid w-full gap-4 lg:grid-cols-2">
+          <EmptyState
+            title="No projects yet"
+            description="Projects group your work and your team's access. Create one to start tracking."
+            action={
+              <Button size="sm" leadingIcon={<Plus />}>
+                New project
+              </Button>
+            }
+            secondaryAction={
+              <Button size="sm" variant="ghost">
+                Import
+              </Button>
+            }
+          />
+          <EmptyState
+            icon={<Search className="size-6" />}
+            title="No results for “billing”"
+            description="Try a different term or clear the search."
+            action={
+              <Button size="sm" variant="outline">
+                Clear search
+              </Button>
+            }
+          />
+        </div>
+      ),
+      code: `{/* First-run */}
+<EmptyState
+  title="No projects yet"
+  description="Projects group your work and your team's access. Create one to start tracking."
+  action={<Button size="sm" leadingIcon={<Plus />}>New project</Button>}
+  secondaryAction={<Button size="sm" variant="ghost">Import</Button>}
+/>
+
+{/* Filtered — compact, secondary action clears the filter */}
+<EmptyState
+  icon={<Search className="size-6" />}
+  title="No results for “billing”"
+  description="Try a different term or clear the search."
+  action={<Button size="sm" variant="outline">Clear search</Button>}
+/>`,
+    },
   ],
   api: [
     {
       rows: [
         { name: 'title', type: 'ReactNode', required: true, description: 'Primary line.' },
         { name: 'description', type: 'ReactNode', description: 'Body copy.' },
-        { name: 'illustration', type: 'ReactNode', description: 'Full-size illustration. Takes precedence over `icon`. If neither is set, the default InboxEmpty illustration is used.' },
-        { name: 'icon', type: 'ReactNode', description: 'Small Lucide-sized icon in a 48 px circular container.' },
+        {
+          name: 'illustration',
+          type: 'ReactNode',
+          description:
+            'Full-size illustration. Takes precedence over `icon`. If neither is set, the default InboxEmpty illustration is used.',
+        },
+        {
+          name: 'icon',
+          type: 'ReactNode',
+          description: 'Small Lucide-sized icon in a 48 px circular container.',
+        },
         { name: 'action', type: 'ReactNode', description: 'Primary CTA — usually a Button.' },
-        { name: 'secondaryAction', type: 'ReactNode', description: 'Optional secondary action next to the primary.' },
+        {
+          name: 'secondaryAction',
+          type: 'ReactNode',
+          description: 'Optional secondary action next to the primary.',
+        },
       ],
     },
   ],
-  related: [
-    { slug: 'error-state', reason: 'For error / 404 / 500 scenarios.' },
+  guidelines: {
+    do: [
+      'Say what is missing and why it matters in one or two sentences.',
+      'Provide a primary next step (`action`) — usually the create button.',
+      'Use a different message for a filtered-empty result ("No results for “x”") with a Clear-filters action.',
+      'Use the compact `icon` form inside tables, cards and side panes.',
+    ],
+    dont: [
+      'Apologise or blame the user ("Oops, nothing here!").',
+      'Use the large illustration inside a table cell or narrow panel.',
+      'Hide the filters or table header when a filtered list is empty — the user cannot clear them.',
+      'Leave the empty state without any action at all.',
+    ],
+  },
+  accessibility: [
+    'The title renders as an <h3>; place it inside a section whose heading level precedes it.',
+    'Illustrations are decorative (aria-hidden) — all meaning lives in the title, description and action.',
+    'Keep the primary action a real Button so it is keyboard-reachable and announced.',
   ],
+  related: [{ slug: 'error-state', reason: 'For error / 404 / 500 scenarios.' }],
 };
 
 export default doc;

@@ -3,7 +3,7 @@ import type { TemplateProps } from './meta';
 import { AuthLayout, ForgotPasswordForm, MagicLinkSent, SignInForm, SignUpForm } from './Authentication';
 
 /**
- * Authentication template — the full auth flow on the split-screen AuthLayout:
+ * Authentication template — the full auth flow on the single-column, centred AuthLayout:
  * sign in, sign up, forgot password and the magic-link confirmation. The links
  * are real: footer links and "Forgot password?" move between the screens (you
  * can also jump straight to any screen from the preview dock). Submitting the

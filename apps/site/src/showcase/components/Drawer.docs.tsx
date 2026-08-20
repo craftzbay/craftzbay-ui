@@ -1,4 +1,10 @@
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/Drawer';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/Drawer';
 import { Button } from '@/components/ui/Button';
 import type { ComponentDoc } from '../registry/types';
 
@@ -22,7 +28,7 @@ const doc: ComponentDoc = {
             <DrawerHeader>
               <DrawerTitle>Quick action</DrawerTitle>
             </DrawerHeader>
-            <div className="p-4 text-sm text-foreground-muted">
+            <div className="text-foreground-muted p-4 text-sm">
               Drag the handle (or background) down to dismiss.
             </div>
           </DrawerContent>
@@ -44,14 +50,28 @@ const doc: ComponentDoc = {
     {
       rows: [
         { name: 'open', type: 'boolean', description: 'Controlled open state.' },
-        { name: 'onOpenChange', type: '(open: boolean) => void', description: 'Fires when open changes.' },
-        { name: 'shouldScaleBackground', type: 'boolean', default: 'true', description: 'iOS-style background scale.' },
+        {
+          name: 'onOpenChange',
+          type: '(open: boolean) => void',
+          description: 'Fires when open changes.',
+        },
+        {
+          name: 'shouldScaleBackground',
+          type: 'boolean',
+          default: 'true',
+          description: 'iOS-style background scale.',
+        },
       ],
     },
   ],
   accessibility: [
     'Backed by Vaul which uses Radix Dialog under the hood — focus trap + Esc + click-outside.',
     'Drag handle is exposed as a button; can be dragged or clicked.',
+  ],
+  keyboard: [
+    { key: 'Tab / Shift+Tab', action: 'Cycle focus inside the drawer content.' },
+    { key: 'Esc', action: 'Close the drawer.' },
+    { key: 'Enter / Space', action: 'Activate the focused trigger or action.' },
   ],
   related: [
     { slug: 'sheet', reason: 'For non-touch side panels.' },

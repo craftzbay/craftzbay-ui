@@ -5,13 +5,7 @@ import type { ComponentDoc } from '../registry/types';
 function PaginationDemo() {
   const [page, setPage] = useState(3);
   return (
-    <Pagination
-      page={page}
-      pageCount={12}
-      totalItems={240}
-      pageSize={20}
-      onPageChange={setPage}
-    />
+    <Pagination page={page} pageCount={12} totalItems={240} pageSize={20} onPageChange={setPage} />
   );
 }
 
@@ -37,17 +31,62 @@ const doc: ComponentDoc = {
   onPageChange={setPage}
 />`,
     },
+    {
+      title: 'States',
+      description:
+        'Bounds disable rather than disappear; `pageCount={0}` hides the numbers while a result set is loading or empty.',
+      preview: (
+        <div className="grid w-full gap-4">
+          <Pagination
+            page={1}
+            pageCount={12}
+            totalItems={240}
+            pageSize={20}
+            onPageChange={() => {}}
+          />
+          <Pagination page={0} pageCount={0} onPageChange={() => {}} />
+        </div>
+      ),
+      code: `{/* First page: prev / first are disabled */}
+<Pagination page={1} pageCount={12} totalItems={240} pageSize={20} onPageChange={setPage} />
+
+{/* Loading / empty: no page numbers yet */}
+<Pagination page={0} pageCount={0} onPageChange={setPage} />`,
+    },
   ],
   api: [
     {
       rows: [
         { name: 'page', type: 'number', required: true, description: '1-indexed current page.' },
-        { name: 'pageCount', type: 'number', required: true, description: 'Total number of pages.' },
-        { name: 'totalItems', type: 'number', description: 'Used for the "showing X–Y of N" label.' },
+        {
+          name: 'pageCount',
+          type: 'number',
+          required: true,
+          description: 'Total number of pages.',
+        },
+        {
+          name: 'totalItems',
+          type: 'number',
+          description: 'Used for the "showing X–Y of N" label.',
+        },
         { name: 'pageSize', type: 'number', description: 'Current items-per-page selection.' },
-        { name: 'pageSizeOptions', type: 'number[]', default: '[10, 20, 50, 100]', description: 'Page-size dropdown options.' },
-        { name: 'onPageChange', type: '(page: number) => void', required: true, description: 'Fires when prev/next/numbered button is clicked.' },
-        { name: 'onPageSizeChange', type: '(size: number) => void', description: 'Fires when the page-size dropdown changes.' },
+        {
+          name: 'pageSizeOptions',
+          type: 'number[]',
+          default: '[10, 20, 50, 100]',
+          description: 'Page-size dropdown options.',
+        },
+        {
+          name: 'onPageChange',
+          type: '(page: number) => void',
+          required: true,
+          description: 'Fires when prev/next/numbered button is clicked.',
+        },
+        {
+          name: 'onPageSizeChange',
+          type: '(size: number) => void',
+          description: 'Fires when the page-size dropdown changes.',
+        },
       ],
     },
   ],
@@ -55,9 +94,12 @@ const doc: ComponentDoc = {
     'Renders as a <nav aria-label="Pagination">; current page sets aria-current="page".',
     'Prev/Next buttons disable at the bounds rather than disappearing — preserves layout.',
   ],
-  related: [
-    { slug: 'data-grid', reason: 'Pair with DataGrid for paginated tables.' },
+  keyboard: [
+    { key: 'Tab / Shift+Tab', action: 'Move between the page-size select and the page buttons.' },
+    { key: 'Enter / Space', action: 'Activate the focused page, prev/next or first/last button.' },
+    { key: 'ArrowDown / ArrowUp', action: 'Inside the page-size select: change rows per page.' },
   ],
+  related: [{ slug: 'data-grid', reason: 'Pair with DataGrid for paginated tables.' }],
 };
 
 export default doc;

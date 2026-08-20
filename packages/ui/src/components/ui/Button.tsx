@@ -1,3 +1,5 @@
+'use client';
+
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { Loader2 } from '@/icons';
@@ -27,13 +29,13 @@ const button = cva(
       variant: {
         primary: [
           'bg-accent text-on-accent',
-          'hover:bg-accent-700',
-          'active:bg-accent-800',
+          'hover:bg-accent-hover',
+          'active:bg-accent-active',
         ],
         secondary: [
           'bg-background-muted text-foreground border border-border',
-          'hover:bg-neutral-200 dark:hover:bg-neutral-800',
-          'active:bg-neutral-300 dark:active:bg-neutral-700',
+          'hover:bg-surface-hover',
+          'active:bg-surface-active',
         ],
         outline: [
           'border border-border bg-transparent text-foreground',
@@ -47,13 +49,13 @@ const button = cva(
         ],
         destructive: [
           'bg-danger text-on-danger',
-          'hover:bg-danger-700',
-          'active:bg-danger-800',
+          'hover:bg-danger-hover',
+          'active:bg-danger-active',
         ],
         link: [
           'bg-transparent text-accent underline-offset-4 px-0',
           'hover:underline',
-          'active:text-accent-700',
+          'active:text-accent-hover',
         ],
       },
       size: {

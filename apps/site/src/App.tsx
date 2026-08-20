@@ -74,11 +74,11 @@ function Shell() {
   useCommandPaletteShortcut(setCmdOpen);
 
   if (isFullBleedRoute(route) && route.kind === 'preview') {
-    return <PreviewPage slug={route.slug} />;
+    return <PreviewPage slug={route.slug} initialScreen={route.screen} />;
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
+    <div className="bg-background text-foreground flex min-h-screen flex-col">
       <ShowcaseTopBar onOpenPalette={() => setCmdOpen(true)} current={route} />
       <div className="flex-1">
         <RouteView route={route} />
@@ -184,6 +184,9 @@ function RouteView({ route }: { route: Route }) {
 
     case 'preview':
       // Handled by Shell before reaching here; kept so the switch is exhaustive.
-      return <PreviewPage slug={route.slug} />;
+      return <PreviewPage slug={route.slug} initialScreen={route.screen} />;
+
+    case 'not-found':
+      return <NotFound />;
   }
 }

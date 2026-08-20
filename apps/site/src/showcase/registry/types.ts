@@ -53,9 +53,17 @@ export interface ComponentDoc {
   /** Path under src/components/ui/ — used for the GitHub source link. */
   sourceFile: string;
   examples: Example[];
-  /** Each table is rendered with its own optional title. */
+  /**
+   * Hand-written prop rows. Rendered on top of the auto-generated tables:
+   * generated rows come first, manual rows with the same name override them,
+   * and new names are appended.
+   */
   api?: PropGroup[];
   accessibility?: string[];
+  /** Keyboard interaction table — `{ key: 'Esc', action: 'Close the dialog' }`. */
+  keyboard?: { key: string; action: string }[];
+  /** Usage guidance rendered as side-by-side Do / Don't lists. */
+  guidelines?: { do: string[]; dont: string[] };
   /** Cross-links rendered at the bottom of the page. */
   related?: { slug: string; reason: string }[];
 }

@@ -34,3 +34,40 @@ describe('Input', () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 });
+
+describe('Input (interactions)', () => {
+  it('password toggle is keyboard reachable and flips the type', async () => {
+    const user = userEvent.setup();
+    render(<Input label="Password" type="password" />);
+    const toggle = screen.getByRole('button', { name: 'Show password' });
+    expect(toggle).not.toHaveAttribute('tabindex', '-1');
+    await user.click(toggle);
+    expect(screen.getByLabelText('Password')).toHaveAttribute('type', 'text');
+    expect(screen.getByRole('button', { name: 'Hide password' })).toBeInTheDocument();
+  });
+
+  it('clearable works uncontrolled', async () => {
+    const user = userEvent.setup();
+    render(<Input label="Search" type="search" clearable />);
+    const input = screen.getByLabelText('Search');
+    expect(screen.queryByRole('button', { name: 'Clear input' })).toBeNull();
+    await user.type(input, 'hello');
+    await user.click(screen.getByRole('button', { name: 'Clear input' }));
+    expect(input).toHaveValue('');
+    expect(screen.queryByRole('button', { name: 'Clear input' })).toBeNull();
+  });
+
+  it('accepts any HTML input type', () => {
+    render(<Input label="When" type="datetime-local" />);
+    expect(screen.getByLabelText('When')).toHaveAttribute('type', 'datetime-local');
+  });
+
+  it('only references rendered ids in aria-describedby', () => {
+    const { rerender } = render(<Input label="Email" />);
+    expect(screen.getByLabelText('Email')).not.toHaveAttribute('aria-describedby');
+    rerender(<Input label="Email" helperText="Work email" />);
+    const input = screen.getByLabelText('Email');
+    const id = input.getAttribute('aria-describedby')!;
+    expect(document.getElementById(id)).toHaveTextContent('Work email');
+  });
+});

@@ -1,13 +1,19 @@
+'use client';
+
 import {
   createContext,
   forwardRef,
   useContext,
   useState,
+  type AnchorHTMLAttributes,
+  type ButtonHTMLAttributes,
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
 import { ChevronDown, ChevronsLeft, ChevronsRight } from '@/icons';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
+import { Tooltip } from './Tooltip';
 
 interface SidebarContextValue {
   collapsed: boolean;
@@ -36,6 +42,7 @@ export interface SidebarProps extends HTMLAttributes<HTMLElement> {
 /**
  * App-level navigation rail. Holds `SidebarSection` → `SidebarItem` lists,
  * and optionally a `footer`. Supports collapse to icon-only on desktop.
+ * Below `md` the rail is hidden — pair it with a Sheet / Drawer for mobile.
  *
  * @example
  *   <Sidebar footer={<UserCard />}>
@@ -65,6 +72,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
   },
   ref,
 ) {
+  const strings = useStrings();
   const [internal, setInternal] = useState(defaultCollapsed);
   const collapsed = controlled ?? internal;
   const setCollapsed = (next: boolean) => {
@@ -76,9 +84,9 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
     <SidebarContext.Provider value={{ collapsed }}>
       <aside
         ref={ref}
-        aria-label="Primary"
+        aria-label={props['aria-label'] ?? strings.sidebar.label}
         className={cn(
-          'sticky top-0 hidden md:flex h-screen shrink-0 flex-col gap-2 border-r border-border bg-background-subtle',
+          'border-border bg-background-subtle sticky top-0 hidden h-screen shrink-0 flex-col gap-2 border-r md:flex',
           'transition-[width] duration-[var(--duration-base)] ease-[var(--ease-out)]',
           collapsed ? 'w-14' : 'w-60',
           className,
@@ -88,7 +96,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
         {header && (
           <div
             className={cn(
-              'flex h-14 shrink-0 items-center overflow-hidden border-b border-border',
+              'border-border flex h-14 shrink-0 items-center overflow-hidden border-b',
               collapsed ? 'justify-center px-2' : 'px-3',
             )}
           >
@@ -96,23 +104,25 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
           </div>
         )}
         <div className="flex-1 overflow-y-auto py-3">{children}</div>
-        {footer && (
-          <div className="border-t border-border p-2">{footer}</div>
-        )}
+        {footer && <div className="border-border border-t p-2">{footer}</div>}
         <button
           type="button"
           onClick={() => setCollapsed(!collapsed)}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={collapsed ? strings.sidebar.expand : strings.sidebar.collapse}
           aria-expanded={!collapsed}
           className={cn(
-            'flex h-8 items-center gap-2 mx-2 mb-2 rounded-md px-2 text-foreground-subtle',
+            'text-foreground-subtle mx-2 mb-2 flex h-8 items-center gap-2 rounded-md px-2',
             'hover:bg-background-muted hover:text-foreground outline-none',
-            'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+            'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
             'transition-colors duration-[var(--duration-fast)]',
           )}
         >
-          {collapsed ? <ChevronsRight className="size-4" aria-hidden /> : <ChevronsLeft className="size-4" aria-hidden />}
-          {!collapsed && <span className="text-xs font-medium">Collapse</span>}
+          {collapsed ? (
+            <ChevronsRight className="size-4" aria-hidden />
+          ) : (
+            <ChevronsLeft className="size-4" aria-hidden />
+          )}
+          {!collapsed && <span className="text-xs font-medium">{strings.sidebar.collapseShort}</span>}
         </button>
       </aside>
     </SidebarContext.Provider>
@@ -130,7 +140,7 @@ export function SidebarSection({ label, className, children, ...props }: Sidebar
   return (
     <div className={cn('mb-3', className)} {...props}>
       {label && !collapsed && (
-        <div className="px-4 pb-1 pt-2 text-xs font-medium text-foreground-subtle uppercase tracking-wide">
+        <div className="text-foreground-subtle px-4 pt-2 pb-1 text-xs font-medium tracking-wide uppercase">
           {label}
         </div>
       )}
@@ -140,54 +150,112 @@ export function SidebarSection({ label, className, children, ...props }: Sidebar
 }
 SidebarSection.displayName = 'SidebarSection';
 
-export interface SidebarItemProps extends HTMLAttributes<HTMLAnchorElement> {
+interface SidebarItemBaseProps {
   /** Lucide icon shown to the left. */
   icon?: ReactNode;
   /** Mark as the current page. */
   active?: boolean;
-  /** Optional `href` — when absent, renders as a `<button>` so consumers can
-   *  bind their own handler / routing wrapper via `onClick`. */
-  href?: string;
   /** Trailing badge / counter slot. */
   trailing?: ReactNode;
   /** Render a sub-item indented under a parent. */
   sub?: boolean;
+  /**
+   * Tooltip text shown while the sidebar is collapsed. Defaults to `children`
+   * when that is a plain string.
+   */
+  tooltip?: ReactNode;
 }
 
-export function SidebarItem({
-  icon,
-  active,
-  href,
-  trailing,
-  sub,
-  className,
-  children,
-  ...props
-}: SidebarItemProps) {
+type SidebarItemAnchorProps = SidebarItemBaseProps &
+  AnchorHTMLAttributes<HTMLAnchorElement> & {
+    /** Renders an `<a>`. Omit to render a `<button>`. */
+    href: string;
+  };
+
+type SidebarItemButtonProps = SidebarItemBaseProps &
+  ButtonHTMLAttributes<HTMLButtonElement> & {
+    href?: undefined;
+  };
+
+/** Discriminated on `href`: with it the item is an anchor, without it a button. */
+export type SidebarItemProps = SidebarItemAnchorProps | SidebarItemButtonProps;
+
+export function SidebarItem(props: SidebarItemProps) {
+  const { icon, active, trailing, sub, tooltip, className, children, ...rest } = props;
   const { collapsed } = useContext(SidebarContext);
-  const Comp: any = href ? 'a' : 'button';
-  return (
-    <li className="px-2">
-      <Comp
+
+  const classes = cn(
+    'flex h-8 w-full items-center gap-2 rounded-md px-2 text-sm outline-none',
+    'transition-colors duration-[var(--duration-fast)]',
+    'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+    active
+      ? 'bg-background-muted text-foreground font-medium'
+      : 'text-foreground-muted hover:bg-background-muted hover:text-foreground',
+    sub && !collapsed && 'ml-6',
+    collapsed && 'justify-center',
+    className,
+  );
+
+  const labelTitle = typeof children === 'string' ? children : undefined;
+
+  const content = (
+    <>
+      {icon && <span className="flex shrink-0 items-center [&_svg]:size-4">{icon}</span>}
+      {collapsed ? (
+        <span className="sr-only">{children}</span>
+      ) : (
+        <span className="flex-1 truncate text-left" title={labelTitle}>
+          {children}
+        </span>
+      )}
+      {!collapsed && trailing && <span className="ml-auto">{trailing}</span>}
+    </>
+  );
+
+  let element: ReactNode;
+  if (rest.href !== undefined) {
+    const { href, ...anchorProps } = rest as Omit<
+      SidebarItemAnchorProps,
+      keyof SidebarItemBaseProps
+    >;
+    element = (
+      <a
         href={href}
         aria-current={active ? 'page' : undefined}
-        className={cn(
-          'flex h-8 w-full items-center gap-2 rounded-md px-2 text-sm outline-none',
-          'transition-colors duration-[var(--duration-fast)]',
-          'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-          active
-            ? 'bg-background-muted text-foreground font-medium'
-            : 'text-foreground-muted hover:bg-background-muted hover:text-foreground',
-          sub && !collapsed && 'ml-6',
-          collapsed && 'justify-center',
-          className,
-        )}
-        {...props}
+        className={classes}
+        {...anchorProps}
       >
-        {icon && <span className="flex shrink-0 items-center [&_svg]:size-4">{icon}</span>}
-        {!collapsed && <span className="flex-1 truncate text-left">{children}</span>}
-        {!collapsed && trailing && <span className="ml-auto">{trailing}</span>}
-      </Comp>
+        {content}
+      </a>
+    );
+  } else {
+    const {
+      href: _href,
+      type,
+      ...buttonProps
+    } = rest as Omit<SidebarItemButtonProps, keyof SidebarItemBaseProps>;
+    element = (
+      <button
+        type={type ?? 'button'}
+        aria-current={active ? 'page' : undefined}
+        className={classes}
+        {...buttonProps}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  const tip = tooltip ?? labelTitle;
+  return (
+    <li className="px-2">
+      {collapsed && tip ? (
+        <Tooltip label={tip} side="right">
+          {element}
+        </Tooltip>
+      ) : (
+        element
+      )}
     </li>
   );
 }
@@ -212,15 +280,18 @@ export function SidebarGroup({ icon, label, defaultOpen = true, children }: Side
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         className={cn(
-          'mx-2 flex h-8 w-[calc(100%-1rem)] items-center gap-2 rounded-md px-2 text-sm text-foreground-muted outline-none',
+          'text-foreground-muted mx-2 flex h-8 w-[calc(100%-1rem)] items-center gap-2 rounded-md px-2 text-sm outline-none',
           'transition-colors duration-[var(--duration-fast)]',
           'hover:bg-background-muted hover:text-foreground',
-          'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+          'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
         )}
       >
         {icon && <span className="flex shrink-0 items-center [&_svg]:size-4">{icon}</span>}
         <span className="flex-1 text-left">{label}</span>
-        <ChevronDown className={cn('size-3.5 transition-transform', open && 'rotate-180')} aria-hidden />
+        <ChevronDown
+          className={cn('size-3.5 transition-transform', open && 'rotate-180')}
+          aria-hidden
+        />
       </button>
       {open && <ul className="flex flex-col gap-px">{children}</ul>}
     </li>

@@ -1,5 +1,8 @@
+'use client';
+
 import { forwardRef, type SVGProps } from 'react';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
 
 export interface SpinnerProps extends SVGProps<SVGSVGElement> {
   /** Visual weight. */
@@ -34,12 +37,13 @@ export const Spinner = forwardRef<SVGSVGElement, SpinnerProps>(function Spinner(
   { className, tone = 'accent', size = 'md', label, decorative, ...props },
   ref,
 ) {
+  const strings = useStrings();
   return (
     <svg
       ref={ref}
       viewBox="0 0 24 24"
       role={decorative ? undefined : 'status'}
-      aria-label={decorative ? undefined : label ?? 'Loading'}
+      aria-label={decorative ? undefined : (label ?? strings.spinner.loading)}
       aria-hidden={decorative || undefined}
       className={cn('animate-spin', sizeMap[size], toneMap[tone], className)}
       {...props}

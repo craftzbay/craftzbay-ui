@@ -30,10 +30,18 @@ const doc: ComponentDoc = {
       title: 'Outline',
       preview: (
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline" tone="neutral">Neutral</Badge>
-          <Badge variant="outline" tone="accent">v0.5</Badge>
-          <Badge variant="outline" tone="success">Active</Badge>
-          <Badge variant="outline" tone="warning">Pending</Badge>
+          <Badge variant="outline" tone="neutral">
+            Neutral
+          </Badge>
+          <Badge variant="outline" tone="accent">
+            v0.5
+          </Badge>
+          <Badge variant="outline" tone="success">
+            Active
+          </Badge>
+          <Badge variant="outline" tone="warning">
+            Pending
+          </Badge>
         </div>
       ),
       code: `<Badge variant="outline" tone="accent">v0.5</Badge>`,
@@ -42,10 +50,18 @@ const doc: ComponentDoc = {
       title: 'With dot',
       preview: (
         <div className="flex flex-wrap items-center gap-2">
-          <Badge tone="success" dot>Online</Badge>
-          <Badge tone="warning" dot>Idle</Badge>
-          <Badge tone="danger" dot>Offline</Badge>
-          <Badge tone="neutral" dot>Away</Badge>
+          <Badge tone="success" dot>
+            Online
+          </Badge>
+          <Badge tone="warning" dot>
+            Idle
+          </Badge>
+          <Badge tone="danger" dot>
+            Offline
+          </Badge>
+          <Badge tone="neutral" dot>
+            Away
+          </Badge>
         </div>
       ),
       code: `<Badge tone="success" dot>Online</Badge>
@@ -55,11 +71,44 @@ const doc: ComponentDoc = {
   api: [
     {
       rows: [
-        { name: 'variant', type: `'subtle' | 'outline'`, default: `'subtle'`, description: 'Filled vs bordered.' },
-        { name: 'tone', type: `'neutral' | 'accent' | 'success' | 'warning' | 'danger' | 'info'`, default: `'neutral'`, description: 'Semantic color.' },
-        { name: 'dot', type: 'boolean', default: 'false', description: 'Show a leading status dot.' },
+        {
+          name: 'variant',
+          type: `'subtle' | 'outline'`,
+          default: `'subtle'`,
+          description: 'Filled vs bordered.',
+        },
+        {
+          name: 'tone',
+          type: `'neutral' | 'accent' | 'success' | 'warning' | 'danger' | 'info'`,
+          default: `'neutral'`,
+          description: 'Semantic color.',
+        },
+        {
+          name: 'dot',
+          type: 'boolean',
+          default: 'false',
+          description: 'Show a leading status dot.',
+        },
       ],
     },
+  ],
+  guidelines: {
+    do: [
+      'Use `dot` or a leading icon with status tones so state is not conveyed by colour alone.',
+      'Keep labels to one or two words: "Active", "Past due".',
+      'Pick one `variant` (subtle or outline) per surface and stay consistent.',
+      'Limit status tones to neutral / info / success / warning / danger.',
+    ],
+    dont: [
+      'Use a Badge as a button — it is not interactive; use a Button or chip pattern.',
+      'Invent extra tones for categories; use neutral badges with text instead.',
+      'Badge everything in a row — if every cell has a badge, none stands out.',
+    ],
+  },
+  accessibility: [
+    'Renders a plain <span>; it is not focusable and carries no role — treat it as text.',
+    'Status tones are reinforced by the optional `dot` and by the label itself, so meaning never depends on colour alone.',
+    'If the badge is the only indicator of state, make sure the surrounding row or heading still reads correctly when the badge text is read inline.',
   ],
 };
 

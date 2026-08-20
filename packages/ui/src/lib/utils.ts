@@ -13,13 +13,3 @@ import { twMerge } from 'tailwind-merge';
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
-
-/**
- * Tiny helper to build a stable id for label/aria-describedby pairings
- * when the component does not receive an `id` from the consumer.
- */
-let __idCounter = 0;
-export function uid(prefix = 'ds'): string {
-  __idCounter += 1;
-  return `${prefix}-${__idCounter}`;
-}

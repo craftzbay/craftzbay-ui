@@ -12,4 +12,4 @@ try {
   if (accent && accent !== 'default') {
     document.documentElement.setAttribute('data-accent', accent);
   }
-} catch (e) {}
+} catch {}

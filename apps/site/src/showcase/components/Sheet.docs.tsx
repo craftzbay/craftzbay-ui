@@ -34,7 +34,9 @@ const doc: ComponentDoc = {
           <SheetContent side="right">
             <SheetHeader>
               <SheetTitle>Filters</SheetTitle>
-              <SheetDescription>Narrow down the order list. Filters apply on save.</SheetDescription>
+              <SheetDescription>
+                Narrow down the order list. Filters apply on save.
+              </SheetDescription>
             </SheetHeader>
             <div className="flex flex-col gap-4 py-4">
               <Input label="Customer" placeholder="Search by name or email" />
@@ -95,13 +97,16 @@ const doc: ComponentDoc = {
     },
     {
       title: 'Sides',
-      description: 'Anchor to any edge. Right is the desktop default; bottom suits mobile (or use Drawer).',
+      description:
+        'Anchor to any edge. Right is the desktop default; bottom suits mobile (or use Drawer).',
       preview: (
         <div className="flex flex-wrap gap-2">
           {(['left', 'right', 'top', 'bottom'] as const).map((side) => (
             <Sheet key={side}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm">{side}</Button>
+                <Button variant="outline" size="sm">
+                  {side}
+                </Button>
               </SheetTrigger>
               <SheetContent side={side}>
                 <SheetHeader>
@@ -110,7 +115,7 @@ const doc: ComponentDoc = {
                     Edge-anchored panel sliding in from the {side}.
                   </SheetDescription>
                 </SheetHeader>
-                <p className="py-4 text-sm text-foreground-muted">
+                <p className="text-foreground-muted py-4 text-sm">
                   Put filters, contextual settings, or a compact navigation menu here. The panel
                   traps focus like a Dialog and closes with Esc or the X.
                 </p>
@@ -135,7 +140,12 @@ const doc: ComponentDoc = {
     {
       title: 'SheetContent',
       rows: [
-        { name: 'side', type: `'left' | 'right' | 'top' | 'bottom'`, default: `'right'`, description: 'Edge to anchor to.' },
+        {
+          name: 'side',
+          type: `'left' | 'right' | 'top' | 'bottom'`,
+          default: `'right'`,
+          description: 'Edge to anchor to.',
+        },
         { name: 'showClose', type: 'boolean', default: 'true', description: 'Render the close X.' },
       ],
     },
@@ -143,6 +153,17 @@ const doc: ComponentDoc = {
   accessibility: [
     'Same focus management as Dialog (Radix-backed).',
     'On mobile, prefer Drawer for bottom-side panels with drag-to-dismiss.',
+  ],
+  keyboard: [
+    {
+      key: 'Tab / Shift+Tab',
+      action: 'Cycle focus inside the panel — focus is trapped while open.',
+    },
+    { key: 'Esc', action: 'Close the sheet and return focus to the trigger.' },
+    {
+      key: 'Enter / Space',
+      action: 'Activate the focused control (trigger, close button, footer actions).',
+    },
   ],
   related: [
     { slug: 'dialog', reason: 'Centered modal alternative.' },

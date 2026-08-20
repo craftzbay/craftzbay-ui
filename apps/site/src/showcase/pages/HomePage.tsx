@@ -11,7 +11,7 @@ const FEATURED = ['button', 'input', 'dialog', 'data-grid', 'card', 'toast', 'co
 
 export function HomePage() {
   return (
-    <div className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
+    <main className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
       {/* Hero */}
       <div className="max-w-3xl">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-foreground-muted">
@@ -49,7 +49,7 @@ export function HomePage() {
             aria-label="View release notes"
           >
             <Badge variant="outline" tone="neutral">v{VERSION}</Badge>
-            <span className="text-[10px] text-foreground-subtle">release notes ↗</span>
+            <span className="text-xs text-foreground-subtle">release notes ↗</span>
           </a>
           <span>·</span>
           <code className="rounded bg-background-muted px-1.5 py-0.5 font-mono">pnpm add {PKG_NAME}</code>
@@ -137,7 +137,7 @@ export function HomePage() {
                 className="group flex flex-col gap-1.5 rounded-md border border-border bg-card p-4 transition-colors hover:border-accent"
               >
                 <div className="text-sm font-medium text-foreground">{d.name}</div>
-                <div className="text-[11px] uppercase tracking-wide text-foreground-subtle">{d.group}</div>
+                <div className="text-xs uppercase tracking-wide text-foreground-subtle">{d.group}</div>
               </a>
             ))}
         </div>
@@ -162,6 +162,6 @@ export function HomePage() {
           </Button>
         </div>
       </section>
-    </div>
+    </main>
   );
 }

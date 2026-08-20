@@ -1,3 +1,5 @@
+'use client';
+
 import { forwardRef, type HTMLAttributes, type ThHTMLAttributes, type TdHTMLAttributes } from 'react';
 import { ArrowDown, ArrowUp, ArrowUpDown } from '@/icons';
 import { cn } from '@/lib/utils';
@@ -74,6 +76,7 @@ export const TableRow = forwardRef<
     <tr
       ref={ref}
       data-selected={selected || undefined}
+      aria-selected={selected || undefined}
       className={cn(
         'border-b border-border transition-colors duration-[var(--duration-fast)]',
         'hover:bg-background-subtle',
@@ -86,15 +89,25 @@ export const TableRow = forwardRef<
 });
 TableRow.displayName = 'TableRow';
 
-export const TableHead = forwardRef<
-  HTMLTableCellElement,
-  ThHTMLAttributes<HTMLTableCellElement>
->(function TableHead({ className, ...props }, ref) {
+export interface TableHeadProps extends ThHTMLAttributes<HTMLTableCellElement> {
+  /**
+   * Render the header label in small caps (`uppercase tracking-wide`).
+   * Off by default — mixed case reads better for long / Cyrillic labels.
+   * @default false
+   */
+  uppercase?: boolean;
+}
+
+export const TableHead = forwardRef<HTMLTableCellElement, TableHeadProps>(function TableHead(
+  { className, uppercase = false, ...props },
+  ref,
+) {
   return (
     <th
       ref={ref}
       className={cn(
-        'h-10 px-3 text-left align-middle text-xs font-medium uppercase tracking-wide text-foreground-subtle',
+        'h-10 px-3 text-left align-middle text-xs font-medium text-foreground-subtle',
+        uppercase && 'uppercase tracking-wide',
         '[&:has([role=checkbox])]:w-10 [&:has([role=checkbox])]:pr-0',
         className,
       )}

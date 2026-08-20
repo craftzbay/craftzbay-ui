@@ -1,8 +1,12 @@
+'use client';
+
 import {
   createContext,
   forwardRef,
   useContext,
+  useEffect,
   useId,
+  useState,
   type HTMLAttributes,
 } from 'react';
 import * as LabelPrimitive from '@radix-ui/react-label';
@@ -62,6 +66,9 @@ export function FormField<
 
 interface FormItemContextValue {
   id: string;
+  /** Whether a <FormDescription> is mounted — drives aria-describedby. */
+  hasDescription: boolean;
+  setHasDescription: (v: boolean) => void;
 }
 const FormItemContext = createContext<FormItemContextValue | null>(null);
 
@@ -80,6 +87,7 @@ export function useFormField() {
     formItemId: `${id}-item`,
     formDescriptionId: `${id}-desc`,
     formMessageId: `${id}-error`,
+    hasDescription: itemContext?.hasDescription ?? false,
     ...fieldState,
   };
 }
@@ -87,8 +95,9 @@ export function useFormField() {
 export const FormItem = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   function FormItem({ className, ...props }, ref) {
     const id = useId();
+    const [hasDescription, setHasDescription] = useState(false);
     return (
-      <FormItemContext.Provider value={{ id }}>
+      <FormItemContext.Provider value={{ id, hasDescription, setHasDescription }}>
         <div ref={ref} className={cn('flex flex-col gap-1.5', className)} {...props} />
       </FormItemContext.Provider>
     );
@@ -105,11 +114,7 @@ export const FormLabel = forwardRef<
     <LabelPrimitive.Root
       ref={ref}
       htmlFor={formItemId}
-      className={cn(
-        'text-sm font-medium text-foreground',
-        error && 'text-danger-text',
-        className,
-      )}
+      className={cn('text-foreground text-sm font-medium', error && 'text-danger-text', className)}
       {...props}
     />
   );
@@ -118,13 +123,24 @@ FormLabel.displayName = 'FormLabel';
 
 export const FormControl = forwardRef<HTMLElement, React.ComponentPropsWithoutRef<typeof Slot>>(
   function FormControl(props, ref) {
-    const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
+    const { error, formItemId, formDescriptionId, formMessageId, hasDescription } = useFormField();
+    // Only reference ids that actually render: the description when mounted,
+    // the message only while there is an error (FormError returns null otherwise).
+    const describedBy =
+      [hasDescription ? formDescriptionId : null, error ? formMessageId : null]
+        .filter(Boolean)
+        .join(' ') || undefined;
+    // Input-style children read `tone="error"` for the red border; plain
+    // elements ignore the unknown prop via Slot merging only when they accept it,
+    // so it is only set while there is an error.
+    const toneProps = error ? { tone: 'error' as const } : {};
     return (
       <Slot
         ref={ref}
         id={formItemId}
-        aria-describedby={!error ? formDescriptionId : `${formDescriptionId} ${formMessageId}`}
+        aria-describedby={describedBy}
         aria-invalid={!!error}
+        {...toneProps}
         {...props}
       />
     );
@@ -132,19 +148,26 @@ export const FormControl = forwardRef<HTMLElement, React.ComponentPropsWithoutRe
 );
 FormControl.displayName = 'FormControl';
 
-export const FormDescription = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLParagraphElement>>(
-  function FormDescription({ className, ...props }, ref) {
-    const { formDescriptionId } = useFormField();
-    return (
-      <p
-        ref={ref}
-        id={formDescriptionId}
-        className={cn('text-xs text-foreground-subtle', className)}
-        {...props}
-      />
-    );
-  },
-);
+export const FormDescription = forwardRef<
+  HTMLParagraphElement,
+  HTMLAttributes<HTMLParagraphElement>
+>(function FormDescription({ className, ...props }, ref) {
+  const { formDescriptionId } = useFormField();
+  const itemContext = useContext(FormItemContext);
+  const setHasDescription = itemContext?.setHasDescription;
+  useEffect(() => {
+    setHasDescription?.(true);
+    return () => setHasDescription?.(false);
+  }, [setHasDescription]);
+  return (
+    <p
+      ref={ref}
+      id={formDescriptionId}
+      className={cn('text-foreground-subtle text-xs', className)}
+      {...props}
+    />
+  );
+});
 FormDescription.displayName = 'FormDescription';
 
 export const FormError = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLParagraphElement>>(
@@ -157,7 +180,7 @@ export const FormError = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLPar
         ref={ref}
         id={formMessageId}
         role="alert"
-        className={cn('text-xs text-danger-text', className)}
+        className={cn('text-danger-text text-xs', className)}
         {...props}
       >
         {body}

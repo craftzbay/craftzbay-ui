@@ -6,6 +6,7 @@ import { Button } from '@craftzbay/ui';
 import { IconButton } from '@craftzbay/ui';
 import { Input } from '@craftzbay/ui';
 import { Separator } from '@craftzbay/ui';
+import { cn } from '@craftzbay/ui';
 import type { TemplateProps } from './meta';
 
 /**
@@ -23,16 +24,10 @@ const ARTICLES = [
   { cat: 'Culture', title: 'The slow return of the long-form essay', excerpt: 'Readers are paying for depth again — and writers are noticing.', author: 'S. Khan', initials: 'SK', time: '9h ago', hue: 320 },
 ];
 
-function Cover({ hue, className }: { hue: number; className?: string }) {
-  return (
-    <div
-      aria-hidden
-      className={className}
-      style={{
-        background: `linear-gradient(135deg, oklch(0.7 0.12 ${hue}), oklch(0.45 0.14 ${hue + 40}))`,
-      }}
-    />
-  );
+/** Image placeholder — a neutral block sized like the eventual photo so the
+ *  layout holds; swap for `<img>` with width/height in a real feed. */
+function Cover({ className }: { hue?: number; className?: string }) {
+  return <div aria-hidden className={cn('bg-background-muted', className)} />;
 }
 
 function Masthead({
@@ -60,6 +55,7 @@ function Masthead({
           {interactive && searchOpen ? (
             <div className="flex items-center gap-1">
               <Input
+                // eslint-disable-next-line jsx-a11y/no-autofocus -- field is revealed by the user's own "search" click; focusing it is the expected result
                 autoFocus
                 size="sm"
                 placeholder="Search stories…"
@@ -93,13 +89,10 @@ function Masthead({
       <nav className="border-t border-border">
         <div className="mx-auto flex max-w-5xl items-center gap-5 overflow-x-auto px-6 py-2.5 text-sm">
           {CATEGORIES.map((c) => (
-            <a
+            <button
               key={c}
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                onCategory?.(c);
-              }}
+              type="button"
+              onClick={() => onCategory?.(c)}
               aria-current={active === c ? 'page' : undefined}
               className={
                 active === c
@@ -108,7 +101,7 @@ function Masthead({
               }
             >
               {c}
-            </a>
+            </button>
           ))}
         </div>
       </nav>
@@ -131,7 +124,7 @@ function Footer({ brand }: { brand: React.ReactNode }) {
           <ul className="mt-3 space-y-2 text-sm">
             {CATEGORIES.filter((c) => c !== 'All').map((c) => (
               <li key={c}>
-                <a href="#" onClick={(e) => e.preventDefault()} className="text-foreground-muted hover:text-foreground">
+                <a href={`#/section/${c.toLowerCase()}`} className="text-foreground-muted hover:text-foreground">
                   {c}
                 </a>
               </li>
@@ -151,9 +144,9 @@ function Footer({ brand }: { brand: React.ReactNode }) {
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-6 py-4 text-xs text-foreground-subtle">
           <span>© 2026 {brand}. All rights reserved.</span>
           <span className="flex gap-4">
-            <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-foreground">Privacy</a>
-            <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-foreground">Terms</a>
-            <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-foreground">Contact</a>
+            <a href="#/privacy" className="hover:text-foreground">Privacy</a>
+            <a href="#/terms" className="hover:text-foreground">Terms</a>
+            <a href="#/contact" className="hover:text-foreground">Contact</a>
           </span>
         </div>
       </div>

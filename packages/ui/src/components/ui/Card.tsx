@@ -1,4 +1,6 @@
-import { forwardRef, type HTMLAttributes } from 'react';
+'use client';
+
+import { forwardRef, type HTMLAttributes, type KeyboardEvent, type MouseEvent } from 'react';
 import { cn } from '@/lib/utils';
 import { cva, type VariantProps } from '@/lib/cva';
 
@@ -11,8 +13,11 @@ const card = cva(
     variants: {
       variant: {
         default: 'border-border',
-        interactive:
+        interactive: [
           'border-border hover:border-border-strong hover:bg-background-subtle cursor-pointer',
+          'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+          'focus-visible:ring-offset-background',
+        ],
       },
       padding: {
         none: '',
@@ -55,10 +60,31 @@ export interface CardProps
  *       refined-minimal direction.
  */
 export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
-  { className, variant, padding, ...props },
+  { className, variant, padding, onClick, onKeyDown, role, tabIndex, ...props },
   ref,
 ) {
-  return <div ref={ref} className={cn(card({ variant, padding }), className)} {...props} />;
+  // An interactive card with a click handler must be reachable and operable
+  // from the keyboard: expose it as a button and map Enter/Space to click.
+  const isButtonLike = variant === 'interactive' && typeof onClick === 'function';
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    onKeyDown?.(event);
+    if (event.defaultPrevented || !isButtonLike) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onClick?.(event as unknown as MouseEvent<HTMLDivElement>);
+    }
+  };
+  return (
+    <div
+      ref={ref}
+      role={role ?? (isButtonLike ? 'button' : undefined)}
+      tabIndex={tabIndex ?? (isButtonLike ? 0 : undefined)}
+      onClick={onClick}
+      onKeyDown={isButtonLike || onKeyDown ? handleKeyDown : undefined}
+      className={cn(card({ variant, padding }), className)}
+      {...props}
+    />
+  );
 });
 Card.displayName = 'Card';
 
@@ -76,13 +102,15 @@ export const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEleme
 CardHeader.displayName = 'CardHeader';
 
 export const CardTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadingElement>>(
-  function CardTitle({ className, ...props }, ref) {
+  function CardTitle({ className, children, ...props }, ref) {
     return (
       <h3
         ref={ref}
         className={cn('text-base font-semibold text-foreground leading-tight', className)}
         {...props}
-      />
+      >
+        {children}
+      </h3>
     );
   },
 );

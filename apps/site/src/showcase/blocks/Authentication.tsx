@@ -4,6 +4,7 @@ import { Button } from '@craftzbay/ui';
 import { Input } from '@craftzbay/ui';
 import { Alert } from '@craftzbay/ui';
 import { Separator } from '@craftzbay/ui';
+import { Github } from '@/icons';
 
 /* -----------------------------------------------------------------------------
  *  Authentication pattern — four screens that share the same shell.
@@ -45,6 +46,47 @@ export function AuthLayout({ brand, title, subtitle, children, footer }: AuthLay
   );
 }
 
+export interface SsoButtonsProps {
+  /** Called with the provider id. */
+  onProvider?: (provider: 'google' | 'github') => void;
+}
+
+/**
+ * SSO buttons above the credential form, separated by an "or" rule. Keep to
+ * ≤2 providers on the sign-in card; more belong on a dedicated page.
+ */
+export function SsoButtons({ onProvider }: SsoButtonsProps) {
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-2 sm:grid-cols-2">
+        <Button type="button" variant="outline" className="w-full" leadingIcon={<GoogleMark />} onClick={() => onProvider?.('google')}>
+          Google
+        </Button>
+        <Button type="button" variant="outline" className="w-full" leadingIcon={<Github />} onClick={() => onProvider?.('github')}>
+          GitHub
+        </Button>
+      </div>
+      <div className="flex items-center gap-3 text-xs uppercase tracking-wider text-foreground-subtle" role="separator" aria-label="or">
+        <Separator className="flex-1" />
+        or
+        <Separator className="flex-1" />
+      </div>
+    </div>
+  );
+}
+
+/** Monochrome "G" — brand marks stay neutral on a refined-minimal surface. */
+function GoogleMark() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.4Z" />
+      <path d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22Z" />
+      <path d="M6.4 14a6 6 0 0 1 0-3.9V7.5H3.1a10 10 0 0 0 0 9l3.3-2.6Z" />
+      <path d="M12 6c1.5 0 2.8.5 3.8 1.5l2.9-2.9A10 10 0 0 0 3.1 7.5L6.4 10C7.2 7.8 9.4 6 12 6Z" />
+    </svg>
+  );
+}
+
 export interface SignInFormProps {
   onSubmit: (data: { email: string; password: string }) => void | Promise<void>;
   loading?: boolean;
@@ -66,6 +108,7 @@ export function SignInForm({ onSubmit, loading, error, forgotHref = '/forgot', o
 
   return (
     <form onSubmit={handle} className="space-y-4">
+      <SsoButtons />
       {error && <Alert variant="danger">{error}</Alert>}
       <Input
         type="email"
@@ -127,6 +170,7 @@ export function SignUpForm({ onSubmit, loading, error }: SignUpFormProps) {
       }}
       className="space-y-4"
     >
+      <SsoButtons />
       {error && <Alert variant="danger">{error}</Alert>}
       <Input label="Full name" value={name} onChange={(e) => setName(e.target.value)} required />
       <Input

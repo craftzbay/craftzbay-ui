@@ -25,7 +25,7 @@ function BreakpointIndicator() {
           Resize your browser. The hook returns booleans for each min-width media query —
           chain them or render layout variants directly.
         </p>
-        <div className="grid grid-cols-5 gap-1 text-center text-[10px] uppercase tracking-wider">
+        <div className="grid grid-cols-5 gap-1 text-center text-xs uppercase tracking-wider">
           {[
             { label: 'sm', on: sm },
             { label: 'md', on: md },

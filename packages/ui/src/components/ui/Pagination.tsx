@@ -1,12 +1,48 @@
-import { forwardRef, useMemo, type HTMLAttributes } from 'react';
+'use client';
+
+import { forwardRef, useId, useMemo, type HTMLAttributes } from 'react';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from '@/icons';
 import { cn } from '@/lib/utils';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from './Select';
+import { useStrings } from '@/hooks/use-strings';
+import { defaultStrings, formatString, type UiStrings } from '@/lib/strings';
+import { Select, SelectContent, SelectItem, SelectTrigger } from './Select';
+
+export interface PaginationLabels {
+  /** Summary line. Receives the computed range. */
+  showing: (from: number, to: number, total: number) => string;
+  /** sr-only label for the page-size select. */
+  rowsPerPage: string;
+  first: string;
+  last: string;
+  prev: string;
+  next: string;
+  /** aria-label for a numbered page button. */
+  page: (n: number) => string;
+  /** Suffix in the page-size options, e.g. "20 / page". */
+  perPage: (n: number) => string;
+  /** aria-label of the nav landmark. */
+  nav: string;
+}
+
+/** Build the label set from a strings object (context → functions). */
+export function paginationLabelsFromStrings(s: UiStrings['pagination']): PaginationLabels {
+  return {
+    showing: (from, to, total) => formatString(s.showing, { from, to, total }),
+    rowsPerPage: s.rowsPerPage,
+    first: s.first,
+    last: s.last,
+    prev: s.prev,
+    next: s.next,
+    page: (n) => formatString(s.page, { n }),
+    perPage: (n) => formatString(s.perPage, { n }),
+    nav: s.nav,
+  };
+}
+
+/** English defaults — derived from `defaultStrings.pagination`. */
+export const defaultPaginationLabels: PaginationLabels = paginationLabelsFromStrings(
+  defaultStrings.pagination,
+);
 
 export interface PaginationProps extends HTMLAttributes<HTMLElement> {
   /** 1-indexed current page. */
@@ -25,6 +61,8 @@ export interface PaginationProps extends HTMLAttributes<HTMLElement> {
   onPageSizeChange?: (size: number) => void;
   /** Show first/last (« ») jump buttons. Default true. */
   showJump?: boolean;
+  /** Override any of the visible / accessible strings (i18n). */
+  labels?: Partial<PaginationLabels>;
 }
 
 function pageRange(current: number, total: number, max = 7): (number | 'gap')[] {
@@ -64,11 +102,16 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
     pageSizeOptions,
     onPageSizeChange,
     showJump = true,
+    labels: labelsProp,
     className,
+    'aria-label': ariaLabel,
     ...props
   },
   ref,
 ) {
+  const strings = useStrings();
+  const labels = { ...paginationLabelsFromStrings(strings.pagination), ...labelsProp };
+  const pageSizeId = useId();
   const pages = useMemo(() => pageRange(page, pageCount), [page, pageCount]);
 
   const from = pageSize ? (page - 1) * pageSize + 1 : undefined;
@@ -82,27 +125,28 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
   return (
     <nav
       ref={ref}
-      aria-label="Pagination"
+      aria-label={ariaLabel ?? labels.nav}
       className={cn('flex flex-wrap items-center justify-between gap-3', className)}
       {...props}
     >
-      <div className="flex items-center gap-3 text-sm text-foreground-muted">
-        {totalItems !== undefined && pageSize !== undefined && (
-          <span className="tabular">
-            Showing {from}–{to} of {totalItems}
-          </span>
-        )}
+      <div className="text-foreground-muted flex items-center gap-3 text-sm">
+        {totalItems !== undefined &&
+          pageSize !== undefined &&
+          from !== undefined &&
+          to !== undefined && (
+            <span className="tabular">{labels.showing(from, to, totalItems)}</span>
+          )}
         {pageSizeOptions && onPageSizeChange && pageSize !== undefined && (
           <div className="flex items-center gap-2">
-            <label htmlFor="page-size" className="sr-only">
-              Rows per page
+            <label htmlFor={pageSizeId} className="sr-only">
+              {labels.rowsPerPage}
             </label>
             <Select value={String(pageSize)} onValueChange={(v) => onPageSizeChange(Number(v))}>
-              <SelectTrigger size="sm" className="w-[7.5rem] whitespace-nowrap" />
+              <SelectTrigger id={pageSizeId} size="sm" className="w-[7.5rem] whitespace-nowrap" />
               <SelectContent>
                 {pageSizeOptions.map((s) => (
                   <SelectItem key={s} value={String(s)}>
-                    {s} / page
+                    {labels.perPage(s)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -116,7 +160,7 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
           <li>
             <button
               type="button"
-              aria-label="Go to first page"
+              aria-label={labels.first}
               disabled={page === 1}
               onClick={() => goto(1)}
               className={navButtonClass}
@@ -128,7 +172,7 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
         <li>
           <button
             type="button"
-            aria-label="Previous page"
+            aria-label={labels.prev}
             disabled={page === 1}
             onClick={() => goto(page - 1)}
             className={navButtonClass}
@@ -138,20 +182,20 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
         </li>
         {pages.map((p, i) =>
           p === 'gap' ? (
-            <li key={`gap-${i}`} className="px-2 text-foreground-subtle">
+            <li key={`gap-${i}`} className="text-foreground-subtle px-2">
               …
             </li>
           ) : (
             <li key={p}>
               <button
                 type="button"
-                aria-label={`Page ${p}`}
+                aria-label={labels.page(p)}
                 aria-current={p === page ? 'page' : undefined}
                 onClick={() => goto(p)}
                 className={cn(
-                  'inline-flex size-8 items-center justify-center rounded-md text-sm tabular outline-none',
+                  'tabular inline-flex size-8 items-center justify-center rounded-md text-sm outline-none',
                   'transition-colors duration-[var(--duration-fast)]',
-                  'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                  'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
                   p === page
                     ? 'bg-accent text-on-accent font-medium'
                     : 'text-foreground-muted hover:bg-background-muted hover:text-foreground',
@@ -165,7 +209,7 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
         <li>
           <button
             type="button"
-            aria-label="Next page"
+            aria-label={labels.next}
             disabled={page === pageCount}
             onClick={() => goto(page + 1)}
             className={navButtonClass}
@@ -177,7 +221,7 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
           <li>
             <button
               type="button"
-              aria-label="Go to last page"
+              aria-label={labels.last}
               disabled={page === pageCount}
               onClick={() => goto(pageCount)}
               className={navButtonClass}

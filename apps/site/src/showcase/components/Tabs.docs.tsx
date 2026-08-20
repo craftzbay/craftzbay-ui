@@ -19,9 +19,15 @@ const doc: ComponentDoc = {
             <TabsTrigger value="activity">Activity</TabsTrigger>
             <TabsTrigger value="files">Files</TabsTrigger>
           </TabsList>
-          <TabsContent value="overview" className="pt-3 text-sm text-foreground-muted">Overview content.</TabsContent>
-          <TabsContent value="activity" className="pt-3 text-sm text-foreground-muted">Activity log.</TabsContent>
-          <TabsContent value="files" className="pt-3 text-sm text-foreground-muted">Files list.</TabsContent>
+          <TabsContent value="overview" className="text-foreground-muted pt-3 text-sm">
+            Overview content.
+          </TabsContent>
+          <TabsContent value="activity" className="text-foreground-muted pt-3 text-sm">
+            Activity log.
+          </TabsContent>
+          <TabsContent value="files" className="text-foreground-muted pt-3 text-sm">
+            Files list.
+          </TabsContent>
         </Tabs>
       ),
       code: `<Tabs defaultValue="overview">
@@ -58,15 +64,34 @@ const doc: ComponentDoc = {
       rows: [
         { name: 'value', type: 'string', description: 'Controlled active tab.' },
         { name: 'defaultValue', type: 'string', description: 'Uncontrolled initial.' },
-        { name: 'onValueChange', type: '(value: string) => void', description: 'Fires on tab change.' },
-        { name: 'orientation', type: `'horizontal' | 'vertical'`, default: `'horizontal'`, description: 'Layout direction.' },
+        {
+          name: 'onValueChange',
+          type: '(value: string) => void',
+          description: 'Fires on tab change.',
+        },
+        {
+          name: 'orientation',
+          type: `'horizontal' | 'vertical'`,
+          default: `'horizontal'`,
+          description: 'Layout direction.',
+        },
       ],
     },
     {
       title: 'TabsList',
       rows: [
-        { name: 'variant', type: `'underline' | 'pills'`, default: `'underline'`, description: 'Visual style.' },
-        { name: 'size', type: `'sm' | 'md' | 'lg'`, default: `'md'`, description: 'Trigger height.' },
+        {
+          name: 'variant',
+          type: `'underline' | 'pills'`,
+          default: `'underline'`,
+          description: 'Visual style.',
+        },
+        {
+          name: 'size',
+          type: `'sm' | 'md' | 'lg'`,
+          default: `'md'`,
+          description: 'Trigger height.',
+        },
       ],
     },
   ],
@@ -74,9 +99,22 @@ const doc: ComponentDoc = {
     'Backed by @radix-ui/react-tabs — Arrow keys cycle, Home/End jump.',
     'Auto-activated by default; set activationMode="manual" if Enter should be required.',
   ],
-  related: [
-    { slug: 'accordion', reason: 'Vertical alternative for stacked sections.' },
+  keyboard: [
+    {
+      key: 'Tab',
+      action: 'Move focus into the tab list (active tab), then into the active panel.',
+    },
+    {
+      key: 'ArrowRight / ArrowLeft',
+      action: 'Focus and activate the next / previous tab (horizontal list).',
+    },
+    {
+      key: 'ArrowDown / ArrowUp',
+      action: 'Focus and activate the next / previous tab (vertical list).',
+    },
+    { key: 'Home / End', action: 'Activate the first / last tab.' },
   ],
+  related: [{ slug: 'accordion', reason: 'Vertical alternative for stacked sections.' }],
 };
 
 export default doc;

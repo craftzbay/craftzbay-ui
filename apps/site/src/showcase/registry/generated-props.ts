@@ -165,22 +165,34 @@ export const generatedProps: Record<string, PropGroup[]> = {
     {
       "rows": [
         {
-          "name": "data",
-          "type": "ChartPoint[]",
-          "required": true,
-          "description": ""
+          "name": "aria-label",
+          "type": "string",
+          "required": false,
+          "description": "Accessible name when there is no `caption`."
         },
         {
           "name": "caption",
           "type": "ReactNode",
           "required": false,
-          "description": "Tooltip / label rendered above the chart."
+          "description": "Visible caption rendered above the chart. Doubles as the accessible name."
         },
         {
           "name": "className",
           "type": "string",
           "required": false,
           "description": ""
+        },
+        {
+          "name": "colors",
+          "type": "string[]",
+          "required": false,
+          "description": "Per-series colours. Defaults to the categorical token list below. TODO(globals.css): add `--chart-1..6` tokens and switch the defaults."
+        },
+        {
+          "name": "data",
+          "type": "ChartPoint[]",
+          "required": false,
+          "description": "Primary series. Ignored when `series` is provided."
         },
         {
           "name": "grid",
@@ -193,6 +205,24 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "number",
           "required": false,
           "description": "Drawing height in px."
+        },
+        {
+          "name": "series",
+          "type": "ChartSeries[]",
+          "required": false,
+          "description": "Multiple series drawn on the same scale."
+        },
+        {
+          "name": "showAxis",
+          "type": "boolean",
+          "required": false,
+          "description": "Y-axis tick labels + first/last x labels. Default true."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Alias of `aria-label` (SVG `<title>`)."
         },
         {
           "name": "width",
@@ -301,22 +331,35 @@ export const generatedProps: Record<string, PropGroup[]> = {
     {
       "rows": [
         {
-          "name": "data",
-          "type": "ChartPoint[]",
-          "required": true,
-          "description": ""
+          "name": "aria-label",
+          "type": "string",
+          "required": false,
+          "description": "Accessible name when there is no `caption`."
         },
         {
           "name": "caption",
           "type": "ReactNode",
           "required": false,
-          "description": "Tooltip / label rendered above the chart."
+          "description": "Visible caption rendered above the chart. Doubles as the accessible name."
         },
         {
           "name": "className",
           "type": "string",
           "required": false,
           "description": ""
+        },
+        {
+          "name": "colors",
+          "type": "string[]",
+          "default": "[\n  'var(--chart-1)',\n  'var(--chart-2)',\n  'var(--chart-3)',\n  'var(--chart-4)',\n  'var(--chart-5)',\n  'var(--chart-6)',\n]",
+          "required": false,
+          "description": "Per-series colours. Defaults to the categorical token list below. TODO(globals.css): add `--chart-1..6` tokens and switch the defaults."
+        },
+        {
+          "name": "data",
+          "type": "ChartPoint[]",
+          "required": false,
+          "description": "Primary series. Ignored when `series` is provided."
         },
         {
           "name": "grid",
@@ -331,6 +374,25 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "default": "160",
           "required": false,
           "description": "Drawing height in px."
+        },
+        {
+          "name": "series",
+          "type": "ChartSeries[]",
+          "required": false,
+          "description": "Multiple series drawn on the same scale."
+        },
+        {
+          "name": "showAxis",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "description": "Y-axis tick labels + first/last x labels. Default true."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Alias of `aria-label` (SVG `<title>`)."
         },
         {
           "name": "width",
@@ -433,31 +495,6 @@ export const generatedProps: Record<string, PropGroup[]> = {
     {
       "rows": [
         {
-          "name": "opts",
-          "type": "Partial<OptionsType>",
-          "required": false,
-          "description": ""
-        },
-        {
-          "name": "orientation",
-          "type": "enum",
-          "default": "horizontal",
-          "required": false,
-          "description": ""
-        },
-        {
-          "name": "setApi",
-          "type": "((api: EmblaCarouselType) => void)",
-          "required": false,
-          "description": ""
-        }
-      ]
-    }
-  ],
-  "CarouselNext": [
-    {
-      "rows": [
-        {
           "name": "className",
           "type": "string",
           "required": false,
@@ -466,14 +503,14 @@ export const generatedProps: Record<string, PropGroup[]> = {
       ]
     }
   ],
-  "CarouselPrevious": [
+  "CarouselItem": [
     {
       "rows": [
         {
-          "name": "className",
-          "type": "string",
+          "name": "index",
+          "type": "number",
           "required": false,
-          "description": ""
+          "description": "0-based position, used for the default \"{i+1} of {n}\" label."
         }
       ]
     }
@@ -569,7 +606,6 @@ export const generatedProps: Record<string, PropGroup[]> = {
         {
           "name": "emptyText",
           "type": "string",
-          "default": "No results.",
           "required": false,
           "description": "Empty state copy when nothing matches."
         },
@@ -584,6 +620,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "ReactNode",
           "required": false,
           "description": "Hint below the field. Hidden when `error` is set."
+        },
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "description": "Consumer-supplied id for the trigger (label association)."
         },
         {
           "name": "label",
@@ -606,16 +648,20 @@ export const generatedProps: Record<string, PropGroup[]> = {
         {
           "name": "placeholder",
           "type": "string",
-          "default": "Select…",
           "required": false,
           "description": "Placeholder shown when no value is selected."
         },
         {
           "name": "searchPlaceholder",
           "type": "string",
-          "default": "Search…",
           "required": false,
           "description": "Search placeholder inside the popover."
+        },
+        {
+          "name": "selectedLabel",
+          "type": "string",
+          "required": false,
+          "description": "Label to show for a preset `value` in `loadOptions` mode before the first search has resolved (the component has no option list yet)."
         },
         {
           "name": "size",
@@ -705,7 +751,6 @@ export const generatedProps: Record<string, PropGroup[]> = {
         {
           "name": "title",
           "type": "string",
-          "default": "Command palette",
           "required": false,
           "description": "Visible label for screen readers."
         }
@@ -898,14 +943,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
         {
           "name": "cancelLabel",
           "type": "string",
-          "default": "Cancel",
           "required": false,
           "description": "Label of the cancel button."
         },
         {
           "name": "confirmLabel",
           "type": "string",
-          "default": "Confirm",
           "required": false,
           "description": "Label of the confirm button."
         },
@@ -1373,10 +1416,22 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": ""
         },
         {
+          "name": "disabledDays",
+          "type": "Matcher | Matcher[]",
+          "required": false,
+          "description": "Extra RDP matcher(s) for disabled days, merged with `fromDate`/`toDate`."
+        },
+        {
           "name": "error",
           "type": "ReactNode",
           "required": false,
           "description": ""
+        },
+        {
+          "name": "formatDate",
+          "type": "((d: Date) => string)",
+          "required": false,
+          "description": "Custom display formatter for the trigger text."
         },
         {
           "name": "fromDate",
@@ -1391,9 +1446,14 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": ""
         },
         {
+          "name": "locale",
+          "type": "Partial<DayPickerLocale>",
+          "required": false,
+          "description": "date-fns locale object passed through to react-day-picker."
+        },
+        {
           "name": "placeholder",
           "type": "string",
-          "default": "Pick a range",
           "required": false,
           "description": ""
         },
@@ -1434,16 +1494,28 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": ""
         },
         {
+          "name": "disabledDays",
+          "type": "Matcher | Matcher[]",
+          "required": false,
+          "description": "Extra RDP matcher(s) for disabled days, merged with `fromDate`/`toDate`."
+        },
+        {
           "name": "error",
           "type": "ReactNode",
           "required": false,
           "description": ""
         },
         {
+          "name": "formatDate",
+          "type": "((d: Date) => string)",
+          "required": false,
+          "description": "Custom display formatter for the trigger text."
+        },
+        {
           "name": "fromDate",
           "type": "Date",
           "required": false,
-          "description": ""
+          "description": "Restrict to a date range. Days outside are not selectable."
         },
         {
           "name": "label",
@@ -1452,9 +1524,14 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": ""
         },
         {
+          "name": "locale",
+          "type": "Partial<DayPickerLocale>",
+          "required": false,
+          "description": "date-fns locale object passed through to react-day-picker."
+        },
+        {
           "name": "placeholder",
           "type": "string",
-          "default": "Pick a range",
           "required": false,
           "description": ""
         },
@@ -1481,6 +1558,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "ReactNode",
           "required": true,
           "description": "Children to scope this brand to."
+        },
+        {
+          "name": "strings",
+          "type": "DeepPartial<UiStrings>",
+          "required": false,
+          "description": "Override any of the library's built-in UI strings (aria-labels, placeholders, empty states). Partial — merged over the parent provider / English defaults. Pass `mnStrings` for Mongolian."
         },
         {
           "name": "tokens",
@@ -2552,6 +2635,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": "Called when files are added or removed."
         },
         {
+          "name": "onReject",
+          "type": "((files: File[], reason: FileRejectReason) => void)",
+          "required": false,
+          "description": "Called with the files that were dropped because of `maxSize` or `accept`."
+        },
+        {
           "name": "value",
           "type": "File[]",
           "required": false,
@@ -2837,7 +2926,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "name": "onClear",
           "type": "(() => void)",
           "required": false,
-          "description": "Fires when the clear button is pressed. The consumer owns the state."
+          "description": "Fires when the clear button is pressed. Controlled inputs own their state and should reset `value` here; uncontrolled inputs are cleared for you."
         },
         {
           "name": "prefix",
@@ -2865,7 +2954,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
         },
         {
           "name": "type",
-          "type": "enum",
+          "type": "string",
           "default": "text",
           "required": false,
           "description": "Field type. `password` enables a show/hide toggle; `search` adds a clear button."
@@ -2890,22 +2979,35 @@ export const generatedProps: Record<string, PropGroup[]> = {
     {
       "rows": [
         {
-          "name": "data",
-          "type": "ChartPoint[]",
-          "required": true,
-          "description": ""
+          "name": "aria-label",
+          "type": "string",
+          "required": false,
+          "description": "Accessible name when there is no `caption`."
         },
         {
           "name": "caption",
           "type": "ReactNode",
           "required": false,
-          "description": "Tooltip / label rendered above the chart."
+          "description": "Visible caption rendered above the chart. Doubles as the accessible name."
         },
         {
           "name": "className",
           "type": "string",
           "required": false,
           "description": ""
+        },
+        {
+          "name": "colors",
+          "type": "string[]",
+          "default": "[\n  'var(--chart-1)',\n  'var(--chart-2)',\n  'var(--chart-3)',\n  'var(--chart-4)',\n  'var(--chart-5)',\n  'var(--chart-6)',\n]",
+          "required": false,
+          "description": "Per-series colours. Defaults to the categorical token list below. TODO(globals.css): add `--chart-1..6` tokens and switch the defaults."
+        },
+        {
+          "name": "data",
+          "type": "ChartPoint[]",
+          "required": false,
+          "description": "Primary series. Ignored when `series` is provided."
         },
         {
           "name": "grid",
@@ -2920,6 +3022,25 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "default": "160",
           "required": false,
           "description": "Drawing height in px."
+        },
+        {
+          "name": "series",
+          "type": "ChartSeries[]",
+          "required": false,
+          "description": "Multiple series drawn on the same scale."
+        },
+        {
+          "name": "showAxis",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "description": "Y-axis tick labels + first/last x labels. Default true."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Alias of `aria-label` (SVG `<title>`)."
         },
         {
           "name": "width",
@@ -2974,7 +3095,6 @@ export const generatedProps: Record<string, PropGroup[]> = {
         {
           "name": "emptyText",
           "type": "string",
-          "default": "No results.",
           "required": false,
           "description": "Text shown when no options match the search."
         },
@@ -2989,6 +3109,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "ReactNode",
           "required": false,
           "description": "Hint below the field. Hidden when `error` is set."
+        },
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "description": "Consumer-supplied id for the search input (label association)."
         },
         {
           "name": "label",
@@ -3006,7 +3132,6 @@ export const generatedProps: Record<string, PropGroup[]> = {
         {
           "name": "placeholder",
           "type": "string",
-          "default": "Select…",
           "required": false,
           "description": "Empty-state placeholder shown when nothing is selected."
         }
@@ -3017,53 +3142,58 @@ export const generatedProps: Record<string, PropGroup[]> = {
     {
       "rows": [
         {
-          "name": "onPageChange",
-          "type": "(page: number) => void",
+          "name": "first",
+          "type": "string",
           "required": true,
-          "description": "Called with the new page when navigating."
+          "description": ""
+        },
+        {
+          "name": "last",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "name": "nav",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "name": "next",
+          "type": "string",
+          "required": true,
+          "description": ""
         },
         {
           "name": "page",
-          "type": "number",
+          "type": "string",
           "required": true,
-          "description": "1-indexed current page."
+          "description": ""
         },
         {
-          "name": "pageCount",
-          "type": "number",
+          "name": "perPage",
+          "type": "string",
           "required": true,
-          "description": "Total number of pages. Set to 0 to hide page numbers."
+          "description": ""
         },
         {
-          "name": "onPageSizeChange",
-          "type": "((size: number) => void)",
-          "required": false,
-          "description": "Called when the user picks a new page size."
+          "name": "prev",
+          "type": "string",
+          "required": true,
+          "description": ""
         },
         {
-          "name": "pageSize",
-          "type": "number",
-          "required": false,
-          "description": "Items shown per page (controlled if `onPageSizeChange` is provided)."
+          "name": "rowsPerPage",
+          "type": "string",
+          "required": true,
+          "description": ""
         },
         {
-          "name": "pageSizeOptions",
-          "type": "number[]",
-          "required": false,
-          "description": "Options for the page-size select."
-        },
-        {
-          "name": "showJump",
-          "type": "boolean",
-          "default": "true",
-          "required": false,
-          "description": "Show first/last (« ») jump buttons. Default true."
-        },
-        {
-          "name": "totalItems",
-          "type": "number",
-          "required": false,
-          "description": "Total item count, for the \"Showing 1-20 of 200\" hint. Omit to hide."
+          "name": "showing",
+          "type": "string",
+          "required": true,
+          "description": ""
         }
       ]
     }
@@ -4017,12 +4147,6 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": "Mark as the current page."
         },
         {
-          "name": "href",
-          "type": "string",
-          "required": false,
-          "description": "Optional `href` — when absent, renders as a `<button>` so consumers can bind their own handler / routing wrapper via `onClick`."
-        },
-        {
           "name": "icon",
           "type": "ReactNode",
           "required": false,
@@ -4033,6 +4157,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "boolean",
           "required": false,
           "description": "Render a sub-item indented under a parent."
+        },
+        {
+          "name": "tooltip",
+          "type": "ReactNode",
+          "required": false,
+          "description": "Tooltip text shown while the sidebar is collapsed. Defaults to `children` when that is a plain string."
         },
         {
           "name": "trailing",
@@ -4338,6 +4468,19 @@ export const generatedProps: Record<string, PropGroup[]> = {
       ]
     }
   ],
+  "TableHead": [
+    {
+      "rows": [
+        {
+          "name": "uppercase",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "description": "Render the header label in small caps (`uppercase tracking-wide`). Off by default — mixed case reads better for long / Cyrillic labels."
+        }
+      ]
+    }
+  ],
   "TableRow": [
     {
       "rows": [
@@ -4468,6 +4611,18 @@ export const generatedProps: Record<string, PropGroup[]> = {
     {
       "rows": [
         {
+          "name": "aria-describedby",
+          "type": "string",
+          "required": false,
+          "description": "Extra ids to append to `aria-describedby`."
+        },
+        {
+          "name": "aria-label",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
           "name": "className",
           "type": "string",
           "required": false,
@@ -4481,6 +4636,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": "Default tags when uncontrolled."
         },
         {
+          "name": "description",
+          "type": "ReactNode",
+          "required": false,
+          "description": "Hint below the field. Hidden while `error` is set."
+        },
+        {
           "name": "disabled",
           "type": "boolean",
           "required": false,
@@ -4488,9 +4649,27 @@ export const generatedProps: Record<string, PropGroup[]> = {
         },
         {
           "name": "error",
+          "type": "ReactNode",
+          "required": false,
+          "description": "Validation state. `true` only paints the danger border; a ReactNode also renders the message below the field and wires `aria-describedby`."
+        },
+        {
+          "name": "hideLabel",
           "type": "boolean",
           "required": false,
-          "description": "Show a danger border."
+          "description": "Visually conceal the label while keeping it for screen readers."
+        },
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "description": "Consumer-supplied id for the inline input."
+        },
+        {
+          "name": "label",
+          "type": "ReactNode",
+          "required": false,
+          "description": "Visible label rendered above the field."
         },
         {
           "name": "max",
@@ -4507,7 +4686,6 @@ export const generatedProps: Record<string, PropGroup[]> = {
         {
           "name": "placeholder",
           "type": "string",
-          "default": "Add and press Enter",
           "required": false,
           "description": "Placeholder shown inside the inline input."
         },
@@ -4611,10 +4789,10 @@ export const generatedProps: Record<string, PropGroup[]> = {
     {
       "rows": [
         {
-          "name": "className",
+          "name": "dateTime",
           "type": "string",
           "required": false,
-          "description": ""
+          "description": "Machine-readable value (ISO 8601). Defaults to `children` when it is a string."
         }
       ]
     }
@@ -5111,6 +5289,18 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": "The root nodes."
         },
         {
+          "name": "aria-label",
+          "type": "string",
+          "required": false,
+          "description": "Accessible name for the tree."
+        },
+        {
+          "name": "aria-labelledby",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
           "name": "className",
           "type": "string",
           "required": false,
@@ -5121,19 +5311,91 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "string[]",
           "default": "[]",
           "required": false,
-          "description": "Ids to expand by default."
+          "description": "Ids to expand by default (uncontrolled)."
+        },
+        {
+          "name": "defaultSelected",
+          "type": "string",
+          "required": false,
+          "description": "Default selected id (uncontrolled)."
+        },
+        {
+          "name": "expanded",
+          "type": "string[]",
+          "required": false,
+          "description": "Controlled set of expanded ids."
+        },
+        {
+          "name": "onExpandedChange",
+          "type": "((next: string[]) => void)",
+          "required": false,
+          "description": "Called with the full next set of expanded ids."
         },
         {
           "name": "onSelect",
           "type": "((id: string) => void)",
           "required": false,
-          "description": ""
+          "description": "Called when a node is activated (click / Enter / Space)."
+        },
+        {
+          "name": "onSelectedChange",
+          "type": "((id: string) => void)",
+          "required": false,
+          "description": "Alias of `onSelect` for the controlled `selected` pair."
+        },
+        {
+          "name": "selected",
+          "type": "string",
+          "required": false,
+          "description": "Controlled selected id. Takes precedence over `selectedId`."
         },
         {
           "name": "selectedId",
           "type": "string",
           "required": false,
-          "description": "Currently selected node id."
+          "description": "Currently selected node id (controlled). Alias: `selected`."
+        }
+      ]
+    }
+  ],
+  "abbreviateNumber": [
+    {
+      "rows": [
+        {
+          "name": "toExponential",
+          "type": "(fractionDigits?: number | undefined) => string",
+          "required": true,
+          "description": "Returns a string containing a number represented in exponential notation. @param fractionDigits Number of digits after the decimal point. Must be in the range 0 - 20, inclusive."
+        },
+        {
+          "name": "toFixed",
+          "type": "(fractionDigits?: number | undefined) => string",
+          "required": true,
+          "description": "Returns a string representing a number in fixed-point notation. @param fractionDigits Number of digits after the decimal point. Must be in the range 0 - 20, inclusive."
+        },
+        {
+          "name": "toPrecision",
+          "type": "(precision?: number | undefined) => string",
+          "required": true,
+          "description": "Returns a string containing a number represented either in exponential or fixed-point notation with a specified number of digits. @param precision Number of significant digits. Must be in the range 1 - 21, inclusive."
+        },
+        {
+          "name": "toLocaleString",
+          "type": "{ (locales?: string | string[], options?: NumberFormatOptions): string; (locales?: LocalesArgument, options?: NumberFormatOptions | undefined): string; }",
+          "required": false,
+          "description": "Converts a number to a string by using the current or specified locale. @param locales A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. @param options An object that contains one or more properties that specify comparison options. @param locales A locale string, array of locale strings, Intl.Locale object, or array of Intl.Locale objects that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. @param options An object that contains one or more properties that specify comparison options."
+        },
+        {
+          "name": "toString",
+          "type": "(radix?: number) => string",
+          "required": false,
+          "description": "Returns a string representation of an object. @param radix Specifies a radix for converting numeric values to strings. This value is only used for numbers."
+        },
+        {
+          "name": "valueOf",
+          "type": "() => number",
+          "required": false,
+          "description": "Returns the primitive value of the specified object."
         }
       ]
     }
@@ -5142,7 +5404,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
     {
       "rows": [
         {
-          "name": "__@hasInstance@9949",
+          "name": "__@hasInstance@10053",
           "type": "(value: any) => boolean",
           "required": true,
           "description": "Determines whether the given value inherits from this function if this function was used as a constructor function. A constructor function can control which objects are recognized as its instances by 'instanceof' by overriding this method."

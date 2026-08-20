@@ -1,0 +1,35 @@
+[
+  {
+    "name": "main entry (library code only, deps ignored)",
+    "path": "packages/ui/dist-lib/index.js",
+    "import": "*",
+    "ignore": [
+      "react",
+      "react-dom",
+      "react/jsx-runtime",
+      "@radix-ui/*",
+      "class-variance-authority",
+      "clsx",
+      "cmdk",
+      "embla-carousel-react",
+      "lucide-react",
+      "react-day-picker",
+      "react-hook-form",
+      "tailwind-merge",
+      "vaul"
+    ],
+    "limit": "40 KB"
+  },
+  {
+    "name": "import { Button } (with deps)",
+    "path": "packages/ui/dist-lib/index.js",
+    "import": "{ Button }",
+    "ignore": ["react", "react-dom", "react/jsx-runtime"],
+    "limit": "10 KB"
+  },
+  {
+    "name": "styles.css",
+    "path": "packages/ui/dist-lib/styles.css",
+    "limit": "15 KB"
+  }
+]

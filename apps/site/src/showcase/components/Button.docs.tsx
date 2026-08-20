@@ -158,8 +158,7 @@ const doc: ComponentDoc = {
         {
           name: '…rest',
           type: 'ButtonHTMLAttributes<HTMLButtonElement>',
-          description:
-            'All standard button props (onClick, type, form, name, …) pass through.',
+          description: 'All standard button props (onClick, type, form, name, …) pass through.',
         },
       ],
     },
@@ -170,6 +169,20 @@ const doc: ComponentDoc = {
     'Use asChild to wrap an <a> so the link still receives proper Enter/Space semantics from the Button.',
     'For icon-only actions, prefer IconButton — it enforces aria-label at the type level.',
   ],
+  guidelines: {
+    do: [
+      'Use exactly one primary button per view; everything else is secondary, outline or ghost.',
+      'Label with a verb and an object — "Save changes", "Delete project" — not "OK" or "Yes".',
+      'Use `loading` for async work so the button keeps its size and blocks double submits.',
+      'Reserve `destructive` for actions that remove or irreversibly change data.',
+    ],
+    dont: [
+      'Place two primary buttons side by side — the user cannot tell which action matters.',
+      'Use colour alone (green / red buttons) as an alternate accent; status colours are for status.',
+      'Shrink the hit area below 32 px in dense UIs; use `size="sm"` rather than custom padding.',
+      'Wrap a button around block content or use it for navigation — use a link styled as a button via `asChild`.',
+    ],
+  },
   related: [
     { slug: 'icon-button', reason: 'For icon-only actions.' },
     { slug: 'dropdown-menu', reason: 'Pair with a Button trigger for action menus.' },

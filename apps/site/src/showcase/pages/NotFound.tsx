@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/Button';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { routeToHash } from '../routing';
 
 export function NotFound() {
   return (
@@ -10,7 +11,7 @@ export function NotFound() {
         description="The page you are looking for does not exist."
         action={
           <Button asChild>
-            <a href="#">Back to overview</a>
+            <a href={`#${routeToHash({ kind: 'home' })}`}>Back to overview</a>
           </Button>
         }
       />

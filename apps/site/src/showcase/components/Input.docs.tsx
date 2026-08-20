@@ -66,11 +66,7 @@ const doc: ComponentDoc = {
       description: 'Use to inline non-interactive affordances like icons, units, or domain hints.',
       preview: (
         <div className="flex w-full max-w-xs flex-col gap-3">
-          <Input
-            label="Handle"
-            prefix={<AtSign className="size-4" />}
-            placeholder="craftzbay"
-          />
+          <Input label="Handle" prefix={<AtSign className="size-4" />} placeholder="craftzbay" />
           <Input
             label="Domain"
             placeholder="acme"
@@ -159,18 +155,68 @@ const doc: ComponentDoc = {
   api: [
     {
       rows: [
-        { name: 'label', type: 'ReactNode', description: 'Field label. Required for a11y; set hideLabel to render visually-hidden only.' },
-        { name: 'hideLabel', type: 'boolean', default: 'false', description: 'Visually hide the label but keep it in the accessibility tree.' },
-        { name: 'helperText', type: 'ReactNode', description: 'Hint shown below the input. Hidden while error is set.' },
-        { name: 'error', type: 'ReactNode', description: 'Error message. Auto-sets tone="error" and aria-invalid.' },
-        { name: 'prefix', type: 'ReactNode', description: 'Inline left affordance (icon, currency symbol, …).' },
+        {
+          name: 'label',
+          type: 'ReactNode',
+          description:
+            'Field label. Required for a11y; set hideLabel to render visually-hidden only.',
+        },
+        {
+          name: 'hideLabel',
+          type: 'boolean',
+          default: 'false',
+          description: 'Visually hide the label but keep it in the accessibility tree.',
+        },
+        {
+          name: 'helperText',
+          type: 'ReactNode',
+          description: 'Hint shown below the input. Hidden while error is set.',
+        },
+        {
+          name: 'error',
+          type: 'ReactNode',
+          description: 'Error message. Auto-sets tone="error" and aria-invalid.',
+        },
+        {
+          name: 'prefix',
+          type: 'ReactNode',
+          description: 'Inline left affordance (icon, currency symbol, …).',
+        },
         { name: 'suffix', type: 'ReactNode', description: 'Inline right affordance.' },
-        { name: 'clearable', type: 'boolean', default: 'false', description: 'Shows a clear button when value is non-empty.' },
-        { name: 'onClear', type: '() => void', description: 'Called when the clear button is clicked.' },
-        { name: 'tone', type: `'default' | 'error'`, default: `'default'`, description: 'Visual tone. Auto-set by `error`.' },
-        { name: 'size', type: `'sm' | 'md' | 'lg'`, default: `'md'`, description: 'Height + padding.' },
-        { name: 'type', type: `'text' | 'email' | 'password' | 'number' | 'search' | 'tel' | 'url'`, default: `'text'`, description: 'Native input type. password auto-shows a toggle.' },
-        { name: '…rest', type: 'InputHTMLAttributes', description: 'Standard input props (value, onChange, onBlur, name, …).' },
+        {
+          name: 'clearable',
+          type: 'boolean',
+          default: 'false',
+          description: 'Shows a clear button when value is non-empty.',
+        },
+        {
+          name: 'onClear',
+          type: '() => void',
+          description: 'Called when the clear button is clicked.',
+        },
+        {
+          name: 'tone',
+          type: `'default' | 'error'`,
+          default: `'default'`,
+          description: 'Visual tone. Auto-set by `error`.',
+        },
+        {
+          name: 'size',
+          type: `'sm' | 'md' | 'lg'`,
+          default: `'md'`,
+          description: 'Height + padding.',
+        },
+        {
+          name: 'type',
+          type: `'text' | 'email' | 'password' | 'number' | 'search' | 'tel' | 'url'`,
+          default: `'text'`,
+          description: 'Native input type. password auto-shows a toggle.',
+        },
+        {
+          name: '…rest',
+          type: 'InputHTMLAttributes',
+          description: 'Standard input props (value, onChange, onBlur, name, …).',
+        },
       ],
     },
   ],
@@ -180,6 +226,20 @@ const doc: ComponentDoc = {
     'Password toggle button has its own aria-label that updates between "Show password" and "Hide password".',
     'Use Form + FormField from react-hook-form for form-level validation; Input slots in unchanged.',
   ],
+  guidelines: {
+    do: [
+      'Put a visible `label` above every field; use `hideLabel` only when layout truly forbids it.',
+      'Show validation errors below the field via `error` — it is linked with aria-describedby.',
+      'Use the right `type` (email, tel, url, search) so mobile keyboards and autofill work.',
+      'Keep `helperText` to one sentence and show it before the user makes a mistake.',
+    ],
+    dont: [
+      'Use `placeholder` as the label — it disappears as soon as the user types.',
+      'Validate on every keystroke for formats that are only valid when complete; validate on blur.',
+      'Put units or currency in the placeholder — use `prefix` / `suffix`.',
+      'Make required fields discoverable only by an asterisk in the placeholder.',
+    ],
+  },
   related: [
     { slug: 'textarea', reason: 'For multi-line text.' },
     { slug: 'form', reason: 'react-hook-form integration.' },

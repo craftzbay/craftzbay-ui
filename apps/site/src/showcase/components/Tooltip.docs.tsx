@@ -38,8 +38,18 @@ const doc: ComponentDoc = {
       title: 'Tooltip',
       rows: [
         { name: 'label', type: 'ReactNode', required: true, description: 'Tooltip body text.' },
-        { name: 'side', type: `'top' | 'right' | 'bottom' | 'left'`, default: `'top'`, description: 'Anchor side.' },
-        { name: 'align', type: `'start' | 'center' | 'end'`, default: `'center'`, description: 'Alignment.' },
+        {
+          name: 'side',
+          type: `'top' | 'right' | 'bottom' | 'left'`,
+          default: `'top'`,
+          description: 'Anchor side.',
+        },
+        {
+          name: 'align',
+          type: `'start' | 'center' | 'end'`,
+          default: `'center'`,
+          description: 'Alignment.',
+        },
         { name: 'delayMs', type: 'number', default: '500', description: 'Open delay.' },
       ],
     },
@@ -48,9 +58,12 @@ const doc: ComponentDoc = {
     'Opens on hover or focus — keyboard users see tooltips too.',
     'Backed by @radix-ui/react-tooltip — proper role + aria-describedby on the trigger.',
   ],
-  related: [
-    { slug: 'popover', reason: 'For interactive overlays.' },
+  keyboard: [
+    { key: 'Tab', action: 'Focusing the trigger shows the tooltip after `delayDuration`.' },
+    { key: 'Esc', action: 'Dismiss the tooltip while it is open.' },
+    { key: 'Shift+Tab / Tab', action: 'Blurring the trigger hides the tooltip.' },
   ],
+  related: [{ slug: 'popover', reason: 'For interactive overlays.' }],
 };
 
 export default doc;

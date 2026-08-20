@@ -20,7 +20,11 @@ export function ShowcaseTopBar({ onOpenPalette, current }: ShowcaseTopBarProps) 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-6 px-6">
-        <a href="#" className="text-sm" aria-label="Home">
+        <a
+          href={`#${routeToHash({ kind: 'home' })}`}
+          className="rounded-sm text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          aria-label="Home"
+        >
           <BrandMark />
         </a>
 
@@ -33,7 +37,8 @@ export function ShowcaseTopBar({ onOpenPalette, current }: ShowcaseTopBarProps) 
                 href={`#${routeToHash(item.route)}`}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'rounded-md px-3 py-1.5 transition-colors',
+                  'rounded-md px-3 py-1.5 outline-none transition-colors',
+                  'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                   active ? 'text-foreground' : 'hover:bg-background-muted hover:text-foreground',
                 )}
               >
@@ -47,10 +52,10 @@ export function ShowcaseTopBar({ onOpenPalette, current }: ShowcaseTopBarProps) 
           <button
             type="button"
             onClick={onOpenPalette}
-            className="hidden h-8 items-center gap-2 rounded-md border border-border bg-card px-2.5 text-sm text-foreground-muted transition-colors hover:bg-background-muted hover:text-foreground sm:flex"
+            className="hidden h-8 items-center gap-2 rounded-md border border-border bg-card px-2.5 text-sm text-foreground-muted outline-none transition-colors hover:bg-background-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:flex"
           >
             <span className="text-xs">Search…</span>
-            <span className="rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[10px] text-foreground-subtle">
+            <span className="rounded border border-border bg-background px-1.5 py-0.5 font-mono text-xs text-foreground-subtle">
               ⌘K
             </span>
           </button>
@@ -61,7 +66,7 @@ export function ShowcaseTopBar({ onOpenPalette, current }: ShowcaseTopBarProps) 
             href={GITHUB_URL}
             target="_blank"
             rel="noreferrer"
-            className="hidden rounded-md p-1.5 text-foreground-muted hover:bg-background-muted hover:text-foreground sm:inline-flex"
+            className={iconLinkClass}
             aria-label="GitHub repository"
           >
             <GithubGlyph />
@@ -70,7 +75,7 @@ export function ShowcaseTopBar({ onOpenPalette, current }: ShowcaseTopBarProps) 
             href={NPM_URL}
             target="_blank"
             rel="noreferrer"
-            className="hidden rounded-md p-1.5 text-foreground-muted hover:bg-background-muted hover:text-foreground sm:inline-flex"
+            className={iconLinkClass}
             aria-label="npm package"
           >
             <NpmGlyph />
@@ -82,6 +87,13 @@ export function ShowcaseTopBar({ onOpenPalette, current }: ShowcaseTopBarProps) 
     </header>
   );
 }
+
+/** ≥32px hit area + visible focus ring for the icon-only links. */
+const iconLinkClass = cn(
+  'hidden size-8 items-center justify-center rounded-md text-foreground-muted outline-none transition-colors sm:inline-flex',
+  'hover:bg-background-muted hover:text-foreground',
+  'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+);
 
 function GithubGlyph() {
   return (

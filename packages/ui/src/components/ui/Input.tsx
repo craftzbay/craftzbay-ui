@@ -1,13 +1,18 @@
+'use client';
+
 import {
   forwardRef,
-  useId,
+  useRef,
   useState,
+  type FormEvent,
   type InputHTMLAttributes,
   type ReactNode,
 } from 'react';
 import { Eye, EyeOff, Search, X } from '@/icons';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
 import { cva, type VariantProps } from '@/lib/cva';
+import { useFieldIds } from '@/hooks/use-field-ids';
 
 /* -----------------------------------------------------------------------------
  *  Field-shell variants. The inner <input> is unstyled background and gets all
@@ -17,7 +22,7 @@ import { cva, type VariantProps } from '@/lib/cva';
 const field = cva(
   [
     'group inline-flex items-center w-full',
-    'rounded-md border bg-card text-sm',
+    'rounded-md border border-input bg-card text-sm',
     'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)]',
     'has-disabled:opacity-50 has-disabled:pointer-events-none',
     'focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-background',
@@ -30,7 +35,7 @@ const field = cva(
         lg: 'h-10 px-3.5 gap-2',
       },
       tone: {
-        default: 'border-border focus-within:border-accent focus-within:ring-ring',
+        default: 'focus-within:border-accent focus-within:ring-ring',
         error: 'border-danger focus-within:border-danger focus-within:ring-danger',
       },
     },
@@ -45,13 +50,16 @@ const innerInput = cva([
   'flex-1 min-w-0 bg-transparent outline-none',
   'placeholder:text-foreground-subtle',
   'text-foreground',
+  // 16px below md so iOS Safari does not zoom the page on focus; --text-lg = 1rem.
+  'text-lg md:text-sm',
   'disabled:cursor-not-allowed',
 ]);
 
-type InputType = 'text' | 'email' | 'password' | 'number' | 'search' | 'tel' | 'url';
+type InputType = NonNullable<InputHTMLAttributes<HTMLInputElement>['type']>;
 
 export interface InputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'prefix'>,
+  extends
+    Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'prefix'>,
     VariantProps<typeof field> {
   /** Field type. `password` enables a show/hide toggle; `search` adds a clear button. */
   type?: InputType;
@@ -67,7 +75,10 @@ export interface InputProps
   suffix?: ReactNode;
   /** Show an inline clear (×) button when the input has a value. */
   clearable?: boolean;
-  /** Fires when the clear button is pressed. The consumer owns the state. */
+  /**
+   * Fires when the clear button is pressed. Controlled inputs own their state
+   * and should reset `value` here; uncontrolled inputs are cleared for you.
+   */
   onClear?: () => void;
   /** Visually conceal the label while keeping it for screen readers. */
   hideLabel?: boolean;
@@ -110,37 +121,67 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     id,
     disabled,
     value,
+    defaultValue,
+    onInput,
     ...props
   },
   ref,
 ) {
-  const autoId = useId();
-  const fieldId = id ?? autoId;
-  const helperId = `${fieldId}-helper`;
-  const errorId = `${fieldId}-error`;
+  const strings = useStrings();
+  const isError = Boolean(error);
+  const { fieldId, helperId, errorId, describedBy } = useFieldIds(id, {
+    hasHelper: Boolean(helperText),
+    hasError: isError,
+  });
+  const innerRef = useRef<HTMLInputElement | null>(null);
+  const setRefs = (el: HTMLInputElement | null) => {
+    innerRef.current = el;
+    if (typeof ref === 'function') ref(el);
+    else if (ref) ref.current = el;
+  };
 
   const [showPassword, setShowPassword] = useState(false);
-  const effectiveType =
-    type === 'password' ? (showPassword ? 'text' : 'password') : type;
+  const effectiveType = type === 'password' ? (showPassword ? 'text' : 'password') : type;
 
-  const isError = Boolean(error);
   const effectiveTone = isError ? 'error' : tone;
 
   // Pre-fill prefix slot for search type.
   const renderedPrefix =
-    prefix ?? (type === 'search' ? <Search className="size-4 text-foreground-subtle" aria-hidden /> : null);
+    prefix ??
+    (type === 'search' ? <Search className="text-foreground-subtle size-4" aria-hidden /> : null);
 
-  const hasValue = value !== undefined && value !== '' && value !== null;
+  // Track the value of uncontrolled inputs so `clearable` can show/hide the
+  // button without the consumer wiring state.
+  const isControlled = value !== undefined;
+  const [localValue, setLocalValue] = useState<string>(
+    defaultValue === undefined || defaultValue === null ? '' : String(defaultValue),
+  );
+  const current = isControlled ? value : localValue;
+  const hasValue = current !== undefined && current !== '' && current !== null;
+
+  const handleInput = (e: FormEvent<HTMLInputElement>) => {
+    if (!isControlled) setLocalValue(e.currentTarget.value);
+    onInput?.(e);
+  };
+
+  const handleClear = () => {
+    if (!isControlled && innerRef.current) {
+      // Use the native setter so React's onChange/onInput listeners fire.
+      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+      setter?.call(innerRef.current, '');
+      innerRef.current.dispatchEvent(new Event('input', { bubbles: true }));
+      setLocalValue('');
+    }
+    onClear?.();
+    innerRef.current?.focus();
+  };
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
       {label && (
         <label
           htmlFor={fieldId}
-          className={cn(
-            'text-sm font-medium text-foreground',
-            hideLabel && 'sr-only',
-          )}
+          className={cn('text-foreground text-sm font-medium', hideLabel && 'sr-only')}
         >
           {label}
         </label>
@@ -148,21 +189,21 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
 
       <div className={cn(field({ size, tone: effectiveTone }))}>
         {renderedPrefix && (
-          <span className="flex items-center text-foreground-subtle [&_svg]:size-4">
+          <span className="text-foreground-subtle flex items-center [&_svg]:size-4">
             {renderedPrefix}
           </span>
         )}
 
         <input
-          ref={ref}
+          ref={setRefs}
           id={fieldId}
           type={effectiveType}
           disabled={disabled}
           value={value}
+          defaultValue={defaultValue}
+          onInput={handleInput}
           aria-invalid={isError || undefined}
-          aria-describedby={
-            error ? errorId : helperText ? helperId : undefined
-          }
+          aria-describedby={describedBy}
           className={cn(innerInput())}
           {...props}
         />
@@ -170,10 +211,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         {clearable && hasValue && (
           <button
             type="button"
-            onClick={onClear}
-            tabIndex={-1}
-            aria-label="Clear input"
-            className="flex items-center text-foreground-subtle hover:text-foreground"
+            onClick={handleClear}
+            aria-label={strings.input.clear}
+            className="text-foreground-subtle hover:text-foreground focus-visible:ring-ring flex items-center rounded-sm outline-none focus-visible:ring-2"
           >
             <X className="size-4" aria-hidden />
           </button>
@@ -183,10 +223,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           <button
             type="button"
             onClick={() => setShowPassword((p) => !p)}
-            tabIndex={-1}
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            aria-label={showPassword ? strings.input.hidePassword : strings.input.showPassword}
             aria-pressed={showPassword}
-            className="flex items-center text-foreground-subtle hover:text-foreground"
+            className="text-foreground-subtle hover:text-foreground focus-visible:ring-ring flex items-center rounded-sm outline-none focus-visible:ring-2"
           >
             {showPassword ? (
               <EyeOff className="size-4" aria-hidden />
@@ -197,18 +236,16 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         )}
 
         {suffix && (
-          <span className="flex items-center text-foreground-subtle [&_svg]:size-4">
-            {suffix}
-          </span>
+          <span className="text-foreground-subtle flex items-center [&_svg]:size-4">{suffix}</span>
         )}
       </div>
 
       {error ? (
-        <p id={errorId} role="alert" className="text-xs text-danger-text">
+        <p id={errorId} role="alert" className="text-danger-text text-xs">
           {error}
         </p>
       ) : helperText ? (
-        <p id={helperId} className="text-xs text-foreground-subtle">
+        <p id={helperId} className="text-foreground-subtle text-xs">
           {helperText}
         </p>
       ) : null}

@@ -14,8 +14,7 @@ const doc: ComponentDoc = {
       title: 'Default',
       preview: (
         <div className="flex items-center gap-2 text-sm">
-          Open palette:{' '}
-          <Kbd>⌘</Kbd>
+          Open palette: <Kbd>⌘</Kbd>
           <span className="text-foreground-subtle">+</span>
           <Kbd>K</Kbd>
         </div>
@@ -29,6 +28,11 @@ const doc: ComponentDoc = {
         { name: 'children', type: 'ReactNode', required: true, description: 'Key glyph or label.' },
       ],
     },
+  ],
+  accessibility: [
+    'Renders a native <kbd> element, which assistive tech announces as keyboard input.',
+    'Purely presentational — never make it the only way a shortcut is documented for a focusable control; pair with a Tooltip or visible text.',
+    'Compose chords as separate <Kbd> elements so each key is read individually.',
   ],
 };
 

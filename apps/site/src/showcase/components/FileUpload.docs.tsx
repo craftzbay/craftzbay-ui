@@ -17,19 +17,56 @@ const doc: ComponentDoc = {
     },
     {
       title: 'Multiple + accept',
-      preview: <FileUpload className="w-full max-w-md" multiple accept="image/*" hint="Images only" />,
+      preview: (
+        <FileUpload className="w-full max-w-md" multiple accept="image/*" hint="Images only" />
+      ),
       code: `<FileUpload multiple accept="image/*" hint="Images only" />`,
+    },
+    {
+      title: 'States',
+      description:
+        'Disabled drop zone — drops and clicks are ignored. Loading and error are owned by the host: show a Progress bar and an Alert next to the zone.',
+      preview: (
+        <FileUpload
+          className="w-full max-w-md"
+          disabled
+          hint="Uploads are paused while the workspace is read-only"
+        />
+      ),
+      code: `<FileUpload disabled hint="Uploads are paused while the workspace is read-only" />`,
     },
   ],
   api: [
     {
       rows: [
-        { name: 'onChange', type: '(files: File[]) => void', description: 'Fires when files are dropped or picked.' },
-        { name: 'accept', type: 'string', description: 'MIME types or extensions, comma-separated.' },
-        { name: 'multiple', type: 'boolean', default: 'false', description: 'Allow more than one file.' },
-        { name: 'maxSize', type: 'number', description: 'Per-file byte cap. Files over the cap trigger an error.' },
+        {
+          name: 'onChange',
+          type: '(files: File[]) => void',
+          description: 'Fires when files are dropped or picked.',
+        },
+        {
+          name: 'accept',
+          type: 'string',
+          description: 'MIME types or extensions, comma-separated.',
+        },
+        {
+          name: 'multiple',
+          type: 'boolean',
+          default: 'false',
+          description: 'Allow more than one file.',
+        },
+        {
+          name: 'maxSize',
+          type: 'number',
+          description: 'Per-file byte cap. Files over the cap trigger an error.',
+        },
         { name: 'hint', type: 'string', description: 'Hint shown below the drop zone.' },
-        { name: 'disabled', type: 'boolean', default: 'false', description: 'Disables both drop and click.' },
+        {
+          name: 'disabled',
+          type: 'boolean',
+          default: 'false',
+          description: 'Disables both drop and click.',
+        },
       ],
     },
   ],

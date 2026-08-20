@@ -30,19 +30,19 @@ export function CodeBlock({ code, language = 'tsx', className }: CodeBlockProps)
   return (
     <div
       className={cn(
-        'code-block group relative overflow-hidden rounded-md border border-border bg-card font-mono text-[12.5px] leading-relaxed',
+        'code-block group relative overflow-hidden rounded-md border border-border bg-card font-mono text-xs leading-relaxed',
         className,
       )}
     >
       <div className="flex items-center justify-between border-b border-border bg-background-subtle/60 px-3 py-1.5">
-        <span className="text-[10px] font-medium uppercase tracking-wider text-foreground-subtle">
+        <span className="text-xs font-medium uppercase tracking-wider text-foreground-subtle">
           {language}
         </span>
         <button
           type="button"
           onClick={onCopy}
           aria-label={copied ? 'Copied' : 'Copy code'}
-          className="inline-flex items-center gap-1 rounded-sm px-1.5 py-1 text-[11px] text-foreground-muted outline-none transition-colors hover:bg-background-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          className="inline-flex items-center gap-1 rounded-sm px-1.5 py-1 text-xs text-foreground-muted outline-none transition-colors hover:bg-background-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
         >
           {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
           {copied ? 'Copied' : 'Copy'}

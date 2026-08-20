@@ -5,6 +5,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { ComponentDoc } from '../registry/types';
+import { Search } from '@/icons';
 
 interface Row {
   id: string;
@@ -17,19 +18,76 @@ interface Row {
 }
 
 const ROWS: Row[] = [
-  { id: '1', name: 'Atlas', owner: 'Avery', initials: 'AV', status: 'Active', spend: 1240, updated: 'Today' },
-  { id: '2', name: 'Beacon', owner: 'Jordan', initials: 'JO', status: 'Paused', spend: 380, updated: 'Yesterday' },
-  { id: '3', name: 'Cosmo', owner: 'Sam', initials: 'SA', status: 'Archived', spend: 0, updated: 'Apr 28' },
-  { id: '4', name: 'Drift', owner: 'Robin', initials: 'RO', status: 'Active', spend: 2210, updated: 'Today' },
-  { id: '5', name: 'Ember', owner: 'Avery', initials: 'AV', status: 'Active', spend: 960, updated: 'May 30' },
-  { id: '6', name: 'Flux', owner: 'Kai', initials: 'KA', status: 'Paused', spend: 145, updated: 'May 12' },
+  {
+    id: '1',
+    name: 'Atlas',
+    owner: 'Avery',
+    initials: 'AV',
+    status: 'Active',
+    spend: 1240,
+    updated: 'Today',
+  },
+  {
+    id: '2',
+    name: 'Beacon',
+    owner: 'Jordan',
+    initials: 'JO',
+    status: 'Paused',
+    spend: 380,
+    updated: 'Yesterday',
+  },
+  {
+    id: '3',
+    name: 'Cosmo',
+    owner: 'Sam',
+    initials: 'SA',
+    status: 'Archived',
+    spend: 0,
+    updated: 'Apr 28',
+  },
+  {
+    id: '4',
+    name: 'Drift',
+    owner: 'Robin',
+    initials: 'RO',
+    status: 'Active',
+    spend: 2210,
+    updated: 'Today',
+  },
+  {
+    id: '5',
+    name: 'Ember',
+    owner: 'Avery',
+    initials: 'AV',
+    status: 'Active',
+    spend: 960,
+    updated: 'May 30',
+  },
+  {
+    id: '6',
+    name: 'Flux',
+    owner: 'Kai',
+    initials: 'KA',
+    status: 'Paused',
+    spend: 145,
+    updated: 'May 12',
+  },
 ];
 
 const tone = (s: Row['status']) =>
-  s === 'Active' ? ('success' as const) : s === 'Paused' ? ('warning' as const) : ('neutral' as const);
+  s === 'Active'
+    ? ('success' as const)
+    : s === 'Paused'
+      ? ('warning' as const)
+      : ('neutral' as const);
 
 const COLUMNS: DataGridColumn<Row>[] = [
-  { key: 'name', header: 'Project', sortable: true, cell: (r) => <span className="font-medium">{r.name}</span> },
+  {
+    key: 'name',
+    header: 'Project',
+    sortable: true,
+    cell: (r) => <span className="font-medium">{r.name}</span>,
+  },
   {
     key: 'owner',
     header: 'Owner',
@@ -41,7 +99,15 @@ const COLUMNS: DataGridColumn<Row>[] = [
       </span>
     ),
   },
-  { key: 'status', header: 'Status', cell: (r) => <Badge tone={tone(r.status)} dot>{r.status}</Badge> },
+  {
+    key: 'status',
+    header: 'Status',
+    cell: (r) => (
+      <Badge tone={tone(r.status)} dot>
+        {r.status}
+      </Badge>
+    ),
+  },
   {
     key: 'spend',
     header: 'Spend / mo',
@@ -69,7 +135,10 @@ function FullDemo() {
       out = [...out].sort((a, b) => {
         const av = a[sort.key as keyof Row];
         const bv = b[sort.key as keyof Row];
-        return (typeof av === 'number' ? av - (bv as number) : String(av).localeCompare(String(bv))) * dir;
+        return (
+          (typeof av === 'number' ? av - (bv as number) : String(av).localeCompare(String(bv))) *
+          dir
+        );
       });
     }
     return out;
@@ -87,7 +156,11 @@ function FullDemo() {
         <EmptyState
           title="No projects match"
           description={`Nothing matches “${query}”. Try a different name or owner.`}
-          action={<Button variant="outline" size="sm" onClick={() => setQuery('')}>Clear filter</Button>}
+          action={
+            <Button variant="outline" size="sm" onClick={() => setQuery('')}>
+              Clear filter
+            </Button>
+          }
         />
       }
     />
@@ -137,31 +210,134 @@ const rows = useMemo(() => sortAndFilter(ROWS, query, sort), [query, sort]);
       preview: <LoadingDemo />,
       code: `<DataGrid columns={columns} rows={[]} loading />`,
     },
+    {
+      title: 'States',
+      description:
+        '`loading` swaps rows for Skeletons while keeping column widths; `emptyState` renders inside the body when `rows` is empty — use different copy for first-run vs. filtered.',
+      preview: (
+        <div className="grid w-full gap-6">
+          <DataGrid className="w-full" columns={COLUMNS} rows={[]} loading />
+          <DataGrid
+            className="w-full"
+            columns={COLUMNS}
+            rows={[]}
+            emptyState={
+              <EmptyState
+                icon={<Search className="size-6" />}
+                title="No members match"
+                description="Adjust the search or clear the filter."
+                action={
+                  <Button variant="outline" size="sm">
+                    Clear filters
+                  </Button>
+                }
+                className="border-0 bg-transparent"
+              />
+            }
+          />
+        </div>
+      ),
+      code: `{/* Loading */}
+<DataGrid columns={columns} rows={[]} loading />
+
+{/* Filtered empty — keep the header so the user can clear filters */}
+<DataGrid
+  columns={columns}
+  rows={[]}
+  emptyState={
+    <EmptyState
+      icon={<Search className="size-6" />}
+      title="No members match"
+      description="Adjust the search or clear the filter."
+      action={<Button variant="outline" size="sm">Clear filters</Button>}
+    />
+  }
+/>`,
+    },
   ],
   api: [
     {
       title: 'DataGrid props',
       rows: [
-        { name: 'rows', type: 'T[]', required: true, description: 'Row data. Each row must have a stable id.' },
-        { name: 'columns', type: 'DataGridColumn<T>[]', required: true, description: 'Column descriptors.' },
-        { name: 'sort', type: `{ key: string; direction: 'asc' | 'desc' } | null`, description: 'Controlled sort state.' },
-        { name: 'onSortChange', type: '(sort) => void', description: 'Fires when a sortable header is clicked.' },
-        { name: 'filter', type: '{ value, onChange, placeholder? }', description: 'Renders the filter input row above the grid.' },
-        { name: 'loading', type: 'boolean', default: 'false', description: 'Skeleton rows while data loads.' },
-        { name: 'emptyState', type: 'ReactNode', description: 'Shown when rows is empty (and not loading).' },
+        {
+          name: 'rows',
+          type: 'T[]',
+          required: true,
+          description: 'Row data. Each row must have a stable id.',
+        },
+        {
+          name: 'columns',
+          type: 'DataGridColumn<T>[]',
+          required: true,
+          description: 'Column descriptors.',
+        },
+        {
+          name: 'sort',
+          type: `{ key: string; direction: 'asc' | 'desc' } | null`,
+          description: 'Controlled sort state.',
+        },
+        {
+          name: 'onSortChange',
+          type: '(sort) => void',
+          description: 'Fires when a sortable header is clicked.',
+        },
+        {
+          name: 'filter',
+          type: '{ value, onChange, placeholder? }',
+          description: 'Renders the filter input row above the grid.',
+        },
+        {
+          name: 'loading',
+          type: 'boolean',
+          default: 'false',
+          description: 'Skeleton rows while data loads.',
+        },
+        {
+          name: 'emptyState',
+          type: 'ReactNode',
+          description: 'Shown when rows is empty (and not loading).',
+        },
       ],
     },
     {
       title: 'DataGridColumn<T>',
       rows: [
-        { name: 'key', type: 'string', required: true, description: 'Stable key for visibility, sort, and React lists.' },
+        {
+          name: 'key',
+          type: 'string',
+          required: true,
+          description: 'Stable key for visibility, sort, and React lists.',
+        },
         { name: 'header', type: 'ReactNode', required: true, description: 'Header label.' },
-        { name: 'sortable', type: 'boolean', default: 'false', description: 'Render as a TableSortHeader.' },
-        { name: 'cell', type: '(row: T) => ReactNode', description: 'Custom cell renderer; defaults to row[key].' },
-        { name: 'align', type: `'left' | 'right'`, default: `'left'`, description: 'Right-align numeric / monetary columns.' },
-        { name: 'width', type: 'string', description: 'CSS width (e.g. "120px", "20%") — keeps shape while loading.' },
+        {
+          name: 'sortable',
+          type: 'boolean',
+          default: 'false',
+          description: 'Render as a TableSortHeader.',
+        },
+        {
+          name: 'cell',
+          type: '(row: T) => ReactNode',
+          description: 'Custom cell renderer; defaults to row[key].',
+        },
+        {
+          name: 'align',
+          type: `'left' | 'right'`,
+          default: `'left'`,
+          description: 'Right-align numeric / monetary columns.',
+        },
+        {
+          name: 'width',
+          type: 'string',
+          description: 'CSS width (e.g. "120px", "20%") — keeps shape while loading.',
+        },
       ],
     },
+  ],
+  accessibility: [
+    'Renders a native <table> with <thead>/<tbody>, so screen readers announce row/column context.',
+    'Sortable headers expose aria-sort; the filter input has an accessible label.',
+    'Loading rows are aria-hidden Skeletons — the grid keeps its column layout so focus does not jump.',
   ],
   related: [
     { slug: 'pagination', reason: 'For paginated tables.' },

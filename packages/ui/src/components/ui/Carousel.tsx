@@ -1,7 +1,19 @@
-import { createContext, forwardRef, useCallback, useContext, useEffect, useState, type HTMLAttributes } from 'react';
+'use client';
+
+import {
+  createContext,
+  forwardRef,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type HTMLAttributes,
+} from 'react';
 import useEmblaCarousel, { type UseEmblaCarouselType } from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight } from '@/icons';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
+import { formatString } from '@/lib/strings';
 import { IconButton } from './IconButton';
 
 type CarouselApi = UseEmblaCarouselType[1];
@@ -15,6 +27,7 @@ interface CarouselContextValue {
   scrollPrev: () => void;
   scrollNext: () => void;
   orientation: 'horizontal' | 'vertical';
+  slideCount: number;
 }
 
 const CarouselContext = createContext<CarouselContextValue | null>(null);
@@ -39,9 +52,14 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(function Carou
   { opts, orientation = 'horizontal', setApi, className, children, ...props },
   ref,
 ) {
-  const [carouselRef, api] = useEmblaCarousel({ ...opts, axis: orientation === 'horizontal' ? 'x' : 'y' });
+  const strings = useStrings();
+  const [carouselRef, api] = useEmblaCarousel({
+    ...opts,
+    axis: orientation === 'horizontal' ? 'x' : 'y',
+  });
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
+  const [slideCount, setSlideCount] = useState(0);
 
   const onSelect = useCallback((api: CarouselApi) => {
     if (!api) return;
@@ -59,6 +77,16 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(function Carou
     };
   }, [api, onSelect, setApi]);
 
+  useEffect(() => {
+    if (!api) return;
+    const count = () => setSlideCount(api.slideNodes().length);
+    count();
+    api.on('reInit', count);
+    return () => {
+      api.off('reInit', count);
+    };
+  }, [api]);
+
   return (
     <CarouselContext.Provider
       value={{
@@ -69,14 +97,23 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(function Carou
         scrollPrev: () => api?.scrollPrev(),
         scrollNext: () => api?.scrollNext(),
         orientation,
+        slideCount,
       }}
     >
-      <div ref={ref} className={cn('relative', className)} role="region" aria-roledescription="carousel" {...props}>
+      <div
+        ref={ref}
+        className={cn('relative', className)}
+        role="region"
+        aria-roledescription="carousel"
+        aria-label={props['aria-label'] ?? (props['aria-labelledby'] ? undefined : strings.carousel.label)}
+        {...props}
+      >
         {children}
       </div>
     </CarouselContext.Provider>
   );
 });
+Carousel.displayName = 'Carousel';
 
 export const CarouselContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   function CarouselContent({ className, ...props }, ref) {
@@ -96,31 +133,46 @@ export const CarouselContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDiv
     );
   },
 );
+CarouselContent.displayName = 'CarouselContent';
 
-export const CarouselItem = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  function CarouselItem({ className, ...props }, ref) {
-    const { orientation } = useCarousel();
-    return (
-      <div
-        ref={ref}
-        role="group"
-        aria-roledescription="slide"
-        className={cn(
-          'min-w-0 shrink-0 grow-0 basis-full',
-          orientation === 'horizontal' ? 'pl-4' : 'pt-4',
-          className,
-        )}
-        {...props}
-      />
-    );
-  },
-);
+export interface CarouselItemProps extends HTMLAttributes<HTMLDivElement> {
+  /** 0-based position, used for the default "{i+1} of {n}" label. */
+  index?: number;
+}
+
+export const CarouselItem = forwardRef<HTMLDivElement, CarouselItemProps>(function CarouselItem(
+  { className, index, ...props },
+  ref,
+) {
+  const strings = useStrings();
+  const { orientation, slideCount } = useCarousel();
+  const defaultLabel =
+    index !== undefined && slideCount > 0
+      ? formatString(strings.carousel.slide, { index: index + 1, count: slideCount })
+      : undefined;
+  return (
+    <div
+      ref={ref}
+      role="group"
+      aria-roledescription="slide"
+      aria-label={props['aria-label'] ?? defaultLabel}
+      className={cn(
+        'min-w-0 shrink-0 grow-0 basis-full',
+        orientation === 'horizontal' ? 'pl-4' : 'pt-4',
+        className,
+      )}
+      {...props}
+    />
+  );
+});
+CarouselItem.displayName = 'CarouselItem';
 
 export function CarouselPrevious({ className }: { className?: string }) {
   const { canPrev, scrollPrev, orientation } = useCarousel();
+  const strings = useStrings();
   return (
     <IconButton
-      aria-label="Previous"
+      aria-label={strings.carousel.previous}
       variant="outline"
       disabled={!canPrev}
       onClick={scrollPrev}
@@ -128,7 +180,7 @@ export function CarouselPrevious({ className }: { className?: string }) {
       className={cn(
         'absolute z-10',
         orientation === 'horizontal'
-          ? '-left-12 top-1/2 -translate-y-1/2'
+          ? 'top-1/2 -left-12 -translate-y-1/2'
           : '-top-12 left-1/2 -translate-x-1/2 rotate-90',
         className,
       )}
@@ -138,9 +190,10 @@ export function CarouselPrevious({ className }: { className?: string }) {
 
 export function CarouselNext({ className }: { className?: string }) {
   const { canNext, scrollNext, orientation } = useCarousel();
+  const strings = useStrings();
   return (
     <IconButton
-      aria-label="Next"
+      aria-label={strings.carousel.next}
       variant="outline"
       disabled={!canNext}
       onClick={scrollNext}
@@ -148,7 +201,7 @@ export function CarouselNext({ className }: { className?: string }) {
       className={cn(
         'absolute z-10',
         orientation === 'horizontal'
-          ? '-right-12 top-1/2 -translate-y-1/2'
+          ? 'top-1/2 -right-12 -translate-y-1/2'
           : '-bottom-12 left-1/2 -translate-x-1/2 rotate-90',
         className,
       )}

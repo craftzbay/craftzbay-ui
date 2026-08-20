@@ -1,6 +1,9 @@
+'use client';
+
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { Check } from '@/icons';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
 
 export interface Step {
   /** Step heading. */
@@ -40,10 +43,11 @@ export const Stepper = forwardRef<HTMLOListElement, StepperProps>(function Stepp
   { steps, current, orientation = 'horizontal', className, ...props },
   ref,
 ) {
+  const strings = useStrings();
   return (
     <ol
       ref={ref}
-      aria-label="Progress"
+      aria-label={props['aria-label'] ?? strings.stepper.label}
       className={cn(
         orientation === 'horizontal' ? 'flex w-full items-center' : 'flex flex-col gap-6',
         className,

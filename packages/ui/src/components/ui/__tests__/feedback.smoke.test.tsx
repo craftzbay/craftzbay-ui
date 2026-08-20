@@ -57,10 +57,10 @@ describe('Feedback (smoke)', () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 
-  it('ErrorState 404 renders alert role + default content', () => {
+  it('ErrorState 404 renders default content without a live-region role', () => {
     render(<ErrorState variant="404" />);
-    expect(screen.getByRole('alert')).toBeInTheDocument();
-    expect(screen.getByText('Page not found')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Page not found' })).toBeInTheDocument();
   });
 
   it('ErrorState is axe-clean', async () => {

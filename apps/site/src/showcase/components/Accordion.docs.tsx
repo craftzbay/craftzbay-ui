@@ -1,4 +1,9 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/Accordion';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/Accordion';
 import type { ComponentDoc } from '../registry/types';
 
 const doc: ComponentDoc = {
@@ -40,9 +45,23 @@ const doc: ComponentDoc = {
     {
       title: 'Accordion (root)',
       rows: [
-        { name: 'type', type: `'single' | 'multiple'`, required: true, description: 'Selection mode.' },
-        { name: 'collapsible', type: 'boolean', default: 'false', description: 'Allow closing the active item (single mode).' },
-        { name: 'value / defaultValue', type: 'string | string[]', description: 'Controlled / uncontrolled value.' },
+        {
+          name: 'type',
+          type: `'single' | 'multiple'`,
+          required: true,
+          description: 'Selection mode.',
+        },
+        {
+          name: 'collapsible',
+          type: 'boolean',
+          default: 'false',
+          description: 'Allow closing the active item (single mode).',
+        },
+        {
+          name: 'value / defaultValue',
+          type: 'string | string[]',
+          description: 'Controlled / uncontrolled value.',
+        },
         { name: 'onValueChange', type: '(v) => void', description: 'Fires on open/close.' },
       ],
     },
@@ -50,9 +69,13 @@ const doc: ComponentDoc = {
   accessibility: [
     'Backed by @radix-ui/react-accordion — Arrow keys cycle headers, Enter/Space toggles.',
   ],
-  related: [
-    { slug: 'tabs', reason: 'Horizontal alternative.' },
+  keyboard: [
+    { key: 'Tab / Shift+Tab', action: 'Move focus between accordion headers.' },
+    { key: 'Enter / Space', action: 'Toggle the focused item.' },
+    { key: 'ArrowDown / ArrowUp', action: 'Move focus to the next / previous header.' },
+    { key: 'Home / End', action: 'Move focus to the first / last header.' },
   ],
+  related: [{ slug: 'tabs', reason: 'Horizontal alternative.' }],
 };
 
 export default doc;

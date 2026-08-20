@@ -16,7 +16,7 @@ export function ShowcaseFooter() {
           <p className="max-w-xs text-xs text-foreground-muted">
             Refined-minimal Tailwind v4 + React design system. MIT-licensed.
           </p>
-          <p className="text-[11px] text-foreground-subtle">
+          <p className="text-xs text-foreground-subtle">
             © {year} craftzbay · v{VERSION}
           </p>
         </div>
@@ -61,7 +61,7 @@ function Column({
 }) {
   return (
     <div>
-      <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-foreground-subtle">
+      <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-foreground-subtle">
         {title}
       </div>
       <ul className="space-y-1.5">

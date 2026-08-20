@@ -26,11 +26,50 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      # Non-blocking until the pre-existing a11y/lint findings in apps/site and
+      # packages/ui components are cleared (see eslint.config.js).
+      - name: Lint
+        run: pnpm lint
+        continue-on-error: true
+
       - name: Test
         run: pnpm test
 
       - name: Build library
         run: pnpm build:lib
 
+      - name: publint
+        run: pnpm publint
+
+      - name: Are the types wrong
+        run: pnpm attw
+
+      - name: Bundle size budget
+        run: pnpm size
+
+      - name: create-app smoke
+        run: pnpm test:create-app
+
       - name: Build showcase
         run: pnpm build
+
+  # Library peer range is ^18 || ^19 — run the component tests against React 19.
+  test-react-19:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install React 19 in packages/ui
+        run: pnpm --filter @craftzbay/ui add -D react@19 react-dom@19 @types/react@19 @types/react-dom@19 @testing-library/react@16
+
+      - name: Test (React 19)
+        run: pnpm test

@@ -1,6 +1,9 @@
+'use client';
+
 import { useMemo, useState, type ReactNode } from 'react';
 import { Settings } from '@/icons';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -84,6 +87,7 @@ export function DataGrid<TRow extends { id: string | number }>({
   emptyState,
   className,
 }: DataGridProps<TRow>) {
+  const strings = useStrings();
   const [hidden, setHidden] = useState<Record<string, boolean>>({});
   const visibleColumns = useMemo(() => columns.filter((c) => !hidden[c.key]), [columns, hidden]);
 
@@ -104,7 +108,7 @@ export function DataGrid<TRow extends { id: string | number }>({
         <TableRow>
           <TableCell colSpan={visibleColumns.length} className="h-32 text-center">
             {emptyState ?? (
-              <span className="text-foreground-subtle">No results.</span>
+              <span className="text-foreground-subtle">{strings.dataGrid.empty}</span>
             )}
           </TableCell>
         </TableRow>
@@ -130,14 +134,14 @@ export function DataGrid<TRow extends { id: string | number }>({
         {filter ? (
           <Input
             type="search"
-            placeholder={filter.placeholder ?? 'Filter…'}
+            placeholder={filter.placeholder ?? strings.dataGrid.filterPlaceholder}
             value={filter.value}
             onChange={(e) => filter.onChange(e.target.value)}
             clearable
             onClear={() => filter.onChange('')}
             className="max-w-sm w-full"
             hideLabel
-            label="Filter rows"
+            label={strings.dataGrid.filterRows}
           />
         ) : (
           <div />
@@ -145,10 +149,10 @@ export function DataGrid<TRow extends { id: string | number }>({
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <IconButton aria-label="Column visibility" icon={<Settings />} variant="outline" />
+              <IconButton aria-label={strings.dataGrid.columnVisibility} icon={<Settings />} variant="outline" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuLabel>Columns</DropdownMenuLabel>
+              <DropdownMenuLabel>{strings.dataGrid.columns}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {columns.map((c) => (
                 <DropdownMenuCheckboxItem

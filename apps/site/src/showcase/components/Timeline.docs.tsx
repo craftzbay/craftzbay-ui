@@ -16,15 +16,15 @@ const doc: ComponentDoc = {
         <Timeline className="w-full max-w-sm">
           <TimelineItem>
             <TimelineTitle>Merged PR #142</TimelineTitle>
-            <p className="text-xs text-foreground-muted">2 hours ago by Avery</p>
+            <p className="text-foreground-muted text-xs">2 hours ago by Avery</p>
           </TimelineItem>
           <TimelineItem>
             <TimelineTitle>Opened PR #143</TimelineTitle>
-            <p className="text-xs text-foreground-muted">3 hours ago by Jordan</p>
+            <p className="text-foreground-muted text-xs">3 hours ago by Jordan</p>
           </TimelineItem>
           <TimelineItem isLast>
             <TimelineTitle>Pushed 4 commits to main</TimelineTitle>
-            <p className="text-xs text-foreground-muted">yesterday by Sam</p>
+            <p className="text-foreground-muted text-xs">yesterday by Sam</p>
           </TimelineItem>
         </Timeline>
       ),
@@ -42,10 +42,24 @@ const doc: ComponentDoc = {
     {
       title: 'TimelineItem',
       rows: [
-        { name: 'isLast', type: 'boolean', default: 'false', description: 'Skips the connector line after this item.' },
-        { name: 'icon', type: 'ReactNode', description: 'Custom dot / icon (defaults to a small dot).' },
+        {
+          name: 'isLast',
+          type: 'boolean',
+          default: 'false',
+          description: 'Skips the connector line after this item.',
+        },
+        {
+          name: 'icon',
+          type: 'ReactNode',
+          description: 'Custom dot / icon (defaults to a small dot).',
+        },
       ],
     },
+  ],
+  accessibility: [
+    'Renders an ordered list (<ol>/<li>) so item count and position are announced.',
+    'Bullets and connector lines are aria-hidden — put dates and meaning in the item text.',
+    'Use <TimelineTitle> for the heading of each item so the list reads as a sequence of events.',
   ],
 };
 

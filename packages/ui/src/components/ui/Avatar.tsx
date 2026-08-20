@@ -1,3 +1,5 @@
+'use client';
+
 import {
   forwardRef,
   type ComponentPropsWithoutRef,
@@ -7,10 +9,12 @@ import {
 } from 'react';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
+import { formatString } from '@/lib/strings';
 import { cva, type VariantProps } from '@/lib/cva';
 
 const sizeMap = {
-  xs: 'size-5 text-[10px]',
+  xs: 'size-5 text-xs',
   sm: 'size-6 text-xs',
   md: 'size-8 text-xs',
   lg: 'size-10 text-sm',
@@ -60,6 +64,7 @@ const statusColour: Record<NonNullable<AvatarProps['status']>, string> = {
  */
 export const Avatar = forwardRef<ElementRef<typeof AvatarPrimitive.Root>, AvatarProps>(
   function Avatar({ className, size, src, alt, fallback, status, ...props }, ref) {
+    const strings = useStrings();
     return (
       <span className={avatarWrapper({ size })}>
         <AvatarPrimitive.Root
@@ -86,7 +91,7 @@ export const Avatar = forwardRef<ElementRef<typeof AvatarPrimitive.Root>, Avatar
         </AvatarPrimitive.Root>
         {status && (
           <span
-            aria-label={`Status: ${status}`}
+            aria-label={formatString(strings.avatar.status, { status })}
             className={cn(
               'absolute bottom-0 right-0 block size-[28%] rounded-full ring-2 ring-background',
               statusColour[status],
@@ -115,6 +120,7 @@ export const AvatarGroup = forwardRef<HTMLDivElement, AvatarGroupProps>(function
   { max = 4, size = 'md', className, children, ...props },
   ref,
 ) {
+  const strings = useStrings();
   const items = Array.isArray(children) ? children : [children];
   const visible = items.slice(0, max);
   const overflow = items.length - visible.length;
@@ -133,7 +139,7 @@ export const AvatarGroup = forwardRef<HTMLDivElement, AvatarGroupProps>(function
             sizeMap[size],
             'font-medium',
           )}
-          aria-label={`${overflow} more`}
+          aria-label={formatString(strings.avatar.more, { n: overflow })}
         >
           +{overflow}
         </div>

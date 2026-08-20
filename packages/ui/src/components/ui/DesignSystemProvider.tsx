@@ -1,5 +1,9 @@
-import { type CSSProperties, type HTMLAttributes, type ReactNode } from 'react';
+'use client';
+
+import { useMemo, type CSSProperties, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { StringsContext, useStrings } from '@/hooks/use-strings';
+import { mergeStrings, type DeepPartial, type UiStrings } from '@/lib/strings';
 
 /**
  * Per-brand token overrides. Keys are CSS variable names (without the `--`
@@ -21,12 +25,19 @@ export type BrandTokens = Record<string, string>;
 export interface DesignSystemProviderProps extends HTMLAttributes<HTMLDivElement> {
   /** Token overrides (CSS variable name → value). */
   tokens?: BrandTokens;
+  /**
+   * Override any of the library's built-in UI strings (aria-labels,
+   * placeholders, empty states). Partial — merged over the parent provider /
+   * English defaults. Pass `mnStrings` for Mongolian.
+   */
+  strings?: DeepPartial<UiStrings>;
   /** Children to scope this brand to. */
   children: ReactNode;
 }
 
 export function DesignSystemProvider({
   tokens,
+  strings,
   className,
   children,
   style,
@@ -35,6 +46,11 @@ export function DesignSystemProvider({
   // Build the inline style from tokens — wrapping every key with `--` so
   // consumers can pass either `accent` or `color-accent` without remembering
   // the prefix dance.
+  const parentStrings = useStrings();
+  const resolvedStrings = useMemo(
+    () => mergeStrings(parentStrings, strings),
+    [parentStrings, strings],
+  );
   const css: CSSProperties = { ...style };
   if (tokens) {
     for (const [k, v] of Object.entries(tokens)) {
@@ -44,9 +60,11 @@ export function DesignSystemProvider({
   }
 
   return (
-    <div data-brand-scope className={cn('contents', className)} style={css} {...props}>
-      {children}
-    </div>
+    <StringsContext.Provider value={resolvedStrings}>
+      <div data-brand-scope className={cn('contents', className)} style={css} {...props}>
+        {children}
+      </div>
+    </StringsContext.Provider>
   );
 }
 

@@ -10,6 +10,8 @@
  *   #guides/theming         → individual guide
  *   #catalog                → legacy: full mini-demo wall
  *   #preview/auth-signin    → full-bleed live preview of a template
+ *   #preview/auth/signup    → …opened at a specific screen
+ *   anything else           → 404
  */
 
 export type Route =
@@ -21,7 +23,8 @@ export type Route =
   | { kind: 'template'; slug: string }
   | { kind: 'guides-index' }
   | { kind: 'guide'; slug: string }
-  | { kind: 'preview'; slug: string };
+  | { kind: 'preview'; slug: string; screen?: string }
+  | { kind: 'not-found' };
 
 export function parseHash(hash: string): Route {
   const raw = hash.replace(/^#/, '');
@@ -32,11 +35,11 @@ export function parseHash(hash: string): Route {
   if (raw === 'templates') return { kind: 'templates-index' };
   if (raw === 'guides' || raw === 'docs') return { kind: 'guides-index' };
 
-  const [section, slug] = raw.split('/');
+  const [section, slug, screen] = raw.split('/');
   if (section === 'components' && slug) return { kind: 'component', slug };
   if (section === 'templates' && slug) return { kind: 'template', slug };
   if ((section === 'guides' || section === 'docs') && slug) return { kind: 'guide', slug };
-  if (section === 'preview' && slug) return { kind: 'preview', slug };
+  if (section === 'preview' && slug) return screen ? { kind: 'preview', slug, screen } : { kind: 'preview', slug };
 
   // Back-compat: legacy single-segment hashes like #dashboard, #auth-signin,
   // #settings used to be top-level pattern keys. Map them to live previews.
@@ -55,7 +58,7 @@ export function parseHash(hash: string): Route {
   };
   if (legacy[raw]) return { kind: 'preview', slug: legacy[raw] };
 
-  return { kind: 'home' };
+  return { kind: 'not-found' };
 }
 
 export function routeToHash(route: Route): string {
@@ -77,7 +80,9 @@ export function routeToHash(route: Route): string {
     case 'guide':
       return `guides/${route.slug}`;
     case 'preview':
-      return `preview/${route.slug}`;
+      return route.screen ? `preview/${route.slug}/${route.screen}` : `preview/${route.slug}`;
+    case 'not-found':
+      return '404';
   }
 }
 
@@ -91,10 +96,10 @@ export function isFullBleedRoute(route: Route): boolean {
  * `target="_blank"` so a template opens in its own browser tab, isolated from
  * the showcase chrome — the headline behaviour of the Templates section.
  */
-export function previewUrl(slug: string): string {
+export function previewUrl(slug: string, screen?: string): string {
   const base =
     typeof window === 'undefined'
       ? ''
       : `${window.location.origin}${window.location.pathname}${window.location.search}`;
-  return `${base}#${routeToHash({ kind: 'preview', slug })}`;
+  return `${base}#${routeToHash(screen ? { kind: 'preview', slug, screen } : { kind: 'preview', slug })}`;
 }

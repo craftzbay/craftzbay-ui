@@ -1,14 +1,20 @@
+'use client';
+
 import {
   forwardRef,
+  useId,
   type ComponentPropsWithoutRef,
   type ElementRef,
   type ReactNode,
 } from 'react';
 import * as SliderPrimitive from '@radix-ui/react-slider';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
 
-export interface SliderProps
-  extends Omit<ComponentPropsWithoutRef<typeof SliderPrimitive.Root>, 'value' | 'defaultValue'> {
+export interface SliderProps extends Omit<
+  ComponentPropsWithoutRef<typeof SliderPrimitive.Root>,
+  'value' | 'defaultValue'
+> {
   /**
    * Controlled value. Pass `[n]` for a single-thumb slider, `[a, b]` for a range slider.
    */
@@ -41,27 +47,34 @@ export interface SliderProps
  */
 export const Slider = forwardRef<ElementRef<typeof SliderPrimitive.Root>, SliderProps>(
   function Slider(
-    {
-      className,
-      label,
-      showValue,
-      formatValue = (v) => String(v),
-      value,
-      defaultValue,
-      ...props
-    },
+    { className, label, showValue, formatValue = (v) => String(v), value, defaultValue, ...props },
     ref,
   ) {
     const currentValue = value ?? defaultValue ?? [0];
     const isRange = currentValue.length > 1;
+    const labelId = useId();
+    const strings = useStrings();
+    // Only a string label can double as aria-label; ReactNode labels are
+    // referenced by id instead.
+    const stringLabel = typeof label === 'string' ? label : undefined;
+    const thumbLabel = (i: number) =>
+      isRange
+        ? i === 0
+          ? strings.slider.minimum
+          : strings.slider.maximum
+        : (stringLabel ?? props['aria-label'] ?? strings.slider.value);
 
     return (
       <div className={cn('flex flex-col gap-2', className)}>
         {(label || showValue) && (
           <div className="flex items-center justify-between">
-            {label && <span className="text-sm font-medium text-foreground">{label}</span>}
+            {label && (
+              <span id={labelId} className="text-foreground text-sm font-medium">
+                {label}
+              </span>
+            )}
             {showValue && (
-              <span className="text-xs tabular text-foreground-muted font-mono">
+              <span className="tabular text-foreground-muted font-mono text-xs">
                 {isRange
                   ? `${formatValue(currentValue[0])} – ${formatValue(currentValue[1])}`
                   : formatValue(currentValue[0])}
@@ -74,22 +87,26 @@ export const Slider = forwardRef<ElementRef<typeof SliderPrimitive.Root>, Slider
           ref={ref}
           value={value}
           defaultValue={defaultValue}
-          className="relative flex w-full touch-none select-none items-center"
+          className="relative flex w-full touch-none items-center py-3.5 select-none"
+          aria-labelledby={label && !stringLabel ? labelId : undefined}
           {...props}
         >
-          <SliderPrimitive.Track className="relative h-1 w-full grow overflow-hidden rounded-full bg-background-muted">
-            <SliderPrimitive.Range className="absolute h-full bg-accent" />
+          <SliderPrimitive.Track className="bg-background-muted relative h-1 w-full grow overflow-hidden rounded-full">
+            <SliderPrimitive.Range className="bg-accent absolute h-full" />
           </SliderPrimitive.Track>
           {currentValue.map((_, i) => (
             <SliderPrimitive.Thumb
               key={i}
               className={cn(
-                'block size-4 rounded-full border-2 border-accent bg-card shadow-sm',
-                'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                'border-accent bg-card relative block size-4 rounded-full border-2 shadow-sm',
+                // 44px touch target without growing the visible thumb.
+                'before:absolute before:top-1/2 before:left-1/2 before:size-11 before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:content-[""]',
+                'focus-visible:ring-ring focus-visible:ring-offset-background outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
                 'transition-transform duration-[var(--duration-fast)] ease-[var(--ease-out)]',
                 'hover:scale-110 disabled:pointer-events-none disabled:opacity-50',
               )}
-              aria-label={isRange ? (i === 0 ? 'Minimum' : 'Maximum') : (label ? String(label) : 'Value')}
+              aria-label={thumbLabel(i)}
+              aria-labelledby={!isRange && label && !stringLabel ? labelId : undefined}
             />
           ))}
         </SliderPrimitive.Root>

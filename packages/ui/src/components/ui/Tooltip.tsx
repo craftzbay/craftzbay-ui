@@ -1,3 +1,5 @@
+'use client';
+
 import {
   forwardRef,
   type ComponentPropsWithoutRef,
@@ -37,8 +39,7 @@ export const TooltipContent = forwardRef<
         sideOffset={sideOffset}
         className={cn(
           'z-[var(--z-tooltip)] overflow-hidden rounded-md px-2 py-1 text-xs font-medium',
-          'bg-neutral-900 text-neutral-50',
-          'dark:bg-neutral-50 dark:text-neutral-900',
+          'bg-tooltip text-tooltip-foreground',
           'shadow-sm max-w-xs',
           'data-[state=open]:animate-in data-[state=closed]:animate-out',
           'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',

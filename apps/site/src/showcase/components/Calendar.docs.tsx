@@ -20,17 +20,38 @@ const doc: ComponentDoc = {
   api: [
     {
       rows: [
-        { name: 'mode', type: `'single' | 'range' | 'multiple'`, default: `'single'`, description: 'Selection mode.' },
-        { name: 'selected', type: 'Date | DateRange | Date[]', description: 'Controlled selection.' },
+        {
+          name: 'mode',
+          type: `'single' | 'range' | 'multiple'`,
+          default: `'single'`,
+          description: 'Selection mode.',
+        },
+        {
+          name: 'selected',
+          type: 'Date | DateRange | Date[]',
+          description: 'Controlled selection.',
+        },
         { name: 'onSelect', type: '(value) => void', description: 'Fires on day click.' },
         { name: 'startMonth / endMonth', type: 'Date', description: 'Navigation bounds.' },
-        { name: 'showOutsideDays', type: 'boolean', default: 'true', description: 'Render days from adjacent months.' },
+        {
+          name: 'showOutsideDays',
+          type: 'boolean',
+          default: 'true',
+          description: 'Render days from adjacent months.',
+        },
       ],
     },
   ],
   accessibility: [
     'Renders as a real ARIA grid; days are buttons with aria-pressed for selection.',
     'Respects locale via Intl.DateTimeFormat — weekday headers reflect user locale.',
+  ],
+  keyboard: [
+    { key: 'ArrowLeft / ArrowRight', action: 'Move focus one day back / forward.' },
+    { key: 'ArrowUp / ArrowDown', action: 'Move focus one week back / forward.' },
+    { key: 'PageUp / PageDown', action: 'Previous / next month (with Shift: year).' },
+    { key: 'Home / End', action: 'First / last day of the week.' },
+    { key: 'Enter / Space', action: 'Select the focused day.' },
   ],
   related: [{ slug: 'date-picker', reason: 'Calendar in a dropdown.' }],
 };

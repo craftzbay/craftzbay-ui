@@ -13,7 +13,13 @@ const doc: ComponentDoc = {
   group: 'Overlays',
   description:
     'Right-click menu. Same API surface as DropdownMenu; trigger is whatever element the user right-clicks on.',
-  exports: ['ContextMenu', 'ContextMenuTrigger', 'ContextMenuContent', 'ContextMenuItem', 'ContextMenuSeparator'],
+  exports: [
+    'ContextMenu',
+    'ContextMenuTrigger',
+    'ContextMenuContent',
+    'ContextMenuItem',
+    'ContextMenuSeparator',
+  ],
   sourceFile: 'ContextMenu.tsx',
   examples: [
     {
@@ -21,7 +27,7 @@ const doc: ComponentDoc = {
       preview: (
         <ContextMenu>
           <ContextMenuTrigger asChild>
-            <div className="flex h-24 w-full max-w-md items-center justify-center rounded-md border border-dashed border-border text-xs text-foreground-muted">
+            <div className="border-border text-foreground-muted flex h-24 w-full max-w-md items-center justify-center rounded-md border border-dashed text-xs">
               Right-click anywhere in this box
             </div>
           </ContextMenuTrigger>
@@ -50,9 +56,18 @@ const doc: ComponentDoc = {
     'Triggerable via Shift+F10 / context-menu keyboard key for keyboard users.',
     'Backed by @radix-ui/react-context-menu.',
   ],
-  related: [
-    { slug: 'dropdown-menu', reason: 'For explicit-trigger menus.' },
+  keyboard: [
+    {
+      key: 'Shift+F10 / Menu',
+      action: 'Open the menu from the keyboard on the focused trigger area.',
+    },
+    { key: 'ArrowDown / ArrowUp', action: 'Move focus to the next / previous item (wraps).' },
+    { key: 'Home / End', action: 'Jump to the first / last item.' },
+    { key: 'ArrowRight / ArrowLeft', action: 'Open / close a submenu.' },
+    { key: 'Enter / Space', action: 'Select the focused item and close the menu.' },
+    { key: 'Esc', action: 'Close the menu without selecting.' },
   ],
+  related: [{ slug: 'dropdown-menu', reason: 'For explicit-trigger menus.' }],
 };
 
 export default doc;

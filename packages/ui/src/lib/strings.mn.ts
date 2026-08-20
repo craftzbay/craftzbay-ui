@@ -1,0 +1,70 @@
+'use client';
+
+import type { UiStrings } from './strings';
+
+/** Mongolian (Cyrillic) translation — pass to `<DesignSystemProvider strings={mnStrings}>`. */
+export const mnStrings: UiStrings = {
+  alert: { dismiss: 'Хаах' },
+  snackbar: { dismiss: 'Хаах' },
+  dialog: { close: 'Хаах' },
+  sheet: { close: 'Хаах' },
+  toast: { close: 'Хаах', region: 'Мэдэгдлүүд' },
+  confirmationDialog: { confirm: 'Баталгаажуулах', cancel: 'Болих' },
+  commandDialog: { title: 'Командын самбар' },
+  carousel: { label: 'Гүйлгэгч', previous: 'Өмнөх', next: 'Дараах', slide: '{index} / {count}' },
+  pagination: {
+    showing: '{from}–{to} / {total}',
+    rowsPerPage: 'Хуудас бүрт мөр',
+    first: 'Эхний хуудас',
+    last: 'Сүүлийн хуудас',
+    prev: 'Өмнөх хуудас',
+    next: 'Дараах хуудас',
+    page: '{n}-р хуудас',
+    perPage: 'Хуудас бүрт {n} мөр',
+    nav: 'Хуудаслалт',
+  },
+  breadcrumbs: { label: 'Замчлал' },
+  stepper: { label: 'Явц' },
+  sidebar: {
+    label: 'Үндсэн цэс',
+    collapse: 'Хажуугийн самбарыг хураах',
+    expand: 'Хажуугийн самбарыг дэлгэх',
+    collapseShort: 'Хураах',
+  },
+  combobox: {
+    placeholder: 'Сонгох…',
+    searchPlaceholder: 'Хайх…',
+    empty: 'Илэрц алга',
+    clear: 'Сонголтыг цэвэрлэх',
+  },
+  multiSelect: {
+    placeholder: 'Сонгох…',
+    empty: 'Илэрц алга',
+    clearAll: 'Бүгдийг цэвэрлэх',
+    remove: '{label}-г устгах',
+  },
+  tagInput: { placeholder: 'Бичээд Enter дарна уу', remove: '{tag}-г устгах' },
+  dataGrid: {
+    filterPlaceholder: 'Шүүх…',
+    empty: 'Илэрц алга',
+    columns: 'Баганууд',
+    columnVisibility: 'Багана харуулах',
+    filterRows: 'Мөр шүүх',
+  },
+  datePicker: { pickDate: 'Огноо сонгох', pickRange: 'Хугацааны интервал сонгох' },
+  fileUpload: { drop: 'Файл чирж оруулах эсвэл дарж сонгох', remove: '{name}-г устгах' },
+  input: { clear: 'Цэвэрлэх', showPassword: 'Нууц үг харуулах', hidePassword: 'Нууц үг нуух' },
+  slider: { minimum: 'Доод хязгаар', maximum: 'Дээд хязгаар', value: 'Утга' },
+  spinner: { loading: 'Ачаалж байна' },
+  errorState: {
+    notFoundTitle: 'Хуудас олдсонгүй',
+    notFoundDescription: 'Таны хайсан зүйл олдсонгүй.',
+    serverTitle: 'Алдаа гарлаа',
+    serverDescription: 'Бид шалгаж байна. Хэсэг хугацааны дараа дахин оролдоно уу.',
+    genericTitle: 'Гэнэтийн алдаа',
+    genericDescription: 'Энэ үйлдэл тасалдлаа.',
+    tryAgain: 'Дахин оролдох',
+  },
+  avatar: { status: 'Төлөв: {status}', more: 'бусад {n}' },
+  tree: { label: 'Мод' },
+};

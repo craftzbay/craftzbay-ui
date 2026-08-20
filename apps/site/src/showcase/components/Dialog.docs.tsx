@@ -38,7 +38,17 @@ const doc: ComponentDoc = {
   group: 'Overlays',
   description:
     'Modal that interrupts the user. Reserve for actions that demand focus — confirmations, dense forms, important choices. For side panels prefer Sheet; for transient messages, Toast.',
-  exports: ['Dialog', 'DialogTrigger', 'DialogContent', 'DialogHeader', 'DialogTitle', 'DialogDescription', 'DialogFooter', 'DialogClose', 'ConfirmationDialog'],
+  exports: [
+    'Dialog',
+    'DialogTrigger',
+    'DialogContent',
+    'DialogHeader',
+    'DialogTitle',
+    'DialogDescription',
+    'DialogFooter',
+    'DialogClose',
+    'ConfirmationDialog',
+  ],
   sourceFile: 'Dialog.tsx',
   examples: [
     {
@@ -81,7 +91,9 @@ const doc: ComponentDoc = {
           {(['sm', 'md', 'lg'] as const).map((s) => (
             <Dialog key={s}>
               <DialogTrigger asChild>
-                <Button size="sm" variant="outline">Open {s}</Button>
+                <Button size="sm" variant="outline">
+                  Open {s}
+                </Button>
               </DialogTrigger>
               <DialogContent size={s}>
                 <DialogHeader>
@@ -98,7 +110,8 @@ const doc: ComponentDoc = {
     },
     {
       title: 'ConfirmationDialog',
-      description: 'Pre-composed pattern for "are you sure?" flows. Controlled via open / onOpenChange; renders title + description + Cancel / Confirm.',
+      description:
+        'Pre-composed pattern for "are you sure?" flows. Controlled via open / onOpenChange; renders title + description + Cancel / Confirm.',
       preview: <ConfirmDemo />,
       code: `const [open, setOpen] = useState(false);
 
@@ -126,27 +139,61 @@ const doc: ComponentDoc = {
       rows: [
         { name: 'open', type: 'boolean', description: 'Controlled open state.' },
         { name: 'defaultOpen', type: 'boolean', description: 'Uncontrolled initial state.' },
-        { name: 'onOpenChange', type: '(open: boolean) => void', description: 'Fires when open changes.' },
+        {
+          name: 'onOpenChange',
+          type: '(open: boolean) => void',
+          description: 'Fires when open changes.',
+        },
       ],
     },
     {
       title: 'DialogContent',
       rows: [
         { name: 'size', type: `'sm' | 'md' | 'lg'`, default: `'md'`, description: 'Max width.' },
-        { name: 'showClose', type: 'boolean', default: 'true', description: 'Render the top-right close X.' },
+        {
+          name: 'showClose',
+          type: 'boolean',
+          default: 'true',
+          description: 'Render the top-right close X.',
+        },
       ],
     },
     {
       title: 'ConfirmationDialog',
       rows: [
         { name: 'open', type: 'boolean', required: true, description: 'Controlled open state.' },
-        { name: 'onOpenChange', type: '(open: boolean) => void', required: true, description: 'Fires when open changes.' },
+        {
+          name: 'onOpenChange',
+          type: '(open: boolean) => void',
+          required: true,
+          description: 'Fires when open changes.',
+        },
         { name: 'title', type: 'ReactNode', required: true, description: 'Question.' },
         { name: 'description', type: 'ReactNode', description: 'Explainer body.' },
-        { name: 'confirmLabel', type: 'string', default: `'Confirm'`, description: 'Primary button label.' },
-        { name: 'cancelLabel', type: 'string', default: `'Cancel'`, description: 'Secondary button label.' },
-        { name: 'confirmVariant', type: `ButtonProps['variant']`, default: `'primary'`, description: 'Style of the confirm button.' },
-        { name: 'onConfirm', type: '() => void | Promise<void>', required: true, description: 'Called on confirm. Awaited — spinner shows while pending.' },
+        {
+          name: 'confirmLabel',
+          type: 'string',
+          default: `'Confirm'`,
+          description: 'Primary button label.',
+        },
+        {
+          name: 'cancelLabel',
+          type: 'string',
+          default: `'Cancel'`,
+          description: 'Secondary button label.',
+        },
+        {
+          name: 'confirmVariant',
+          type: `ButtonProps['variant']`,
+          default: `'primary'`,
+          description: 'Style of the confirm button.',
+        },
+        {
+          name: 'onConfirm',
+          type: '() => void | Promise<void>',
+          required: true,
+          description: 'Called on confirm. Awaited — spinner shows while pending.',
+        },
         { name: 'loading', type: 'boolean', description: 'Override the spinner state.' },
       ],
     },
@@ -156,6 +203,28 @@ const doc: ComponentDoc = {
     'Esc closes; click-outside closes (configurable per Radix).',
     'DialogTitle is required for screen readers — Radix will warn if omitted.',
   ],
+  keyboard: [
+    {
+      key: 'Tab / Shift+Tab',
+      action: 'Cycle focus inside the dialog — focus is trapped while open.',
+    },
+    { key: 'Esc', action: 'Close the dialog and return focus to the trigger.' },
+    { key: 'Enter / Space', action: 'Activate the focused button (trigger, Cancel, Confirm, ×).' },
+  ],
+  guidelines: {
+    do: [
+      'Lead the title with the action or question: "Delete project?" rather than "Are you sure?".',
+      'State the consequence in one sentence in `DialogDescription`.',
+      'Put the primary action on the right, Cancel on its left; use `destructive` for irreversible actions.',
+      'Use `ConfirmationDialog` for single-sentence confirms — it wires focus, Esc and buttons for you.',
+    ],
+    dont: [
+      'Open a dialog for reversible, low-risk actions — an Undo toast is lighter.',
+      'Stack a dialog on a dialog; use a Sheet or a new page for deeper flows.',
+      'Put more than ~3 fields in a dialog; use a Sheet (4–8 fields) or a full page.',
+      'Hide the close affordance without providing Cancel.',
+    ],
+  },
   related: [
     { slug: 'sheet', reason: 'Side panel alternative.' },
     { slug: 'drawer', reason: 'Bottom sheet on mobile.' },

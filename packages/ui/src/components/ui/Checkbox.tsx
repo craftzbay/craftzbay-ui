@@ -1,3 +1,5 @@
+'use client';
+
 import { forwardRef, useId, type ComponentPropsWithoutRef, type ElementRef, type ReactNode } from 'react';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { Check, Minus } from '@/icons';
@@ -53,7 +55,7 @@ export const Checkbox = forwardRef<ElementRef<typeof CheckboxPrimitive.Root>, Ch
               'data-[state=checked]:bg-accent data-[state=checked]:border-accent data-[state=checked]:text-on-accent',
               'data-[state=indeterminate]:bg-accent data-[state=indeterminate]:border-accent data-[state=indeterminate]:text-on-accent',
               'disabled:cursor-not-allowed disabled:opacity-50',
-              error ? 'border-danger' : 'border-border-strong',
+              error ? 'border-danger' : 'border-border-input',
             )}
             {...props}
           >

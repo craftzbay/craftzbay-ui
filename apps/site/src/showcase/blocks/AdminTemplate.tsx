@@ -1,12 +1,13 @@
 import { AdminDashboard } from './AdminDashboard';
 
 /**
- * Admin dashboard template — a complete, sellable admin console: a slim icon
- * rail switches areas, each area's child menu renders in the secondary panel,
- * a workspace switcher sits up top, and pages are real and interactive
- * (Projects is full CRUD with search + filter + pagination; Team, Billing,
- * Settings and Inbox each have their own data and actions). The authentication
- * screens live in their own "Authentication" template.
+ * Admin dashboard template — a complete admin console on the library's
+ * Sidebar + TopNav shell (collapsible rail, mobile drawer, ⌘K palette, tenant
+ * in the top bar). Pages are real and interactive — Projects is the full table
+ * pattern (sort, filter chips, debounced search, pagination, bulk actions,
+ * confirm-before-delete, empty + loading states); Team, Billing, Settings and
+ * Inbox each have their own data and actions. Source: ./AdminDashboard.tsx +
+ * ./admin/*. The authentication screens live in the "Authentication" template.
  */
 export function AdminTemplate() {
   return <AdminDashboard />;

@@ -1,3 +1,5 @@
+'use client';
+
 import {
   forwardRef,
   type ComponentPropsWithoutRef,
@@ -46,7 +48,7 @@ export const SelectTrigger = forwardRef<
     <SelectPrimitive.Trigger
       ref={ref}
       className={cn(
-        'inline-flex w-full items-center justify-between gap-2 rounded-md border bg-card text-sm text-foreground',
+        'inline-flex w-full items-center justify-between gap-2 rounded-md border bg-card text-lg md:text-sm text-foreground',
         'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)]',
         'outline-none',
         'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
@@ -56,7 +58,7 @@ export const SelectTrigger = forwardRef<
         size === 'md' && 'h-9 px-3',
         size === 'lg' && 'h-10 px-3.5',
         tone === 'default'
-          ? 'border-border focus-visible:border-accent focus-visible:ring-ring'
+          ? 'border-border-input focus-visible:border-accent focus-visible:ring-ring'
           : 'border-danger focus-visible:border-danger focus-visible:ring-danger',
         className,
       )}

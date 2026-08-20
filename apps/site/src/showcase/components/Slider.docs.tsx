@@ -23,7 +23,9 @@ const doc: ComponentDoc = {
     },
     {
       title: 'Stepped',
-      preview: <Slider defaultValue={[50]} min={0} max={100} step={10} className="w-full max-w-sm" />,
+      preview: (
+        <Slider defaultValue={[50]} min={0} max={100} step={10} className="w-full max-w-sm" />
+      ),
       code: `<Slider defaultValue={[50]} min={0} max={100} step={10} />`,
     },
   ],
@@ -35,14 +37,30 @@ const doc: ComponentDoc = {
         { name: 'min', type: 'number', default: '0', description: 'Minimum.' },
         { name: 'max', type: 'number', default: '100', description: 'Maximum.' },
         { name: 'step', type: 'number', default: '1', description: 'Increment per arrow press.' },
-        { name: 'onValueChange', type: '(value: number[]) => void', description: 'Fires on every move.' },
-        { name: 'disabled', type: 'boolean', default: 'false', description: 'Disables interaction.' },
+        {
+          name: 'onValueChange',
+          type: '(value: number[]) => void',
+          description: 'Fires on every move.',
+        },
+        {
+          name: 'disabled',
+          type: 'boolean',
+          default: 'false',
+          description: 'Disables interaction.',
+        },
       ],
     },
   ],
   accessibility: [
     'Arrow keys: ±step. PageUp/PageDown: ±step×10. Home / End: min / max.',
     'Each handle has aria-valuenow / aria-valuemin / aria-valuemax.',
+  ],
+  keyboard: [
+    { key: 'ArrowRight / ArrowUp', action: 'Increase by one `step`.' },
+    { key: 'ArrowLeft / ArrowDown', action: 'Decrease by one `step`.' },
+    { key: 'PageUp / PageDown', action: 'Change by ten steps.' },
+    { key: 'Home / End', action: 'Jump to `min` / `max`.' },
+    { key: 'Tab', action: 'Move between thumbs in a range slider.' },
   ],
 };
 

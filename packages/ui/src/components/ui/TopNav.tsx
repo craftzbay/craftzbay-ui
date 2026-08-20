@@ -1,3 +1,5 @@
+'use client';
+
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -37,8 +39,7 @@ export const TopNav = forwardRef<HTMLElement, TopNavProps>(function TopNav(
       ref={ref}
       className={cn(
         'sticky top-0 z-[var(--z-sticky)] flex h-14 w-full items-center gap-4',
-        'border-b border-border bg-background/80 px-4 backdrop-blur',
-        'supports-[backdrop-filter]:bg-background/60',
+        'border-b border-border bg-background px-4',
         className,
       )}
       {...props}

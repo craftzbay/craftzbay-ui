@@ -1,6 +1,9 @@
+'use client';
+
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { CheckCircle2, Info, AlertTriangle, XCircle, X } from '@/icons';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
 import { cva, type VariantProps } from '@/lib/cva';
 
 const snackbar = cva(
@@ -52,6 +55,7 @@ export const Snackbar = forwardRef<HTMLDivElement, SnackbarProps>(function Snack
   { className, variant = 'default', title, action, onClose, icon, children, ...props },
   ref,
 ) {
+  const strings = useStrings();
   const renderedIcon = icon === false ? null : icon ?? iconForVariant[variant ?? 'default'];
 
   return (
@@ -66,7 +70,7 @@ export const Snackbar = forwardRef<HTMLDivElement, SnackbarProps>(function Snack
         <button
           type="button"
           onClick={onClose}
-          aria-label="Dismiss"
+          aria-label={strings.snackbar.dismiss}
           className="rounded p-1 text-foreground-muted hover:bg-background-muted hover:text-foreground"
         >
           <X className="size-4" />

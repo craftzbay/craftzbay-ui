@@ -1,5 +1,7 @@
 # Design Philosophy — Refined-Minimal
 
+> The rules below are the library-specific distillation of the [craftzbay design-research](https://github.com/craftzbay/design-research) guidelines ([rendered](https://craftzbay.github.io/design-research/)).
+
 This system is built for **internal product teams** at the company. It must work across
 any product surface, so it favours discipline and clarity over decoration. The visual
 quality bar is Linear, Vercel, Stripe Dashboard, Notion, and Raycast — side by side.

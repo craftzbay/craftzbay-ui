@@ -26,6 +26,29 @@ alias, so editing a component hot-reloads the docs instantly. Templates open in
 their own browser tab, and the brand + theme switchers in the header re-theme
 the whole site — including any open preview tab — live.
 
+## Install (consumers)
+
+```bash
+pnpm add @craftzbay/ui
+```
+
+```css
+@import '@craftzbay/ui/styles.css'; /* no Tailwind in your app */
+/* — or, with Tailwind v4 — */
+@import 'tailwindcss';
+@import '@craftzbay/ui/theme.css';
+@source "../node_modules/@craftzbay/ui/dist-lib";
+```
+
+Add the Geist Google Fonts `<link>`, toggle `.dark` on `<html>` for dark mode, render `<Toaster />` once.
+ESM-only, per-module output: `import { Button }` is ~8 KB gz. Name-addressed icons: `import { Icon } from '@craftzbay/ui/icon'`.
+Full setup (Next.js note, providers) in [`packages/ui/README.md`](./packages/ui/README.md).
+
+## Design rules
+
+The library implements the [craftzbay/design-research](https://github.com/craftzbay/design-research) guidelines
+([rendered](https://craftzbay.github.io/design-research/)); see [`packages/ui/docs/PHILOSOPHY.md`](./packages/ui/docs/PHILOSOPHY.md).
+
 ## Develop
 
 ```bash
@@ -33,6 +56,8 @@ pnpm install
 pnpm dev            # showcase site at localhost:5173
 pnpm typecheck      # every package
 pnpm test           # @craftzbay/ui component tests
+pnpm lint           # eslint (typescript-eslint + react-hooks + jsx-a11y)
+pnpm size           # bundle-size budgets (.size-limit.json)
 pnpm build          # build the library, then the site
 ```
 

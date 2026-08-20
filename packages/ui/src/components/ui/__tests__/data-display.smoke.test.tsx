@@ -72,6 +72,27 @@ describe('Data Display (smoke)', () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 
+  it('TableRow selected exposes aria-selected; TableHead uppercase is opt-in', () => {
+    render(
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Plain</TableHead>
+            <TableHead uppercase>Caps</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow selected>
+            <TableCell>Picked</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>,
+    );
+    expect(screen.getByText('Picked').closest('tr')).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByText('Plain')).not.toHaveClass('uppercase');
+    expect(screen.getByText('Caps')).toHaveClass('uppercase');
+  });
+
   it('DataGrid renders rows', () => {
     const cols: DataGridColumn<Row>[] = [{ key: 'name', header: 'Name' }];
     render(<DataGrid rows={[{ id: '1', name: 'Atlas' }]} columns={cols} />);

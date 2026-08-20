@@ -39,7 +39,12 @@ function VariantsDemo() {
   return (
     <div className="flex flex-wrap items-center justify-center gap-2">
       {(Object.keys(VARIANT_COPY) as Array<keyof typeof VARIANT_COPY>).map((v) => (
-        <Button key={v} variant="outline" size="sm" onClick={() => push({ variant: v, ...VARIANT_COPY[v] })}>
+        <Button
+          key={v}
+          variant="outline"
+          size="sm"
+          onClick={() => push({ variant: v, ...VARIANT_COPY[v] })}
+        >
           {v}
         </Button>
       ))}
@@ -56,7 +61,11 @@ function ActionDemo() {
         push({
           title: 'Conversation archived',
           description: 'You can restore it from the archive.',
-          action: { label: 'Undo', altText: 'Undo archive', onClick: () => push({ title: 'Restored', variant: 'success' }) },
+          action: {
+            label: 'Undo',
+            altText: 'Undo archive',
+            onClick: () => push({ title: 'Restored', variant: 'success' }),
+          },
         })
       }
     >
@@ -71,12 +80,20 @@ const doc: ComponentDoc = {
   group: 'Feedback',
   description:
     'Transient, non-blocking feedback. Toasts queue and auto-dismiss. Use the useToast hook imperatively — do not render <Toast> directly outside the ToastProvider.',
-  exports: ['Toast', 'ToastProvider', 'ToastViewport', 'ToastTitle', 'ToastDescription', 'useToast'],
+  exports: [
+    'Toast',
+    'ToastProvider',
+    'ToastViewport',
+    'ToastTitle',
+    'ToastDescription',
+    'useToast',
+  ],
   sourceFile: 'Toast.tsx',
   examples: [
     {
       title: 'Imperative (useToast)',
-      description: 'Mount <ToastProvider> + <ToastViewport /> once at your app root, then call push() from anywhere.',
+      description:
+        'Mount <ToastProvider> + <ToastViewport /> once at your app root, then call push() from anywhere.',
       preview: <TriggerDemo />,
       code: `// app.tsx
 <ToastProvider>
@@ -90,7 +107,8 @@ push({ title: 'Saved', description: 'All changes published.', variant: 'success'
     },
     {
       title: 'Variants',
-      description: 'One tone per outcome: default for neutral notices, success / warning / danger for results, info for ongoing state. Click to preview each.',
+      description:
+        'One tone per outcome: default for neutral notices, success / warning / danger for results, info for ongoing state. Click to preview each.',
       preview: <VariantsDemo />,
       code: `const { push } = useToast();
 
@@ -102,7 +120,8 @@ push({ variant: 'info',    title: 'Syncing', description: 'Your workspace is bei
     },
     {
       title: 'With action',
-      description: 'An optional action button — use for one-step recovery like Undo. altText is what screen readers announce.',
+      description:
+        'An optional action button — use for one-step recovery like Undo. altText is what screen readers announce.',
       preview: <ActionDemo />,
       code: `const { push } = useToast();
 
@@ -166,10 +185,26 @@ push({
     {
       title: 'useToast()',
       rows: [
-        { name: 'push', type: '(t: ToastDescriptor) => string', description: 'Show a toast. Returns the toast id.' },
-        { name: 'dismiss', type: '(id: string) => void', description: 'Hide a toast by id (allowing exit animation).' },
-        { name: 'remove', type: '(id: string) => void', description: 'Immediately remove a toast from state.' },
-        { name: 'toasts', type: 'InternalToast[]', description: 'Live toast list (mostly for ToastViewport internals).' },
+        {
+          name: 'push',
+          type: '(t: ToastDescriptor) => string',
+          description: 'Show a toast. Returns the toast id.',
+        },
+        {
+          name: 'dismiss',
+          type: '(id: string) => void',
+          description: 'Hide a toast by id (allowing exit animation).',
+        },
+        {
+          name: 'remove',
+          type: '(id: string) => void',
+          description: 'Immediately remove a toast from state.',
+        },
+        {
+          name: 'toasts',
+          type: 'InternalToast[]',
+          description: 'Live toast list (mostly for ToastViewport internals).',
+        },
       ],
     },
     {
@@ -177,9 +212,23 @@ push({
       rows: [
         { name: 'title', type: 'ReactNode', description: 'Bold leading text.' },
         { name: 'description', type: 'ReactNode', description: 'Body text.' },
-        { name: 'variant', type: `'default' | 'success' | 'warning' | 'danger' | 'info'`, default: `'default'`, description: 'Tone.' },
-        { name: 'duration', type: 'number', default: '5000', description: 'Milliseconds before auto-dismiss; Infinity to require manual close.' },
-        { name: 'action', type: 'ReactNode', description: 'Optional action button rendered on the right.' },
+        {
+          name: 'variant',
+          type: `'default' | 'success' | 'warning' | 'danger' | 'info'`,
+          default: `'default'`,
+          description: 'Tone.',
+        },
+        {
+          name: 'duration',
+          type: 'number',
+          default: '5000',
+          description: 'Milliseconds before auto-dismiss; Infinity to require manual close.',
+        },
+        {
+          name: 'action',
+          type: 'ReactNode',
+          description: 'Optional action button rendered on the right.',
+        },
       ],
     },
   ],
@@ -188,6 +237,20 @@ push({
     'Focus is preserved — toasts do not steal focus from the page.',
     'Esc dismisses the most recent toast.',
   ],
+  guidelines: {
+    do: [
+      'Use for transient confirmation of a completed action ("Project archived").',
+      'Offer an `action` like Undo for reversible operations, with a 5 s window.',
+      'Keep the title ≤ 5 words and the description to one line.',
+      'Match `variant` to outcome: success, danger, warning, info.',
+    ],
+    dont: [
+      'Use a toast for errors that need a decision — show them inline or in a dialog.',
+      'Stack several toasts for one action; combine into a single message.',
+      'Put essential information only in a toast — it disappears and may be missed.',
+      'Auto-dismiss a toast that carries an action in under 5 seconds.',
+    ],
+  },
   related: [
     { slug: 'alert', reason: 'For persistent in-page messages.' },
     { slug: 'snackbar', reason: 'For inline, section-level feedback.' },

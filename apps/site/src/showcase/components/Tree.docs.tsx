@@ -51,15 +51,33 @@ const doc: ComponentDoc = {
   api: [
     {
       rows: [
-        { name: 'data', type: 'TreeNode[]', required: true, description: 'Recursive node descriptor.' },
-        { name: 'defaultExpanded', type: 'string[]', description: 'Uncontrolled initially expanded node IDs.' },
-        { name: 'expanded / onExpandedChange', type: 'string[]', description: 'Controlled expanded state.' },
+        {
+          name: 'data',
+          type: 'TreeNode[]',
+          required: true,
+          description: 'Recursive node descriptor.',
+        },
+        {
+          name: 'defaultExpanded',
+          type: 'string[]',
+          description: 'Uncontrolled initially expanded node IDs.',
+        },
+        {
+          name: 'expanded / onExpandedChange',
+          type: 'string[]',
+          description: 'Controlled expanded state.',
+        },
         { name: 'selected / onSelect', type: 'string', description: 'Controlled selection.' },
       ],
     },
   ],
-  accessibility: [
-    'Arrow keys: Right expands, Left collapses, Up/Down navigate, Enter activates.',
+  accessibility: ['Arrow keys: Right expands, Left collapses, Up/Down navigate, Enter activates.'],
+  keyboard: [
+    { key: 'ArrowDown / ArrowUp', action: 'Move focus to the next / previous visible node.' },
+    { key: 'ArrowRight', action: 'Expand a collapsed node, or move to its first child.' },
+    { key: 'ArrowLeft', action: 'Collapse an expanded node, or move to its parent.' },
+    { key: 'Home / End', action: 'Move focus to the first / last visible node.' },
+    { key: 'Enter / Space', action: 'Select the focused node (toggles expansion on parents).' },
   ],
 };
 

@@ -7,7 +7,7 @@
   "homepage": "https://components.runestonetechnologies.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/craftzbay/craftzbay-ui.git",
+    "url": "git+https://github.com/craftzbay/craftzbay-ui.git",
     "directory": "packages/ui"
   },
   "bugs": {
@@ -24,16 +24,32 @@
     "accessible"
   ],
   "type": "module",
-  "main": "./dist-lib/index.cjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "./dist-lib/index.js",
   "module": "./dist-lib/index.js",
   "types": "./dist-lib/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "icon": [
+        "./dist-lib/icon.d.ts"
+      ]
+    }
+  },
   "exports": {
     ".": {
       "types": "./dist-lib/index.d.ts",
       "import": "./dist-lib/index.js",
-      "require": "./dist-lib/index.cjs"
+      "default": "./dist-lib/index.js"
+    },
+    "./icon": {
+      "types": "./dist-lib/icon.d.ts",
+      "import": "./dist-lib/icon.js",
+      "default": "./dist-lib/icon.js"
     },
     "./styles.css": "./dist-lib/styles.css",
+    "./theme.css": "./dist-lib/theme.css",
     "./package.json": "./package.json"
   },
   "sideEffects": [
@@ -48,7 +64,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && node scripts/fix-dts-extensions.mjs && (cp src/styles/theme.css dist-lib/ || true)",
     "dev": "vite build --watch",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
@@ -57,7 +73,8 @@
     "changeset": "changeset",
     "changeset:version": "changeset version",
     "changeset:release": "pnpm build && changeset publish",
-    "prepublishOnly": "pnpm build"
+    "prepublishOnly": "pnpm build",
+    "lint": "eslint src"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.2",
@@ -123,7 +140,13 @@
     "vitest": "^4.1.6"
   },
   "peerDependencies": {
-    "react": ">=18",
-    "react-dom": ">=18"
+    "react": "^18 || ^19",
+    "react-dom": "^18 || ^19",
+    "tailwindcss": "^4"
+  },
+  "peerDependenciesMeta": {
+    "tailwindcss": {
+      "optional": true
+    }
   }
 }
