@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeft, Menu, Search, X } from '@/icons';
+import { ArrowLeft, Menu, Search, X, ImageIcon } from '@/icons';
 import { Avatar } from '@craftzbay/ui';
 import { Badge } from '@craftzbay/ui';
 import { Button } from '@craftzbay/ui';
@@ -24,10 +24,22 @@ const ARTICLES = [
   { cat: 'Culture', title: 'The slow return of the long-form essay', excerpt: 'Readers are paying for depth again — and writers are noticing.', author: 'S. Khan', initials: 'SK', time: '9h ago', hue: 320 },
 ];
 
-/** Image placeholder — a neutral block sized like the eventual photo so the
- *  layout holds; swap for `<img>` with width/height in a real feed. */
-function Cover({ className }: { hue?: number; className?: string }) {
-  return <div aria-hidden className={cn('bg-background-muted', className)} />;
+/** Image placeholder — a flat, per-category tinted surface (solid colour mixed
+ *  into the muted background, so it follows light/dark) with a faint image
+ *  glyph. No gradient (PHILOSOPHY). Swap for `<img>` with width/height in a
+ *  real feed. */
+function Cover({ hue = 250, className }: { hue?: number; className?: string }) {
+  return (
+    <div
+      aria-hidden
+      className={cn('flex items-center justify-center text-foreground/15', className)}
+      style={{
+        background: `color-mix(in oklch, var(--background-muted) 78%, oklch(0.62 0.14 ${hue}))`,
+      }}
+    >
+      <ImageIcon className="size-8" strokeWidth={1.25} />
+    </div>
+  );
 }
 
 function Masthead({

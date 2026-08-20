@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeft, Heart, Minus, Plus, Search, ShoppingCart, Star, Trash2, X } from '@/icons';
+import { ArrowLeft, Heart, Minus, Plus, Search, ShoppingCart, Star, Trash2, X, ImageIcon } from '@/icons';
 import { Badge } from '@craftzbay/ui';
 import { Button } from '@craftzbay/ui';
 import { Card, CardContent } from '@craftzbay/ui';
@@ -31,8 +31,22 @@ type Cart = Record<string, number>;
 const money = (n: number) => `$${n.toFixed(2)}`;
 
 /** Product image placeholder — neutral block that reserves the photo's box. */
-function Shot({ className }: { hue?: number; className?: string }) {
-  return <div aria-hidden className={cn('bg-background-muted', className)} />;
+/** Image placeholder — a flat, per-category tinted surface (solid colour mixed
+ *  into the muted background, so it follows light/dark) with a faint image
+ *  glyph. No gradient (PHILOSOPHY). Swap for `<img>` with width/height in a
+ *  real feed. */
+function Shot({ hue = 250, className }: { hue?: number; className?: string }) {
+  return (
+    <div
+      aria-hidden
+      className={cn('flex items-center justify-center text-foreground/15', className)}
+      style={{
+        background: `color-mix(in oklch, var(--background-muted) 78%, oklch(0.62 0.14 ${hue}))`,
+      }}
+    >
+      <ImageIcon className="size-8" strokeWidth={1.25} />
+    </div>
+  );
 }
 
 function Stars({ rating }: { rating: number }) {
