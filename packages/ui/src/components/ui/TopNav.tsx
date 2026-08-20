@@ -44,7 +44,7 @@ export const TopNav = forwardRef<HTMLElement, TopNavProps>(function TopNav(
       )}
       {...props}
     >
-      <div className="flex items-center gap-6 shrink-0">
+      <div className="flex min-w-0 items-center gap-6">
         {logo}
         {nav && <nav className="hidden md:flex items-center gap-1">{nav}</nav>}
       </div>

@@ -80,6 +80,7 @@ function Shell() {
         slug={route.slug}
         initialScreen={route.screen}
         initialVariant={route.variant}
+        initialPage={route.page}
       />;
   }
 

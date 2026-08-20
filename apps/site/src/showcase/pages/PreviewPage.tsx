@@ -28,11 +28,14 @@ export function PreviewPage({
   slug,
   initialScreen,
   initialVariant,
+  initialPage,
 }: {
   slug: string;
   initialScreen?: string;
   /** Layout variant key from the route (`#preview/<slug>/<screen>/<variant>`). */
   initialVariant?: string;
+  /** In-app page for app shells (`#preview/<slug>/<screen>/<variant>/<page>`). */
+  initialPage?: string;
 }) {
   const doc = getBlockMeta(slug);
   const [screen, setScreen] = useState(
@@ -68,7 +71,13 @@ export function PreviewPage({
           </div>
         }
       >
-        <BlockPreview slug={slug} screen={screen} setScreen={setScreen} variant={variant} />
+        <BlockPreview
+          slug={slug}
+          screen={screen}
+          setScreen={setScreen}
+          variant={variant}
+          page={initialPage}
+        />
       </Suspense>
 
       {/* Floating preview dock — bottom-right so the template renders edge to
@@ -93,7 +102,7 @@ export function PreviewPage({
               aria-label={`Template: ${doc.name}. Switch template or screen`}
             >
               <span className="inline-flex size-1.5 rounded-full bg-accent" aria-hidden />
-              <span className="font-medium text-foreground">{doc.name}</span>
+              <span className="whitespace-nowrap font-medium text-foreground">{doc.name}</span>
               <ChevronDown className="size-3.5" aria-hidden />
             </button>
           </DropdownMenuTrigger>

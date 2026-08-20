@@ -1,8 +1,9 @@
 import type { MouseEvent, ReactNode } from 'react';
-import { ArrowRight, BarChart3, Github, Lock, Plug, Sparkles, Star, Zap } from '@/icons';
+import { ArrowRight, BarChart3, Github, Lock, Menu, Plug, Sparkles, Star, Zap } from '@/icons';
 import { Avatar } from '@craftzbay/ui';
 import { Button } from '@craftzbay/ui';
 import { Card, CardContent } from '@craftzbay/ui';
+import { IconButton, Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '@craftzbay/ui';
 import { AuthLayout, SignUpForm } from './Authentication';
 import { Pricing } from './Pricing';
 import type { TemplateProps } from './meta';
@@ -157,12 +158,45 @@ function Nav({ brand, onSignUp }: { brand: ReactNode; onSignUp: () => void }) {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={onSignUp}>
+          <Button variant="ghost" size="sm" onClick={onSignUp} className="hidden sm:inline-flex">
             Sign in
           </Button>
           <Button size="sm" onClick={onSignUp}>
             {CTA_LABEL}
           </Button>
+          {/* Section links (and Sign in) move into a drawer below md. */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <IconButton
+                aria-label="Open menu"
+                icon={<Menu />}
+                variant="ghost"
+                size="sm"
+                className="md:hidden"
+              />
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72">
+              <SheetTitle>Menu</SheetTitle>
+              <nav aria-label="Primary" className="mt-6 flex flex-col gap-1">
+                {NAV.map((n) => (
+                  <SheetClose asChild key={n.id}>
+                    <a
+                      href={`#${n.id}`}
+                      onClick={(e) => scrollTo(e, n.id)}
+                      className="text-foreground hover:bg-background-muted flex h-11 items-center rounded-md px-3 text-base"
+                    >
+                      {n.label}
+                    </a>
+                  </SheetClose>
+                ))}
+                <SheetClose asChild>
+                  <Button variant="ghost" className="mt-2 justify-start sm:hidden" onClick={onSignUp}>
+                    Sign in
+                  </Button>
+                </SheetClose>
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>

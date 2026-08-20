@@ -10,6 +10,12 @@ import { AdminDashboard, type AdminLayout } from './AdminDashboard';
  * ./admin/*. The authentication screens live in the "Authentication" template.
  * `layout` picks the shell: `sidebar` (rail) or `topnav` (horizontal links).
  */
-export function AdminTemplate({ layout = 'sidebar' }: { layout?: AdminLayout }) {
-  return <AdminDashboard layout={layout} />;
+export function AdminTemplate({
+  layout = 'sidebar',
+  initialPage,
+}: {
+  layout?: AdminLayout;
+  initialPage?: string;
+}) {
+  return <AdminDashboard layout={layout} initialPage={initialPage} />;
 }

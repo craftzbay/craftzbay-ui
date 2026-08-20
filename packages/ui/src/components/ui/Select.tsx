@@ -49,6 +49,7 @@ export const SelectTrigger = forwardRef<
       ref={ref}
       className={cn(
         'inline-flex w-full items-center justify-between gap-2 rounded-md border bg-card text-lg md:text-sm text-foreground',
+        '[&>span]:min-w-0 [&>span]:truncate',
         'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)]',
         'outline-none',
         'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background',

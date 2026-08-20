@@ -79,7 +79,7 @@ export function WorkspaceSwitcher({
           className={cn(
             'flex items-center gap-2.5 rounded-md text-left transition-colors outline-none',
             'hover:bg-background-muted focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
-            variant === 'bar' ? 'h-9 px-1.5' : 'h-10 w-full',
+            variant === 'bar' ? 'h-9 min-w-0 px-1.5' : 'h-10 w-full',
             variant === 'sidebar' && (collapsed ? 'justify-center px-0' : 'px-1.5'),
           )}
         >
@@ -353,7 +353,7 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
     <TopNav
       className="bg-background supports-[backdrop-filter]:bg-background"
       logo={
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <IconButton
             aria-label="Open navigation"
             icon={<Menu />}
@@ -371,8 +371,8 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
             />
           ) : (
             // Tenant is visible on every page, even with a single workspace.
-            <span className="flex items-center gap-2 text-sm">
-              <span className="text-foreground font-semibold">{workspace.name}</span>
+            <span className="flex min-w-0 items-center gap-2 text-sm">
+              <span className="text-foreground truncate font-semibold">{workspace.name}</span>
               <Badge tone="neutral" variant="outline" className="hidden sm:inline-flex">
                 {workspace.plan}
               </Badge>
@@ -554,11 +554,11 @@ export function PageHeader({
         />
       )}
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
+        <div className="min-w-0">
           <h1 className="text-foreground text-2xl font-semibold tracking-tight">{title}</h1>
           {subtitle && <p className="text-foreground-muted mt-1 text-sm">{subtitle}</p>}
         </div>
-        {actions && <div className="flex items-center gap-2">{actions}</div>}
+        {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
       </div>
     </header>
   );

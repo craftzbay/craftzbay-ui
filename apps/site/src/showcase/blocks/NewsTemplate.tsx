@@ -4,6 +4,7 @@ import { Avatar } from '@craftzbay/ui';
 import { Badge } from '@craftzbay/ui';
 import { Button } from '@craftzbay/ui';
 import { IconButton } from '@craftzbay/ui';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@craftzbay/ui';
 import { Input } from '@craftzbay/ui';
 import { Separator } from '@craftzbay/ui';
 import { cn } from '@craftzbay/ui';
@@ -60,9 +61,33 @@ function Masthead({
 
   return (
     <header className="border-b border-border bg-background">
-      <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-4">
-        <IconButton aria-label="Menu" icon={<Menu />} variant="ghost" size="sm" className="md:hidden" />
-        <div className="text-lg font-semibold tracking-tight">{brand}</div>
+      <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-4 sm:gap-4 sm:px-6">
+        <Sheet>
+          <SheetTrigger asChild>
+            <IconButton aria-label="Menu" icon={<Menu />} variant="ghost" size="sm" className="md:hidden" />
+          </SheetTrigger>
+          <SheetContent side="left" className="w-72">
+            <SheetTitle>Sections</SheetTitle>
+            <nav className="mt-6 flex flex-col gap-1" aria-label="Sections">
+              {CATEGORIES.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => onCategory?.(c)}
+                  aria-current={active === c ? 'page' : undefined}
+                  className={cn(
+                    'flex h-11 items-center rounded-md px-3 text-left text-base',
+                    active === c ? 'bg-accent-soft font-medium text-accent' : 'text-foreground hover:bg-background-muted',
+                  )}
+                >
+                  {c}
+                </button>
+              ))}
+              <Button className="mt-4 w-full sm:hidden">Subscribe</Button>
+            </nav>
+          </SheetContent>
+        </Sheet>
+        <div className="min-w-0 truncate text-lg font-semibold tracking-tight">{brand}</div>
         <div className="ml-auto flex items-center gap-2">
           {interactive && searchOpen ? (
             <div className="flex items-center gap-1">
@@ -95,22 +120,23 @@ function Masthead({
               onClick={interactive ? () => setSearchOpen(true) : undefined}
             />
           )}
-          <Button size="sm">Subscribe</Button>
+          <Button size="sm" className="hidden sm:inline-flex">
+            Subscribe
+          </Button>
         </div>
       </div>
       <nav className="border-t border-border">
-        <div className="mx-auto flex max-w-5xl items-center gap-5 overflow-x-auto px-6 py-2.5 text-sm">
+        <div className="mx-auto flex max-w-5xl snap-x items-center gap-5 overflow-x-auto px-6 py-2.5 text-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {CATEGORIES.map((c) => (
             <button
               key={c}
               type="button"
               onClick={() => onCategory?.(c)}
               aria-current={active === c ? 'page' : undefined}
-              className={
-                active === c
-                  ? 'font-medium text-accent'
-                  : 'text-foreground-muted hover:text-foreground'
-              }
+              className={cn(
+                'shrink-0 snap-start whitespace-nowrap py-1',
+                active === c ? 'font-medium text-accent' : 'text-foreground-muted hover:text-foreground',
+              )}
             >
               {c}
             </button>
@@ -146,8 +172,8 @@ function Footer({ brand }: { brand: React.ReactNode }) {
         <div>
           <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground-subtle">The Daily Brief</h3>
           <p className="mt-3 text-sm text-foreground-muted">Top stories in your inbox each morning.</p>
-          <div className="mt-3 flex gap-2">
-            <Input size="sm" type="email" placeholder="you@example.com" className="flex-1" />
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Input size="sm" type="email" placeholder="you@example.com" className="min-w-0 flex-1 basis-40" />
             <Button size="sm">Sign up</Button>
           </div>
         </div>

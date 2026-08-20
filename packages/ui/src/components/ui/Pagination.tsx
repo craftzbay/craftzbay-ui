@@ -157,7 +157,7 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
 
       <ul className="flex items-center gap-1">
         {showJump && (
-          <li>
+          <li className="hidden sm:block">
             <button
               type="button"
               aria-label={labels.first}
@@ -180,13 +180,17 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
             <ChevronLeft className="size-4" aria-hidden />
           </button>
         </li>
+        {/* Below sm the page list collapses to "current / total". */}
+        <li className="tabular text-foreground-muted px-2 text-sm sm:hidden" aria-current="page">
+          {page} / {pageCount}
+        </li>
         {pages.map((p, i) =>
           p === 'gap' ? (
-            <li key={`gap-${i}`} className="text-foreground-subtle px-2">
+            <li key={`gap-${i}`} className="text-foreground-subtle hidden px-2 sm:block">
               …
             </li>
           ) : (
-            <li key={p}>
+            <li key={p} className="hidden sm:block">
               <button
                 type="button"
                 aria-label={labels.page(p)}
@@ -218,7 +222,7 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
           </button>
         </li>
         {showJump && (
-          <li>
+          <li className="hidden sm:block">
             <button
               type="button"
               aria-label={labels.last}

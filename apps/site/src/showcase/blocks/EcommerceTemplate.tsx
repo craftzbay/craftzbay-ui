@@ -380,7 +380,7 @@ function CartScreen({
   return (
     <div className="min-h-screen bg-background">
       <ShopHeader brand={brand} cartCount={cartCount} onCart={() => {}} onCategory={onCategory} />
-      <main className="mx-auto max-w-5xl px-6 py-10">
+      <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
         <h1 className="text-2xl font-semibold tracking-tight">Your cart</h1>
         {items.length === 0 ? (
           <div className="mt-6 rounded-lg border border-border bg-card p-12 text-center">
@@ -396,23 +396,26 @@ function CartScreen({
             <Card padding="none">
               <ul className="divide-y divide-border">
                 {items.map((p) => (
-                  <li key={p.name} className="flex items-center gap-4 p-4">
+                  <li key={p.name} className="flex flex-wrap items-center gap-x-4 gap-y-3 p-4">
                     <Shot hue={p.hue} className="size-16 shrink-0 rounded-md" />
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-0 flex-1 basis-32">
                       <div className="font-medium text-foreground">{p.name}</div>
                       <div className="text-sm text-foreground-subtle">{money(p.price)}</div>
                     </div>
-                    <QtyStepper qty={cart[p.name]} onChange={(q) => setQty(p.name, q)} />
-                    <div className="w-20 text-right font-medium tabular text-foreground">
-                      {money(p.price * cart[p.name])}
+                    {/* Controls drop to a second, full-width row below sm. */}
+                    <div className="flex w-full items-center gap-3 sm:w-auto">
+                      <QtyStepper qty={cart[p.name]} onChange={(q) => setQty(p.name, q)} />
+                      <div className="ml-auto min-w-16 text-right font-medium tabular text-foreground">
+                        {money(p.price * cart[p.name])}
+                      </div>
+                      <IconButton
+                        aria-label={`Remove ${p.name}`}
+                        icon={<Trash2 />}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => remove(p.name)}
+                      />
                     </div>
-                    <IconButton
-                      aria-label={`Remove ${p.name}`}
-                      icon={<Trash2 />}
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => remove(p.name)}
-                    />
                   </li>
                 ))}
               </ul>

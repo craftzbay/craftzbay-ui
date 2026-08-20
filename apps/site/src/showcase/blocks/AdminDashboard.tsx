@@ -29,10 +29,21 @@ const SIDEBAR_KEY = 'admin-template:sidebar-collapsed';
 /** `sidebar` = collapsible rail (default); `topnav` = horizontal links, no rail. */
 export type AdminLayout = 'sidebar' | 'topnav';
 
-export function AdminDashboard({ layout = 'sidebar' }: { layout?: AdminLayout }) {
+const PAGES = ['overview', 'analytics', 'projects', 'inbox', 'members', 'reports', 'settings', 'billing'];
+
+export function AdminDashboard({
+  layout = 'sidebar',
+  initialPage,
+}: {
+  layout?: AdminLayout;
+  /** Page to open first (deep link from the preview route); unknown keys fall back to overview. */
+  initialPage?: string;
+}) {
   const hasRail = layout === 'sidebar';
   const { push } = useToast();
-  const [page, setPage] = useState('overview');
+  const [page, setPage] = useState(() =>
+    initialPage && PAGES.includes(initialPage) ? initialPage : 'overview',
+  );
   const [workspace, setWorkspace] = useState(WORKSPACES[0].id);
   const [collapsed, setCollapsed] = useState(() => {
     try {

@@ -15,17 +15,20 @@ export default function BlockPreview({
   screen,
   setScreen,
   variant,
+  page,
 }: {
   slug: string;
   screen: string;
   setScreen: (screen: string) => void;
   /** Layout variant key (see `BlockMeta.variants`); only some templates use it. */
   variant?: string;
+  /** Initial in-app page for app shells (admin). */
+  page?: string;
 }) {
   const props = { screen, setScreen, brand: <BrandMark />, variant };
   switch (slug) {
     case 'admin':
-      return <AdminTemplate layout={variant === 'topnav' ? 'topnav' : 'sidebar'} />;
+      return <AdminTemplate layout={variant === 'topnav' ? 'topnav' : 'sidebar'} initialPage={page} />;
     case 'auth':
       return <AuthTemplate {...props} />;
     case 'landing':

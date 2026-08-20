@@ -85,7 +85,7 @@ export function KpiTile({
 function RangeSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger size="sm" aria-label="Time range" className="w-32" />
+      <SelectTrigger size="sm" aria-label="Time range" className="w-36" />
       <SelectContent>
         <SelectItem value="7d">Last 7 days</SelectItem>
         <SelectItem value="30d">Last 30 days</SelectItem>
@@ -107,7 +107,7 @@ export function Overview({ onNavigate }: { onNavigate: (key: string) => void }) 
         actions={<RangeSelect value={range} onChange={setRange} />}
         onNavigate={onNavigate}
       />
-      <section aria-label="Key metrics" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <section aria-label="Key metrics" className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <KpiTile label="Active users" value="2,840" delta={12} positive compare={compare} />
         <KpiTile label="Sessions" value="8,402" delta={4} positive compare={compare} />
         <KpiTile label="Open issues" value="14" delta={-6} positive compare={compare} />
@@ -136,7 +136,7 @@ export function Overview({ onNavigate }: { onNavigate: (key: string) => void }) 
       </Card>
 
       <Card padding="none" className="mt-4">
-        <CardHeader className="flex-row items-center justify-between px-5 pt-5">
+        <CardHeader className="flex-row flex-wrap items-center justify-between gap-2 px-5 pt-5">
           <CardTitle>Recent activity</CardTitle>
           <Button variant="ghost" size="sm" onClick={() => onNavigate('inbox')}>
             View all
@@ -189,7 +189,7 @@ export function Analytics({ onNavigate }: { onNavigate: (key: string) => void })
         actions={<RangeSelect value={range} onChange={setRange} />}
         onNavigate={onNavigate}
       />
-      <section aria-label="Key metrics" className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+      <section aria-label="Key metrics" className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <KpiTile label="Page views" value="128k" delta={8} positive />
         <KpiTile label="Avg. session" value="4m 12s" delta={5.8} positive />
         <KpiTile label="Bounce rate" value="38%" delta={-2} positive />
