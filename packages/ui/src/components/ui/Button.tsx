@@ -33,12 +33,12 @@ const button = cva(
           'active:bg-accent-active',
         ],
         secondary: [
-          'bg-background-muted text-foreground border border-border',
+          'bg-background-muted text-foreground border border-border-input',
           'hover:bg-surface-hover',
           'active:bg-surface-active',
         ],
         outline: [
-          'border border-border bg-transparent text-foreground',
+          'border border-border-input bg-transparent text-foreground',
           'hover:bg-background-muted',
           'active:bg-background-subtle',
         ],
