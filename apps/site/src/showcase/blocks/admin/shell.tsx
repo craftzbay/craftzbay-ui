@@ -229,7 +229,7 @@ export function AppSidebar({
       </Sidebar>
 
       <Sheet open={drawerOpen} onOpenChange={onDrawerOpenChange}>
-        <SheetContent side="left" className="w-64 p-0">
+        <SheetContent side="left" className="w-64 p-0" showClose={false}>
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <Sidebar
             header={<WorkspaceSwitcher value={workspace} onChange={onWorkspaceChange} />}
