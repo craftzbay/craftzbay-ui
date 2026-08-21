@@ -63,7 +63,7 @@ jobs:
         run: pnpm --filter @craftzbay/site test
 
   # Library peer range is ^18 || ^19 — typecheck + test the library against React 19.
-  # Only packages/ui is switched; apps/site stays on React 18 and is not checked here.
+  # React is overridden for the whole workspace in this job (see step below).
   test-react-19:
     runs-on: ubuntu-latest
     steps:
