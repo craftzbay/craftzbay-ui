@@ -75,8 +75,8 @@ export interface AuthLayoutProps {
 
 export function AuthLayout({ brand, title, subtitle, children, footer }: AuthLayoutProps) {
   return (
-    <main className="bg-background-subtle grid min-h-dvh place-items-center px-4 py-12">
-      <div className="w-full max-w-[400px] space-y-6">
+    <main className="bg-background-subtle grid min-h-dvh grid-cols-[minmax(0,1fr)] place-items-center px-4 py-12">
+      <div className="w-full max-w-[400px] min-w-0 space-y-6">
         {brand && <div className="flex justify-center">{brand}</div>}
         <div className="space-y-2 text-center">
           <h1 className="text-foreground text-2xl font-semibold tracking-tight">{title}</h1>
