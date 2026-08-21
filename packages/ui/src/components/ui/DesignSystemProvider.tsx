@@ -198,7 +198,7 @@ export const brandPresets = {
       'color-accent-800': 'oklch(0.46 0.12 65)',
       'accent-subtle': 'oklch(0.96 0.04 75)',
       'accent-subtle-foreground': 'oklch(0.48 0.12 65)',
-      ring: 'oklch(0.66 0.14 65)',
+      ring: 'oklch(0.64 0.14 65)', // 3.17:1 on background-muted (0.66 was 2.93)
     },
     dark: {
       accent: 'oklch(0.66 0.14 65)',

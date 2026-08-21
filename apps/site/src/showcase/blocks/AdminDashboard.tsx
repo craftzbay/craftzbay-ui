@@ -149,6 +149,7 @@ export function AdminDashboard({
   const searchRef = useRef<HTMLInputElement>(null);
   const projectsRef = useRef<ProjectsHandle>(null);
   const membersRef = useRef<MembersHandle>(null);
+  const drawerTriggerRef = useRef<HTMLButtonElement>(null);
 
   // Persist the rail state like a real app would.
   const onCollapsedChange = (next: boolean) => {
@@ -259,6 +260,7 @@ export function AdminDashboard({
               onCollapsedChange={onCollapsedChange}
               drawerOpen={drawerOpen}
               onDrawerOpenChange={setDrawerOpen}
+              drawerTriggerRef={drawerTriggerRef}
               mode={SIDEBAR_MODE[layout]}
               module={module}
               onModuleChange={setModule}
@@ -270,6 +272,7 @@ export function AdminDashboard({
                 ref={searchRef}
                 workspace={ws}
                 onOpenDrawer={() => setDrawerOpen(true)}
+                drawerTriggerRef={drawerTriggerRef}
                 onOpenPalette={() => setPaletteOpen(true)}
                 onNavigate={navigate}
                 onSignOut={() =>

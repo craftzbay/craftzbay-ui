@@ -222,16 +222,15 @@ export const SidebarItem = forwardRef<HTMLElement, SidebarItemProps>(
 
     const labelTitle = typeof children === 'string' ? children : undefined;
     const tip = tooltip ?? labelTitle;
-    // Collapsed: the Tooltip already supplies the accessible name, so no
-    // sr-only copy — otherwise AT reads the label twice. Without a tooltip
-    // (non-string children) keep an sr-only label.
+    // Collapsed: keep an sr-only label so the control always has a name —
+    // the Tooltip only wires aria-describedby while it is open.
     const showTooltip = collapsed && !!tip;
 
     const content = (
       <>
         {icon && <span className="flex shrink-0 items-center [&_svg]:size-4">{icon}</span>}
         {collapsed ? (
-          !showTooltip && <span className="sr-only">{children}</span>
+          <span className="sr-only">{children}</span>
         ) : (
           <span className="flex-1 truncate text-left" title={labelTitle}>
             {children}

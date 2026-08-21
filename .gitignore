@@ -10,3 +10,8 @@ dist-lib
 .turbo
 coverage
 *.tsbuildinfo
+
+# Playwright
+test-results
+playwright-report
+blob-report

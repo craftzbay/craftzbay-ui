@@ -3,6 +3,7 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ElementRef } from 'react';
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
 
 /**
  * Custom scroll container with consistent styled scrollbars across OS / browsers.
@@ -14,24 +15,40 @@ import { cn } from '@/lib/utils';
  *     <div className="p-3">…long content…</div>
  *   </ScrollArea>
  */
-export const ScrollArea = forwardRef<
-  ElementRef<typeof ScrollAreaPrimitive.Root>,
-  ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root>
->(function ScrollArea({ className, children, ...props }, ref) {
-  return (
-    <ScrollAreaPrimitive.Root
-      ref={ref}
-      className={cn('relative overflow-hidden', className)}
-      {...props}
-    >
-      <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
-        {children}
-      </ScrollAreaPrimitive.Viewport>
-      <ScrollBar />
-      <ScrollAreaPrimitive.Corner />
-    </ScrollAreaPrimitive.Root>
-  );
-});
+export interface ScrollAreaProps extends ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> {
+  /**
+   * Accessible name of the viewport (a focusable `group` so keyboard users
+   * can scroll it). Defaults to `strings.scrollArea.region`.
+   */
+  viewportLabel?: string;
+}
+
+export const ScrollArea = forwardRef<ElementRef<typeof ScrollAreaPrimitive.Root>, ScrollAreaProps>(
+  function ScrollArea({ className, children, viewportLabel, ...props }, ref) {
+    const strings = useStrings();
+    return (
+      <ScrollAreaPrimitive.Root
+        ref={ref}
+        className={cn('relative overflow-hidden', className)}
+        {...props}
+      >
+        <ScrollAreaPrimitive.Viewport
+          role="group"
+          aria-label={viewportLabel ?? strings.scrollArea.region}
+          tabIndex={0}
+          className={cn(
+            'h-full w-full rounded-[inherit]',
+            'focus-visible:ring-ring focus-visible:ring-offset-background outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+          )}
+        >
+          {children}
+        </ScrollAreaPrimitive.Viewport>
+        <ScrollBar />
+        <ScrollAreaPrimitive.Corner />
+      </ScrollAreaPrimitive.Root>
+    );
+  },
+);
 ScrollArea.displayName = 'ScrollArea';
 
 export const ScrollBar = forwardRef<

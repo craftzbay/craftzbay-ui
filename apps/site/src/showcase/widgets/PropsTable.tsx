@@ -16,7 +16,12 @@ export function PropsTable({ groups }: PropsTableProps) {
           {group.title && (
             <h3 className="text-foreground mb-3 text-sm font-semibold">{group.title}</h3>
           )}
-          <div className="border-border overflow-x-auto rounded-md border">
+          <div
+            className="border-border scroll-region overflow-x-auto rounded-md border"
+            tabIndex={0}
+            role="region"
+            aria-label={group.title ? `${group.title} props` : 'Props'}
+          >
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-border bg-background-subtle/60 text-foreground-subtle border-b text-xs tracking-wider uppercase">

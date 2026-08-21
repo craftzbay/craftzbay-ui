@@ -12,6 +12,7 @@ export * from './lib/utils';
 export * from './lib/cva';
 export { defaultStrings, formatString, type UiStrings, type DeepPartial } from './lib/strings';
 export { mnStrings } from './lib/strings.mn';
+export type { ReturnFocusRef } from './lib/return-focus';
 export * from './lib/format';
 
 // Hooks

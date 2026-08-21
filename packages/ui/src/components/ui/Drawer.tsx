@@ -12,6 +12,7 @@ import { Drawer as DrawerPrimitive } from 'vaul';
 import { X } from '@/icons';
 import { cn } from '@/lib/utils';
 import { useStrings } from '@/hooks/use-strings';
+import { withReturnFocus, type ReturnFocusRef } from '@/lib/return-focus';
 
 type Direction = 'top' | 'right' | 'bottom' | 'left';
 
@@ -82,13 +83,30 @@ export interface DrawerContentProps extends ComponentPropsWithoutRef<
   hideHandle?: boolean;
   /** Show the close (×) button. Default `true`. */
   showClose?: boolean;
+  /**
+   * Element to focus when the overlay closes. Overrides Radix's default
+   * (the element focused when the content mounted), which is `<body>` for
+   * controlled overlays opened from a pointer click on a non-focusable /
+   * tooltip-wrapped trigger. A consumer `onCloseAutoFocus` runs first and
+   * wins if it calls `preventDefault()`.
+   */
+  returnFocusTo?: ReturnFocusRef;
 }
 
 export const DrawerContent = forwardRef<
   ElementRef<typeof DrawerPrimitive.Content>,
   DrawerContentProps
 >(function DrawerContent(
-  { className, direction: directionProp, hideHandle, showClose = true, children, ...props },
+  {
+    className,
+    direction: directionProp,
+    hideHandle,
+    showClose = true,
+    returnFocusTo,
+    onCloseAutoFocus,
+    children,
+    ...props
+  },
   ref,
 ) {
   const rootDirection = useContext(DrawerDirectionContext);
@@ -100,6 +118,7 @@ export const DrawerContent = forwardRef<
       <DrawerOverlay />
       <DrawerPrimitive.Content
         ref={ref}
+        onCloseAutoFocus={withReturnFocus(returnFocusTo, onCloseAutoFocus)}
         className={cn(
           'bg-card fixed z-[var(--z-modal)]',
           directionStyles[direction],

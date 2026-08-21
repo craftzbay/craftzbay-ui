@@ -47,7 +47,7 @@ export function ComponentDocPage({ doc }: ComponentDocPageProps) {
           href={`${GITHUB_BLOB}/${doc.sourceFile}`}
           target="_blank"
           rel="noreferrer"
-          className="text-foreground-muted hover:text-accent mt-4 inline-flex items-center gap-1 text-xs"
+          className="text-foreground-muted hover:text-accent mt-4 inline-flex min-h-6 items-center gap-1 py-1 text-xs"
         >
           View source <ExternalLink className="size-3" aria-hidden />
         </a>
@@ -60,7 +60,7 @@ export function ComponentDocPage({ doc }: ComponentDocPageProps) {
           <span className="text-foreground font-medium">i18n:</span> {doc.i18n} Override via{' '}
           <a
             href={`#${routeToHash({ kind: 'component', slug: 'design-system-provider' })}`}
-            className="text-accent hover:underline"
+            className="prose-link"
           >
             DesignSystemProvider <code>strings</code>
           </a>
@@ -106,7 +106,12 @@ export function ComponentDocPage({ doc }: ComponentDocPageProps) {
       {doc.keyboard && doc.keyboard.length > 0 && (
         <>
           <SectionAnchor id="keyboard">Keyboard</SectionAnchor>
-          <div className="border-border overflow-x-auto rounded-md border">
+          <div
+            className="border-border scroll-region overflow-x-auto rounded-md border"
+            tabIndex={0}
+            role="region"
+            aria-label="Keyboard shortcuts table"
+          >
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-border bg-background-subtle/60 text-foreground-subtle border-b text-xs tracking-wider uppercase">

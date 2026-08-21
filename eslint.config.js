@@ -25,6 +25,10 @@ export default tseslint.config(
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
       ],
+      // Scrollable containers must be keyboard-reachable (axe
+      // scrollable-region-focusable); the sanctioned pattern is
+      // role="region" + aria-label + tabindex="0".
+      'jsx-a11y/no-noninteractive-tabindex': ['error', { roles: ['region', 'group'] }],
     },
   },
 );

@@ -49,13 +49,21 @@ const doc: ComponentDoc = {
             <TabsTrigger value="week">Week</TabsTrigger>
             <TabsTrigger value="month">Month</TabsTrigger>
           </TabsList>
+          {['day', 'week', 'month'].map((v) => (
+            <TabsContent key={v} value={v} className="text-foreground-muted pt-3 text-sm">
+              Showing the {v} view.
+            </TabsContent>
+          ))}
         </Tabs>
       ),
       code: `<TabsList variant="pills">
   <TabsTrigger value="day">Day</TabsTrigger>
   <TabsTrigger value="week">Week</TabsTrigger>
   <TabsTrigger value="month">Month</TabsTrigger>
-</TabsList>`,
+</TabsList>
+<TabsContent value="day">…</TabsContent>
+<TabsContent value="week">…</TabsContent>
+<TabsContent value="month">…</TabsContent>`,
     },
   ],
   api: [

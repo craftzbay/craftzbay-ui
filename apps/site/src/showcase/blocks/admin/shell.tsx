@@ -1,4 +1,4 @@
-import { createContext, forwardRef, useContext, type ReactNode } from 'react';
+import { createContext, forwardRef, useContext, type ReactNode, type RefObject } from 'react';
 import {
   Bell,
   Sparkles,
@@ -574,6 +574,8 @@ export interface AppSidebarProps {
   /** Mobile drawer state (below lg). */
   drawerOpen: boolean;
   onDrawerOpenChange: (open: boolean) => void;
+  /** The hamburger that opens the drawer — focus returns to it on close. */
+  drawerTriggerRef?: RefObject<HTMLButtonElement>;
   /** Desktop chrome (≥lg). Every mode keeps the drawer below lg. */
   mode?: AppSidebarMode;
   /** Active module for `dual`. */
@@ -594,6 +596,7 @@ export function AppSidebar({
   onCollapsedChange,
   drawerOpen,
   onDrawerOpenChange,
+  drawerTriggerRef,
   mode = 'rail',
   module = MODULES[0].key,
   onModuleChange = () => {},
@@ -642,7 +645,18 @@ export function AppSidebar({
       )}
 
       <Sheet open={drawerOpen} onOpenChange={onDrawerOpenChange}>
-        <SheetContent side="left" className="w-64 p-0" showClose={false}>
+        <SheetContent
+          side="left"
+          className="w-64 p-0"
+          showClose={false}
+          // Controlled sheet (no SheetTrigger): Radix would hand focus back
+          // to <body>, so return it to the hamburger explicitly.
+          onCloseAutoFocus={(e) => {
+            if (!drawerTriggerRef?.current) return;
+            e.preventDefault();
+            drawerTriggerRef.current.focus();
+          }}
+        >
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <Sidebar
             header={
@@ -721,6 +735,8 @@ function TopNavItems({ page, onNavigate }: { page: string; onNavigate: (key: str
 export interface AppTopNavProps {
   workspace: Workspace;
   onOpenDrawer: () => void;
+  /** Ref to the hamburger so the drawer can restore focus on close. */
+  drawerTriggerRef?: RefObject<HTMLButtonElement>;
   onOpenPalette: () => void;
   onNavigate: (key: string) => void;
   onSignOut: () => void;
@@ -737,6 +753,7 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
   {
     workspace,
     onOpenDrawer,
+    drawerTriggerRef,
     onOpenPalette,
     onNavigate,
     onSignOut,
@@ -758,6 +775,7 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
       logo={
         <div className="flex min-w-0 items-center gap-2">
           <IconButton
+            ref={drawerTriggerRef}
             aria-label="Open navigation"
             icon={<Menu />}
             variant="ghost"

@@ -176,7 +176,12 @@ export function HomePage() {
               <Package className="text-accent size-4" aria-hidden />
               Install in seconds
             </div>
-            <pre className="bg-background-muted mt-3 overflow-x-auto rounded-md px-4 py-3 font-mono text-sm">
+            <pre
+              className="bg-background-muted scroll-region mt-3 overflow-x-auto rounded-md px-4 py-3 font-mono text-sm"
+              tabIndex={0}
+              role="region"
+              aria-label="Install command"
+            >
               <code>pnpm add {PKG_NAME}</code>
             </pre>
           </div>

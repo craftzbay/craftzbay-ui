@@ -4,6 +4,7 @@ import { forwardRef, type ComponentPropsWithoutRef, type ElementRef, type ReactN
 import * as SelectPrimitive from '@radix-ui/react-select';
 import { Check, ChevronDown, ChevronUp, ChevronsUpDown } from '@/icons';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
 
 /* -----------------------------------------------------------------------------
  *  Compound API:
@@ -29,7 +30,12 @@ export interface SelectTriggerProps extends Omit<
   ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>,
   'children'
 > {
-  /** Placeholder shown when no value is selected. */
+  /**
+   * Placeholder shown when no value is selected. Also used as the trigger's
+   * accessible name when no `aria-label` / `aria-labelledby` / `id` (external
+   * `<Label htmlFor>`) is supplied — `role="combobox"` takes no name from
+   * its content.
+   */
   placeholder?: string;
   /** Trigger height — matches Input sizes. */
   size?: 'sm' | 'md' | 'lg';
@@ -41,9 +47,12 @@ export const SelectTrigger = forwardRef<
   ElementRef<typeof SelectPrimitive.Trigger>,
   SelectTriggerProps
 >(function SelectTrigger({ className, placeholder, size = 'md', tone = 'default', ...props }, ref) {
+  const strings = useStrings();
+  const hasName = Boolean(props['aria-label'] || props['aria-labelledby'] || props.id);
   return (
     <SelectPrimitive.Trigger
       ref={ref}
+      aria-label={hasName ? undefined : (placeholder ?? strings.select.placeholder)}
       className={cn(
         'bg-card text-foreground inline-flex w-full items-center justify-between gap-2 rounded-md border text-lg md:text-sm',
         '[&>span]:min-w-0 [&>span]:truncate',

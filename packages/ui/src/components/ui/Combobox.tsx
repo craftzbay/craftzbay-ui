@@ -189,7 +189,11 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(function Combo
   return (
     <div ref={ref} className={cn('flex flex-col gap-1.5', className)}>
       {label && (
-        <label htmlFor={fieldId} className="text-foreground text-sm font-medium">
+        <label
+          id={`${fieldId}-label`}
+          htmlFor={fieldId}
+          className="text-foreground text-sm font-medium"
+        >
           {label}
         </label>
       )}
@@ -204,6 +208,11 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(function Combo
               aria-expanded={open}
               aria-haspopup="listbox"
               aria-controls={open ? listId : undefined}
+              // role=combobox takes no name from content, so the placeholder
+              // must be exposed explicitly. A consumer `id` implies an external
+              // <label htmlFor>, which aria-label would override.
+              aria-labelledby={label ? `${fieldId}-label` : undefined}
+              aria-label={label || id ? undefined : placeholder}
               aria-invalid={isError || undefined}
               aria-describedby={describedBy}
               disabled={disabled}
@@ -247,6 +256,9 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(function Combo
 
         <PopoverPrimitive.Portal>
           <PopoverPrimitive.Content
+            // Radix gives the popover role="dialog"; name it after the field.
+            aria-labelledby={label ? `${fieldId}-label` : undefined}
+            aria-label={label ? undefined : placeholder}
             align="start"
             sideOffset={4}
             className={cn(

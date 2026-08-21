@@ -204,7 +204,7 @@ export function DocSidebar({
               {section.kind !== current?.kind && (
                 <a
                   href={`#${routeToHash(indexRouteFor(section.kind))}`}
-                  className="text-foreground-subtle hover:text-accent inline-flex items-center gap-0.5 text-xs"
+                  className="text-foreground-subtle hover:text-accent inline-flex min-h-6 items-center gap-0.5 py-1 text-xs"
                 >
                   Open <ArrowRight className="size-2.5" aria-hidden />
                 </a>
@@ -214,7 +214,7 @@ export function DocSidebar({
           {section.groups.map((group) => (
             <div key={group.name} className="mb-3">
               {!isSearching && (
-                <div className="text-foreground-subtle/80 mb-1 px-2 text-xs font-medium tracking-wide uppercase">
+                <div className="text-foreground-muted mb-1 px-2 text-xs font-medium tracking-wide uppercase">
                   {group.name}
                 </div>
               )}

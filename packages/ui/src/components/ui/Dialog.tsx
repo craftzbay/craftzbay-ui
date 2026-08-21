@@ -13,6 +13,7 @@ import { X } from '@/icons';
 import { cn } from '@/lib/utils';
 import { useStrings } from '@/hooks/use-strings';
 import { Button, type ButtonProps } from './Button';
+import { withReturnFocus, type ReturnFocusRef } from '@/lib/return-focus';
 
 export const Dialog = DialogPrimitive.Root;
 export const DialogTrigger = DialogPrimitive.Trigger;
@@ -45,18 +46,30 @@ export interface DialogContentProps extends ComponentPropsWithoutRef<
   showClose?: boolean;
   /** Dialog width — `sm` 400 / `md` 520 / `lg` 720. */
   size?: 'sm' | 'md' | 'lg';
+  /**
+   * Element to focus when the overlay closes. Overrides Radix's default
+   * (the element focused when the content mounted), which is `<body>` for
+   * controlled overlays opened from a pointer click on a non-focusable /
+   * tooltip-wrapped trigger. A consumer `onCloseAutoFocus` runs first and
+   * wins if it calls `preventDefault()`.
+   */
+  returnFocusTo?: ReturnFocusRef;
 }
 
 export const DialogContent = forwardRef<
   ElementRef<typeof DialogPrimitive.Content>,
   DialogContentProps
->(function DialogContent({ className, children, showClose = true, size = 'md', ...props }, ref) {
+>(function DialogContent(
+  { className, children, showClose = true, size = 'md', returnFocusTo, onCloseAutoFocus, ...props },
+  ref,
+) {
   const strings = useStrings();
   return (
     <DialogPortal>
       <DialogOverlay />
       <DialogPrimitive.Content
         ref={ref}
+        onCloseAutoFocus={withReturnFocus(returnFocusTo, onCloseAutoFocus)}
         className={cn(
           'fixed top-1/2 left-1/2 z-[var(--z-modal)] -translate-x-1/2 -translate-y-1/2',
           'border-border bg-card text-card-foreground w-[calc(100%-2rem)] rounded-xl border shadow-lg',

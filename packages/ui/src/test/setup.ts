@@ -43,6 +43,10 @@ if (typeof Element !== 'undefined' && !Element.prototype.hasPointerCapture) {
   Element.prototype.hasPointerCapture = () => false;
   Element.prototype.releasePointerCapture = () => {};
 }
+if (typeof Element !== 'undefined' && !Element.prototype.setPointerCapture) {
+  // vaul (Drawer) calls it on pointerdown; jsdom lacks it.
+  Element.prototype.setPointerCapture = () => {};
+}
 
 // Polyfill matchMedia for components that check prefers-color-scheme etc.
 if (typeof window !== 'undefined' && !window.matchMedia) {

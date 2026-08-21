@@ -40,6 +40,7 @@ export interface UiStrings {
   stepper: { label: string; complete: string; current: string; upcoming: string };
   topNav: { label: string };
   sidebar: { label: string; collapse: string; expand: string; collapseShort: string };
+  select: { placeholder: string };
   combobox: {
     placeholder: string;
     searchPlaceholder: string;
@@ -76,6 +77,10 @@ export interface UiStrings {
   };
   avatar: { status: string; more: string };
   tree: { label: string };
+  /** Accessible name of the focusable scroll wrapper around the table. */
+  table: { scrollRegion: string };
+  /** Accessible name of the focusable scroll viewport. */
+  scrollArea: { region: string };
   chart: {
     series: string;
     noData: string;
@@ -140,6 +145,7 @@ export const defaultStrings: UiStrings = {
     expand: 'Expand sidebar',
     collapseShort: 'Collapse',
   },
+  select: { placeholder: 'Select…' },
   combobox: {
     placeholder: 'Select…',
     searchPlaceholder: 'Search…',
@@ -186,6 +192,8 @@ export const defaultStrings: UiStrings = {
   },
   avatar: { status: 'Status: {status}', more: '{n} more' },
   tree: { label: 'Tree' },
+  table: { scrollRegion: 'Scrollable table' },
+  scrollArea: { region: 'Scrollable content' },
   chart: {
     series: 'Series {n}',
     noData: 'no data',

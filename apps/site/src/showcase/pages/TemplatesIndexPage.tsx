@@ -56,7 +56,7 @@ export function TemplatesIndexPage() {
               <button
                 type="button"
                 onClick={() => setActive(new Set())}
-                className="text-foreground-muted hover:text-foreground inline-flex items-center gap-1 text-xs"
+                className="text-foreground-muted hover:text-foreground inline-flex min-h-6 items-center gap-1 py-1 text-xs"
               >
                 <X className="size-3" />
                 Clear
@@ -141,13 +141,13 @@ export function TemplatesIndexPage() {
                     href={previewUrl(preview)}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-accent relative z-10 inline-flex items-center gap-1 font-medium hover:underline"
+                    className="text-accent relative z-10 inline-flex min-h-6 items-center gap-1 py-1 font-medium hover:underline"
                   >
                     Open preview <ExternalLink className="size-3" aria-hidden />
                   </a>
                   <a
                     href={`#${routeToHash({ kind: 'template', slug: doc.slug })}`}
-                    className="text-foreground-muted hover:text-foreground relative z-10"
+                    className="text-foreground-muted hover:text-foreground relative z-10 inline-flex min-h-6 items-center py-1"
                   >
                     Docs
                   </a>

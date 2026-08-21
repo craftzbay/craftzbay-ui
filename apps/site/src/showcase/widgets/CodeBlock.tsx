@@ -48,7 +48,12 @@ export function CodeBlock({ code, language = 'tsx', className }: CodeBlockProps)
           {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
-      <pre className="text-foreground max-h-[70vh] overflow-auto p-4">
+      <pre
+        className="text-foreground scroll-region max-h-[70vh] overflow-auto p-4"
+        tabIndex={0}
+        role="region"
+        aria-label={`${language} code`}
+      >
         <code>{highlight(code, language)}</code>
       </pre>
     </div>

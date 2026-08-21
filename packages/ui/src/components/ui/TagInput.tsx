@@ -158,7 +158,9 @@ export const TagInput = forwardRef<HTMLDivElement, TagInputProps>(function TagIn
             }
           }}
           placeholder={tags.length === 0 ? placeholder : undefined}
-          aria-label={ariaLabel}
+          // Unlabelled field: fall back to the placeholder. A consumer `id`
+          // implies an external <label htmlFor>.
+          aria-label={ariaLabel ?? (label || id ? undefined : placeholder)}
           aria-invalid={isError || undefined}
           aria-describedby={describedBy}
           className="placeholder:text-foreground-subtle min-w-[8ch] flex-1 bg-transparent text-lg outline-none md:text-sm"

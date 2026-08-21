@@ -1942,6 +1942,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": "Event handler called when the a `pointerdown` event happens outside of the `DismissableLayer`. Can be prevented."
         },
         {
+          "name": "returnFocusTo",
+          "type": "ReturnFocusRef",
+          "required": false,
+          "description": "Element to focus when the overlay closes. Overrides Radix's default (the element focused when the content mounted), which is `<body>` for controlled overlays opened from a pointer click on a non-focusable / tooltip-wrapped trigger. A consumer `onCloseAutoFocus` runs first and wins if it calls `preventDefault()`."
+        },
+        {
           "name": "showClose",
           "type": "boolean",
           "default": "true",
@@ -2164,6 +2170,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "((event: PointerDownOutsideEvent) => void)",
           "required": false,
           "description": "Event handler called when the a `pointerdown` event happens outside of the `DismissableLayer`. Can be prevented."
+        },
+        {
+          "name": "returnFocusTo",
+          "type": "ReturnFocusRef",
+          "required": false,
+          "description": "Element to focus when the overlay closes. Overrides Radix's default (the element focused when the content mounted), which is `<body>` for controlled overlays opened from a pointer click on a non-focusable / tooltip-wrapped trigger. A consumer `onCloseAutoFocus` runs first and wins if it calls `preventDefault()`."
         },
         {
           "name": "showClose",
@@ -3840,6 +3852,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "enum",
           "required": false,
           "description": ""
+        },
+        {
+          "name": "viewportLabel",
+          "type": "string",
+          "required": false,
+          "description": "Accessible name of the viewport (a focusable `group` so keyboard users can scroll it). Defaults to `strings.scrollArea.region`."
         }
       ]
     }
@@ -4081,7 +4099,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "name": "placeholder",
           "type": "string",
           "required": false,
-          "description": "Placeholder shown when no value is selected."
+          "description": "Placeholder shown when no value is selected. Also used as the trigger's accessible name when no `aria-label` / `aria-labelledby` / `id` (external `<Label htmlFor>`) is supplied — `role=\"combobox\"` takes no name from its content."
         },
         {
           "name": "size",
@@ -4216,6 +4234,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "((event: PointerDownOutsideEvent) => void)",
           "required": false,
           "description": "Event handler called when the a `pointerdown` event happens outside of the `DismissableLayer`. Can be prevented."
+        },
+        {
+          "name": "returnFocusTo",
+          "type": "ReturnFocusRef",
+          "required": false,
+          "description": "Element to focus when the overlay closes. Overrides Radix's default (the element focused when the content mounted), which is `<body>` for controlled overlays opened from a pointer click on a non-focusable / tooltip-wrapped trigger. A consumer `onCloseAutoFocus` runs first and wins if it calls `preventDefault()`."
         },
         {
           "name": "showClose",
@@ -4732,6 +4756,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "MaxHeight<string | number>",
           "required": false,
           "description": "Max height of the scroll wrapper. Required for the sticky header to work — `<thead>` sticks to the nearest scroll container, so a wrapper with no height cap never scrolls. e.g. `maxHeight=\"24rem\"`."
+        },
+        {
+          "name": "scrollLabel",
+          "type": "string",
+          "required": false,
+          "description": "Accessible name of the scroll wrapper (it is a focusable `group` so keyboard users can scroll wide / capped tables). Defaults to `strings.table.scrollRegion`; pass the table's own title when you have one."
         }
       ]
     }

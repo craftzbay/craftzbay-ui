@@ -19,10 +19,14 @@ export const ToastProvider = ToastPrimitive.Provider;
 export const ToastViewport = forwardRef<
   ElementRef<typeof ToastPrimitive.Viewport>,
   ComponentPropsWithoutRef<typeof ToastPrimitive.Viewport>
->(function ToastViewport({ className, ...props }, ref) {
+>(function ToastViewport({ className, label, ...props }, ref) {
+  const strings = useStrings();
   return (
     <ToastPrimitive.Viewport
       ref={ref}
+      // Radix's default is "Notifications ({hotkey})" — route it through the
+      // strings so the region landmark is localised like the rest.
+      label={label ?? strings.toast.region}
       className={cn(
         'fixed right-0 bottom-0 z-[var(--z-toast)] flex max-h-dvh w-full flex-col-reverse gap-2 p-6',
         // Respect notched/home-indicator insets (consumers set viewport-fit=cover).

@@ -3,6 +3,7 @@
 import {
   forwardRef,
   useEffect,
+  useRef,
   type ComponentPropsWithoutRef,
   type Dispatch,
   type ElementRef,
@@ -113,12 +114,12 @@ export const CommandSeparator = forwardRef<
   ElementRef<typeof CommandPrimitive.Separator>,
   ComponentPropsWithoutRef<typeof CommandPrimitive.Separator>
 >(function CommandSeparator({ className, ...props }, ref) {
+  // cmdk hard-codes role="separator", which is not a permitted child of the
+  // listbox. asChild lets the child's role win: the divider is purely visual.
   return (
-    <CommandPrimitive.Separator
-      ref={ref}
-      className={cn('bg-border -mx-1 my-1 h-px', className)}
-      {...props}
-    />
+    <CommandPrimitive.Separator ref={ref} asChild {...props}>
+      <div role="none" className={cn('bg-border -mx-1 my-1 h-px', className)} />
+    </CommandPrimitive.Separator>
   );
 });
 CommandSeparator.displayName = 'CommandSeparator';
@@ -177,6 +178,10 @@ export interface CommandDialogProps {
 
 export function CommandDialog({ open, onOpenChange, children, title }: CommandDialogProps) {
   const strings = useStrings();
+  // The palette has no DialogTrigger (⌘K / any button opens it), so Radix has
+  // no trigger to return focus to and would drop it on <body>. Remember what
+  // was focused when the dialog opened and restore it on close.
+  const returnFocusRef = useRef<HTMLElement | null>(null);
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
@@ -189,6 +194,14 @@ export function CommandDialog({ open, onOpenChange, children, title }: CommandDi
         />
         <DialogPrimitive.Content
           aria-describedby={undefined}
+          onOpenAutoFocus={() => {
+            returnFocusRef.current = document.activeElement as HTMLElement | null;
+          }}
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            returnFocusRef.current?.focus();
+            returnFocusRef.current = null;
+          }}
           className={cn(
             'fixed top-[20%] left-1/2 z-[var(--z-modal)] -translate-x-1/2',
             'w-[calc(100%-2rem)] max-w-[640px] overflow-hidden',

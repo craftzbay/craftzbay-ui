@@ -503,7 +503,7 @@
   --accent: oklch(0.56 0.14 65); /* 4.8:1 with white text (0.62 was 3.8:1) */
   --accent-subtle: oklch(0.96 0.04 75);
   --accent-subtle-foreground: oklch(0.48 0.12 65);
-  --ring: oklch(0.66 0.14 65);
+  --ring: oklch(0.64 0.14 65); /* 3.17:1 on background-muted (0.66 was 2.93) */
 }
 .dark[data-accent='amber'] {
   --accent: oklch(0.66 0.14 65);
@@ -645,6 +645,14 @@
   /* Visible default focus indicator. Components that draw their own
      `focus-visible:ring-*` set `outline-none` locally to avoid doubling. */
   :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* Chart series are focusable SVG <g> groups. Tailwind's ring utilities are
+     box-shadow based and do not paint on SVG groups; CSS `outline` does
+     (Chromium + Firefox), drawn around the group's bounding box. */
+  [data-chart-series]:focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }

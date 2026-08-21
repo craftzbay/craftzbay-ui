@@ -90,7 +90,14 @@ function FormDemo() {
         {submitted && (
           <div className="border-border bg-background-muted rounded-md border p-3 text-xs">
             <p className="text-foreground mb-1 font-medium">Submitted values:</p>
-            <pre className="overflow-x-auto font-mono">{JSON.stringify(submitted, null, 2)}</pre>
+            <pre
+              className="scroll-region overflow-x-auto font-mono"
+              tabIndex={0}
+              role="region"
+              aria-label="Submitted values"
+            >
+              {JSON.stringify(submitted, null, 2)}
+            </pre>
           </div>
         )}
       </CardContent>

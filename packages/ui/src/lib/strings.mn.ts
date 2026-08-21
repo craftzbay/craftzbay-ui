@@ -41,6 +41,7 @@ export const mnStrings: UiStrings = {
     expand: 'Хажуугийн самбарыг дэлгэх',
     collapseShort: 'Хураах',
   },
+  select: { placeholder: 'Сонгох…' },
   combobox: {
     placeholder: 'Сонгох…',
     searchPlaceholder: 'Хайх…',
@@ -87,6 +88,8 @@ export const mnStrings: UiStrings = {
   },
   avatar: { status: 'Төлөв: {status}', more: 'бусад {n}' },
   tree: { label: 'Мод' },
+  table: { scrollRegion: 'Гүйлгэх боломжтой хүснэгт' },
+  scrollArea: { region: 'Гүйлгэх боломжтой агуулга' },
   chart: {
     series: '{n}-р цуваа',
     noData: 'өгөгдөл алга',

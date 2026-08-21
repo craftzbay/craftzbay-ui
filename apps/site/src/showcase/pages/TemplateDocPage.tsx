@@ -212,7 +212,7 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
           href={previewUrl(doc.slug, screen, variant)}
           target="_blank"
           rel="noreferrer"
-          className="text-accent focus-visible:ring-ring rounded-sm outline-none hover:underline focus-visible:ring-2"
+          className="prose-link"
         >
           open it in a new tab ↗
         </a>

@@ -333,7 +333,7 @@ function Landing({
             {LOGOS.map((c) => (
               <span
                 key={c}
-                className="text-foreground-muted inline-flex h-8 items-center text-lg font-semibold tracking-tight opacity-70 grayscale transition-opacity hover:opacity-100"
+                className="text-foreground-muted hover:text-foreground inline-flex h-8 items-center text-lg font-semibold tracking-tight grayscale transition-colors"
               >
                 {c}
               </span>
@@ -409,6 +409,7 @@ function Landing({
           <div className="mx-auto max-w-3xl px-6 text-center">
             <div
               className="text-warning-text mb-4 flex items-center justify-center gap-1"
+              role="img"
               aria-label="5 out of 5 stars"
             >
               {Array.from({ length: 5 }).map((_, i) => (
@@ -469,7 +470,7 @@ function Landing({
                 {CTA_LABEL} <ArrowRight className="ml-1 size-4" aria-hidden />
               </Button>
             </div>
-            <p className="mt-4 text-sm opacity-80">No credit card required · 14-day free trial</p>
+            <p className="mt-4 text-sm">No credit card required · 14-day free trial</p>
           </div>
         </section>
       </main>

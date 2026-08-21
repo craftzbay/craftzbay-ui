@@ -153,6 +153,58 @@ export function InboxPage({ onNavigate }: { onNavigate: (key: string) => void })
   );
 }
 
+function StatusBadge({ status }: { status: Member['status'] }) {
+  const tone = status === 'Active' ? 'success' : 'warning';
+  return (
+    <Badge tone={tone} variant="outline">
+      <StatusIcon tone={tone} />
+      {status}
+    </Badge>
+  );
+}
+
+function RoleSelect({
+  member: m,
+  onChange,
+  className,
+}: {
+  member: Member;
+  onChange: (id: number, role: Member['role']) => void;
+  className?: string;
+}) {
+  return (
+    <Select value={m.role} onValueChange={(v) => onChange(m.id, v as Member['role'])}>
+      <SelectTrigger
+        size="sm"
+        aria-label={`Role for ${m.name}`}
+        className={className}
+        disabled={m.role === 'Owner'}
+      />
+      <SelectContent>
+        {ROLES.map((r) => (
+          <SelectItem key={r} value={r}>
+            {r}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function RemoveButton({ member: m, onRemove }: { member: Member; onRemove: (m: Member) => void }) {
+  return (
+    <IconButton
+      aria-label={`Remove ${m.name}`}
+      icon={<Trash2 />}
+      variant="ghost"
+      size="sm"
+      disabled={m.role === 'Owner'}
+      title={m.role === 'Owner' ? 'The owner cannot be removed' : undefined}
+      onClick={() => onRemove(m)}
+    />
+  );
+}
+
 export interface MembersHandle {
   invite: () => void;
 }
@@ -208,6 +260,9 @@ export const Members = forwardRef<MembersHandle, { onNavigate: (key: string) => 
       });
     };
 
+    const setMemberRole = (id: number, next: Member['role']) =>
+      setItems((xs) => xs.map((x) => (x.id === id ? { ...x, role: next } : x)));
+
     const visible = demo.state === 'empty' ? [] : items;
     const inviteButton = (
       <Button size="sm" leadingIcon={<Plus />} onClick={() => setOpen(true)}>
@@ -246,99 +301,94 @@ export const Members = forwardRef<MembersHandle, { onNavigate: (key: string) => 
           />
         ) : (
           <Card padding="none">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-12 text-right">
-                    <span className="sr-only">Actions</span>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {demo.state === 'loading'
-                  ? Array.from({ length: 4 }, (_, i) => (
-                      <TableRow key={`sk-${i}`} aria-hidden>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Skeleton variant="avatar" className="size-8" />
-                            <Skeleton variant="text" className="w-32" />
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-8 w-32" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-5 w-16 rounded-full" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="ml-auto size-8" />
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  : visible.map((m) => (
-                      <TableRow key={m.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Avatar size="sm" fallback={m.initials} alt="" />
-                            <div className="leading-tight">
-                              <div className="text-foreground font-medium">{m.name}</div>
-                              <div className="text-foreground-subtle text-xs">{m.email}</div>
+            {/* <sm: a stacked list — the 4-column table would put the Role
+                select past the 320px edge inside a horizontal scroller. */}
+            <ul className="divide-border divide-y sm:hidden">
+              {demo.state === 'loading'
+                ? Array.from({ length: 4 }, (_, i) => (
+                    <li key={`sk-${i}`} aria-hidden className="space-y-3 p-4">
+                      <div className="flex items-center gap-2">
+                        <Skeleton variant="avatar" className="size-8" />
+                        <Skeleton variant="text" className="w-32" />
+                      </div>
+                      <Skeleton className="h-8 w-full" />
+                    </li>
+                  ))
+                : visible.map((m) => (
+                    <li key={m.id} className="space-y-3 p-4">
+                      <div className="flex items-center gap-2">
+                        <Avatar size="sm" fallback={m.initials} alt="" />
+                        <div className="min-w-0 flex-1 leading-tight">
+                          <div className="text-foreground truncate font-medium">{m.name}</div>
+                          <div className="text-foreground-subtle truncate text-xs">{m.email}</div>
+                        </div>
+                        <StatusBadge status={m.status} />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <RoleSelect member={m} onChange={setMemberRole} className="w-full" />
+                        <RemoveButton member={m} onRemove={setPendingRemove} />
+                      </div>
+                    </li>
+                  ))}
+            </ul>
+            <div className="hidden sm:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="w-12 text-right">
+                      <span className="sr-only">Actions</span>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {demo.state === 'loading'
+                    ? Array.from({ length: 4 }, (_, i) => (
+                        <TableRow key={`sk-${i}`} aria-hidden>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Skeleton variant="avatar" className="size-8" />
+                              <Skeleton variant="text" className="w-32" />
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            value={m.role}
-                            onValueChange={(v) =>
-                              setItems((xs) =>
-                                xs.map((x) =>
-                                  x.id === m.id ? { ...x, role: v as Member['role'] } : x,
-                                ),
-                              )
-                            }
-                          >
-                            <SelectTrigger
-                              size="sm"
-                              aria-label={`Role for ${m.name}`}
-                              className="w-32"
-                              disabled={m.role === 'Owner'}
-                            />
-                            <SelectContent>
-                              {ROLES.map((r) => (
-                                <SelectItem key={r} value={r}>
-                                  {r}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            tone={m.status === 'Active' ? 'success' : 'warning'}
-                            variant="outline"
-                          >
-                            <StatusIcon tone={m.status === 'Active' ? 'success' : 'warning'} />
-                            {m.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <IconButton
-                            aria-label={`Remove ${m.name}`}
-                            icon={<Trash2 />}
-                            variant="ghost"
-                            size="sm"
-                            disabled={m.role === 'Owner'}
-                            title={m.role === 'Owner' ? 'The owner cannot be removed' : undefined}
-                            onClick={() => setPendingRemove(m)}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-              </TableBody>
-            </Table>
+                          </TableCell>
+                          <TableCell>
+                            <Skeleton className="h-8 w-32" />
+                          </TableCell>
+                          <TableCell>
+                            <Skeleton className="h-5 w-16 rounded-full" />
+                          </TableCell>
+                          <TableCell>
+                            <Skeleton className="ml-auto size-8" />
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    : visible.map((m) => (
+                        <TableRow key={m.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Avatar size="sm" fallback={m.initials} alt="" />
+                              <div className="leading-tight">
+                                <div className="text-foreground font-medium">{m.name}</div>
+                                <div className="text-foreground-subtle text-xs">{m.email}</div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <RoleSelect member={m} onChange={setMemberRole} className="w-32" />
+                          </TableCell>
+                          <TableCell>
+                            <StatusBadge status={m.status} />
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <RemoveButton member={m} onRemove={setPendingRemove} />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                </TableBody>
+              </Table>
+            </div>
           </Card>
         )}
 

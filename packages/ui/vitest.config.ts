@@ -18,5 +18,16 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     css: false,
     include: ['src/**/*.test.{ts,tsx}'],
+    coverage: {
+      provider: 'v8',
+      include: ['src/components/ui/**', 'src/hooks/**', 'src/lib/**'],
+      exclude: ['**/*.test.{ts,tsx}', '**/__tests__/**'],
+      reporter: ['text', 'html'],
+      thresholds: {
+        'src/components/ui/**': { lines: 80, statements: 80 },
+        'src/hooks/**': { lines: 80, statements: 80 },
+        'src/lib/**': { lines: 80, statements: 80 },
+      },
+    },
   },
 });

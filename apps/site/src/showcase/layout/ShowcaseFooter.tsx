@@ -71,14 +71,14 @@ function Column({
       <div className="text-foreground-subtle mb-2 text-xs font-semibold tracking-wider uppercase">
         {title}
       </div>
-      <ul className="space-y-1.5">
+      <ul>
         {links.map((l) => (
           <li key={l.label}>
             <a
               href={l.href}
               target={l.external ? '_blank' : undefined}
               rel={l.external ? 'noreferrer' : undefined}
-              className="text-foreground-muted hover:text-foreground"
+              className="text-foreground-muted hover:text-foreground focus-visible:ring-ring inline-flex min-h-6 items-center rounded-sm py-1 outline-none focus-visible:ring-2"
             >
               {l.label}
               {l.external && <span className="text-foreground-subtle ml-0.5">↗</span>}

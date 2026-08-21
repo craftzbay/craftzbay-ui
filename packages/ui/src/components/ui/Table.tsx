@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { ArrowDown, ArrowUp, ArrowUpDown } from '@/icons';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
 
 /* -----------------------------------------------------------------------------
  *  Table primitives — minimal sugar over <table>. Pair with a sortable
@@ -25,15 +26,31 @@ export interface TableProps extends HTMLAttributes<HTMLTableElement> {
    * with no height cap never scrolls. e.g. `maxHeight="24rem"`.
    */
   maxHeight?: CSSProperties['maxHeight'];
+  /**
+   * Accessible name of the scroll wrapper (it is a focusable `group` so
+   * keyboard users can scroll wide / capped tables). Defaults to
+   * `strings.table.scrollRegion`; pass the table's own title when you have one.
+   */
+  scrollLabel?: string;
 }
 
 export const Table = forwardRef<HTMLTableElement, TableProps>(function Table(
-  { className, containerClassName, maxHeight, ...props },
+  { className, containerClassName, maxHeight, scrollLabel, ...props },
   ref,
 ) {
+  const strings = useStrings();
   return (
+    // Whether the wrapper actually overflows is not knowable statically, so it
+    // is always a tab stop (WCAG 2.1.1 / axe scrollable-region-focusable).
     <div
-      className={cn('relative isolate w-full overflow-auto', containerClassName)}
+      role="group"
+      aria-label={scrollLabel ?? strings.table.scrollRegion}
+      tabIndex={0}
+      className={cn(
+        'relative isolate w-full overflow-auto',
+        'focus-visible:ring-ring focus-visible:ring-offset-background outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+        containerClassName,
+      )}
       style={maxHeight !== undefined ? { maxHeight } : undefined}
     >
       <table

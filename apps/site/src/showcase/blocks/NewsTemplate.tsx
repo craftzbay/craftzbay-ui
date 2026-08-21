@@ -525,44 +525,46 @@ function ArticlePage({
   return (
     <div className="bg-background flex min-h-dvh flex-col">
       <Masthead brand={brand} onCategory={onSection} />
-      <article className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
-        {/* `flex w-fit` (not inline-flex): an inline-level button shares the
+      <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
+        <article>
+          {/* `flex w-fit` (not inline-flex): an inline-level button shares the
             line with the inline Badge below, gluing "Back to front page" to
             the category chip. */}
-        <button
-          onClick={onBack}
-          className="text-foreground-muted hover:text-foreground mb-6 flex w-fit items-center gap-1.5 text-sm"
-        >
-          <ArrowLeft className="size-4" aria-hidden /> Back to front page
-        </button>
-        <Badge tone="accent" variant="outline">
-          {a.cat}
-        </Badge>
-        <h1 className="mt-3 text-4xl leading-tight font-semibold tracking-tight">{a.title}</h1>
-        <p className="text-foreground-muted mt-4 text-lg leading-relaxed">{a.excerpt}</p>
-        <div className="mt-5 flex items-center justify-between">
-          <Byline {...a} />
-          <span className="text-foreground-subtle text-xs">6 min read</span>
-        </div>
-        <Cover hue={a.hue} className="mt-6 aspect-[16/9] w-full rounded-lg" />
-        <div className="text-foreground mt-8 max-w-[65ch] space-y-4 text-base leading-relaxed">
-          <p>
-            For years the boundary between design and engineering was a stack of hand-offs. A new
-            generation of token-driven libraries is quietly erasing it — and teams are shipping
-            measurably faster as a result.
-          </p>
-          <p>
-            The shift is subtle. Instead of pixel specs, designers ship semantic tokens; instead of
-            re-implementing them, engineers consume the same source of truth. Themes become data,
-            and dark mode stops being a project.
-          </p>
-          <p>
-            “We stopped arguing about spacing,” one lead told us. “The system decides, and we get
-            our afternoons back.” That sentiment — less debate, more shipping — came up again and
-            again across the dozen teams we spoke to.
-          </p>
-        </div>
-      </article>
+          <button
+            onClick={onBack}
+            className="text-foreground-muted hover:text-foreground mb-6 flex w-fit items-center gap-1.5 text-sm"
+          >
+            <ArrowLeft className="size-4" aria-hidden /> Back to front page
+          </button>
+          <Badge tone="accent" variant="outline">
+            {a.cat}
+          </Badge>
+          <h1 className="mt-3 text-4xl leading-tight font-semibold tracking-tight">{a.title}</h1>
+          <p className="text-foreground-muted mt-4 text-lg leading-relaxed">{a.excerpt}</p>
+          <div className="mt-5 flex items-center justify-between">
+            <Byline {...a} />
+            <span className="text-foreground-subtle text-xs">6 min read</span>
+          </div>
+          <Cover hue={a.hue} className="mt-6 aspect-[16/9] w-full rounded-lg" />
+          <div className="text-foreground mt-8 max-w-[65ch] space-y-4 text-base leading-relaxed">
+            <p>
+              For years the boundary between design and engineering was a stack of hand-offs. A new
+              generation of token-driven libraries is quietly erasing it — and teams are shipping
+              measurably faster as a result.
+            </p>
+            <p>
+              The shift is subtle. Instead of pixel specs, designers ship semantic tokens; instead
+              of re-implementing them, engineers consume the same source of truth. Themes become
+              data, and dark mode stops being a project.
+            </p>
+            <p>
+              “We stopped arguing about spacing,” one lead told us. “The system decides, and we get
+              our afternoons back.” That sentiment — less debate, more shipping — came up again and
+              again across the dozen teams we spoke to.
+            </p>
+          </div>
+        </article>
+      </main>
       <Footer brand={brand} onSection={onSection} onLegal={onLegal} />
     </div>
   );

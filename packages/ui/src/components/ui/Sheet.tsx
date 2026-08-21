@@ -11,6 +11,7 @@ import { X } from '@/icons';
 import { cn } from '@/lib/utils';
 import { useStrings } from '@/hooks/use-strings';
 import { cva, type VariantProps } from '@/lib/cva';
+import { withReturnFocus, type ReturnFocusRef } from '@/lib/return-focus';
 
 /* -----------------------------------------------------------------------------
  *  Sheet — drawer-style overlay. Built on Radix Dialog (focus trap, escape,
@@ -68,17 +69,41 @@ const sheet = cva(
 export interface SheetContentProps
   extends ComponentPropsWithoutRef<typeof DialogPrimitive.Content>, VariantProps<typeof sheet> {
   showClose?: boolean;
+  /**
+   * Element to focus when the overlay closes. Overrides Radix's default
+   * (the element focused when the content mounted), which is `<body>` for
+   * controlled overlays opened from a pointer click on a non-focusable /
+   * tooltip-wrapped trigger. A consumer `onCloseAutoFocus` runs first and
+   * wins if it calls `preventDefault()`.
+   */
+  returnFocusTo?: ReturnFocusRef;
 }
 
 export const SheetContent = forwardRef<
   ElementRef<typeof DialogPrimitive.Content>,
   SheetContentProps
->(function SheetContent({ className, children, side = 'right', showClose = true, ...props }, ref) {
+>(function SheetContent(
+  {
+    className,
+    children,
+    side = 'right',
+    showClose = true,
+    returnFocusTo,
+    onCloseAutoFocus,
+    ...props
+  },
+  ref,
+) {
   const strings = useStrings();
   return (
     <SheetPortal>
       <SheetOverlay />
-      <DialogPrimitive.Content ref={ref} className={cn(sheet({ side }), className)} {...props}>
+      <DialogPrimitive.Content
+        ref={ref}
+        className={cn(sheet({ side }), className)}
+        onCloseAutoFocus={withReturnFocus(returnFocusTo, onCloseAutoFocus)}
+        {...props}
+      >
         {children}
         {showClose && (
           <DialogPrimitive.Close

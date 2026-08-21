@@ -144,7 +144,10 @@ export function formatMNT(n: number, { compact, ...options }: FormatMNTOptions =
       [1e6, 'M'],
       [1e3, 'K'],
     ];
-    const [div, unit] = units.find(([d]) => Math.abs(n) >= d) as [number, string];
+    let idx = units.findIndex(([d]) => Math.abs(n) >= d);
+    // 999,999 → "1000.0K" after rounding; promote to the next unit instead.
+    if (idx > 0 && Math.abs(n / units[idx][0]).toFixed(1) === '1000.0') idx -= 1;
+    const [div, unit] = units[idx];
     return `${formatNumber(n / div, { ...options, maximumFractionDigits: 1 })}${unit}₮`;
   }
   return `${formatNumber(n, { ...options, maximumFractionDigits: 0 })}₮`;

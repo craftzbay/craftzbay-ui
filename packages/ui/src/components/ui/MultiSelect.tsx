@@ -148,7 +148,11 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
   return (
     <div ref={ref} className={cn('flex flex-col gap-1.5', className)}>
       {label && (
-        <label htmlFor={fieldId} className="text-foreground text-sm font-medium">
+        <label
+          id={`${fieldId}-label`}
+          htmlFor={fieldId}
+          className="text-foreground text-sm font-medium"
+        >
           {label}
         </label>
       )}
@@ -220,6 +224,10 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
                   aria-controls={open ? listId : undefined}
                   aria-haspopup="listbox"
                   aria-autocomplete="list"
+                  // Unlabelled field: name the input after the placeholder. A
+                  // consumer `id` implies an external <label htmlFor>.
+                  aria-labelledby={label ? `${fieldId}-label` : undefined}
+                  aria-label={label || id ? undefined : placeholder}
                   aria-invalid={isError || undefined}
                   aria-describedby={describedBy}
                   className="placeholder:text-foreground-subtle min-w-[6ch] flex-1 bg-transparent text-lg outline-none md:text-sm"
@@ -235,7 +243,7 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
                       e.stopPropagation();
                       clear();
                     }}
-                    className="text-foreground-subtle hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background relative rounded-sm outline-none before:absolute before:-inset-1 before:content-[''] focus-visible:ring-2 focus-visible:ring-offset-2"
+                    className="text-foreground-subtle hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background inline-flex size-6 shrink-0 items-center justify-center rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                   >
                     <X className="size-4" aria-hidden />
                   </button>
@@ -249,6 +257,8 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
             <PopoverPrimitive.Content
               align="start"
               sideOffset={4}
+              // Radix gives the content role="dialog"; a dialog needs a name.
+              aria-label={strings.command.suggestions}
               className={cn(
                 'border-border bg-popover text-popover-foreground z-[var(--z-popover)] w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-lg border shadow-md',
                 'data-[state=open]:animate-in data-[state=closed]:animate-out',

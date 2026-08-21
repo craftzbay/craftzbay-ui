@@ -66,7 +66,11 @@ function PickerTrigger({
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label htmlFor={fieldId} className="text-foreground text-sm font-medium">
+        <label
+          id={`${fieldId}-label`}
+          htmlFor={fieldId}
+          className="text-foreground text-sm font-medium"
+        >
           {label}
         </label>
       )}
@@ -78,6 +82,9 @@ function PickerTrigger({
           role="combobox"
           aria-expanded={open}
           aria-controls={calendarId}
+          // role=combobox takes no name from content; expose the placeholder.
+          aria-labelledby={label ? `${fieldId}-label` : undefined}
+          aria-label={label ? undefined : placeholder}
           disabled={disabled}
           aria-invalid={Boolean(error) || undefined}
           aria-describedby={error ? errorId : undefined}
@@ -179,6 +186,9 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(function D
         <PopoverPrimitive.Portal>
           <PopoverPrimitive.Content
             id={`${fieldId}-calendar`}
+            // Radix gives the popover role="dialog"; name it after the field.
+            aria-labelledby={label ? `${fieldId}-label` : undefined}
+            aria-label={label ? undefined : placeholder}
             align="start"
             sideOffset={4}
             className="text-popover-foreground z-[var(--z-popover)] rounded-lg shadow-md"
@@ -186,6 +196,8 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(function D
             <Calendar
               mode="single"
               selected={value}
+              // RDP 9 ignores `selected` for the initial month; open on the value.
+              defaultMonth={value}
               onSelect={(d) => {
                 onChange(d ?? undefined);
                 if (d) setOpen(false);
@@ -261,6 +273,8 @@ export const DateRangePicker = forwardRef<HTMLDivElement, DateRangePickerProps>(
           <PopoverPrimitive.Portal>
             <PopoverPrimitive.Content
               id={`${fieldId}-calendar`}
+              aria-labelledby={label ? `${fieldId}-label` : undefined}
+              aria-label={label ? undefined : placeholder}
               align="start"
               sideOffset={4}
               className="text-popover-foreground z-[var(--z-popover)] rounded-lg shadow-md"
@@ -268,6 +282,7 @@ export const DateRangePicker = forwardRef<HTMLDivElement, DateRangePickerProps>(
               <Calendar
                 mode="range"
                 selected={value}
+                defaultMonth={value?.from}
                 onSelect={onChange}
                 numberOfMonths={2}
                 startMonth={fromDate}

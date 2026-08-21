@@ -511,6 +511,7 @@ interface FrameContext {
     tabIndex: number;
     role: 'group';
     'aria-label': string;
+    'data-chart-series': true;
     onKeyDown: (e: KeyboardEvent<SVGGElement>) => void;
     onFocus: () => void;
     onBlur: () => void;
@@ -545,8 +546,10 @@ function useRovingPoints(all: ChartSeries[], t: UiStrings['chart'], labels: Char
     tabIndex: 0,
     role: 'group' as const,
     'aria-label': labels.series(seriesName(all[si], si, t), validIndices(si).length),
+    // Focus ring comes from theme.css `[data-chart-series]:focus-visible`
+    // (CSS outline — Tailwind's box-shadow ring does not paint on SVG <g>).
+    'data-chart-series': true as const,
     className: cn(
-      'outline-none',
       '[&:focus-visible_[data-active]]:stroke-[var(--ring)] [&:focus-visible_[data-active]]:stroke-[3px]',
     ),
     onFocus: () => {
