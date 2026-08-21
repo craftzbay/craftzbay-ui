@@ -192,7 +192,7 @@ describe('Data Display (smoke)', () => {
       </div>,
     );
     const table = container.querySelector('table[data-chart-table]');
-    expect(table).toHaveClass('sr-only');
+    expect(table?.parentElement).toHaveClass('sr-only');
     expect(table?.querySelectorAll('tbody tr')).toHaveLength(2);
     expect(screen.getByRole('group', { name: /^A, 2 points/ })).toHaveAttribute('tabindex', '0');
     expect(container.querySelectorAll('circle[tabindex], rect[tabindex]')).toHaveLength(0);

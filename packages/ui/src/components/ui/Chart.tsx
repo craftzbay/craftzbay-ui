@@ -326,13 +326,13 @@ function DataTable({
 }) {
   const longest = Math.max(...all.map((s) => s.data.length));
   const xs = all.find((s) => s.data.length === longest)?.data ?? [];
-  return (
+  // A <table> ignores `sr-only`'s 1px width (min-content wins) and can widen
+  // the document on narrow viewports — hide it inside a wrapper instead.
+  const table = (
     <table
       id={id}
       data-chart-table
-      className={cn(
-        visible ? 'tabular text-foreground-muted mt-2 w-full text-left text-xs' : 'sr-only',
-      )}
+      className={cn(visible && 'tabular text-foreground-muted mt-2 w-full text-left text-xs')}
     >
       <caption className={cn(visible && 'text-foreground-subtle pb-1 text-left')}>
         {formatString(t.tableCaption, { name: name ?? '' }).trim()}
@@ -369,6 +369,7 @@ function DataTable({
       </tbody>
     </table>
   );
+  return visible ? table : <div className="sr-only">{table}</div>;
 }
 
 function Frame({
