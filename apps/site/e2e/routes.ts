@@ -92,8 +92,11 @@ export const DOC_PAGES: { name: string; hash: string }[] = [
 
 export const ADMIN_LAYOUTS = ['sidebar', 'topnav', 'dual'] as const;
 
-/** Every navigable admin page (ALL_SECTIONS in blocks/admin/data.ts). */
-export const ADMIN_PAGES = [
+/**
+ * Admin pages with real, layout-sensitive content (ALL_SECTIONS in
+ * blocks/admin/data.ts). These run in every layout.
+ */
+export const ADMIN_CORE_PAGES = [
   'overview',
   'analytics',
   'projects',
@@ -102,7 +105,15 @@ export const ADMIN_PAGES = [
   'reports',
   'settings',
   'billing',
-  // CRM / Finance / Content / Admin modules (stubs + the 403 page)
+  'apikeys', // the permission-denied (403) page
+] as const;
+
+/**
+ * CRM / Finance / Content / Admin module stubs — identical EmptyState bodies,
+ * so a layout bug would show on the core pages first. Covered in the `sidebar`
+ * layout only to keep the matrix (and CI wall-clock) proportional.
+ */
+export const ADMIN_STUB_PAGES = [
   'customers',
   'deals',
   'pipeline',
@@ -115,8 +126,10 @@ export const ADMIN_PAGES = [
   'comments',
   'audit',
   'roles',
-  'apikeys',
 ] as const;
+
+/** Every navigable admin page. */
+export const ADMIN_PAGES = [...ADMIN_CORE_PAGES, ...ADMIN_STUB_PAGES] as const;
 
 export interface TemplateRoute {
   /** Stable id used in test titles. */
@@ -128,7 +141,7 @@ export interface TemplateRoute {
 
 export const TEMPLATE_ROUTES: TemplateRoute[] = [
   ...ADMIN_LAYOUTS.flatMap((layout) =>
-    ADMIN_PAGES.map((page) => ({
+    (layout === 'sidebar' ? ADMIN_PAGES : ADMIN_CORE_PAGES).map((page) => ({
       name: `admin/${layout}/${page}`,
       hash: `preview/admin/app/${layout}/${page}`,
       shell: 'app' as const,
