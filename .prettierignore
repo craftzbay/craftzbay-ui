@@ -4,3 +4,4 @@ pnpm-lock.yaml
 **/CHANGELOG.md
 apps/site/src/generated/
 packages/create-app/templates/
+apps/site/src/showcase/registry/generated-props.ts

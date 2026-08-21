@@ -4,7 +4,7 @@ import {
   forwardRef,
   useRef,
   useState,
-  type FormEvent,
+  type ComponentProps,
   type InputHTMLAttributes,
   type ReactNode,
 } from 'react';
@@ -177,7 +177,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   const current = isControlled ? value : localValue;
   const hasValue = current !== undefined && current !== '' && current !== null;
 
-  const handleInput = (e: FormEvent<HTMLInputElement>) => {
+  // React 19 types `onInput` as `InputEventHandler`; `ComponentProps` keeps this portable.
+  const handleInput: NonNullable<ComponentProps<'input'>['onInput']> = (e) => {
     if (!isControlled) setLocalValue(e.currentTarget.value);
     onInput?.(e);
   };
