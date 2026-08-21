@@ -95,8 +95,32 @@ jobs:
 
   # Showcase E2E (Playwright, chromium). Visual baselines are per-platform and
   # skipped here unless CI_VISUAL=1 — see apps/site/e2e/README.md.
-  e2e:
+  # Decide whether the Playwright job is worth running for this change.
+  e2e-filter:
     runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.f.outputs.ui }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: f
+        with:
+          filters: |
+            ui:
+              - 'packages/ui/src/**'
+              - 'packages/ui/package.json'
+              - 'apps/site/**'
+              - 'pnpm-lock.yaml'
+              - '.github/workflows/ci.yml'
+
+  e2e:
+    needs: e2e-filter
+    if: needs.e2e-filter.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     steps:
       - uses: actions/checkout@v4
 
@@ -109,19 +133,36 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # The showcase consumes packages/ui from source — no library build needed.
       - name: Build showcase
-        run: pnpm build
+        run: pnpm build:site
+
+      - name: Playwright version
+        id: pw
+        run: echo "v=$(pnpm --filter @craftzbay/site exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright chromium
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.v }}
 
       - name: Install Playwright chromium
+        if: steps.pw-cache.outputs.cache-hit != 'true'
         run: pnpm --filter @craftzbay/site exec playwright install --with-deps chromium
 
-      - name: E2E
-        run: pnpm test:e2e
+      - name: Install Playwright OS deps (cache hit)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: pnpm --filter @craftzbay/site exec playwright install-deps chromium
+
+      - name: E2E (shard ${{ matrix.shard }}/2)
+        run: pnpm test:e2e --shard=${{ matrix.shard }}/2
 
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shard }}
           path: apps/site/playwright-report
           retention-days: 14

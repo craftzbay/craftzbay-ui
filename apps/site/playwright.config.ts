@@ -17,7 +17,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: CI,
   retries: CI ? 1 : 0,
-  workers: CI ? 2 : undefined,
+  // GitHub hosted runners have 4 vCPUs; the suite is network-free so 4 is safe.
+  workers: CI ? 4 : undefined,
   timeout: 60_000,
   expect: {
     timeout: 10_000,
