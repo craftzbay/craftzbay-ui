@@ -7,6 +7,7 @@ const doc: ComponentDoc = {
   group: 'Feedback',
   description:
     'Indeterminate loading indicator. Use inside buttons (Button does this for you), in small contexts (avatar swap, row load), or at page scale for first paint.',
+  i18n: 'Reads `spinner.loading` (default accessible label).',
   exports: ['Spinner'],
   sourceFile: 'Spinner.tsx',
   examples: [

@@ -7,6 +7,7 @@ const doc: ComponentDoc = {
   group: 'Inputs',
   description:
     'Inline calendar grid. Useful when the calendar must always be visible — e.g. booking flows, schedules. For form fields, prefer DatePicker.',
+  i18n: 'Reads `calendar.previous` / `calendar.next` / `calendar.chooseMonth` / `calendar.chooseYear` / `calendar.nav`.',
   exports: ['Calendar'],
   sourceFile: 'Calendar.tsx',
   examples: [

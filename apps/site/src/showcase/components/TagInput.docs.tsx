@@ -7,6 +7,7 @@ const doc: ComponentDoc = {
   group: 'Inputs',
   description:
     'Free-text chip input. Type a tag, press Enter or comma to add. Backspace removes the last tag when the input is empty. Use MultiSelect when tags must come from a fixed list.',
+  i18n: 'Reads `tagInput.placeholder` and `tagInput.remove` ("Remove {tag}").',
   exports: ['TagInput'],
   sourceFile: 'TagInput.tsx',
   examples: [

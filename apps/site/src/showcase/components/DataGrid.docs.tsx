@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { ComponentDoc } from '../registry/types';
 import { Search } from '@/icons';
+import { Checkbox } from '@/components/ui/Checkbox';
 
 interface Row {
   id: string;
@@ -171,6 +172,43 @@ function LoadingDemo() {
   return <DataGrid className="w-full" columns={COLUMNS} rows={[]} loading />;
 }
 
+function ColumnVisibilityDemo() {
+  const [visibility, setVisibility] = useState<Record<string, boolean>>({
+    owner: true,
+    updated: false,
+  });
+  const toggle = (key: string) => (v: boolean | 'indeterminate') =>
+    setVisibility((s) => ({ ...s, [key]: v === true }));
+  return (
+    <div className="w-full space-y-3">
+      <div className="flex flex-wrap gap-4">
+        <Checkbox
+          checked={visibility.owner ?? true}
+          onCheckedChange={toggle('owner')}
+          label="Owner"
+        />
+        <Checkbox
+          checked={visibility.status ?? true}
+          onCheckedChange={toggle('status')}
+          label="Status"
+        />
+        <Checkbox
+          checked={visibility.updated ?? true}
+          onCheckedChange={toggle('updated')}
+          label="Updated"
+        />
+      </div>
+      <DataGrid
+        className="w-full"
+        columns={COLUMNS}
+        rows={ROWS.slice(0, 4)}
+        columnVisibility={visibility}
+        onColumnVisibilityChange={setVisibility}
+      />
+    </div>
+  );
+}
+
 const doc: ComponentDoc = {
   slug: 'data-grid',
   name: 'DataGrid',
@@ -178,6 +216,7 @@ const doc: ComponentDoc = {
   description:
     'Sortable, filterable, column-visibility table. Stateless — pass in rows + columns and handle interactions in your own state. Pair with Pagination for large lists.',
   exports: ['DataGrid', 'DataGridColumn'],
+  i18n: 'Reads `dataGrid.filterPlaceholder`, `dataGrid.empty`, `dataGrid.columns`, `dataGrid.columnVisibility`, `dataGrid.filterRows`.',
   sourceFile: 'DataGrid.tsx',
   examples: [
     {
@@ -252,6 +291,25 @@ const rows = useMemo(() => sortAndFilter(ROWS, query, sort), [query, sort]);
       action={<Button variant="outline" size="sm">Clear filters</Button>}
     />
   }
+/>`,
+    },
+    {
+      title: 'Controlled column visibility',
+      description:
+        'Own the visibility map with `columnVisibility` / `onColumnVisibilityChange` to persist it (URL, localStorage, user prefs) or to drive it from UI outside the grid. The built-in ⋯ menu keeps working and calls the same handler.',
+      preview: <ColumnVisibilityDemo />,
+      code: `const [visibility, setVisibility] = useState({ owner: true, updated: false });
+
+<Checkbox
+  checked={visibility.owner}
+  onCheckedChange={(v) => setVisibility((s) => ({ ...s, owner: v === true }))}
+  label="Owner"
+/>
+<DataGrid
+  columns={columns}
+  rows={rows}
+  columnVisibility={visibility}
+  onColumnVisibilityChange={setVisibility}
 />`,
     },
   ],

@@ -31,11 +31,13 @@ const doc: ComponentDoc = {
           <IconButton aria-label="Add" size="sm" icon={<Plus />} />
           <IconButton aria-label="Add" size="md" icon={<Plus />} />
           <IconButton aria-label="Add" size="lg" icon={<Plus />} />
+          <IconButton aria-label="Add" size="xl" icon={<Plus />} />
         </div>
       ),
       code: `<IconButton aria-label="Add" size="sm" icon={<Plus />} />
 <IconButton aria-label="Add" size="md" icon={<Plus />} />
-<IconButton aria-label="Add" size="lg" icon={<Plus />} />`,
+<IconButton aria-label="Add" size="lg" icon={<Plus />} />
+<IconButton aria-label="Add" size="xl" icon={<Plus />} />`,
     },
     {
       title: 'With Tooltip',

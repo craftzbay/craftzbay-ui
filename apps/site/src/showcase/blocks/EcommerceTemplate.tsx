@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react';
 import {
   ArrowLeft,
   Heart,
+  Menu,
   Minus,
+  Package,
   Plus,
   Search,
   ShoppingCart,
@@ -14,11 +16,14 @@ import {
 import { Badge } from '@craftzbay/ui';
 import { Button } from '@craftzbay/ui';
 import { Card, CardContent } from '@craftzbay/ui';
+import { EmptyState } from '@craftzbay/ui';
 import { IconButton } from '@craftzbay/ui';
 import { Input } from '@craftzbay/ui';
 import { Separator } from '@craftzbay/ui';
-import { cn } from '@craftzbay/ui';
+import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '@craftzbay/ui';
+import { cn, formatNumber } from '@craftzbay/ui';
 import type { TemplateProps } from './meta';
+import { readHashParams, writeHash } from './admin/use-hash-params';
 
 /**
  * E-commerce template — storefront grid, product detail, and cart, all sharing
@@ -29,17 +34,38 @@ import type { TemplateProps } from './meta';
 const CATEGORIES = ['All', 'Audio', 'Wearables', 'Home', 'Accessories'];
 
 const PRODUCTS = [
-  { name: 'Aura Wireless Headphones', price: 249, rating: 4.8, tag: 'Audio', hue: 250 },
-  { name: 'Pulse Smartwatch', price: 199, rating: 4.6, tag: 'Wearables', hue: 160 },
-  { name: 'Lumen Desk Lamp', price: 89, rating: 4.9, tag: 'Home', hue: 65 },
-  { name: 'Drift Earbuds', price: 129, rating: 4.5, tag: 'Audio', hue: 290 },
-  { name: 'Field Backpack', price: 149, rating: 4.7, tag: 'Accessories', hue: 30 },
-  { name: 'Nest Speaker', price: 179, rating: 4.4, tag: 'Audio', hue: 200 },
+  { id: 'aura', name: 'Aura Wireless Headphones', price: 249, rating: 4.8, tag: 'Audio', hue: 250 },
+  { id: 'pulse', name: 'Pulse Smartwatch', price: 199, rating: 4.6, tag: 'Wearables', hue: 160 },
+  { id: 'lumen', name: 'Lumen Desk Lamp', price: 89, rating: 4.9, tag: 'Home', hue: 65 },
+  { id: 'drift', name: 'Drift Earbuds', price: 129, rating: 4.5, tag: 'Audio', hue: 290 },
+  { id: 'field', name: 'Field Backpack', price: 149, rating: 4.7, tag: 'Accessories', hue: 30 },
+  { id: 'nest', name: 'Nest Speaker', price: 179, rating: 4.4, tag: 'Audio', hue: 200 },
 ];
 
 type Cart = Record<string, number>;
 
-const money = (n: number) => `$${n.toFixed(2)}`;
+/** USD, EN demo — thousands grouped, always two decimals. */
+const money = (n: number) =>
+  `$${formatNumber(n, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+type HelpTopic = 'shipping' | 'returns' | 'support';
+const HELP: { key: HelpTopic; title: string; body: string }[] = [
+  {
+    key: 'shipping',
+    title: 'Shipping',
+    body: 'Orders ship within 1–2 business days. Standard delivery is $9 flat; free over $150. Tracking arrives by email as soon as the parcel leaves the warehouse.',
+  },
+  {
+    key: 'returns',
+    title: 'Returns',
+    body: 'Return anything within 30 days in its original condition for a full refund. Start a return from your order page — the label is prepaid.',
+  },
+  {
+    key: 'support',
+    title: 'Support',
+    body: 'We answer within one business day. Include your order number so we can look it up straight away.',
+  },
+];
 
 /** Product image placeholder — neutral block that reserves the photo's box. */
 /** Image placeholder — a flat, per-category tinted surface (solid colour mixed
@@ -120,9 +146,40 @@ function ShopHeader({
 
   return (
     <header className="border-border bg-background sticky top-0 z-[var(--z-sticky)] border-b">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-6">
-        <div className="text-sm">{brand}</div>
-        <nav className="text-foreground-muted hidden items-center gap-5 text-sm md:flex">
+      <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:px-6 md:gap-6">
+        {/* Categories move into a drawer below md. */}
+        <Sheet>
+          <SheetTrigger asChild>
+            <IconButton
+              aria-label="Open menu"
+              icon={<Menu />}
+              variant="ghost"
+              size="sm"
+              className="md:hidden"
+            />
+          </SheetTrigger>
+          <SheetContent side="left" className="w-72">
+            <SheetTitle>Shop</SheetTitle>
+            <nav aria-label="Categories" className="mt-6 flex flex-col gap-1">
+              {CATEGORIES.map((c) => (
+                <SheetClose asChild key={c}>
+                  <button
+                    type="button"
+                    onClick={() => onCategory(c)}
+                    className="text-foreground hover:bg-background-muted flex h-11 items-center rounded-md px-3 text-left text-base"
+                  >
+                    {c}
+                  </button>
+                </SheetClose>
+              ))}
+            </nav>
+          </SheetContent>
+        </Sheet>
+        <div className="min-w-0 truncate text-sm">{brand}</div>
+        <nav
+          aria-label="Categories"
+          className="text-foreground-muted hidden items-center gap-5 text-sm md:flex"
+        >
           {CATEGORIES.slice(1).map((c) => (
             <button
               key={c}
@@ -134,17 +191,19 @@ function ShopHeader({
             </button>
           ))}
         </nav>
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-1">
           {searchable && searchOpen ? (
-            <div className="flex items-center gap-1">
+            <div className="flex min-w-0 flex-1 items-center justify-end gap-1">
               <Input
                 // eslint-disable-next-line jsx-a11y/no-autofocus -- field is revealed by the user's own "search" click; focusing it is the expected result
                 autoFocus
                 size="sm"
+                label="Search products"
+                hideLabel
                 placeholder="Search products…"
                 value={query}
                 onChange={(e) => onQuery?.(e.target.value)}
-                className="w-48"
+                className="w-full max-w-xs"
               />
               <IconButton
                 aria-label="Close search"
@@ -184,33 +243,81 @@ function ShopHeader({
   );
 }
 
-function ShopFooter() {
+function ShopFooter({ onHelp }: { onHelp: (topic: HelpTopic) => void }) {
   return (
     <footer className="border-border bg-background-subtle mt-auto border-t">
-      <div className="text-foreground-subtle mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-6 py-6 text-xs">
-        <span>© 2026 Shop demo. Prices are placeholders.</span>
-        <nav aria-label="Footer" className="flex gap-4">
-          <a
-            href="#/help/shipping"
-            className="hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-          >
-            Shipping
-          </a>
-          <a
-            href="#/help/returns"
-            className="hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-          >
-            Returns
-          </a>
-          <a
-            href="#/help/support"
-            className="hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-          >
-            Support
-          </a>
+      <div className="text-foreground-subtle mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-6 text-xs sm:px-6">
+        <span>© {new Date().getFullYear()} Shop demo. Prices are placeholders.</span>
+        <nav aria-label="Help" className="flex gap-4">
+          {HELP.map((h) => (
+            <button
+              key={h.key}
+              type="button"
+              onClick={() => onHelp(h.key)}
+              className="hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            >
+              {h.title}
+            </button>
+          ))}
         </nav>
       </div>
     </footer>
+  );
+}
+
+/** Help / policies — in-template destination for the footer links. */
+function HelpScreen({
+  brand,
+  topic,
+  cartCount,
+  onCart,
+  onCategory,
+  onShop,
+  onHelp,
+}: {
+  brand: React.ReactNode;
+  topic: HelpTopic;
+  cartCount: number;
+  onCart: () => void;
+  onCategory: (c: string) => void;
+  onShop: () => void;
+  onHelp: (topic: HelpTopic) => void;
+}) {
+  const active = HELP.find((h) => h.key === topic) ?? HELP[0];
+  return (
+    <div className="bg-background flex min-h-dvh flex-col">
+      <ShopHeader brand={brand} cartCount={cartCount} onCart={onCart} onCategory={onCategory} />
+      <main className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
+        <button
+          onClick={onShop}
+          className="text-foreground-muted hover:text-foreground mb-6 flex w-fit items-center gap-1.5 text-sm"
+        >
+          <ArrowLeft className="size-4" aria-hidden /> Back to shop
+        </button>
+        <h1 className="text-2xl font-semibold tracking-tight">{active.title}</h1>
+        <p className="text-foreground-muted mt-3 max-w-[65ch] text-sm leading-relaxed">
+          {active.body}
+        </p>
+        <Separator className="my-8" />
+        <h2 className="text-foreground-subtle text-xs font-semibold tracking-wider uppercase">
+          More help
+        </h2>
+        <ul className="mt-3 space-y-2 text-sm">
+          {HELP.filter((h) => h.key !== active.key).map((h) => (
+            <li key={h.key}>
+              <button
+                type="button"
+                onClick={() => onHelp(h.key)}
+                className="text-accent font-medium hover:underline"
+              >
+                {h.title}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </main>
+      <ShopFooter onHelp={onHelp} />
+    </div>
   );
 }
 
@@ -218,13 +325,15 @@ function Shop({
   brand,
   onOpen,
   onCart,
+  onHelp,
   cartCount,
   category,
   setCategory,
 }: {
   brand: React.ReactNode;
-  onOpen: () => void;
+  onOpen: (id: string) => void;
   onCart: () => void;
+  onHelp: (topic: HelpTopic) => void;
   cartCount: number;
   category: string;
   setCategory: (c: string) => void;
@@ -257,7 +366,7 @@ function Shop({
         query={query}
         onQuery={setQuery}
       />
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
         <div className="flex items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">New arrivals</h1>
@@ -286,7 +395,9 @@ function Shop({
           <div className="border-border bg-card mt-8 rounded-lg border p-10 text-center">
             <p className="text-sm font-medium">No products found</p>
             <p className="text-foreground-muted mt-1 text-sm">
-              Nothing matches “{query}” in {category}.
+              {query.trim()
+                ? `Nothing matches “${query.trim()}” in ${category}.`
+                : `Nothing in ${category} right now.`}
             </p>
             <Button
               variant="outline"
@@ -306,7 +417,7 @@ function Shop({
               <Card key={p.name} padding="none" className="group overflow-hidden">
                 <div className="relative">
                   <button
-                    onClick={onOpen}
+                    onClick={() => onOpen(p.id)}
                     aria-label={`View ${p.name}`}
                     className="block w-full text-left"
                   >
@@ -332,7 +443,7 @@ function Shop({
                     />
                   </button>
                 </div>
-                <button onClick={onOpen} className="block w-full p-4 text-left">
+                <button onClick={() => onOpen(p.id)} className="block w-full p-4 text-left">
                   <div className="flex items-center justify-between gap-2">
                     <Badge tone="neutral" variant="outline">
                       {p.tag}
@@ -349,33 +460,59 @@ function Shop({
           </div>
         )}
       </main>
-      <ShopFooter />
+      <ShopFooter onHelp={onHelp} />
     </div>
   );
 }
 
 function Product({
   brand,
+  id,
   onCart,
   onBack,
+  onHelp,
   cartCount,
   addToCart,
   onCategory,
 }: {
   brand: React.ReactNode;
+  id: string;
   onCart: () => void;
   onBack: () => void;
+  onHelp: (topic: HelpTopic) => void;
   cartCount: number;
   addToCart: (name: string, qty: number) => void;
   onCategory: (c: string) => void;
 }) {
-  const p = PRODUCTS[0];
+  const p = PRODUCTS.find((x) => x.id === id);
   const [qty, setQty] = useState(1);
+
+  if (!p)
+    return (
+      <div className="bg-background flex min-h-dvh flex-col">
+        <ShopHeader brand={brand} cartCount={cartCount} onCart={onCart} onCategory={onCategory} />
+        <main className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
+          <EmptyState
+            icon={<Package />}
+            title="Product not found"
+            description="It may have sold out or the link is out of date."
+            action={
+              <Button variant="secondary" leadingIcon={<ArrowLeft />} onClick={onBack}>
+                Back to shop
+              </Button>
+            }
+            headingLevel={1}
+            className="min-h-[320px]"
+          />
+        </main>
+        <ShopFooter onHelp={onHelp} />
+      </div>
+    );
 
   return (
     <div className="bg-background flex min-h-dvh flex-col">
       <ShopHeader brand={brand} cartCount={cartCount} onCart={onCart} onCategory={onCategory} />
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
         <button
           onClick={onBack}
           className="text-foreground-muted hover:text-foreground mb-6 flex w-fit items-center gap-1.5 text-sm"
@@ -429,7 +566,7 @@ function Product({
           </div>
         </div>
       </main>
-      <ShopFooter />
+      <ShopFooter onHelp={onHelp} />
     </div>
   );
 }
@@ -437,6 +574,7 @@ function Product({
 function CartScreen({
   brand,
   onShop,
+  onHelp,
   cart,
   setQty,
   remove,
@@ -444,6 +582,7 @@ function CartScreen({
 }: {
   brand: React.ReactNode;
   onShop: () => void;
+  onHelp: (topic: HelpTopic) => void;
   cart: Cart;
   setQty: (name: string, qty: number) => void;
   remove: (name: string) => void;
@@ -457,7 +596,7 @@ function CartScreen({
   return (
     <div className="bg-background flex min-h-dvh flex-col">
       <ShopHeader brand={brand} cartCount={cartCount} onCart={() => {}} onCategory={onCategory} />
-      <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+      <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
         <h1 className="text-2xl font-semibold tracking-tight">Your cart</h1>
         {items.length === 0 ? (
           <div className="border-border bg-card mt-6 rounded-lg border p-12 text-center">
@@ -523,7 +662,7 @@ function CartScreen({
           </div>
         )}
       </main>
-      <ShopFooter />
+      <ShopFooter onHelp={onHelp} />
     </div>
   );
 }
@@ -534,27 +673,46 @@ export function EcommerceTemplate({ screen, setScreen, brand }: TemplateProps) {
     'Lumen Desk Lamp': 2,
   });
   const [category, setCategory] = useState('All');
+  // Product id lives in the hash tail (`…?id=drift`) so a product page can be
+  // reloaded or shared; an unknown id renders the in-template not-found.
+  const [productId, setProductId] = useState(() => readHashParams().get('id') ?? PRODUCTS[0].id);
+  const [helpTopic, setHelpTopic] = useState<HelpTopic>('shipping');
   const cartCount = Object.values(cart).reduce((s, q) => s + q, 0);
+  const openProduct = (id: string) => {
+    setProductId(id);
+    writeHash({ id });
+    setScreen('product');
+  };
+  const go = (next: string) => {
+    writeHash({});
+    setScreen(next);
+  };
+  const openHelp = (topic: HelpTopic) => {
+    setHelpTopic(topic);
+    go('help');
+  };
 
   const addToCart = (name: string, qty: number) => {
     setCart((prev) => ({ ...prev, [name]: (prev[name] ?? 0) + qty }));
-    setScreen('cart');
+    go('cart');
   };
   const setQty = (name: string, qty: number) =>
     setCart((prev) => (qty <= 0 ? removeKey(prev, name) : { ...prev, [name]: qty }));
   const remove = (name: string) => setCart((prev) => removeKey(prev, name));
   const goCategory = (c: string) => {
     setCategory(c);
-    setScreen('shop');
+    go('shop');
   };
 
   if (screen === 'product')
     return (
       <Product
         brand={brand}
+        id={productId}
         cartCount={cartCount}
-        onBack={() => setScreen('shop')}
-        onCart={() => setScreen('cart')}
+        onBack={() => go('shop')}
+        onCart={() => go('cart')}
+        onHelp={openHelp}
         addToCart={addToCart}
         onCategory={goCategory}
       />
@@ -566,16 +724,30 @@ export function EcommerceTemplate({ screen, setScreen, brand }: TemplateProps) {
         cart={cart}
         setQty={setQty}
         remove={remove}
-        onShop={() => setScreen('shop')}
+        onShop={() => go('shop')}
+        onHelp={openHelp}
         onCategory={goCategory}
+      />
+    );
+  if (screen === 'help')
+    return (
+      <HelpScreen
+        brand={brand}
+        topic={helpTopic}
+        cartCount={cartCount}
+        onCart={() => go('cart')}
+        onCategory={goCategory}
+        onShop={() => go('shop')}
+        onHelp={openHelp}
       />
     );
   return (
     <Shop
       brand={brand}
       cartCount={cartCount}
-      onOpen={() => setScreen('product')}
-      onCart={() => setScreen('cart')}
+      onOpen={openProduct}
+      onCart={() => go('cart')}
+      onHelp={openHelp}
       category={category}
       setCategory={setCategory}
     />

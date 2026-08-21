@@ -9,6 +9,7 @@ const doc: ComponentDoc = {
   group: 'Feedback',
   description:
     'Full-page error scaffolding for 404, 500, and generic crash screens. Each variant ships with its own line illustration; override `title`, `description`, `illustration`, or `action` as needed.',
+  i18n: 'Reads `errorState.*` — the default title / description per variant and `errorState.tryAgain`.',
   exports: ['ErrorState'],
   sourceFile: 'ErrorState.tsx',
   examples: [
@@ -22,6 +23,20 @@ const doc: ComponentDoc = {
       title: '500 with retry',
       preview: <ErrorState variant="500" onRetry={() => {}} />,
       code: `<ErrorState variant="500" onRetry={() => refetch()} />`,
+      surfaceClassName: 'min-h-[340px]',
+    },
+    {
+      title: '403 permission denied',
+      description:
+        'Use when the route exists but the signed-in user lacks access — say so plainly and offer a way back rather than pretending the page is missing.',
+      preview: (
+        <ErrorState
+          variant="403"
+          headingLevel={2}
+          action={<Button variant="outline">Back to dashboard</Button>}
+        />
+      ),
+      code: `<ErrorState variant="403" headingLevel={2} action={<Button variant="outline">Back to dashboard</Button>} />`,
       surfaceClassName: 'min-h-[340px]',
     },
     {

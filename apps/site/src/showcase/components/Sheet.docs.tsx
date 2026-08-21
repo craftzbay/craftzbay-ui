@@ -20,6 +20,7 @@ const doc: ComponentDoc = {
   group: 'Overlays',
   description:
     'Edge-anchored modal panel. Use for filters, contextual settings, mobile-friendly menus — anything that benefits from staying anchored to a screen edge.',
+  i18n: 'Reads `sheet.close` (close button aria-label).',
   exports: ['Sheet', 'SheetTrigger', 'SheetContent', 'SheetHeader', 'SheetTitle', 'SheetClose'],
   sourceFile: 'Sheet.tsx',
   examples: [

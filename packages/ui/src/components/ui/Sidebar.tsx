@@ -153,7 +153,7 @@ export function SidebarSection({ label, className, children, ...props }: Sidebar
         <div
           id={labelId}
           className={cn(
-            'text-foreground-subtle px-4 pt-2 pb-1 text-xs font-medium tracking-wide uppercase',
+            'text-foreground-subtle px-4 pt-2 pb-1 text-xs font-medium',
             collapsed && 'sr-only',
           )}
         >

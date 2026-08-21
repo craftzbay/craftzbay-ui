@@ -20,6 +20,7 @@ export * from './hooks/use-toast';
 export * from './hooks/use-field-ids';
 export * from './hooks/use-modifier-key';
 export * from './hooks/use-delayed-loading';
+export * from './hooks/use-debounce';
 export { useStrings } from './hooks/use-strings';
 
 // Icons (namespaced to avoid name collisions with consumer apps).

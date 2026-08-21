@@ -1,4 +1,4 @@
-import type { MouseEvent, ReactNode } from 'react';
+import { useState, type MouseEvent, type ReactNode } from 'react';
 import { ArrowRight, BarChart3, Github, Lock, Menu, Plug, Sparkles, Star, Zap } from '@/icons';
 import { Avatar } from '@craftzbay/ui';
 import { Button } from '@craftzbay/ui';
@@ -214,7 +214,82 @@ function Nav({ brand, onSignUp }: { brand: ReactNode; onSignUp: () => void }) {
   );
 }
 
-function Landing({ brand, onSignUp }: { brand: ReactNode; onSignUp: () => void }) {
+type LegalTopic = 'privacy' | 'terms' | 'security';
+const LEGAL: { key: LegalTopic; title: string; body: string }[] = [
+  {
+    key: 'privacy',
+    title: 'Privacy policy',
+    body: 'We store the data you put into Northwind and the account details needed to bill you — nothing is sold or shared with advertisers. Export or delete everything from Settings at any time.',
+  },
+  {
+    key: 'terms',
+    title: 'Terms of service',
+    body: 'Use Northwind for lawful purposes on the plan you chose. Paid plans renew monthly and can be cancelled any time; access continues to the end of the billing period.',
+  },
+  {
+    key: 'security',
+    title: 'Security',
+    body: 'Data is encrypted in transit and at rest, access is role-based with audit logs on every plan, and we are SOC 2 Type II certified. Report a vulnerability from the Help menu in the app.',
+  },
+];
+
+/** Legal pages — in-template destinations for the footer links. */
+function LegalPage({
+  brand,
+  topic,
+  onBack,
+  onLegal,
+}: {
+  brand: ReactNode;
+  topic: LegalTopic;
+  onBack: () => void;
+  onLegal: (t: LegalTopic) => void;
+}) {
+  const active = LEGAL.find((l) => l.key === topic) ?? LEGAL[0];
+  return (
+    <div className="bg-background min-h-dvh">
+      <header className="border-border border-b">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+          <div className="min-w-0 truncate">{brand}</div>
+          <Button variant="ghost" size="sm" onClick={onBack}>
+            Back to site
+          </Button>
+        </div>
+      </header>
+      <main className="mx-auto w-full max-w-2xl px-6 py-12">
+        <h1 className="text-foreground text-3xl font-semibold tracking-tight">{active.title}</h1>
+        <p className="text-foreground-muted mt-4 max-w-[65ch] text-base leading-relaxed">
+          {active.body}
+        </p>
+        <nav aria-label="Legal" className="border-border mt-10 border-t pt-6">
+          <ul className="text-foreground-muted flex flex-wrap gap-4 text-sm">
+            {LEGAL.filter((l) => l.key !== active.key).map((l) => (
+              <li key={l.key}>
+                <button
+                  type="button"
+                  onClick={() => onLegal(l.key)}
+                  className="text-accent font-medium hover:underline"
+                >
+                  {l.title}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </main>
+    </div>
+  );
+}
+
+function Landing({
+  brand,
+  onSignUp,
+  onLegal,
+}: {
+  brand: ReactNode;
+  onSignUp: () => void;
+  onLegal: (t: LegalTopic) => void;
+}) {
   return (
     <div className="bg-background">
       <Nav brand={brand} onSignUp={onSignUp} />
@@ -399,8 +474,8 @@ function Landing({ brand, onSignUp }: { brand: ReactNode; onSignUp: () => void }
         </section>
       </main>
 
-      {/* Footer — real anchors to the sections above; legal links are paths
-          for the host app to serve. */}
+      {/* Footer — real anchors to the sections above; legal links open the
+          in-template legal page. Resources are paths for the host app. */}
       <footer className="border-border border-t">
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-6 py-12 sm:grid-cols-4">
           <FooterColumn
@@ -417,7 +492,7 @@ function Landing({ brand, onSignUp }: { brand: ReactNode; onSignUp: () => void }
             links={[
               { label: 'Product', id: SECTIONS.product },
               { label: 'Customers', id: SECTIONS.customers },
-              { label: 'Contact', href: 'mailto:hello@example.com' },
+              { label: 'Contact', id: SECTIONS.faq },
             ]}
           />
           <FooterColumn
@@ -431,9 +506,9 @@ function Landing({ brand, onSignUp }: { brand: ReactNode; onSignUp: () => void }
           <FooterColumn
             heading="Legal"
             links={[
-              { label: 'Privacy', href: '/privacy' },
-              { label: 'Terms', href: '/terms' },
-              { label: 'Security', href: '/security' },
+              { label: 'Privacy', onClick: () => onLegal('privacy') },
+              { label: 'Terms', onClick: () => onLegal('terms') },
+              { label: 'Security', onClick: () => onLegal('security') },
             ]}
           />
         </div>
@@ -445,7 +520,7 @@ function Landing({ brand, onSignUp }: { brand: ReactNode; onSignUp: () => void }
   );
 }
 
-type FooterLink = { label: string; id?: string; href?: string };
+type FooterLink = { label: string; id?: string; href?: string; onClick?: () => void };
 
 function FooterColumn({ heading, links }: { heading: string; links: FooterLink[] }) {
   const linkClass =
@@ -462,6 +537,10 @@ function FooterColumn({ heading, links }: { heading: string; links: FooterLink[]
               <SectionLink id={l.id} className={linkClass}>
                 {l.label}
               </SectionLink>
+            ) : l.onClick ? (
+              <button type="button" onClick={l.onClick} className={linkClass}>
+                {l.label}
+              </button>
             ) : (
               <a href={l.href} className={linkClass}>
                 {l.label}
@@ -475,6 +554,21 @@ function FooterColumn({ heading, links }: { heading: string; links: FooterLink[]
 }
 
 export function LandingTemplate({ screen, setScreen, brand }: TemplateProps) {
+  const [legalTopic, setLegalTopic] = useState<LegalTopic>('privacy');
+  const openLegal = (t: LegalTopic) => {
+    setLegalTopic(t);
+    setScreen('legal');
+  };
+  if (screen === 'legal') {
+    return (
+      <LegalPage
+        brand={brand}
+        topic={legalTopic}
+        onBack={() => setScreen('home')}
+        onLegal={openLegal}
+      />
+    );
+  }
   if (screen === 'signup') {
     return (
       <AuthLayout
@@ -498,5 +592,5 @@ export function LandingTemplate({ screen, setScreen, brand }: TemplateProps) {
       </AuthLayout>
     );
   }
-  return <Landing brand={brand} onSignUp={() => setScreen('signup')} />;
+  return <Landing brand={brand} onSignUp={() => setScreen('signup')} onLegal={openLegal} />;
 }

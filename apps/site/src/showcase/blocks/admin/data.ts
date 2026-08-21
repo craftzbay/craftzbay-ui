@@ -411,10 +411,7 @@ export const SEED_PROJECTS: Project[] = NAMES.map((name, i) => {
 });
 
 /** Relative label for a timestamp, with the absolute date for `title`. */
-export function formatRelative(
-  iso: string,
-  now = Date.UTC(2026, 7, 20, 10, 0, 0),
-): { label: string; title: string } {
+export function formatRelative(iso: string, now = Date.now()): { label: string; title: string } {
   const diffMin = Math.max(0, Math.round((now - new Date(iso).getTime()) / 60000));
   const title = iso.slice(0, 16).replace('T', ' ');
   if (diffMin < 60) return { label: `${diffMin}m ago`, title };
@@ -538,10 +535,11 @@ export const SEED_MEMBERS: Member[] = [
   },
 ];
 
+/** Amounts in USD (EN demo); render with `formatNumber(n, { minimumFractionDigits: 2 })`. */
 export const INVOICES = [
-  { id: 'INV-2041', date: '2026-06-01', amount: '$240.00', status: 'Paid' },
-  { id: 'INV-2032', date: '2026-05-01', amount: '$240.00', status: 'Paid' },
-  { id: 'INV-2018', date: '2026-04-01', amount: '$240.00', status: 'Paid' },
+  { id: 'INV-2041', date: '2026-06-01', amount: 240, status: 'Paid' },
+  { id: 'INV-2032', date: '2026-05-01', amount: 240, status: 'Paid' },
+  { id: 'INV-2018', date: '2026-04-01', amount: 240, status: 'Paid' },
 ];
 
 export const NOTIFICATIONS = [

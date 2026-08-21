@@ -38,7 +38,8 @@ export type ComponentGroup =
   | 'Navigation'
   | 'Layout'
   | 'Data Display'
-  | 'Typography';
+  | 'Typography'
+  | 'Utilities';
 
 export interface ComponentDoc {
   /** URL slug — e.g. 'button'. */
@@ -50,6 +51,13 @@ export interface ComponentDoc {
   description: string;
   /** Names re-exported from `@craftzbay/ui` for this component. */
   exports: string[];
+  /** Package entry the exports come from. Default `@craftzbay/ui`. */
+  importPath?: string;
+  /**
+   * Which `UiStrings` keys the component reads (e.g. `dialog.close`). Shown
+   * as an i18n note on the doc page; override via `<DesignSystemProvider strings>`.
+   */
+  i18n?: string;
   /** Path under src/components/ui/ — used for the GitHub source link. */
   sourceFile: string;
   examples: Example[];

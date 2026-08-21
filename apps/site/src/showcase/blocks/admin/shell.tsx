@@ -1,6 +1,7 @@
 import { createContext, forwardRef, useContext, type ReactNode } from 'react';
 import {
   Bell,
+  Sparkles,
   AlertTriangle,
   Check,
   Circle,
@@ -30,6 +31,7 @@ import {
   CommandList,
   CommandShortcut,
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -462,6 +464,103 @@ export function PageCrumbs({
 /** Shell layout, so `PageHeader` knows when the top bar already shows the trail. */
 export const AdminLayoutContext = createContext<'sidebar' | 'topnav' | 'dual'>('sidebar');
 
+/* ---------------------------------------------------------------------------
+ *  Demo controls — preview every page in its loading / empty / error state,
+ *  toggle the environment banner and the table density. In a real app `state`
+ *  comes from your data layer; `density` is a user preference (localStorage).
+ * ------------------------------------------------------------------------ */
+
+export type DemoState = 'normal' | 'loading' | 'empty' | 'error';
+export type Density = 'default' | 'compact';
+
+export interface DemoControls {
+  state: DemoState;
+  setState: (s: DemoState) => void;
+  density: Density;
+  setDensity: (d: Density) => void;
+  banner: boolean;
+  setBanner: (on: boolean) => void;
+}
+
+export const DemoContext = createContext<DemoControls>({
+  state: 'normal',
+  setState: () => {},
+  density: 'default',
+  setDensity: () => {},
+  banner: false,
+  setBanner: () => {},
+});
+
+export const useDemo = () => useContext(DemoContext);
+
+const DEMO_STATES: { value: DemoState; label: string }[] = [
+  { value: 'normal', label: 'Normal' },
+  { value: 'loading', label: 'Loading' },
+  { value: 'empty', label: 'Empty' },
+  { value: 'error', label: 'Error' },
+];
+
+function DemoMenu() {
+  const demo = useDemo();
+  return (
+    <DropdownMenu>
+      <Tooltip label="Demo controls">
+        <DropdownMenuTrigger asChild>
+          <IconButton
+            aria-label={`Demo controls. State: ${demo.state}`}
+            icon={<Sparkles />}
+            variant="ghost"
+            size="sm"
+          />
+        </DropdownMenuTrigger>
+      </Tooltip>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel className="text-foreground-subtle text-xs font-normal">
+          Demo state
+        </DropdownMenuLabel>
+        <DropdownMenuRadioGroup
+          value={demo.state}
+          onValueChange={(v) => demo.setState(v as DemoState)}
+        >
+          {DEMO_STATES.map((s) => (
+            <DropdownMenuRadioItem key={s.value} value={s.value}>
+              {s.label}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="text-foreground-subtle text-xs font-normal">
+          Density
+        </DropdownMenuLabel>
+        <DropdownMenuRadioGroup
+          value={demo.density}
+          onValueChange={(v) => demo.setDensity(v as Density)}
+        >
+          <DropdownMenuRadioItem value="default">Default</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="compact">Compact</DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuCheckboxItem checked={demo.banner} onCheckedChange={demo.setBanner}>
+          Environment banner
+        </DropdownMenuCheckboxItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/** Slim environment bar — visible on every page so nobody edits prod thinking it's staging. */
+export function EnvBanner({ label = 'Staging' }: { label?: string }) {
+  return (
+    <div
+      role="status"
+      className="bg-warning-soft text-warning-text border-warning-border-soft flex h-7 shrink-0 items-center justify-center gap-2 border-b px-4 text-xs font-medium"
+    >
+      <AlertTriangle className="size-3.5" aria-hidden />
+      {label} environment — data resets nightly.
+    </div>
+  );
+}
+
 /** `rail` = collapsible sidebar (≥lg); `dual` = icon rail + module panel; `none` = drawer only. */
 export type AppSidebarMode = 'rail' | 'dual' | 'none';
 
@@ -729,6 +828,8 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
             />
           </Tooltip>
 
+          <DemoMenu />
+
           <Tooltip label={`Theme: ${THEME_LABEL[theme]}`}>
             <IconButton
               aria-label={`Theme: ${THEME_LABEL[theme]}. Switch to ${THEME_LABEL[NEXT_THEME[theme]].toLowerCase()}`}
@@ -758,7 +859,7 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
                 size="sm"
               />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
+            <DropdownMenuContent align="end" className="w-[min(20rem,calc(100vw-2rem))]">
               <DropdownMenuLabel className="flex items-center justify-between">
                 Notifications
                 {unread > 0 && <Badge tone="accent">{unread} new</Badge>}

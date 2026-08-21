@@ -7,6 +7,51 @@ import { Separator } from '@craftzbay/ui';
 import { Github } from '@/icons';
 
 /* -----------------------------------------------------------------------------
+ *  Validation — on blur after first interaction, then live on input for a
+ *  field that already showed an error; never on the first keystroke (CANON).
+ *  Errors render through `Input`'s `error` prop, which wires `aria-invalid`
+ *  + `aria-describedby`. On submit every field is checked; with more than one
+ *  error a summary is announced above the form.
+ * --------------------------------------------------------------------------- */
+
+type Errors<K extends string> = Partial<Record<K, string>>;
+
+function useFormValidation<K extends string>(errors: Errors<K>) {
+  const [touched, setTouched] = useState<Set<K>>(new Set());
+  const [submitted, setSubmitted] = useState(false);
+  const errorFor = (field: K) => (submitted || touched.has(field) ? errors[field] : undefined);
+  const touch = (field: K) => setTouched((t) => (t.has(field) ? t : new Set(t).add(field)));
+  const count = Object.values(errors).filter(Boolean).length;
+  /** Mark everything touched; returns true when the form is valid. */
+  const submit = () => {
+    setSubmitted(true);
+    return count === 0;
+  };
+  return { errorFor, touch, submit, summary: submitted && count > 1 ? errors : null };
+}
+
+function ErrorSummary({ errors }: { errors: Record<string, string | undefined> }) {
+  const list = Object.values(errors).filter((e): e is string => Boolean(e));
+  return (
+    <Alert variant="danger" title={`Fix ${list.length} fields to continue`} live>
+      <ul className="list-disc space-y-0.5 pl-4">
+        {list.map((e) => (
+          <li key={e}>{e}</li>
+        ))}
+      </ul>
+    </Alert>
+  );
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const emailError = (v: string) =>
+  !v.trim()
+    ? 'Enter your email address.'
+    : !EMAIL_RE.test(v)
+      ? 'Enter a valid email address.'
+      : undefined;
+
+/* -----------------------------------------------------------------------------
  *  Authentication pattern — four screens that share the same shell.
  *
  *    <AuthLayout title="…" subtitle="…">…form…</AuthLayout>
@@ -120,21 +165,35 @@ export function SignInForm({
 }: SignInFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const v = useFormValidation<'email' | 'password'>({
+    email: emailError(email),
+    password: password ? undefined : 'Enter your password.',
+  });
 
   const handle = (e: FormEvent) => {
     e.preventDefault();
-    onSubmit({ email, password });
+    if (v.submit()) onSubmit({ email, password });
   };
 
   return (
-    <form onSubmit={handle} className="space-y-4">
+    <form onSubmit={handle} className="space-y-4" noValidate>
       <SsoButtons />
-      {error && <Alert variant="danger">{error}</Alert>}
+      {v.summary ? (
+        <ErrorSummary errors={v.summary} />
+      ) : (
+        error && (
+          <Alert variant="danger" live>
+            {error}
+          </Alert>
+        )
+      )}
       <Input
         type="email"
         label="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        onBlur={() => v.touch('email')}
+        error={v.errorFor('email')}
         autoComplete="email"
         required
       />
@@ -143,6 +202,8 @@ export function SignInForm({
         label="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        onBlur={() => v.touch('password')}
+        error={v.errorFor('password')}
         autoComplete="current-password"
         required
       />
@@ -181,23 +242,47 @@ export function SignUpForm({ onSubmit, loading, error }: SignUpFormProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const v = useFormValidation<'name' | 'email' | 'password'>({
+    name: name.trim() ? undefined : 'Enter your full name.',
+    email: emailError(email),
+    password: password.length >= 8 ? undefined : 'Password must be at least 8 characters.',
+  });
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit({ name, email, password });
+        if (v.submit()) onSubmit({ name, email, password });
       }}
       className="space-y-4"
+      noValidate
     >
       <SsoButtons />
-      {error && <Alert variant="danger">{error}</Alert>}
-      <Input label="Full name" value={name} onChange={(e) => setName(e.target.value)} required />
+      {v.summary ? (
+        <ErrorSummary errors={v.summary} />
+      ) : (
+        error && (
+          <Alert variant="danger" live>
+            {error}
+          </Alert>
+        )
+      )}
+      <Input
+        label="Full name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        onBlur={() => v.touch('name')}
+        error={v.errorFor('name')}
+        autoComplete="name"
+        required
+      />
       <Input
         type="email"
         label="Work email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        onBlur={() => v.touch('email')}
+        error={v.errorFor('email')}
         autoComplete="email"
         required
       />
@@ -207,6 +292,8 @@ export function SignUpForm({ onSubmit, loading, error }: SignUpFormProps) {
         helperText="At least 8 characters."
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        onBlur={() => v.touch('password')}
+        error={v.errorFor('password')}
         autoComplete="new-password"
         required
       />
@@ -228,21 +315,29 @@ export interface ForgotPasswordFormProps {
 
 export function ForgotPasswordForm({ onSubmit, loading, error }: ForgotPasswordFormProps) {
   const [email, setEmail] = useState('');
+  const v = useFormValidation<'email'>({ email: emailError(email) });
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit(email);
+        if (v.submit()) onSubmit(email);
       }}
       className="space-y-4"
+      noValidate
     >
-      {error && <Alert variant="danger">{error}</Alert>}
+      {error && (
+        <Alert variant="danger" live>
+          {error}
+        </Alert>
+      )}
       <Input
         type="email"
         label="Email"
         helperText="We'll send a reset link if an account exists."
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        onBlur={() => v.touch('email')}
+        error={v.errorFor('email')}
         autoComplete="email"
         required
       />

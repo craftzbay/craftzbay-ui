@@ -59,7 +59,7 @@ export const DialogContent = forwardRef<
         ref={ref}
         className={cn(
           'fixed top-1/2 left-1/2 z-[var(--z-modal)] -translate-x-1/2 -translate-y-1/2',
-          'border-border bg-card text-card-foreground w-[calc(100%-2rem)] rounded-lg border shadow-lg',
+          'border-border bg-card text-card-foreground w-[calc(100%-2rem)] rounded-xl border shadow-lg',
           'p-6',
           'data-[state=open]:animate-in data-[state=closed]:animate-out',
           'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',

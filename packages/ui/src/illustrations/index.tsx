@@ -115,3 +115,14 @@ export function ConnectionLost(props: Props) {
     </Base>
   );
 }
+
+export function Locked(props: Props) {
+  return (
+    <Base {...props}>
+      <rect x="34" y="54" width="52" height="40" rx="4" />
+      <path d="M44 54v-10a16 16 0 0 1 32 0v10" />
+      <circle cx="60" cy="72" r="4" />
+      <path d="M60 76v8" />
+    </Base>
+  );
+}

@@ -7,6 +7,7 @@ const doc: ComponentDoc = {
   group: 'Data Display',
   description:
     'Slide gallery powered by Embla. Renders prev/next buttons and dot indicators. Use sparingly — most content reads better as a vertical list.',
+  i18n: 'Reads `carousel.label`, `carousel.previous`, `carousel.next` and `carousel.slide` ("{index} of {count}").',
   exports: ['Carousel', 'CarouselContent', 'CarouselItem'],
   sourceFile: 'Carousel.tsx',
   examples: [

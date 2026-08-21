@@ -33,6 +33,7 @@ const doc: ComponentDoc = {
   group: 'Inputs',
   description:
     'Chip-based multi-choice picker. Selected items show inline as removable chips. Backspace clears the last chip when the input is empty.',
+  i18n: 'Reads `multiSelect.placeholder`, `multiSelect.empty`, `multiSelect.clearAll`, `multiSelect.remove` ("Remove {label}").',
   exports: ['MultiSelect'],
   sourceFile: 'MultiSelect.tsx',
   examples: [

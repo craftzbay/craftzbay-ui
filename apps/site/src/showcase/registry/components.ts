@@ -65,6 +65,11 @@ import treeDoc from '../components/Tree.docs';
 import chartDoc from '../components/Chart.docs';
 
 import kbdDoc from '../components/Kbd.docs';
+import relativeTimeDoc from '../components/RelativeTime.docs';
+
+import designSystemProviderDoc from '../components/DesignSystemProvider.docs';
+import formatDoc from '../components/Format.docs';
+import hooksDoc from '../components/Hooks.docs';
 
 export const componentDocs: ComponentDoc[] = [
   // Buttons
@@ -131,9 +136,15 @@ export const componentDocs: ComponentDoc[] = [
   timelineDoc,
   treeDoc,
   chartDoc,
+  relativeTimeDoc,
 
   // Typography
   kbdDoc,
+
+  // Utilities
+  designSystemProviderDoc,
+  formatDoc,
+  hooksDoc,
 ];
 
 export function getComponentDoc(slug: string): ComponentDoc | undefined {

@@ -31,6 +31,7 @@ const doc: ComponentDoc = {
   group: 'Inputs',
   description:
     'Calendar dropdown for selecting a single date (DatePicker) or a date range (DateRangePicker). Built on react-day-picker v9.',
+  i18n: 'Reads `datePicker.pickDate` / `datePicker.pickRange` (trigger placeholders) plus the `calendar.*` keys.',
   exports: ['DatePicker', 'DateRangePicker'],
   sourceFile: 'DatePicker.tsx',
   examples: [

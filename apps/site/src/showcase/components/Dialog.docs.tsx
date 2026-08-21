@@ -38,6 +38,7 @@ const doc: ComponentDoc = {
   group: 'Overlays',
   description:
     'Modal that interrupts the user. Reserve for actions that demand focus — confirmations, dense forms, important choices. For side panels prefer Sheet; for transient messages, Toast.',
+  i18n: 'Reads `dialog.close` (close button aria-label) and `confirmationDialog.confirm` / `confirmationDialog.cancel`.',
   exports: [
     'Dialog',
     'DialogTrigger',

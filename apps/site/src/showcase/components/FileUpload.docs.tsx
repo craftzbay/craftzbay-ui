@@ -7,6 +7,7 @@ const doc: ComponentDoc = {
   group: 'Inputs',
   description:
     'Drag-and-drop file picker with click fallback. Reports selected files via onChange — does not perform the upload itself.',
+  i18n: 'Reads `fileUpload.drop`, `fileUpload.remove`, and the size units `fileUpload.bytes` / `kilobytes` / `megabytes`.',
   exports: ['FileUpload'],
   sourceFile: 'FileUpload.tsx',
   examples: [

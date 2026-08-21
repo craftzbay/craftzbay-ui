@@ -7,6 +7,7 @@ const doc: ComponentDoc = {
   group: 'Inputs',
   description:
     'Single-handle or range slider for numeric input where the exact value matters less than the relative position.',
+  i18n: 'Reads `slider.minimum` / `slider.maximum` / `slider.value` (thumb aria-labels).',
   exports: ['Slider'],
   sourceFile: 'Slider.tsx',
   examples: [

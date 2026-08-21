@@ -58,6 +58,7 @@ export const mnStrings: UiStrings = {
   dataGrid: {
     filterPlaceholder: 'Шүүх…',
     empty: 'Илэрц алга',
+    emptyCell: 'Хоосон',
     columns: 'Баганууд',
     columnVisibility: 'Багана харуулах',
     filterRows: 'Мөр шүүх',
@@ -80,6 +81,8 @@ export const mnStrings: UiStrings = {
     serverDescription: 'Бид шалгаж байна. Хэсэг хугацааны дараа дахин оролдоно уу.',
     genericTitle: 'Гэнэтийн алдаа',
     genericDescription: 'Энэ үйлдэл тасалдлаа.',
+    forbiddenTitle: 'Танд хандах эрх байхгүй',
+    forbiddenDescription: 'Админаас эрх нээлгэхийг хүснэ үү.',
     tryAgain: 'Дахин оролдох',
   },
   avatar: { status: 'Төлөв: {status}', more: 'бусад {n}' },

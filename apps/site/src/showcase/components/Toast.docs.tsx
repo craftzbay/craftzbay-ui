@@ -80,12 +80,14 @@ const doc: ComponentDoc = {
   group: 'Feedback',
   description:
     'Transient, non-blocking feedback. Toasts queue and auto-dismiss. Use the useToast hook imperatively — do not render <Toast> directly outside the ToastProvider.',
+  i18n: 'Reads `toast.close` (close button) and `toast.region` (viewport aria-label).',
   exports: [
     'Toast',
     'ToastProvider',
     'ToastViewport',
     'ToastTitle',
     'ToastDescription',
+    'Toaster',
     'useToast',
   ],
   sourceFile: 'Toast.tsx',
@@ -108,7 +110,7 @@ push({ title: 'Saved', description: 'All changes published.', variant: 'success'
     {
       title: 'Variants',
       description:
-        'One tone per outcome: default for neutral notices, success / warning / danger for results, info for ongoing state. Click to preview each.',
+        'One tone per outcome: default for neutral notices, success / warning / danger for results, info for ongoing state. Each variant has its own auto-dismiss time (`TOAST_DURATIONS`): default / success / info 4 s, warning 6 s, danger persists until dismissed. Pass `duration` to override per toast. Click to preview each.',
       preview: <VariantsDemo />,
       code: `const { push } = useToast();
 

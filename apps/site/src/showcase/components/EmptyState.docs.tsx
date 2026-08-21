@@ -51,6 +51,20 @@ const doc: ComponentDoc = {
 />`,
     },
     {
+      title: 'Heading level',
+      description:
+        'The title is an `<h3>` by default. Match the surrounding outline with `headingLevel` — `2` when the empty state *is* the page, `4` inside a card.',
+      preview: (
+        <EmptyState
+          icon={<Search className="size-6" />}
+          title="No results"
+          description="Try a different search term."
+          headingLevel={4}
+        />
+      ),
+      code: `<EmptyState icon={<Search />} title="No results" headingLevel={4} />`,
+    },
+    {
       title: 'Custom illustration',
       description: 'Use any of the built-in line illustrations via the `Illustrations` namespace.',
       preview: (

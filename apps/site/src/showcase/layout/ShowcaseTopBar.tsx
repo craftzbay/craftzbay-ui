@@ -1,6 +1,14 @@
 import { cn } from '@/lib/utils';
-import { Search } from '@/icons';
+import { Menu, Search } from '@/icons';
 import { Kbd } from '@/components/ui/Kbd';
+import { IconButton } from '@/components/ui/IconButton';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/DropdownMenu';
 import { useModifierKey } from '@/hooks/use-modifier-key';
 import { routeToHash, type Route } from '../routing';
 import { GITHUB_URL, NPM_URL } from '../site.config';
@@ -94,6 +102,47 @@ export function ShowcaseTopBar({ onOpenPalette, current }: ShowcaseTopBarProps) 
           </a>
 
           <ThemeToggle />
+
+          {/* < sm: nav + search + external links collapse into one menu. */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <IconButton
+                aria-label="Open menu"
+                icon={<Menu />}
+                variant="ghost"
+                size="sm"
+                className="sm:hidden"
+              />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onSelect={onOpenPalette}>
+                <Search aria-hidden />
+                Search docs…
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {NAV.map((item) => (
+                <DropdownMenuItem key={item.label} asChild>
+                  <a
+                    href={`#${routeToHash(item.route)}`}
+                    aria-current={item.matchKinds.includes(current.kind) ? 'page' : undefined}
+                  >
+                    {item.label}
+                  </a>
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <a href={GITHUB_URL} target="_blank" rel="noreferrer">
+                  GitHub
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a href={NPM_URL} target="_blank" rel="noreferrer">
+                  npm
+                </a>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

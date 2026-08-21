@@ -24,6 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   EmptyState,
+  ErrorState,
   IconButton,
   Input,
   Pagination,
@@ -32,7 +33,6 @@ import {
   SelectItem,
   SelectTrigger,
   Skeleton,
-  Switch,
   Table,
   TableBody,
   TableCell,
@@ -54,7 +54,7 @@ import {
   type ProjectStatus,
 } from './data';
 import { readHashParams, useHashParams } from './use-hash-params';
-import { PageHeader, StatusIcon } from './shell';
+import { PageHeader, StatusIcon, useDemo } from './shell';
 import { FilterChip, ProjectDialog, useDebounced } from './projects-parts';
 
 /* =============================================================================
@@ -144,7 +144,10 @@ export const Projects = forwardRef<
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Project | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Project[] | null>(null);
-  const [loading, setLoading] = useState(false);
+  // Loading / empty / error come from the shell's demo menu; in a real app
+  // they are your query's status.
+  const demo = useDemo();
+  const loading = demo.state === 'loading';
 
   useImperativeHandle(ref, () => ({
     create: () => {
@@ -253,11 +256,24 @@ export const Projects = forwardRef<
     ]);
     push({ variant: 'success', title: 'Project duplicated', description: `${p.name} (copy)` });
   };
+  // Archive is reversible: the toast carries a 5s Undo (10s for bulk) that
+  // restores the previous rows. Delete stays behind a confirm — it's permanent.
   const archive = (ps: Project[]) => {
     const ids = new Set(ps.map((p) => p.id));
+    const snapshot = items;
     setItems((xs) => xs.map((x) => (ids.has(x.id) ? { ...x, status: 'Archived' } : x)));
     setSelected(new Set());
-    push({ title: ps.length === 1 ? 'Project archived' : `${ps.length} projects archived` });
+    const bulk = ps.length > 1;
+    push({
+      title: bulk ? `${ps.length} projects archived` : 'Project archived',
+      description: bulk ? undefined : ps[0].name,
+      duration: bulk ? 10000 : 5000,
+      action: {
+        label: 'Undo',
+        altText: bulk ? `Undo archiving ${ps.length} projects` : `Undo archiving ${ps[0].name}`,
+        onClick: () => setItems(snapshot),
+      },
+    });
   };
   const confirmDelete = () => {
     if (!pendingDelete) return;
@@ -274,8 +290,22 @@ export const Projects = forwardRef<
   };
 
   const selectedRows = items.filter((p) => selected.has(p.id));
-  const firstRun = items.length === 0;
+  const firstRun = items.length === 0 || demo.state === 'empty';
   const filteredEmpty = !firstRun && filtered.length === 0;
+
+  if (demo.state === 'error')
+    return (
+      <div>
+        <PageHeader page="projects" title="Projects" onNavigate={onNavigate} />
+        <ErrorState
+          variant="500"
+          title="Couldn't load projects"
+          description="The list didn't come back from the server. Your filters are kept — try again."
+          onRetry={() => demo.setState('normal')}
+          live
+        />
+      </div>
+    );
 
   return (
     <div>
@@ -284,21 +314,15 @@ export const Projects = forwardRef<
         title="Projects"
         subtitle={
           <span aria-live="polite">
-            {filtered.length === items.length
-              ? `${items.length} projects`
-              : `${filtered.length} of ${items.length} projects`}
+            {firstRun
+              ? 'No projects'
+              : filtered.length === items.length
+                ? `${items.length} projects`
+                : `${filtered.length} of ${items.length} projects`}
           </span>
         }
         actions={
           <>
-            {/* Demo-only: preview the loading state. */}
-            <Switch
-              size="sm"
-              label="Loading"
-              labelPosition="before"
-              checked={loading}
-              onCheckedChange={setLoading}
-            />
             <Button
               variant="outline"
               size="sm"
@@ -342,7 +366,10 @@ export const Projects = forwardRef<
             <Button
               variant="outline"
               leadingIcon={<Upload />}
-              onClick={() => setItems(SEED_PROJECTS)}
+              onClick={() => {
+                setItems(SEED_PROJECTS);
+                demo.setState('normal');
+              }}
             >
               Import
             </Button>

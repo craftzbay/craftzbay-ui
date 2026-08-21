@@ -7,6 +7,7 @@ const doc: ComponentDoc = {
   group: 'Navigation',
   description:
     'Linear progress indicator for multi-step flows: onboarding wizards, checkouts, multi-page forms. Past steps show as complete, current as active, future as pending.',
+  i18n: 'Reads `stepper.label`, `stepper.complete`, `stepper.current`, `stepper.upcoming`.',
   exports: ['Stepper'],
   sourceFile: 'Stepper.tsx',
   examples: [

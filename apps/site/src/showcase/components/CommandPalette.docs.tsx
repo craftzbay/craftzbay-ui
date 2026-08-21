@@ -14,6 +14,7 @@ const doc: ComponentDoc = {
   group: 'Overlays',
   description:
     '⌘K-style command surface. Use for app-wide search + jump-to + quick actions. CommandDialog wraps it in a modal; useCommandPaletteShortcut wires ⌘K / Ctrl+K.',
+  i18n: 'Reads `command.suggestions` (default group heading) and `commandDialog.title` (dialog title).',
   exports: [
     'Command',
     'CommandInput',

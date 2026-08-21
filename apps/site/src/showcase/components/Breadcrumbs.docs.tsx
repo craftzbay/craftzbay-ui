@@ -7,6 +7,7 @@ const doc: ComponentDoc = {
   group: 'Navigation',
   description:
     'Linear path trail. Use only when the user is more than two levels deep in a hierarchy. Overflowing trails collapse with an ellipsis.',
+  i18n: 'Reads `breadcrumbs.label` (nav aria-label) and `breadcrumbs.collapsed` (overflow menu).',
   exports: ['Breadcrumbs'],
   sourceFile: 'Breadcrumbs.tsx',
   examples: [

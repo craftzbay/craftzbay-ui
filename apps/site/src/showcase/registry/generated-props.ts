@@ -560,6 +560,78 @@ export const generatedProps: Record<string, PropGroup[]> = {
       ]
     }
   ],
+  "Calendar": [
+    {
+      "rows": [
+        {
+          "name": "captionLayout",
+          "type": "\"label\" | \"dropdown\" | \"dropdown-months\" | \"dropdown-years\"",
+          "required": false,
+          "description": "Show dropdowns to navigate between months or years. - `label`: Displays the month and year as a label. Default value. - `dropdown`: Displays dropdowns for both month and year navigation. - `dropdown-months`: Displays a dropdown only for the month navigation. - `dropdown-years`: Displays a dropdown only for the year navigation. **Note:** By default, showing the dropdown will set the {@link startMonth} to 100 years ago and {@link endMonth} to the end of the current year. You can override this behavior by explicitly setting `startMonth` and `endMonth`."
+        },
+        {
+          "name": "className",
+          "type": "string",
+          "required": false,
+          "description": "Class name to add to the root element."
+        },
+        {
+          "name": "defaultMonth",
+          "type": "Date",
+          "required": false,
+          "description": "The initial month to show in the calendar. Use this prop to let DayPicker control the current month. If you need to set the month programmatically, use {@link month} and {@link onMonthChange}."
+        },
+        {
+          "name": "disabled",
+          "type": "Matcher | Matcher[]",
+          "required": false,
+          "description": "Apply the `disabled` modifier to the matching days. Disabled days cannot be selected when in a selection mode is set."
+        },
+        {
+          "name": "locale",
+          "type": "Partial<DayPickerLocale>",
+          "required": false,
+          "description": "The locale object used to localize dates. Pass a locale from `react-day-picker/locale` to localize the calendar."
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "required": false,
+          "description": "Enable the selection of a single day, multiple days, or a range of days."
+        },
+        {
+          "name": "month",
+          "type": "Date",
+          "required": false,
+          "description": "The month displayed in the calendar. As opposed to `defaultMonth`, use this prop with `onMonthChange` to change the month programmatically."
+        },
+        {
+          "name": "numberOfMonths",
+          "type": "number",
+          "required": false,
+          "description": "The number of displayed months."
+        },
+        {
+          "name": "onMonthChange",
+          "type": "MonthChangeEventHandler",
+          "required": false,
+          "description": "Event fired when the user navigates between months."
+        },
+        {
+          "name": "showOutsideDays",
+          "type": "boolean",
+          "required": false,
+          "description": "Show the outside days (days falling in the next or the previous month). **Note:** when a {@link broadcastCalendar} is set, this prop defaults to true."
+        },
+        {
+          "name": "weekStartsOn",
+          "type": "0 | 1 | 2 | 3 | 4 | 5 | 6",
+          "required": false,
+          "description": "The index of the first day of the week (0 - Sunday). Overrides the locale's default."
+        }
+      ]
+    }
+  ],
   "Card": [
     {
       "rows": [
@@ -638,7 +710,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
         },
         {
           "name": "size",
-          "type": "\"sm\" | \"md\" | \"lg\" | null",
+          "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | null",
           "required": false,
           "description": ""
         },
@@ -668,7 +740,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
         },
         {
           "name": "size",
-          "type": "\"sm\" | \"md\" | \"lg\" | null",
+          "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | null",
           "required": false,
           "description": ""
         },
@@ -1962,31 +2034,6 @@ export const generatedProps: Record<string, PropGroup[]> = {
     {
       "rows": [
         {
-          "name": "activeSnapPoint",
-          "type": "string | number | null",
-          "required": false,
-          "description": ""
-        },
-        {
-          "name": "autoFocus",
-          "type": "boolean",
-          "required": false,
-          "description": ""
-        },
-        {
-          "name": "closeThreshold",
-          "type": "number",
-          "default": "0.25",
-          "required": false,
-          "description": "Number between 0 and 1 that determines when the drawer should be closed. Example: threshold of 0.5 would close the drawer if the user swiped for 50% of the height of the drawer or more."
-        },
-        {
-          "name": "container",
-          "type": "HTMLElement | null",
-          "required": false,
-          "description": ""
-        },
-        {
           "name": "defaultOpen",
           "type": "boolean",
           "default": "false",
@@ -2001,37 +2048,11 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": "Direction of the drawer. Can be `top` or `bottom`, `left`, `right`."
         },
         {
-          "name": "disablePreventScroll",
-          "type": "boolean",
-          "default": "false",
-          "required": false,
-          "description": "When set to `true` prevents scrolling on the document body on mount, and restores it on unmount."
-        },
-        {
           "name": "dismissible",
           "type": "boolean",
           "default": "true",
           "required": false,
           "description": "When `false` dragging, clicking outside, pressing esc, etc. will not close the drawer. Use this in comination with the `open` prop, otherwise you won't be able to open/close the drawer."
-        },
-        {
-          "name": "fadeFromIndex",
-          "type": "number",
-          "required": false,
-          "description": "Index of a `snapPoint` from which the overlay fade should be applied. Defaults to the last snap point."
-        },
-        {
-          "name": "fixed",
-          "type": "boolean",
-          "required": false,
-          "description": "When `true`, don't move the drawer upwards if there's space, but rather only change it's height so it's fully scrollable when the keyboard is open"
-        },
-        {
-          "name": "handleOnly",
-          "type": "boolean",
-          "default": "false",
-          "required": false,
-          "description": "When `true` only allows the drawer to be dragged by the `<Drawer.Handle />` component."
         },
         {
           "name": "modal",
@@ -2041,44 +2062,8 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": "When `false` it allows to interact with elements outside of the drawer without closing it."
         },
         {
-          "name": "nested",
-          "type": "boolean",
-          "required": false,
-          "description": ""
-        },
-        {
-          "name": "noBodyStyles",
-          "type": "boolean",
-          "required": false,
-          "description": "When `true` the `body` doesn't get any styles assigned from Vaul"
-        },
-        {
-          "name": "onAnimationEnd",
-          "type": "((open: boolean) => void)",
-          "required": false,
-          "description": "Gets triggered after the open or close animation ends, it receives an `open` argument with the `open` state of the drawer by the time the function was triggered. Useful to revert any state changes for example."
-        },
-        {
-          "name": "onClose",
-          "type": "(() => void)",
-          "required": false,
-          "description": ""
-        },
-        {
-          "name": "onDrag",
-          "type": "((event: PointerEvent<HTMLDivElement>, percentageDragged: number) => void)",
-          "required": false,
-          "description": ""
-        },
-        {
           "name": "onOpenChange",
           "type": "((open: boolean) => void)",
-          "required": false,
-          "description": ""
-        },
-        {
-          "name": "onRelease",
-          "type": "((event: PointerEvent<HTMLDivElement>, open: boolean) => void)",
           "required": false,
           "description": ""
         },
@@ -2087,39 +2072,6 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "boolean",
           "required": false,
           "description": ""
-        },
-        {
-          "name": "preventScrollRestoration",
-          "type": "boolean",
-          "required": false,
-          "description": ""
-        },
-        {
-          "name": "repositionInputs",
-          "type": "boolean",
-          "default": "true when {@link snapPoints } is defined",
-          "required": false,
-          "description": "When `true` Vaul will reposition inputs rather than scroll then into view if the keyboard is in the way. Setting it to `false` will fall back to the default browser behavior."
-        },
-        {
-          "name": "scrollLockTimeout",
-          "type": "number",
-          "default": "500ms",
-          "required": false,
-          "description": "Duration for which the drawer is not draggable after scrolling content inside of the drawer."
-        },
-        {
-          "name": "setActiveSnapPoint",
-          "type": "((snapPoint: string | number | null) => void)",
-          "required": false,
-          "description": ""
-        },
-        {
-          "name": "setBackgroundColorOnScale",
-          "type": "boolean",
-          "default": "true",
-          "required": false,
-          "description": "When `false` we don't change body's background color when the drawer is open."
         },
         {
           "name": "shouldScaleBackground",
@@ -2133,13 +2085,6 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "(string | number)[]",
           "required": false,
           "description": "Array of numbers from 0 to 100 that corresponds to % of the screen a given snap point should take up. Should go from least visible. Example `[0.2, 0.5, 0.8]`. You can also use px values, which doesn't take screen height into account."
-        },
-        {
-          "name": "snapToSequentialPoint",
-          "type": "boolean",
-          "default": "false",
-          "required": false,
-          "description": "Disabled velocity based swiping for snap points. This means that a snap point won't be skipped even if the velocity is high enough. Useful if each snap point in a drawer is equally important."
         }
       ]
     }
@@ -2813,7 +2758,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "enum",
           "default": "generic",
           "required": false,
-          "description": "`404` not-found, `500` server, or `generic` (catch-all)."
+          "description": "`403` permission-denied, `404` not-found, `500` server, or `generic` (catch-all)."
         }
       ]
     }
@@ -3105,7 +3050,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
         },
         {
           "name": "size",
-          "type": "\"sm\" | \"md\" | \"lg\" | null",
+          "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | null",
           "required": false,
           "description": ""
         },
@@ -4133,76 +4078,22 @@ export const generatedProps: Record<string, PropGroup[]> = {
     {
       "rows": [
         {
-          "name": "autoComplete",
+          "name": "placeholder",
           "type": "string",
           "required": false,
-          "description": ""
+          "description": "Placeholder shown when no value is selected."
         },
         {
-          "name": "defaultOpen",
-          "type": "boolean",
+          "name": "size",
+          "type": "'sm' | 'md' | 'lg'",
           "required": false,
-          "description": ""
+          "description": "Trigger height — matches Input sizes."
         },
         {
-          "name": "defaultValue",
-          "type": "string",
+          "name": "tone",
+          "type": "'default' | 'error'",
           "required": false,
-          "description": ""
-        },
-        {
-          "name": "dir",
-          "type": "enum",
-          "required": false,
-          "description": ""
-        },
-        {
-          "name": "disabled",
-          "type": "boolean",
-          "required": false,
-          "description": ""
-        },
-        {
-          "name": "form",
-          "type": "string",
-          "required": false,
-          "description": ""
-        },
-        {
-          "name": "name",
-          "type": "string",
-          "required": false,
-          "description": ""
-        },
-        {
-          "name": "onOpenChange",
-          "type": "((open: boolean) => void)",
-          "required": false,
-          "description": ""
-        },
-        {
-          "name": "onValueChange",
-          "type": "((value: string) => void)",
-          "required": false,
-          "description": ""
-        },
-        {
-          "name": "open",
-          "type": "boolean",
-          "required": false,
-          "description": ""
-        },
-        {
-          "name": "required",
-          "type": "boolean",
-          "required": false,
-          "description": ""
-        },
-        {
-          "name": "value",
-          "type": "string",
-          "required": false,
-          "description": ""
+          "description": "Visual tone — `error` swaps the border + ring to danger."
         }
       ]
     }
@@ -4397,6 +4288,42 @@ export const generatedProps: Record<string, PropGroup[]> = {
       ]
     }
   ],
+  "Sidebar": [
+    {
+      "rows": [
+        {
+          "name": "collapsed",
+          "type": "boolean",
+          "required": false,
+          "description": "Controlled collapsed state."
+        },
+        {
+          "name": "defaultCollapsed",
+          "type": "boolean",
+          "required": false,
+          "description": "Default state on first mount. Use `defaultCollapsed` for uncontrolled."
+        },
+        {
+          "name": "footer",
+          "type": "ReactNode",
+          "required": false,
+          "description": "Footer slot pinned to the bottom (user card, version, etc.)."
+        },
+        {
+          "name": "header",
+          "type": "ReactNode",
+          "required": false,
+          "description": "Header slot pinned to the top (brand, workspace switcher, etc.)."
+        },
+        {
+          "name": "onCollapsedChange",
+          "type": "(next: boolean) => void",
+          "required": false,
+          "description": "Called when the user toggles via the rail or keyboard."
+        }
+      ]
+    }
+  ],
   "SidebarGroup": [
     {
       "rows": [
@@ -4494,9 +4421,16 @@ export const generatedProps: Record<string, PropGroup[]> = {
         {
           "name": "delay",
           "type": "number",
-          "default": "0",
+          "default": "300",
           "required": false,
-          "description": "Render nothing until this many ms have elapsed, so sub-300ms loads never flash a placeholder. Default 0 (render immediately)."
+          "description": "Render nothing until this many ms have elapsed, so sub-300ms loads never flash a placeholder. Default 300. Pass 0 to render immediately."
+        },
+        {
+          "name": "minVisible",
+          "type": "number",
+          "default": "500",
+          "required": false,
+          "description": "Once shown, keep the placeholder mounted for at least this many ms so it never flickers. Default 500."
         },
         {
           "name": "variant",
@@ -5814,7 +5748,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
     {
       "rows": [
         {
-          "name": "__@hasInstance@10292",
+          "name": "__@hasInstance@10293",
           "type": "(value: any) => boolean",
           "required": true,
           "description": "Determines whether the given value inherits from this function if this function was used as a constructor function. A constructor function can control which objects are recognized as its instances by 'instanceof' by overriding this method."

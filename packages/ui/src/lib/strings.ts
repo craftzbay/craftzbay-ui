@@ -52,6 +52,8 @@ export interface UiStrings {
   dataGrid: {
     filterPlaceholder: string;
     empty: string;
+    /** Screen-reader label for an empty cell rendered as an em dash. */
+    emptyCell: string;
     columns: string;
     columnVisibility: string;
     filterRows: string;
@@ -68,6 +70,8 @@ export interface UiStrings {
     serverDescription: string;
     genericTitle: string;
     genericDescription: string;
+    forbiddenTitle: string;
+    forbiddenDescription: string;
     tryAgain: string;
   };
   avatar: { status: string; more: string };
@@ -153,6 +157,7 @@ export const defaultStrings: UiStrings = {
   dataGrid: {
     filterPlaceholder: 'Filter…',
     empty: 'No results.',
+    emptyCell: 'Empty',
     columns: 'Columns',
     columnVisibility: 'Column visibility',
     filterRows: 'Filter rows',
@@ -175,6 +180,8 @@ export const defaultStrings: UiStrings = {
     serverDescription: "We're looking into it. Please try again in a moment.",
     genericTitle: 'Unexpected error',
     genericDescription: 'Something interrupted this action.',
+    forbiddenTitle: "You don't have access",
+    forbiddenDescription: 'Ask an admin to grant the permission.',
     tryAgain: 'Try again',
   },
   avatar: { status: 'Status: {status}', more: '{n} more' },

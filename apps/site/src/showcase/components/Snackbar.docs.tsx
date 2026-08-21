@@ -7,6 +7,7 @@ const doc: ComponentDoc = {
   group: 'Feedback',
   description:
     'Inline, dismissible feedback bar — between Alert and Toast. Use for section-level confirmations that should stay until the user closes.',
+  i18n: 'Reads `snackbar.dismiss`.',
   exports: ['Snackbar'],
   sourceFile: 'Snackbar.tsx',
   examples: [

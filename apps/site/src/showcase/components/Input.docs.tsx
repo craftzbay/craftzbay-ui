@@ -26,6 +26,7 @@ const doc: ComponentDoc = {
   group: 'Inputs',
   description:
     'Text-style field with label, helper / error, prefix / suffix, clear button, and built-in password toggle. Works inside Form (RHF) without extra wiring.',
+  i18n: 'Reads `input.clear`, `input.showPassword`, `input.hidePassword` (built-in affordance buttons).',
   exports: ['Input'],
   sourceFile: 'Input.tsx',
   examples: [

@@ -1,5 +1,30 @@
+import { useState } from 'react';
 import { Alert } from '@/components/ui/Alert';
+import { Button } from '@/components/ui/Button';
 import type { ComponentDoc } from '../registry/types';
+
+function ControlledAlertDemo() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="flex w-full max-w-md flex-col gap-3">
+      <div>
+        <Button variant="outline" size="sm" onClick={() => setOpen(true)} disabled={open}>
+          Simulate failure
+        </Button>
+      </div>
+      <Alert
+        variant="danger"
+        title="Save failed"
+        live
+        dismissible
+        open={open}
+        onOpenChange={setOpen}
+      >
+        Your changes were not saved. Check your connection and retry.
+      </Alert>
+    </div>
+  );
+}
 
 const doc: ComponentDoc = {
   slug: 'alert',
@@ -7,6 +32,7 @@ const doc: ComponentDoc = {
   group: 'Feedback',
   description:
     'Static, in-page banner. Use for messages tied to a section of the page — not for transient feedback (use Toast) or destructive confirms (use ConfirmationDialog).',
+  i18n: 'Reads `alert.dismiss` (dismiss button aria-label).',
   exports: ['Alert'],
   sourceFile: 'Alert.tsx',
   examples: [
@@ -42,6 +68,43 @@ const doc: ComponentDoc = {
       ),
       code: `<Alert variant="info" title="New feature" dismissible onDismiss={() => …}>
   DataGrid now supports column drag-to-reorder.
+</Alert>`,
+    },
+    {
+      title: 'Controlled + live',
+      description:
+        'Drive visibility with `open` / `onOpenChange` when the alert reflects app state (a failed save, a lost connection). Add `live` so an alert that appears *after* load is announced: `danger` maps to role="alert", everything else to role="status". Leave `live` off for banners present at page load.',
+      preview: <ControlledAlertDemo />,
+      code: `const [open, setOpen] = useState(false);
+
+<Button onClick={() => setOpen(true)}>Simulate failure</Button>
+<Alert
+  variant="danger"
+  title="Save failed"
+  live
+  dismissible
+  open={open}
+  onOpenChange={setOpen}
+>
+  Your changes were not saved. Check your connection and retry.
+</Alert>`,
+    },
+    {
+      title: 'Heading level',
+      description:
+        'The title renders as an `<h3>` by default. Set `headingLevel` to keep the document outline in order — `2` directly under a page title, `4` inside a card section.',
+      preview: (
+        <Alert
+          variant="warning"
+          title="Trial ends in 3 days"
+          headingLevel={4}
+          className="w-full max-w-md"
+        >
+          Add a payment method to keep your workspace.
+        </Alert>
+      ),
+      code: `<Alert variant="warning" title="Trial ends in 3 days" headingLevel={4}>
+  Add a payment method to keep your workspace.
 </Alert>`,
     },
   ],

@@ -30,10 +30,11 @@ const iconButton = cva(
         destructive: 'bg-danger text-on-danger hover:bg-danger-hover active:bg-danger-active',
       },
       size: {
-        // 28px visual, 36px hit area via an invisible halo (WCAG 2.5.8 ≥24px).
-        sm: 'relative h-7 w-7 [&_svg]:size-3.5 before:absolute before:-inset-1 before:content-[""]',
-        md: 'h-8 w-8 [&_svg]:size-4',
+        // Matches Button heights: sm 32 / md 36 / lg 40 / xl 44 (touch / marketing).
+        sm: 'h-8 w-8 [&_svg]:size-4',
+        md: 'h-9 w-9 [&_svg]:size-4',
         lg: 'h-10 w-10 [&_svg]:size-5',
+        xl: 'h-11 w-11 [&_svg]:size-5',
       },
     },
     defaultVariants: {

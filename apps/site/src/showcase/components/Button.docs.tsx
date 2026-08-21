@@ -34,17 +34,20 @@ const doc: ComponentDoc = {
     },
     {
       title: 'Sizes',
-      description: 'sm for dense toolbars, md (default) for general use, lg for marketing CTAs.',
+      description:
+        "sm for dense toolbars, md (default) for general use, lg for marketing CTAs, xl for a hero's single primary call to action.",
       preview: (
         <div className="flex flex-wrap items-center gap-2">
           <Button size="sm">Small</Button>
           <Button size="md">Medium</Button>
           <Button size="lg">Large</Button>
+          <Button size="xl">Extra large</Button>
         </div>
       ),
       code: `<Button size="sm">Small</Button>
 <Button size="md">Medium</Button>
-<Button size="lg">Large</Button>`,
+<Button size="lg">Large</Button>
+<Button size="xl">Extra large</Button>`,
     },
     {
       title: 'With icons',

@@ -9,7 +9,7 @@ const doc: ComponentDoc = {
   group: 'Overlays',
   description:
     'Passive hint on hover / focus. Use only for affordance — never put crucial info in a tooltip. Mount one <TooltipProvider> at your app root.',
-  exports: ['Tooltip', 'TooltipProvider'],
+  exports: ['Tooltip', 'TooltipProvider', 'TooltipTrigger', 'TooltipContent'],
   sourceFile: 'Tooltip.tsx',
   examples: [
     {

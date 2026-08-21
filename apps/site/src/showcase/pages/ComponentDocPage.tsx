@@ -17,7 +17,7 @@ interface ComponentDocPageProps {
 export function ComponentDocPage({ doc }: ComponentDocPageProps) {
   const related = doc.related ? getRelatedDocs(doc.related.map((r) => r.slug)) : [];
 
-  const importLine = `import { ${doc.exports.join(', ')} } from '@craftzbay/ui';`;
+  const importLine = `import { ${doc.exports.join(', ')} } from '${doc.importPath ?? '@craftzbay/ui'}';`;
 
   // The generated-props table is ~5k lines of data used only here — load it on
   // demand so it never sits in the initial bundle. Generated rows render by
@@ -55,6 +55,18 @@ export function ComponentDocPage({ doc }: ComponentDocPageProps) {
 
       <SectionAnchor id="import">Import</SectionAnchor>
       <CodeBlock code={importLine} />
+      {doc.i18n && (
+        <p className="text-foreground-muted mt-3 text-sm leading-relaxed">
+          <span className="text-foreground font-medium">i18n:</span> {doc.i18n} Override via{' '}
+          <a
+            href={`#${routeToHash({ kind: 'component', slug: 'design-system-provider' })}`}
+            className="text-accent hover:underline"
+          >
+            DesignSystemProvider <code>strings</code>
+          </a>
+          .
+        </p>
+      )}
 
       {doc.examples.length > 0 && (
         <>

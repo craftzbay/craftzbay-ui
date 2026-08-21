@@ -1,5 +1,7 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { Component, lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { ArrowLeft, Check, ChevronDown } from '@/icons';
+import { Button } from '@/components/ui/Button';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { Spinner } from '@/components/ui/Spinner';
 import { cn } from '@/lib/utils';
 import { blockMeta, getBlockMeta } from '../blocks/meta';
@@ -16,6 +18,84 @@ import { ThemeToggle, BrandSwitcher } from '../theme/Controls';
 import { NotFound } from './NotFound';
 
 const BlockPreview = lazy(() => import('../blocks/Preview'));
+
+/** Stale-deploy chunk failures (hash in the filename changed under us). */
+const isChunkError = (err: unknown) =>
+  err instanceof Error &&
+  (err.name === 'ChunkLoadError' ||
+    /Loading chunk|Failed to fetch dynamically imported module|Importing a module script failed/i.test(
+      err.message,
+    ));
+
+const RELOADED_KEY = 'cb-preview-chunk-reloaded';
+
+/**
+ * Catches a failed lazy import. A chunk-load failure reloads the page once
+ * (flag in sessionStorage so a genuinely broken build can't loop); anything
+ * else — or a second failure — shows a retry screen instead of a blank tab.
+ */
+class PreviewBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  state = { error: null as Error | null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  componentDidCatch(error: Error) {
+    if (!isChunkError(error)) return;
+    try {
+      if (sessionStorage.getItem(RELOADED_KEY) !== '1') {
+        sessionStorage.setItem(RELOADED_KEY, '1');
+        window.location.reload();
+      }
+    } catch {
+      /* storage unavailable — fall through to the retry screen */
+    }
+  }
+
+  render() {
+    if (!this.state.error) return this.props.children;
+    return (
+      <div className="flex min-h-dvh items-center justify-center p-6">
+        <ErrorState
+          variant="500"
+          title="Preview failed to load"
+          description="The template's code couldn't be loaded. Reload to fetch the latest version."
+          action={
+            <Button
+              onClick={() => {
+                try {
+                  sessionStorage.removeItem(RELOADED_KEY);
+                } catch {
+                  /* ignore */
+                }
+                window.location.reload();
+              }}
+            >
+              Reload
+            </Button>
+          }
+          className="max-w-md"
+        />
+      </div>
+    );
+  }
+}
+
+/** Spinner only after 300ms — fast loads never flash a loader. */
+function DelayedFallback() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const t = window.setTimeout(() => setShow(true), 300);
+    return () => window.clearTimeout(t);
+  }, []);
+  return (
+    <div className="flex h-dvh items-center justify-center" role="status" aria-live="polite">
+      {show && <Spinner />}
+      <span className="sr-only">Loading preview…</span>
+    </div>
+  );
+}
 
 /**
  * Standalone template preview — its own browser tab. The template owns the
@@ -66,21 +146,17 @@ export function PreviewPage({
     <div
       className={cn('bg-background', doc.shell === 'app' ? 'h-dvh overflow-hidden' : 'min-h-dvh')}
     >
-      <Suspense
-        fallback={
-          <div className="flex h-[60vh] items-center justify-center">
-            <Spinner />
-          </div>
-        }
-      >
-        <BlockPreview
-          slug={slug}
-          screen={screen}
-          setScreen={setScreen}
-          variant={variant}
-          page={initialPage}
-        />
-      </Suspense>
+      <PreviewBoundary>
+        <Suspense fallback={<DelayedFallback />}>
+          <BlockPreview
+            slug={slug}
+            screen={screen}
+            setScreen={setScreen}
+            variant={variant}
+            page={initialPage}
+          />
+        </Suspense>
+      </PreviewBoundary>
 
       {/* Floating preview dock — bottom-right so the template renders edge to
           edge like a real deployment. */}

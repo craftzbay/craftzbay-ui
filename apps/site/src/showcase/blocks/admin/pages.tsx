@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useState } from 'react';
-import { Lock, Mail, Plus, Trash2 } from '@/icons';
+import { FileText, Lock, Mail, Plus, Receipt, Trash2, Users } from '@/icons';
 import {
   Avatar,
   Badge,
@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
   EmptyState,
+  ErrorState,
   IconButton,
   Input,
   RadioGroup,
@@ -24,6 +25,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
+  Skeleton,
   Switch,
   Table,
   TableBody,
@@ -33,6 +35,7 @@ import {
   TableRow,
   cn,
   formatDate,
+  formatNumber,
   useToast,
 } from '@craftzbay/ui';
 import {
@@ -44,7 +47,7 @@ import {
   type Member,
   type Message,
 } from './data';
-import { PageHeader, StatusIcon } from './shell';
+import { PageHeader, StatusIcon, useDemo } from './shell';
 import { useTheme, type Theme } from '../../theme/theme-context';
 import { useUnsavedGuard } from './unsaved';
 
@@ -53,9 +56,25 @@ import { useUnsavedGuard } from './unsaved';
  * ========================================================================== */
 
 export function InboxPage({ onNavigate }: { onNavigate: (key: string) => void }) {
+  const { push } = useToast();
   const [items, setItems] = useState<Message[]>(SEED_MESSAGES);
-  const [pendingDelete, setPendingDelete] = useState<Message | null>(null);
   const unread = items.filter((m) => m.unread).length;
+  // Recoverable delete: no confirm, a 5s Undo in the toast restores the row
+  // at its original position (CANON · Undo window).
+  const remove = (m: Message) => {
+    const snapshot = items;
+    setItems((xs) => xs.filter((x) => x.id !== m.id));
+    push({
+      title: 'Conversation deleted',
+      description: m.subject,
+      duration: 5000,
+      action: {
+        label: 'Undo',
+        altText: `Undo deleting “${m.subject}”`,
+        onClick: () => setItems(snapshot),
+      },
+    });
+  };
   return (
     <div>
       <PageHeader
@@ -123,29 +142,13 @@ export function InboxPage({ onNavigate }: { onNavigate: (key: string) => void })
                   icon={<Trash2 />}
                   variant="ghost"
                   size="sm"
-                  onClick={() => setPendingDelete(m)}
+                  onClick={() => remove(m)}
                 />
               </li>
             ))}
           </ul>
         </Card>
       )}
-      <ConfirmationDialog
-        open={pendingDelete !== null}
-        onOpenChange={(o) => !o && setPendingDelete(null)}
-        title="Delete conversation?"
-        description={
-          pendingDelete
-            ? `“${pendingDelete.subject}” from ${pendingDelete.from} will be removed for everyone.`
-            : undefined
-        }
-        confirmLabel="Delete"
-        confirmVariant="destructive"
-        onConfirm={() => {
-          setItems((xs) => xs.filter((x) => x.id !== pendingDelete?.id));
-          setPendingDelete(null);
-        }}
-      />
     </div>
   );
 }
@@ -157,6 +160,7 @@ export interface MembersHandle {
 export const Members = forwardRef<MembersHandle, { onNavigate: (key: string) => void }>(
   function Members({ onNavigate }, ref) {
     const { push } = useToast();
+    const demo = useDemo();
     const [items, setItems] = useState<Member[]>(SEED_MEMBERS);
     const [open, setOpen] = useState(false);
     const [email, setEmail] = useState('');
@@ -187,89 +191,156 @@ export const Members = forwardRef<MembersHandle, { onNavigate: (key: string) => 
       setOpen(false);
     };
 
+    // Removal is confirmed (access is revoked immediately) and still
+    // reversible for 5s — the toast's Undo restores the row.
+    const remove = (m: Member) => {
+      const snapshot = items;
+      setItems((xs) => xs.filter((x) => x.id !== m.id));
+      push({
+        title: 'Member removed',
+        description: m.name,
+        duration: 5000,
+        action: {
+          label: 'Undo',
+          altText: `Undo removing ${m.name}`,
+          onClick: () => setItems(snapshot),
+        },
+      });
+    };
+
+    const visible = demo.state === 'empty' ? [] : items;
+    const inviteButton = (
+      <Button size="sm" leadingIcon={<Plus />} onClick={() => setOpen(true)}>
+        Invite
+      </Button>
+    );
+
     return (
       <div>
         <PageHeader
           page="members"
           title="Team"
           subtitle="People with access to this workspace."
-          actions={
-            <Button size="sm" leadingIcon={<Plus />} onClick={() => setOpen(true)}>
-              Invite
-            </Button>
-          }
+          actions={inviteButton}
           onNavigate={onNavigate}
         />
-        <Card padding="none">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-12 text-right">
-                  <span className="sr-only">Actions</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((m) => (
-                <TableRow key={m.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Avatar size="sm" fallback={m.initials} alt="" />
-                      <div className="leading-tight">
-                        <div className="text-foreground font-medium">{m.name}</div>
-                        <div className="text-foreground-subtle text-xs">{m.email}</div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Select
-                      value={m.role}
-                      onValueChange={(v) =>
-                        setItems((xs) =>
-                          xs.map((x) => (x.id === m.id ? { ...x, role: v as Member['role'] } : x)),
-                        )
-                      }
-                    >
-                      <SelectTrigger
-                        size="sm"
-                        aria-label={`Role for ${m.name}`}
-                        className="w-32"
-                        disabled={m.role === 'Owner'}
-                      />
-                      <SelectContent>
-                        {ROLES.map((r) => (
-                          <SelectItem key={r} value={r}>
-                            {r}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <Badge tone={m.status === 'Active' ? 'success' : 'warning'} variant="outline">
-                      <StatusIcon tone={m.status === 'Active' ? 'success' : 'warning'} />
-                      {m.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <IconButton
-                      aria-label={`Remove ${m.name}`}
-                      icon={<Trash2 />}
-                      variant="ghost"
-                      size="sm"
-                      disabled={m.role === 'Owner'}
-                      title={m.role === 'Owner' ? 'The owner cannot be removed' : undefined}
-                      onClick={() => setPendingRemove(m)}
-                    />
-                  </TableCell>
+        {demo.state === 'error' ? (
+          <ErrorState
+            variant="500"
+            title="Couldn't load the team"
+            description="The members list didn't come back from the server. Your changes are safe."
+            onRetry={() => demo.setState('normal')}
+            live
+          />
+        ) : visible.length === 0 && demo.state !== 'loading' ? (
+          <EmptyState
+            icon={<Users />}
+            title="No one else is here yet"
+            description="Invite teammates to collaborate on projects. They'll get an email with a link to join."
+            action={
+              <Button leadingIcon={<Plus />} onClick={() => setOpen(true)}>
+                Invite a teammate
+              </Button>
+            }
+            className="min-h-[320px]"
+          />
+        ) : (
+          <Card padding="none">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-12 text-right">
+                    <span className="sr-only">Actions</span>
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
+              </TableHeader>
+              <TableBody>
+                {demo.state === 'loading'
+                  ? Array.from({ length: 4 }, (_, i) => (
+                      <TableRow key={`sk-${i}`} aria-hidden>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Skeleton variant="avatar" className="size-8" />
+                            <Skeleton variant="text" className="w-32" />
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-8 w-32" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-5 w-16 rounded-full" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="ml-auto size-8" />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  : visible.map((m) => (
+                      <TableRow key={m.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Avatar size="sm" fallback={m.initials} alt="" />
+                            <div className="leading-tight">
+                              <div className="text-foreground font-medium">{m.name}</div>
+                              <div className="text-foreground-subtle text-xs">{m.email}</div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Select
+                            value={m.role}
+                            onValueChange={(v) =>
+                              setItems((xs) =>
+                                xs.map((x) =>
+                                  x.id === m.id ? { ...x, role: v as Member['role'] } : x,
+                                ),
+                              )
+                            }
+                          >
+                            <SelectTrigger
+                              size="sm"
+                              aria-label={`Role for ${m.name}`}
+                              className="w-32"
+                              disabled={m.role === 'Owner'}
+                            />
+                            <SelectContent>
+                              {ROLES.map((r) => (
+                                <SelectItem key={r} value={r}>
+                                  {r}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            tone={m.status === 'Active' ? 'success' : 'warning'}
+                            variant="outline"
+                          >
+                            <StatusIcon tone={m.status === 'Active' ? 'success' : 'warning'} />
+                            {m.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <IconButton
+                            aria-label={`Remove ${m.name}`}
+                            icon={<Trash2 />}
+                            variant="ghost"
+                            size="sm"
+                            disabled={m.role === 'Owner'}
+                            title={m.role === 'Owner' ? 'The owner cannot be removed' : undefined}
+                            onClick={() => setPendingRemove(m)}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+              </TableBody>
+            </Table>
+          </Card>
+        )}
 
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent>
@@ -329,7 +400,7 @@ export const Members = forwardRef<MembersHandle, { onNavigate: (key: string) => 
           confirmLabel="Remove member"
           confirmVariant="destructive"
           onConfirm={() => {
-            setItems((xs) => xs.filter((x) => x.id !== pendingRemove?.id));
+            if (pendingRemove) remove(pendingRemove);
             setPendingRemove(null);
           }}
         />
@@ -466,62 +537,135 @@ export function SettingsPage({ onNavigate }: { onNavigate: (key: string) => void
   );
 }
 
+const usd = (n: number) =>
+  `$${formatNumber(n, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
 export function BillingPage({ onNavigate }: { onNavigate: (key: string) => void }) {
+  const demo = useDemo();
+  const invoices = demo.state === 'empty' ? [] : INVOICES;
+  if (demo.state === 'error')
+    return (
+      <div className="max-w-2xl">
+        <PageHeader
+          page="billing"
+          title="Billing"
+          subtitle="Plan and invoices."
+          onNavigate={onNavigate}
+        />
+        <ErrorState
+          variant="500"
+          title="Billing is unavailable"
+          description="We couldn't reach the billing provider. Your subscription is unaffected — try again in a moment."
+          onRetry={() => demo.setState('normal')}
+          live
+        />
+      </div>
+    );
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-2xl">
       <PageHeader
         page="billing"
         title="Billing"
         subtitle="Plan and invoices."
         onNavigate={onNavigate}
       />
-      <Card>
-        <CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-foreground text-lg font-semibold">Team plan</span>
-              <Badge tone="accent">Current</Badge>
+      {demo.state === 'loading' ? (
+        <Card>
+          <CardContent className="space-y-3">
+            <Skeleton variant="text" className="w-40" />
+            <Skeleton variant="text" className="w-64" />
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-foreground text-lg font-semibold">Team plan</span>
+                <Badge tone="accent">Current</Badge>
+              </div>
+              <p className="text-foreground-muted mt-1 text-sm">
+                {usd(20)} / user / month · renews 2026-07-01
+              </p>
             </div>
-            <p className="text-foreground-muted mt-1 text-sm">
-              $20 / user / month · renews 2026-07-01
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline">Manage</Button>
-            <Button>Upgrade</Button>
-          </div>
-        </CardContent>
-      </Card>
+            <div className="flex gap-2">
+              <Button variant="outline">Manage</Button>
+              <Button>Upgrade</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       <Card padding="none" className="mt-4">
         <CardHeader className="px-4 pt-4 md:px-6 md:pt-6">
           <h2 className="text-foreground text-base leading-none font-semibold">Invoices</h2>
         </CardHeader>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Invoice</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-              <TableHead className="text-right">Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {INVOICES.map((inv) => (
-              <TableRow key={inv.id}>
-                <TableCell className="text-foreground font-medium">{inv.id}</TableCell>
-                <TableCell className="tabular text-foreground-muted">{inv.date}</TableCell>
-                <TableCell className="tabular text-foreground text-right">{inv.amount}</TableCell>
-                <TableCell className="text-right">
-                  <Badge tone="success" variant="outline">
-                    <StatusIcon tone="success" />
-                    {inv.status}
-                  </Badge>
-                </TableCell>
+        {demo.state === 'loading' ? (
+          <div className="space-y-3 px-4 pb-4 md:px-6 md:pb-6" aria-hidden>
+            <Skeleton variant="text" className="w-full" />
+            <Skeleton variant="text" className="w-full" />
+            <Skeleton variant="text" className="w-2/3" />
+          </div>
+        ) : invoices.length === 0 ? (
+          <EmptyState
+            icon={<Receipt />}
+            title="No invoices yet"
+            description="Your first invoice is issued at the start of the next billing cycle."
+            className="rounded-t-none border-0"
+          />
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Invoice</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="text-right">Status</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {INVOICES.map((inv) => (
+                <TableRow key={inv.id}>
+                  <TableCell className="text-foreground font-medium">{inv.id}</TableCell>
+                  <TableCell className="tabular text-foreground-muted">{inv.date}</TableCell>
+                  <TableCell className="tabular text-foreground text-right">
+                    {usd(inv.amount)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Badge tone="success" variant="outline">
+                      <StatusIcon tone="success" />
+                      {inv.status}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </Card>
+    </div>
+  );
+}
+
+/**
+ * In-shell 404 — an unknown page key (stale bookmark, typo in the deep link)
+ * keeps the chrome so the user can simply pick another destination.
+ */
+export function NotFoundPage({
+  page,
+  onNavigate,
+}: {
+  page: string;
+  onNavigate: (key: string) => void;
+}) {
+  return (
+    <div className="max-w-2xl">
+      <EmptyState
+        icon={<FileText />}
+        title="Page not found"
+        description={`There's no page called “${page}” in this workspace. It may have moved or the link is out of date.`}
+        action={<Button onClick={() => onNavigate('overview')}>Back to overview</Button>}
+        className="min-h-[320px]"
+      />
     </div>
   );
 }

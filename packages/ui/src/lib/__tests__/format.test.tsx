@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { formatDate, formatMNT, formatNumber } from '../format';
+import { formatDate, formatMNT, formatNumber, formatPhone, parsePhoneMN } from '../format';
 import { RelativeTime } from '../../components/ui/RelativeTime';
 import { StringsContext } from '../../hooks/use-strings';
 import { mnStrings } from '../strings.mn';
@@ -19,6 +19,25 @@ describe('format helpers', () => {
     expect(formatNumber(-1234.5)).toBe('-1,234.5');
     expect(formatNumber(0.333, { maximumFractionDigits: 1 })).toBe('0.3');
     expect(formatMNT(1250000)).toBe('1,250,000₮');
+  });
+
+  it('formatMNT compact abbreviates with one decimal and drops trailing .0', () => {
+    expect(formatMNT(12400000, { compact: true })).toBe('12.4M₮');
+    expect(formatMNT(850000, { compact: true })).toBe('850K₮');
+    expect(formatMNT(1000000, { compact: true })).toBe('1M₮');
+    expect(formatMNT(2500000000, { compact: true })).toBe('2.5B₮');
+    expect(formatMNT(-1500, { compact: true })).toBe('-1.5K₮');
+    expect(formatMNT(999, { compact: true })).toBe('999₮');
+  });
+
+  it('formatPhone formats 8-digit MN numbers and leaves others untouched', () => {
+    expect(formatPhone('99112233')).toBe('+976 9911 2233');
+    expect(formatPhone('+97699112233')).toBe('+976 9911 2233');
+    expect(formatPhone('976 9911-2233')).toBe('+976 9911 2233');
+    expect(formatPhone('+1 555 0100')).toBe('+1 555 0100');
+    expect(formatPhone('')).toBe('');
+    expect(parsePhoneMN('9911 2233')).toBe('+97699112233');
+    expect(parsePhoneMN('+1 555 0100')).toBeNull();
   });
 });
 

@@ -20,6 +20,8 @@ const doc: ComponentDoc = {
     'DropdownMenuTrigger',
     'DropdownMenuContent',
     'DropdownMenuItem',
+    'DropdownMenuCheckboxItem',
+    'DropdownMenuRadioItem',
     'DropdownMenuLabel',
     'DropdownMenuSeparator',
   ],

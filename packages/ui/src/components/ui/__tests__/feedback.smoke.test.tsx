@@ -58,8 +58,8 @@ describe('Feedback (smoke)', () => {
     }
   });
 
-  it('Skeleton renders', () => {
-    const { container } = render(<Skeleton className="h-4 w-24" />);
+  it('Skeleton renders immediately with delay={0}', () => {
+    const { container } = render(<Skeleton delay={0} className="h-4 w-24" />);
     expect(container.firstChild).toBeInTheDocument();
   });
 

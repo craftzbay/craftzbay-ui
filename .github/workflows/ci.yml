@@ -56,6 +56,12 @@ jobs:
       - name: Build showcase
         run: pnpm build
 
+      - name: Generated props are up to date
+        run: git diff --exit-code apps/site/src/showcase/registry/generated-props.ts
+
+      - name: Test showcase
+        run: pnpm --filter @craftzbay/site test
+
   # Library peer range is ^18 || ^19 — typecheck + test the library against React 19.
   # Only packages/ui is switched; apps/site stays on React 18 and is not checked here.
   test-react-19:

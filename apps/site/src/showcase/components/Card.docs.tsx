@@ -83,6 +83,29 @@ const doc: ComponentDoc = {
 </a>`,
     },
     {
+      title: 'asChild (card as link)',
+      description:
+        'Instead of nesting an <a> around the card, `asChild` merges the card styles onto your own element — one DOM node, native link semantics, and the interactive hover/focus ring land on the <a> itself. Works with router <Link> too.',
+      preview: (
+        <Card asChild variant="interactive" className="block w-full max-w-sm no-underline">
+          <a href="#/components/card">
+            <CardHeader>
+              <CardTitle>Project Beacon</CardTitle>
+              <CardDescription>Open dashboard ↗</CardDescription>
+            </CardHeader>
+          </a>
+        </Card>
+      ),
+      code: `<Card asChild variant="interactive">
+  <Link to="/projects/beacon">
+    <CardHeader>
+      <CardTitle>Project Beacon</CardTitle>
+      <CardDescription>Open dashboard ↗</CardDescription>
+    </CardHeader>
+  </Link>
+</Card>`,
+    },
+    {
       title: 'Compact / no padding',
       preview: (
         <Card padding="none" className="w-full max-w-sm">

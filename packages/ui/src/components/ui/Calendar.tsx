@@ -88,6 +88,7 @@ export function Calendar({
   startMonth,
   endMonth,
   labels,
+  weekStartsOn = 1,
   ...props
 }: CalendarProps) {
   const strings = useStrings();
@@ -107,6 +108,7 @@ export function Calendar({
   return (
     <DayPicker
       showOutsideDays
+      weekStartsOn={weekStartsOn}
       captionLayout={captionLayout}
       startMonth={start}
       endMonth={end}

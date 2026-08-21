@@ -29,6 +29,30 @@ export type Route =
   | { kind: 'preview'; slug: string; screen?: string; variant?: string; page?: string }
   | { kind: 'not-found' };
 
+/**
+ * Legacy single-segment hashes → template preview targets. Every entry must
+ * resolve to an existing block slug / screen / variant / page (asserted by
+ * registry-completeness.test.ts).
+ */
+export const LEGACY_REDIRECTS: Record<
+  string,
+  { slug: string; screen?: string; variant?: string; page?: string }
+> = {
+  'auth-signin': { slug: 'auth', screen: 'signin' },
+  'auth-signup': { slug: 'auth', screen: 'signup' },
+  'auth-forgot': { slug: 'auth', screen: 'forgot' },
+  'auth-magic': { slug: 'auth', screen: 'magic' },
+  dashboard: { slug: 'admin', screen: 'app', variant: 'sidebar' },
+  'first-run': { slug: 'admin', screen: 'app', variant: 'sidebar' },
+  settings: { slug: 'admin', screen: 'app', variant: 'sidebar', page: 'settings' },
+  'data-table': { slug: 'admin', screen: 'app', variant: 'sidebar', page: 'projects' },
+  record: { slug: 'admin', screen: 'app', variant: 'sidebar', page: 'projects' },
+  onboarding: { slug: 'landing', screen: 'signup' },
+  // The landing template has no standalone pricing screen — pricing is a
+  // section of its home page.
+  pricing: { slug: 'landing', screen: 'home' },
+};
+
 export function parseHash(hash: string): Route {
   // Strip a query-style tail (`#preview/admin/app/sidebar/projects?status=…`) —
   // list state the admin template keeps in the URL; the router ignores it.
@@ -53,21 +77,10 @@ export function parseHash(hash: string): Route {
   }
 
   // Back-compat: legacy single-segment hashes like #dashboard, #auth-signin,
-  // #settings used to be top-level pattern keys. Map them to live previews.
-  const legacy: Record<string, string> = {
-    'auth-signin': 'auth-signin',
-    'auth-signup': 'auth-signup',
-    'auth-forgot': 'auth-forgot',
-    'auth-magic': 'auth-magic',
-    dashboard: 'dashboard',
-    settings: 'settings',
-    'data-table': 'data-table',
-    record: 'record',
-    onboarding: 'onboarding',
-    pricing: 'pricing',
-    'first-run': 'first-run',
-  };
-  if (legacy[raw]) return { kind: 'preview', slug: legacy[raw] };
+  // #settings used to be top-level pattern keys. Redirect them to the
+  // matching screen of a live template preview.
+  const legacy = LEGACY_REDIRECTS[raw];
+  if (legacy) return { kind: 'preview', ...legacy };
 
   return { kind: 'not-found' };
 }

@@ -69,8 +69,14 @@ export interface DataGridProps<TRow extends { id: string | number }> {
 }
 
 /** Default cell renderer for `row[key]` when no `cell` is given. */
-function renderValue(v: unknown): ReactNode {
-  if (v === null || v === undefined) return null;
+function renderValue(v: unknown, emptyLabel: string): ReactNode {
+  if (v === null || v === undefined || v === '') {
+    return (
+      <span aria-label={emptyLabel} className="text-foreground-subtle">
+        —
+      </span>
+    );
+  }
   if (v instanceof Date) return formatDate(v);
   if (typeof v === 'object') return isValidElement(v) ? v : String(v);
   return v as ReactNode;
@@ -153,7 +159,9 @@ export function DataGrid<TRow extends { id: string | number }>({
       <TableRow key={row.id}>
         {visibleColumns.map((c) => (
           <TableCell key={c.key} align={c.align ?? 'left'}>
-            {c.cell ? c.cell(row) : renderValue((row as Record<string, unknown>)[c.key])}
+            {c.cell
+              ? c.cell(row)
+              : renderValue((row as Record<string, unknown>)[c.key], strings.dataGrid.emptyCell)}
           </TableCell>
         ))}
       </TableRow>

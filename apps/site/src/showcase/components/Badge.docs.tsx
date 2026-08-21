@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/Badge';
+import { AlertTriangle, Check, Lock } from '@/icons';
 import type { ComponentDoc } from '../registry/types';
 
 const doc: ComponentDoc = {
@@ -66,6 +67,27 @@ const doc: ComponentDoc = {
       ),
       code: `<Badge tone="success" dot>Online</Badge>
 <Badge tone="warning" dot>Idle</Badge>`,
+    },
+    {
+      title: 'With icon',
+      description:
+        'Pass `icon` for a 12px leading glyph (decorative, aria-hidden). It replaces `dot` — use it when the state has a recognisable symbol, not as decoration.',
+      preview: (
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge tone="success" icon={<Check />}>
+            Verified
+          </Badge>
+          <Badge tone="warning" icon={<AlertTriangle />}>
+            Pending
+          </Badge>
+          <Badge tone="info" variant="outline" icon={<Lock />}>
+            Admin
+          </Badge>
+        </div>
+      ),
+      code: `<Badge tone="success" icon={<Check />}>Verified</Badge>
+<Badge tone="warning" icon={<AlertTriangle />}>Pending</Badge>
+<Badge tone="info" variant="outline" icon={<Lock />}>Admin</Badge>`,
     },
   ],
   api: [

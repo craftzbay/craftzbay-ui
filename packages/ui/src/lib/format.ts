@@ -125,11 +125,52 @@ export function formatNumber(
   return `${sign}${int}${frac ? decimal + frac : ''}`;
 }
 
+export interface FormatMNTOptions extends Omit<FormatNumberOptions, 'maximumFractionDigits'> {
+  /** Abbreviate ≥1,000 as `K` / `M` / `B` with one decimal: `12.4M₮`, `850K₮`. */
+  compact?: boolean;
+}
+
 /**
  * Mongolian tögrög: grouped integer + `₮` suffix, no space.
  *
- * @example formatMNT(1250000) // "1,250,000₮"
+ * @example formatMNT(1250000)                    // "1,250,000₮"
+ * @example formatMNT(12400000, { compact: true }) // "12.4M₮"
+ * @example formatMNT(850000, { compact: true })   // "850K₮"
  */
-export function formatMNT(n: number, options?: Omit<FormatNumberOptions, 'maximumFractionDigits'>) {
+export function formatMNT(n: number, { compact, ...options }: FormatMNTOptions = {}) {
+  if (compact && Number.isFinite(n) && Math.abs(n) >= 1000) {
+    const units: Array<[number, string]> = [
+      [1e9, 'B'],
+      [1e6, 'M'],
+      [1e3, 'K'],
+    ];
+    const [div, unit] = units.find(([d]) => Math.abs(n) >= d) as [number, string];
+    return `${formatNumber(n / div, { ...options, maximumFractionDigits: 1 })}${unit}₮`;
+  }
   return `${formatNumber(n, { ...options, maximumFractionDigits: 0 })}₮`;
+}
+
+/**
+ * Display form for Mongolian phone numbers. Accepts `XXXXXXXX`, `+976XXXXXXXX`,
+ * `976XXXXXXXX`, or already-spaced input; anything else is returned unchanged.
+ *
+ * @example formatPhone('99112233')     // "+976 9911 2233"
+ * @example formatPhone('+97699112233') // "+976 9911 2233"
+ * @example formatPhone('+1 555 0100')  // "+1 555 0100" (non-MN, untouched)
+ */
+export function formatPhone(input: string): string {
+  const digits = input.replace(/[\s\-().]/g, '');
+  const m = /^(?:\+?976)?(\d{8})$/.exec(digits);
+  if (!m) return input;
+  return `+976 ${m[1].slice(0, 4)} ${m[1].slice(4)}`;
+}
+
+/**
+ * Normalise a Mongolian phone number to E.164 (`+976XXXXXXXX`) for storage.
+ * Returns `null` when the input is not an 8-digit MN number.
+ */
+export function parsePhoneMN(input: string): string | null {
+  const digits = input.replace(/[\s\-().]/g, '');
+  const m = /^(?:\+?976)?(\d{8})$/.exec(digits);
+  return m ? `+976${m[1]}` : null;
 }

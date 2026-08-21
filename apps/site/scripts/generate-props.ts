@@ -11,6 +11,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
+import ts from 'typescript';
 import { withCustomConfig } from 'react-docgen-typescript';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -46,6 +47,137 @@ interface PropRow {
 interface PropGroup {
   title?: string;
   rows: PropRow[];
+}
+
+/**
+ * Components react-docgen gets wrong or misses, re-extracted straight from
+ * the props type with the TypeScript checker. `own` keeps only members
+ * declared in the component file (drops inherited Radix / HTML props);
+ * `keep` is an explicit allowlist of prop names.
+ */
+const TYPE_OVERRIDES: Record<
+  string,
+  { file: string; type: string; own?: boolean; keep?: string[] }
+> = {
+  // docgen attributes the Select *root* (Radix) props to SelectTrigger.
+  SelectTrigger: { file: 'Select.tsx', type: 'SelectTriggerProps', own: true },
+  // DayPicker's props are generic; docgen emits nothing. Keep the common surface.
+  Calendar: {
+    file: 'Calendar.tsx',
+    type: 'CalendarProps',
+    keep: [
+      'mode',
+      'selected',
+      'onSelect',
+      'defaultMonth',
+      'month',
+      'onMonthChange',
+      'captionLayout',
+      'numberOfMonths',
+      'disabled',
+      'showOutsideDays',
+      'weekStartsOn',
+      'locale',
+      'className',
+    ],
+  },
+  Sidebar: { file: 'Sidebar.tsx', type: 'SidebarProps', own: true },
+};
+
+/** Components whose docgen output is trimmed to the props the docs describe. */
+const ROW_ALLOWLIST: Record<string, string[]> = {
+  // Raw Vaul root props are noise — keep the ones consumers actually set.
+  Drawer: [
+    'open',
+    'defaultOpen',
+    'onOpenChange',
+    'direction',
+    'dismissible',
+    'modal',
+    'shouldScaleBackground',
+    'snapPoints',
+  ],
+};
+
+let program: ts.Program | undefined;
+function getProgram(): ts.Program {
+  if (program) return program;
+  const cfg = ts.readConfigFile(TSCONFIG, ts.sys.readFile);
+  const parsed = ts.parseJsonConfigFileContent(cfg.config, ts.sys, UI_PKG);
+  const roots = Object.values(TYPE_OVERRIDES).map((o) => path.join(UI_DIR, o.file));
+  program = ts.createProgram(roots, parsed.options);
+  return program;
+}
+
+function jsDocText(sym: ts.Symbol, checker: ts.TypeChecker): { description: string; def?: string } {
+  const description = ts
+    .displayPartsToString(sym.getDocumentationComment(checker))
+    .replace(/\s+/g, ' ')
+    .trim();
+  const def = sym
+    .getJsDocTags(checker)
+    .find((t) => t.name === 'default')
+    ?.text?.map((t) => t.text)
+    .join('')
+    .trim();
+  return { description, def };
+}
+
+function propsFromType(name: string): PropGroup[] | undefined {
+  const o = TYPE_OVERRIDES[name];
+  const file = path.join(UI_DIR, o.file);
+  const prog = getProgram();
+  const checker = prog.getTypeChecker();
+  const sf = prog.getSourceFile(file);
+  if (!sf) return undefined;
+  let decl: ts.Node | undefined;
+  sf.forEachChild((n) => {
+    if ((ts.isInterfaceDeclaration(n) || ts.isTypeAliasDeclaration(n)) && n.name.text === o.type)
+      decl = n;
+  });
+  if (!decl) return undefined;
+  const type = checker.getTypeAtLocation(decl);
+  const rows: PropRow[] = [];
+  for (const sym of checker.getPropertiesOfType(type)) {
+    const d = sym.declarations?.[0];
+    if (!d) continue;
+    if (o.own && d.getSourceFile().fileName !== sf.fileName) continue;
+    if (o.keep && !o.keep.includes(sym.name)) continue;
+    const { description, def } = jsDocText(sym, checker);
+    if (description.startsWith('@internal')) continue;
+    const required = !(sym.flags & ts.SymbolFlags.Optional);
+    // Prefer the source text of the annotation (`ReactNode`, `Matcher[]`) —
+    // checker.typeToString expands aliases and embeds absolute import paths,
+    // which would make the output machine-dependent.
+    let typeText: string;
+    if (ts.isPropertySignature(d) && d.type) {
+      typeText = d.type.getText(d.getSourceFile());
+    } else {
+      const propType = checker.getTypeOfSymbolAtLocation(sym, d);
+      typeText = checker.typeToString(
+        checker.getNonNullableType(propType),
+        d,
+        ts.TypeFormatFlags.NoTruncation | ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope,
+      );
+    }
+    typeText = typeText
+      .replace(/\s+/g, ' ')
+      .replace(/^undefined \| /, '')
+      .replace(/ \| undefined$/, '');
+    rows.push({
+      name: sym.name,
+      type: simplifyType(typeText),
+      default: def,
+      required,
+      description,
+    });
+  }
+  if (rows.length === 0) return undefined;
+  rows.sort((a, b) => {
+    if (a.required !== b.required) return a.required ? -1 : 1;
+    return a.name.localeCompare(b.name);
+  });
+  return [{ rows }];
 }
 
 function parseFile(file: string): Record<string, PropGroup[]> {
@@ -94,6 +226,17 @@ function main() {
     } catch (err) {
       console.warn(`[gen-props] skipping ${path.basename(file)}: ${(err as Error).message}`);
     }
+  }
+
+  for (const [name, keep] of Object.entries(ROW_ALLOWLIST)) {
+    const groups = all[name];
+    if (!groups) continue;
+    all[name] = groups.map((g) => ({ ...g, rows: g.rows.filter((r) => keep.includes(r.name)) }));
+  }
+  for (const name of Object.keys(TYPE_OVERRIDES)) {
+    const groups = propsFromType(name);
+    if (groups) all[name] = groups;
+    else console.warn(`[gen-props] override for ${name} produced no rows`);
   }
 
   const sortedNames = Object.keys(all).sort();

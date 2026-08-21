@@ -7,6 +7,7 @@ const doc: ComponentDoc = {
   group: 'Data Display',
   description:
     'Hierarchical list with expand / collapse. Use for file explorers, nested settings, taxonomies. Keyboard-navigable: arrows expand, Enter activates.',
+  i18n: 'Reads `tree.label` (tree aria-label).',
   exports: ['Tree'],
   sourceFile: 'Tree.tsx',
   examples: [

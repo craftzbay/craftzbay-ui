@@ -319,6 +319,38 @@ const rows = useMemo(() => sortRows(invoices, sort), [sort]);
   </TableRow>
 </TableBody>`,
     },
+    {
+      title: 'Numeric alignment',
+      description:
+        '`align="right"` on TableHead + TableCell right-aligns the column and applies tabular figures so digits line up — use it for every numeric column instead of `className="text-right"`.',
+      preview: (
+        <Table className="w-full max-w-md">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Plan</TableHead>
+              <TableHead align="right">Seats</TableHead>
+              <TableHead align="right">Amount</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {[
+              ['Starter', 3, 2900],
+              ['Team', 25, 49000],
+              ['Enterprise', 1200, 1250000],
+            ].map(([plan, seats, amount]) => (
+              <TableRow key={plan}>
+                <TableCell>{plan}</TableCell>
+                <TableCell align="right">{seats}</TableCell>
+                <TableCell align="right">{fmt(amount as number)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      ),
+      code: `<TableHead align="right">Amount</TableHead>
+…
+<TableCell align="right">{fmt(row.amount)}</TableCell>`,
+    },
   ],
   api: [
     {

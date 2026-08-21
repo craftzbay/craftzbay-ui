@@ -18,7 +18,10 @@ export interface ToastDescriptor {
   title?: ReactNode;
   description?: ReactNode;
   variant?: ToastVariant;
-  /** Milliseconds before auto-dismiss. Default 5000. Set to 0 to keep open. */
+  /**
+   * Milliseconds before auto-dismiss. Defaults per variant: success/info/default
+   * 4000, warning 6000, danger 0 (stays until closed). Set to 0 to keep open.
+   */
   duration?: number;
   /** Action button. The alt text is used for screen reader announcements. */
   action?: {
@@ -49,6 +52,15 @@ interface ToastStore {
 
 const EMPTY: InternalToast[] = [];
 
+/** Per-variant auto-dismiss defaults (ms). Errors persist until the user closes them. */
+export const TOAST_DURATIONS: Record<ToastVariant, number> = {
+  default: 4000,
+  success: 4000,
+  info: 4000,
+  warning: 6000,
+  danger: 0,
+};
+
 function createStore(): ToastStore {
   return {
     toasts: EMPTY,
@@ -62,9 +74,21 @@ function createStore(): ToastStore {
       let merged: InternalToast[];
       if (existing) {
         // Same id → update in place, keep queue position, re-open if it was closing.
-        merged = this.toasts.map((x) => (x.id === id ? { ...x, ...t, id, open: true } : x));
+        merged = this.toasts.map((x) => {
+          if (x.id !== id) return x;
+          const variant = t.variant ?? x.variant ?? 'default';
+          const duration = t.duration ?? (t.variant ? TOAST_DURATIONS[variant] : x.duration);
+          return { ...x, ...t, id, variant, duration, open: true };
+        });
       } else {
-        const next: InternalToast = { open: true, duration: 5000, variant: 'default', ...t, id };
+        const variant = t.variant ?? 'default';
+        const next: InternalToast = {
+          ...t,
+          id,
+          open: true,
+          variant,
+          duration: t.duration ?? TOAST_DURATIONS[variant],
+        };
         merged = [next, ...this.toasts];
       }
       let kept = 0;

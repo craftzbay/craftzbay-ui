@@ -9,9 +9,14 @@ export interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
   variant?: 'text' | 'circle' | 'card' | 'avatar';
   /**
    * Render nothing until this many ms have elapsed, so sub-300ms loads never
-   * flash a placeholder. Default 0 (render immediately).
+   * flash a placeholder. Default 300. Pass 0 to render immediately.
    */
   delay?: number;
+  /**
+   * Once shown, keep the placeholder mounted for at least this many ms so it
+   * never flickers. Default 500.
+   */
+  minVisible?: number;
 }
 
 /**
@@ -32,13 +37,14 @@ export interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
  *
  * @do Match the silhouette of the eventual content so the layout doesn't
  *      shift when data arrives.
- * @dont Show a full-page skeleton for sub-300ms loads — use `delay={300}` or a single Spinner.
+ * @dont Pass `delay={0}` for data that usually arrives in under 300ms — the
+ *       default delay exists so fast loads never flash a placeholder.
  */
 export const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>(function Skeleton(
-  { className, variant, delay = 0, ...props },
+  { className, variant, delay = 300, minVisible = 500, ...props },
   ref,
 ) {
-  const show = useDelayedLoading(delay);
+  const show = useDelayedLoading(delay, { minVisible });
   if (!show) return null;
   return (
     <div

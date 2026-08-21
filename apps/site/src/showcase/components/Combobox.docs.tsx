@@ -33,6 +33,7 @@ const doc: ComponentDoc = {
   group: 'Inputs',
   description:
     'Searchable single-select. Use when option count is large (20+) or when filter-as-you-type is faster than scanning a menu. Supports async option loading.',
+  i18n: 'Reads `combobox.placeholder`, `combobox.searchPlaceholder`, `combobox.empty`, `combobox.clear`, `combobox.loadError` — props override per instance.',
   exports: ['Combobox'],
   sourceFile: 'Combobox.tsx',
   examples: [

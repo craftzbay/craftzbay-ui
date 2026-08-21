@@ -15,6 +15,7 @@ const doc: ComponentDoc = {
   group: 'Buttons',
   description:
     'Numbered page navigation for long lists. Includes prev/next, ellipses, and a page-size selector. Fully controlled — parent owns page + pageSize.',
+  i18n: 'Reads every `pagination.*` key — `showing`, `rowsPerPage`, `first` / `last` / `prev` / `next`, `page`, `perPage`, `nav`.',
   exports: ['Pagination'],
   sourceFile: 'Pagination.tsx',
   examples: [

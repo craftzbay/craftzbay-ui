@@ -46,7 +46,11 @@ export function ShowcaseFooter() {
                 href: `#${routeToHash({ kind: 'guide', slug: 'quickstart' })}`,
               },
               { label: 'Theming', href: `#${routeToHash({ kind: 'guide', slug: 'theming' })}` },
-              { label: 'Dashboard preview', href: previewUrl('dashboard'), external: true },
+              {
+                label: 'Dashboard preview',
+                href: previewUrl('admin', 'app', 'sidebar'),
+                external: true,
+              },
             ]}
           />
         </div>

@@ -605,6 +605,8 @@
   }
 
   html {
+    /* Reserve the scrollbar track so layout doesn't shift when content height changes. */
+    scrollbar-gutter: stable;
     font-family: var(--font-sans);
     font-feature-settings:
       'cv11' on,

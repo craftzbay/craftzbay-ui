@@ -4,12 +4,12 @@ import { createElement, forwardRef, type HTMLAttributes, type ReactNode } from '
 import { cn } from '@/lib/utils';
 import { useStrings } from '@/hooks/use-strings';
 import type { UiStrings } from '@/lib/strings';
-import { NotFound, ServerError, ConnectionLost } from '@/illustrations';
+import { NotFound, ServerError, ConnectionLost, Locked } from '@/illustrations';
 import { Button } from './Button';
 
 export interface ErrorStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
-  /** `404` not-found, `500` server, or `generic` (catch-all). */
-  variant?: '404' | '500' | 'generic';
+  /** `403` permission-denied, `404` not-found, `500` server, or `generic` (catch-all). */
+  variant?: '403' | '404' | '500' | 'generic';
   /** Override the default title. */
   title?: ReactNode;
   /** Override the default description. */
@@ -34,6 +34,11 @@ export interface ErrorStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 't
 }
 
 const presets = (s: UiStrings) => ({
+  '403': {
+    illustration: <Locked className="size-32" />,
+    title: s.errorState.forbiddenTitle,
+    description: s.errorState.forbiddenDescription,
+  },
   '404': {
     illustration: <NotFound className="size-32" />,
     title: s.errorState.notFoundTitle,
@@ -59,6 +64,9 @@ const presets = (s: UiStrings) => ({
  *
  * @example 500 with retry
  *   <ErrorState variant="500" onRetry={refetch} />
+ *
+ * @example 403 with a way out (no retry — permission won't change on reload)
+ *   <ErrorState variant="403" action={<Button variant="outline" asChild><a href="/">Go home</a></Button>} />
  *
  * @example Custom
  *   <ErrorState

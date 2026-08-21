@@ -1,6 +1,13 @@
 import { Avatar, AvatarGroup } from '@/components/ui/Avatar';
 import type { ComponentDoc } from '../registry/types';
 
+/* Inline SVG portrait placeholder — keeps the docs free of third-party image hosts. */
+const AVATAR_SRC =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><rect width="96" height="96" fill="#cbd5e1"/><circle cx="48" cy="38" r="18" fill="#475569"/><path d="M14 92c4-20 18-30 34-30s30 10 34 30Z" fill="#475569"/></svg>`,
+  );
+
 const doc: ComponentDoc = {
   slug: 'avatar',
   name: 'Avatar',
@@ -8,6 +15,7 @@ const doc: ComponentDoc = {
   description:
     'User / entity avatar with image, fallback initials, and optional status dot. Use AvatarGroup to overlap multiple avatars with a +N suffix.',
   exports: ['Avatar', 'AvatarGroup'],
+  i18n: 'Reads `avatar.status` (status dot label) and `avatar.more` (AvatarGroup overflow count).',
   sourceFile: 'Avatar.tsx',
   examples: [
     {
@@ -28,7 +36,7 @@ const doc: ComponentDoc = {
       title: 'Image with fallback',
       preview: (
         <div className="flex items-center gap-3">
-          <Avatar src="https://i.pravatar.cc/96?img=8" alt="Avery" fallback="AV" />
+          <Avatar src={AVATAR_SRC} alt="Avery" fallback="AV" />
           <Avatar src="/broken.png" alt="Missing" fallback="MZ" />
         </div>
       ),

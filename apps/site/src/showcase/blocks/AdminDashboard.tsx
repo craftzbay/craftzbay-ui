@@ -1,12 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
-import { ConfirmationDialog, Toaster, useCommandPaletteShortcut, useToast } from '@craftzbay/ui';
+import {
+  ConfirmationDialog,
+  Toaster,
+  cn,
+  useCommandPaletteShortcut,
+  useToast,
+} from '@craftzbay/ui';
 import { ALL_SECTIONS, STUB_PAGES, WORKSPACES, findModule } from './admin/data';
 import {
   AdminLayoutContext,
   AdminPalette,
   AppSidebar,
   AppTopNav,
+  DemoContext,
+  EnvBanner,
   type AppSidebarMode,
+  type DemoState,
+  type Density,
 } from './admin/shell';
 import { Analytics, Overview, Reports } from './admin/overview';
 import { Projects, type ProjectsHandle } from './admin/projects';
@@ -14,6 +24,7 @@ import {
   BillingPage,
   InboxPage,
   Members,
+  NotFoundPage,
   PermissionDeniedPage,
   SettingsPage,
   StubPage,
@@ -49,6 +60,20 @@ import { writeHash } from './admin/use-hash-params';
  * ========================================================================== */
 
 const SIDEBAR_KEY = 'admin-template:sidebar-collapsed';
+const DENSITY_KEY = 'cb-demo-density';
+
+/**
+ * Density is a layout preference, so it lives on the shell root as
+ * `data-density` and cascades via these selectors: table rows 44 → 36px,
+ * card padding 24 → 16px (CANON). Pages need no per-row branching.
+ */
+const DENSITY_CLASSES = [
+  'data-[density=compact]:[&_td]:py-2',
+  'data-[density=compact]:[&_th]:h-8',
+  "data-[density=compact]:[&_[class*='md:p-6']]:p-4",
+  "data-[density=compact]:[&_[class*='md:px-6']]:px-4",
+  "data-[density=compact]:[&_[class*='md:pt-6']]:pt-4",
+].join(' ');
 
 /** `sidebar` = collapsible rail (default); `topnav` = horizontal links, no rail; `dual` = icon rail + module panel. */
 export type AdminLayout = 'sidebar' | 'topnav' | 'dual';
@@ -72,9 +97,10 @@ export function AdminDashboard({
 }) {
   const hasRail = layout === 'sidebar';
   const { push } = useToast();
-  const [page, setPage] = useState(() =>
-    initialPage && PAGES.includes(initialPage) ? initialPage : 'overview',
-  );
+  // Unknown keys are kept so the shell can render its own 404 (the chrome
+  // stays, the user keeps their bearings).
+  const [page, setPage] = useState(() => initialPage || 'overview');
+  const known = PAGES.includes(page);
   // `dual` only: which module the panel shows. Navigating to a page selects
   // its module; clicking the rail only switches the panel.
   const [module, setModule] = useState(() => findModule(page).key);
@@ -100,6 +126,25 @@ export function AdminDashboard({
   }, []);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [search, setSearch] = useState('');
+
+  // Demo controls (top-bar menu): data state, density, environment banner.
+  const [demoState, setDemoState] = useState<DemoState>('normal');
+  const [banner, setBanner] = useState(false);
+  const [density, setDensityState] = useState<Density>(() => {
+    try {
+      return localStorage.getItem(DENSITY_KEY) === 'compact' ? 'compact' : 'default';
+    } catch {
+      return 'default';
+    }
+  });
+  const setDensity = (d: Density) => {
+    setDensityState(d);
+    try {
+      localStorage.setItem(DENSITY_KEY, d);
+    } catch {
+      /* private mode */
+    }
+  };
 
   const searchRef = useRef<HTMLInputElement>(null);
   const projectsRef = useRef<ProjectsHandle>(null);
@@ -188,86 +233,105 @@ export function AdminDashboard({
     // root itself (sidebar "scrolls away"). With min-h-0 only <main> scrolls.
     <AdminLayoutContext.Provider value={layout}>
       <UnsavedContext.Provider value={setDirty}>
-        <div className="bg-background text-foreground flex h-dvh overflow-hidden">
-          <AppSidebar
-            page={page}
-            onNavigate={navigate}
-            workspace={workspace}
-            onWorkspaceChange={setWorkspace}
-            collapsed={collapsed}
-            onCollapsedChange={onCollapsedChange}
-            drawerOpen={drawerOpen}
-            onDrawerOpenChange={setDrawerOpen}
-            mode={SIDEBAR_MODE[layout]}
-            module={module}
-            onModuleChange={setModule}
-          />
-
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-            <AppTopNav
-              ref={searchRef}
-              workspace={ws}
-              onOpenDrawer={() => setDrawerOpen(true)}
-              onOpenPalette={() => setPaletteOpen(true)}
-              onNavigate={navigate}
-              onSignOut={() =>
-                push({ title: 'Signed out', description: 'Demo — no real session.' })
-              }
-              searchValue={search}
-              onSearchChange={onSearchChange}
-              layout={layout}
+        <DemoContext.Provider
+          value={{
+            state: demoState,
+            setState: setDemoState,
+            density,
+            setDensity,
+            banner,
+            setBanner,
+          }}
+        >
+          <div
+            data-density={density}
+            className={cn(
+              'bg-background text-foreground flex h-dvh overflow-hidden',
+              DENSITY_CLASSES,
+            )}
+          >
+            <AppSidebar
               page={page}
+              onNavigate={navigate}
+              workspace={workspace}
               onWorkspaceChange={setWorkspace}
+              collapsed={collapsed}
+              onCollapsedChange={onCollapsedChange}
+              drawerOpen={drawerOpen}
+              onDrawerOpenChange={setDrawerOpen}
+              mode={SIDEBAR_MODE[layout]}
+              module={module}
+              onModuleChange={setModule}
             />
-            <main
-              id="main"
-              tabIndex={-1}
-              className="bg-background-subtle min-h-0 flex-1 overflow-y-auto p-4 outline-none md:p-6"
-            >
-              <div className="mx-auto max-w-[1440px]">
-                {page === 'overview' && <Overview onNavigate={navigate} />}
-                {page === 'analytics' && <Analytics onNavigate={navigate} />}
-                {page === 'projects' && (
-                  <Projects ref={projectsRef} onNavigate={navigate} globalQuery={search} />
-                )}
-                {page === 'inbox' && <InboxPage onNavigate={navigate} />}
-                {page === 'members' && <Members ref={membersRef} onNavigate={navigate} />}
-                {page === 'reports' && <Reports onNavigate={navigate} />}
-                {page === 'settings' && <SettingsPage onNavigate={navigate} />}
-                {page === 'billing' && <BillingPage onNavigate={navigate} />}
-                {page === 'apikeys' && <PermissionDeniedPage onNavigate={navigate} />}
-                {page in STUB_PAGES && <StubPage page={page} onNavigate={navigate} />}
-              </div>
-            </main>
-          </div>
 
-          <AdminPalette
-            open={paletteOpen}
-            onOpenChange={setPaletteOpen}
-            onNavigate={navigate}
-            onAction={runAction}
-            hasSidebar={hasRail}
-            sections={layout === 'dual' ? ALL_SECTIONS : undefined}
-          />
-          <ConfirmationDialog
-            open={pendingNav !== null}
-            onOpenChange={(open) => {
-              if (!open) setPendingNav(null);
-            }}
-            title="Discard changes?"
-            description="Your profile edits haven't been saved. Leaving this page will lose them."
-            cancelLabel="Keep editing"
-            confirmLabel="Discard"
-            confirmVariant="destructive"
-            onConfirm={() => {
-              const run = pendingNav;
-              setPendingNav(null);
-              setDirty(false);
-              run?.();
-            }}
-          />
-          <Toaster />
-        </div>
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+              {banner && <EnvBanner />}
+              <AppTopNav
+                ref={searchRef}
+                workspace={ws}
+                onOpenDrawer={() => setDrawerOpen(true)}
+                onOpenPalette={() => setPaletteOpen(true)}
+                onNavigate={navigate}
+                onSignOut={() =>
+                  push({ title: 'Signed out', description: 'Demo — no real session.' })
+                }
+                searchValue={search}
+                onSearchChange={onSearchChange}
+                layout={layout}
+                page={page}
+                onWorkspaceChange={setWorkspace}
+              />
+              <main
+                id="main"
+                tabIndex={-1}
+                className="bg-background-subtle min-h-0 flex-1 overflow-y-auto p-4 pb-[max(1rem,env(safe-area-inset-bottom))] outline-none md:p-6 md:pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+              >
+                <div className="mx-auto max-w-[1440px]">
+                  {!known && <NotFoundPage page={page} onNavigate={navigate} />}
+                  {page === 'overview' && <Overview onNavigate={navigate} />}
+                  {page === 'analytics' && <Analytics onNavigate={navigate} />}
+                  {page === 'projects' && (
+                    <Projects ref={projectsRef} onNavigate={navigate} globalQuery={search} />
+                  )}
+                  {page === 'inbox' && <InboxPage onNavigate={navigate} />}
+                  {page === 'members' && <Members ref={membersRef} onNavigate={navigate} />}
+                  {page === 'reports' && <Reports onNavigate={navigate} />}
+                  {page === 'settings' && <SettingsPage onNavigate={navigate} />}
+                  {page === 'billing' && <BillingPage onNavigate={navigate} />}
+                  {page === 'apikeys' && <PermissionDeniedPage onNavigate={navigate} />}
+                  {page in STUB_PAGES && <StubPage page={page} onNavigate={navigate} />}
+                </div>
+              </main>
+            </div>
+
+            <AdminPalette
+              open={paletteOpen}
+              onOpenChange={setPaletteOpen}
+              onNavigate={navigate}
+              onAction={runAction}
+              hasSidebar={hasRail}
+              sections={layout === 'dual' ? ALL_SECTIONS : undefined}
+            />
+            <ConfirmationDialog
+              open={pendingNav !== null}
+              onOpenChange={(open) => {
+                if (!open) setPendingNav(null);
+              }}
+              title="Discard changes?"
+              description="Your profile edits haven't been saved. Leaving this page will lose them."
+              cancelLabel="Keep editing"
+              confirmLabel="Discard"
+              confirmVariant="destructive"
+              onConfirm={() => {
+                const run = pendingNav;
+                setPendingNav(null);
+                setDirty(false);
+                run?.();
+              }}
+            />
+            <Toaster />
+          </div>
+        </DemoContext.Provider>
       </UnsavedContext.Provider>
     </AdminLayoutContext.Provider>
   );

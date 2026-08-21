@@ -24,7 +24,7 @@ export const ToastViewport = forwardRef<
     <ToastPrimitive.Viewport
       ref={ref}
       className={cn(
-        'fixed right-0 bottom-0 z-[var(--z-toast)] flex max-h-screen w-full flex-col-reverse gap-2 p-6',
+        'fixed right-0 bottom-0 z-[var(--z-toast)] flex max-h-dvh w-full flex-col-reverse gap-2 p-6',
         // Respect notched/home-indicator insets (consumers set viewport-fit=cover).
         'pr-[max(1.5rem,env(safe-area-inset-right))] pb-[max(1.5rem,env(safe-area-inset-bottom))] pl-[max(1.5rem,env(safe-area-inset-left))]',
         'sm:top-4 sm:right-4 sm:bottom-auto sm:max-w-sm sm:flex-col',

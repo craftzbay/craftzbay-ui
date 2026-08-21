@@ -290,7 +290,7 @@ function YAxis({ ticks }: { ticks: number[] }) {
   return (
     <div
       aria-hidden
-      className="tabular text-foreground-subtle pointer-events-none flex shrink-0 flex-col justify-between py-[6px] pr-1.5 text-right text-xs"
+      className="tabular text-foreground-subtle pointer-events-none flex shrink-0 flex-col justify-between py-1.5 pr-1.5 text-right text-xs"
     >
       {ticks.map((t, i) => (
         <span key={i} className="leading-none">

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { AdminTemplate } from './AdminTemplate';
 import { AuthTemplate } from './AuthTemplate';
 import { LandingTemplate } from './LandingTemplate';
@@ -26,6 +27,14 @@ export default function BlockPreview({
   page?: string;
 }) {
   const props = { screen, setScreen, brand: <BrandMark />, variant };
+  // This chunk loaded — re-arm the preview page's one-shot chunk-error reload.
+  useEffect(() => {
+    try {
+      sessionStorage.removeItem('cb-preview-chunk-reloaded');
+    } catch {
+      /* ignore */
+    }
+  }, []);
   switch (slug) {
     case 'admin':
       return (
