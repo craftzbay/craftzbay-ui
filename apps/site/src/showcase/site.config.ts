@@ -6,7 +6,9 @@
 import type { BrandName } from '@craftzbay/ui';
 
 export const PKG_NAME = '@craftzbay/ui';
-export const VERSION = '0.10.0';
+/** Injected by vite.config.ts from packages/ui/package.json. */
+declare const __UI_VERSION__: string;
+export const VERSION: string = typeof __UI_VERSION__ === 'string' ? __UI_VERSION__ : '0.0.0';
 
 export const GITHUB_URL = 'https://github.com/craftzbay/craftzbay-ui';
 export const NPM_URL = 'https://www.npmjs.com/package/@craftzbay/ui';

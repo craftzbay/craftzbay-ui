@@ -3,9 +3,17 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UI_SRC = path.resolve(__dirname, '../../packages/ui/src');
+// Library version shown in the showcase — read from the package so a release
+// bump (changesets) never leaves a stale badge.
+const UI_VERSION = (
+  JSON.parse(readFileSync(path.resolve(__dirname, '../../packages/ui/package.json'), 'utf8')) as {
+    version: string;
+  }
+).version;
 
 /**
  * Showcase site build. The library is consumed straight from source via the
@@ -16,6 +24,7 @@ const UI_SRC = path.resolve(__dirname, '../../packages/ui/src');
  */
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  define: { __UI_VERSION__: JSON.stringify(UI_VERSION) },
   resolve: {
     alias: {
       '@craftzbay/ui': path.join(UI_SRC, 'index.ts'),
