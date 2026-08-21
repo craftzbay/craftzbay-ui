@@ -11,12 +11,20 @@ import {
   type ComponentPropsWithoutRef,
   type KeyboardEvent,
 } from 'react';
+import { version as reactVersion } from 'react';
 import useEmblaCarousel, { type UseEmblaCarouselType } from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight } from '@/icons';
 import { cn } from '@/lib/utils';
 import { useStrings } from '@/hooks/use-strings';
 import { formatString } from '@/lib/strings';
 import { IconButton } from './IconButton';
+
+// `inert` is a boolean attribute. React 19 renders `inert={true}` as `inert=""`;
+// React 18 has no knowledge of it and only forwards a string, so pass `''`
+// there (it would drop `true` with a warning). Typed loosely for both.
+const INERT_PROPS = {
+  inert: Number(reactVersion.split('.')[0]) >= 19 ? true : '',
+} as Record<string, unknown>;
 
 type CarouselApi = UseEmblaCarouselType[1];
 type CarouselOptions = Parameters<typeof useEmblaCarousel>[0];
@@ -196,8 +204,7 @@ export const CarouselItem = forwardRef<HTMLDivElement, CarouselItemProps>(functi
       aria-roledescription="slide"
       aria-label={ariaLabel ?? defaultLabel}
       aria-hidden={offscreen || undefined}
-      // @ts-expect-error `inert` is in the HTML spec but missing from older React types.
-      inert={offscreen ? '' : undefined}
+      {...(offscreen ? INERT_PROPS : undefined)}
       className={cn(
         'min-w-0 shrink-0 grow-0 basis-full',
         orientation === 'horizontal' ? 'pl-4' : 'pt-4',

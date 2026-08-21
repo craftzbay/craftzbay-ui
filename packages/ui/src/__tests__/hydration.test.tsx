@@ -149,10 +149,17 @@ describe('hydration: server markup matches first client render', () => {
     const tree = <Unstable />;
     container.innerHTML = renderToString(tree);
     errorSpy.mockClear();
+    // React 18 logs mismatches to console.error; React 19 reports them via
+    // onRecoverableError only. The positive tests check both channels too.
+    const recoverable: string[] = [];
     await act(async () => {
-      root = hydrateRoot(container, tree, { onRecoverableError: () => {} });
+      root = hydrateRoot(container, tree, {
+        onRecoverableError: (err) => recoverable.push(String(err)),
+      });
     });
-    expect(collectMismatches(errorSpy).length).toBeGreaterThan(0);
+    const seen =
+      collectMismatches(errorSpy).length + recoverable.filter((m) => MISMATCH.test(m)).length;
+    expect(seen).toBeGreaterThan(0);
   });
 });
 
