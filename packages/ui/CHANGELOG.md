@@ -1,5 +1,77 @@
 # @craftzbay/ui
 
+## 0.11.0
+
+### Minor Changes
+
+- 5ff1a7b: Audit round 2 — a11y, hydration, contrast and API consistency.
+
+  **Fixes**
+  - Calendar: selected/range days styled from tokens (RDP 9 `<td>` selector); `react-day-picker/style.css` side-effect import removed; RDP labels come from `useStrings` (mn included).
+  - `brandPresets` / `DesignSystemProvider tokens`: `{ light, dark }` pairs — soft accent backgrounds no longer wash out in dark mode.
+  - Hydration-safe: `useMediaQuery` (`useSyncExternalStore`), `useToast` (no module singleton shared across SSR requests), `DatePicker` default format `yyyy-MM-dd` / `locale.code`.
+  - Toast: `duration: 0` keeps the toast open; `push` with an existing `id` updates in place; persistent toasts are never evicted by the 3-toast cap.
+  - Drawer: `direction` is passed to vaul (drag physics follow it), close button, `dvh`.
+  - Consumer `aria-label` / `aria-describedby` are merged, never overwritten (Input, Textarea, Checkbox, RadioGroup, Switch, Breadcrumbs, Sidebar, Stepper, Carousel). `hideLabel` hides only the label, not the description.
+  - Combobox: filters by label (`keywords`), empty state renders for non-matching queries, `aria-controls` points at the real list, `loadOptions` rejection → error text.
+  - Slider uncontrolled `showValue`; RadioGroup forwards `orientation`; Input `value={null}` handled; Textarea autoResize respects `minRows` + ResizeObserver; FileUpload drag flicker + duplicate keys; CommandPalette shortcut hook toggles without re-render; ConfirmationDialog awaits `onConfirm`.
+  - Chart: one tab stop per series with arrow-key roving (was one per point), measured width (no `preserveAspectRatio="none"` distortion), negative bars, i18n `labels`.
+  - Table / DataGrid: `aria-sort` only on the active column, `aria-selected` only with `role="row"` (plain rows use `data-state="selected"`), `align` on cells, sticky header via `containerClassName`/`maxHeight`, min one visible column, Date cells formatted; Pagination zero state; Progress clamps to `[0, max]`.
+  - Contrast: `--border-input` and `--switch-track-off` ≥ 3:1 against both `background` and `background-muted` in light and dark. `prefers-contrast: more`, `forced-colors`, `prefers-reduced-transparency` handled in `theme.css`; scrollbar thumb always visible; reduced-motion keeps a slow opacity pulse for Spinner/indeterminate Progress.
+
+  **Additions**
+  - Button `size="xl"` (44px). Badge `icon`. `TableCell`/`TableHead` `align`. `headingLevel` on Alert/EmptyState/ErrorState. `asChild` on Card, SidebarItem, TopNavLink. Controlled `open` on Alert and SidebarGroup; controlled `columnVisibility` on DataGrid. New string keys (`drawer`, `calendar`, `topNav`, `stepper.*`, `breadcrumbs.collapsed`, `chart.summary/point/seriesNav`, `fileUpload.*`) with Mongolian translations. `mergeStrings` is a deep merge.
+
+  **Behaviour changes (minor, 0.x)**
+  - Button/IconButton `loading` no longer sets `disabled`; it uses `aria-disabled` + `aria-busy` and keeps focus. With `asChild` no spinner is rendered.
+  - `Alert` is not a live region unless `live`; its title is an `h3` by default (`headingLevel`).
+  - `FormError` is plain text referenced via `aria-describedby`; the form renders one `role="status"` live region. Field-level `role="alert"` removed.
+  - `FormControl` no longer injects `tone`; fields style from `aria-invalid`. `tone` on Input/Select is **deprecated** and will be removed in the next major.
+  - `useFieldIds` helper id suffix `-helper` → `-desc`. `Card` padding is 16px / 24px (md+). `--text-md` token removed (unused). `.line-clamp-*` utilities removed — use Tailwind's built-ins.
+
+- f500b9c: Accessibility / localisation compliance pass (additive, no breaking changes):
+  - Touch targets (WCAG 2.5.8): Checkbox, RadioGroup item, Switch `sm` and IconButton `sm` gain an invisible ≥24px hit halo; Input clear/password buttons are 24px.
+  - Chart: `--chart-1` is a categorical blue (no longer aliases `--accent`); new `tableFallback` (default on, `sr-only` data table) + `showTableToggle`; every point/bar is keyboard-focusable with an `aria-label`; `y: null` breaks the line; `state="loading" | "empty" | "error"`; nice 1/2/2.5/5 axis ticks; strings moved to `UiStrings.chart`.
+  - 16px inputs on mobile: Combobox, MultiSelect, TagInput, DatePicker trigger, CommandPalette input use `text-lg md:text-sm`.
+  - Contrast: amber preset accent darkened to oklch(0.56 0.14 65) (4.8:1 with white); `--foreground-subtle` → hsl(215 16% 45%) (4.6:1 on `background-muted`).
+  - Safe areas: Toast viewport, Sheet and Drawer pad by `env(safe-area-inset-*)` (set `viewport-fit=cover`).
+  - New: `formatDate`, `formatNumber`, `formatMNT`, `<RelativeTime>`, `useDelayedLoading(ms)`, `Skeleton delay`; `UiStrings.relativeTime` (EN/MN).
+  - Minor: Calendar weekday `text-xs` and `bg-accent-hover`; Sidebar root is `<nav>`; Popover content has a focus-visible ring.
+
+- c4fe1d6: Accessibility fixes from the e2e/axe audit:
+  - `Table` scroll wrapper and `ScrollArea` viewport are now focusable (`tabIndex=0`, `role="group"`, visible focus ring) with an accessible name from `strings.table.scrollRegion` / `strings.scrollArea.region`; override per instance with the new `scrollLabel` / `viewportLabel` props. `DataGrid` inherits this.
+  - `Combobox`, `DatePicker` / `DateRangePicker`, `MultiSelect`, `TagInput` and `SelectTrigger` expose an accessible name when no `label` is given — the placeholder (or the default string, new `strings.select.placeholder`). With a `label`, the control carries `aria-labelledby`. A consumer `id` / `aria-label` / `aria-labelledby` is treated as an external label and left untouched.
+  - `Chart` series groups get a visible keyboard focus outline (`[data-chart-series]:focus-visible` in `theme.css`; Tailwind rings do not paint on SVG `<g>`).
+  - New `returnFocusTo?: RefObject<HTMLElement | null>` prop on `DialogContent`, `SheetContent` and `DrawerContent` to restore focus to a given element on close (controlled overlays opened from non-focusable or tooltip-wrapped triggers); `onCloseAutoFocus` is still forwarded and wins when it calls `preventDefault()`. Type exported as `ReturnFocusRef`.
+
+- 2e5e8d4: Canon alignment, round 3.
+  - `Dialog`: modal radius `rounded-xl` (12px).
+  - `DataGrid`: default cell renders `—` with `aria-label` (`strings.dataGrid.emptyCell`, en/mn) for `null` / `undefined` / `''`.
+  - `useToast`: per-variant default duration — success/info/default 4000ms, warning 6000ms, danger 0 (persistent, manual close); explicit `duration` still wins. New `TOAST_DURATIONS` export. Toast viewport uses `max-h-dvh`.
+  - `Skeleton`: default `delay` is now 300ms (pass `delay={0}` for immediate render); new `minVisible` (500ms). `useDelayedLoading(ms, { minVisible })` holds `true` for at least `minVisible` once shown.
+  - `theme.css`: `html { scrollbar-gutter: stable }`.
+  - `ErrorState`: new `variant="403"` (permission denied) with `Locked` illustration and en/mn strings; pair with an `action` (back/home) — no retry.
+  - `formatPhone(input)` → `+976 XXXX XXXX` for 8-digit Mongolian numbers (accepts `+976…`/`976…`/spaced; non-MN returned as-is); `parsePhoneMN()` → E.164. `formatMNT(n, { compact: true })` → `12.4M₮` / `850K₮`.
+  - New hooks `useDebounce(value, delay = 300)` and `useDebouncedCallback(fn, delay = 300)`.
+  - `IconButton` sizes now match Button heights: sm 32 / md 36 / lg 40 / new xl 44 (was 28/32/40).
+  - `Calendar` / `DatePicker`: week starts on Monday by default (`weekStartsOn={1}`); popover shadow `shadow-md`.
+  - `Sidebar` section labels: sentence case (removed forced `uppercase`).
+  - `Chart` Y axis padding uses the spacing scale (`py-1.5`).
+
+- 5395f74: Every interactive control edge now uses `--border-input` (≥3:1, WCAG 1.4.11): secondary/outline `Button`/`IconButton`, `Combobox`, `MultiSelect`, `DatePicker`, `TagInput`, `FileUpload` drop zone — matching Input/Select/Textarea/Checkbox/Radio. Containers (card, table, popover, divider) keep the soft `--border`.
+- c4900d0: Mobile polish: `SelectTrigger` truncates its value instead of wrapping at 16px mobile text; `Pagination` collapses to prev/next + "page / count" below `sm` (page numbers and first/last from `sm` up); `TopNav` logo group may shrink (`min-w-0`) so a long tenant name truncates instead of pushing the actions off-screen.
+- 2227223: Add `useModifierKey()` / `isApplePlatform()` — platform-correct shortcut hints (⌘ on Apple, Ctrl elsewhere) for `<Kbd>` labels.
+- e471206: Body `overflow-wrap` is `break-word` instead of `anywhere` — `anywhere` collapsed table/flex columns (KPI deltas, selects, table cells) on narrow viewports.
+- c4fe1d6: Full test suite (unit + keyboard + axe per component, SSR/hydration, hooks, token contrast, public-API guards) and the defects it surfaced:
+  - Sidebar: collapsed items always have an accessible name (sr-only label no longer depends on the tooltip being open).
+  - Toast: viewport region is labelled from `strings.toast.region` (was Radix's hard-coded English).
+  - MultiSelect / Combobox / DatePicker: popover dialogs have an accessible name (axe `aria-dialog-name`).
+  - DatePicker: reopens on the selected month (`defaultMonth`).
+  - CommandDialog: focus returns to the previously focused element on close.
+  - CommandSeparator: no `role="separator"` inside the listbox.
+  - `formatMNT(999_999, { compact: true })` → `1M₮` (was `1,000K₮`).
+  - Amber preset `--ring` darkened to 3.17:1 on `background-muted` (theme.css + `brandPresets` in sync).
+
 ## 0.10.0
 
 ### Minor Changes
