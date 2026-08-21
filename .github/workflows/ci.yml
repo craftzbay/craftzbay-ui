@@ -78,8 +78,14 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Install React 19 in packages/ui
-        run: pnpm --filter @craftzbay/ui add -D react@19 react-dom@19 @types/react@19 @types/react-dom@19 @testing-library/react@16
+      # Override React for the WHOLE workspace: with node-linker=hoisted, adding
+      # react@19 only to packages/ui leaves @testing-library/react on a nested
+      # react-dom@18 (apps/site pins ^18), which then renders 19-created elements.
+      - name: Install React 19 (workspace override)
+        run: |
+          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json'));p.pnpm={...(p.pnpm||{}),overrides:{...((p.pnpm||{}).overrides||{}),react:'19','react-dom':'19','@types/react':'19','@types/react-dom':'19'}};fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\n')"
+          pnpm install --no-frozen-lockfile
+          node -p "'react-dom ' + require('react-dom/package.json').version"
 
       - name: Typecheck (React 19)
         run: pnpm --filter @craftzbay/ui typecheck
