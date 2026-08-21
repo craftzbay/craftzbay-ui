@@ -42,13 +42,26 @@ export interface CheckboxProps extends Omit<
  */
 export const Checkbox = forwardRef<ElementRef<typeof CheckboxPrimitive.Root>, CheckboxProps>(
   function Checkbox(
-    { className, label, description, error, hideLabel, id, disabled, ...props },
+    {
+      className,
+      label,
+      description,
+      error,
+      hideLabel,
+      id,
+      disabled,
+      'aria-describedby': ariaDescribedby,
+      'aria-invalid': ariaInvalid,
+      ...props
+    },
     ref,
   ) {
     const autoId = useId();
     const fieldId = id ?? autoId;
     const descId = description ? `${fieldId}-desc` : undefined;
     const errorId = error ? `${fieldId}-error` : undefined;
+    const describedBy = [errorId, descId, ariaDescribedby].filter(Boolean).join(' ') || undefined;
+    const isError = Boolean(error) || ariaInvalid === true || ariaInvalid === 'true';
 
     return (
       <div className={cn('flex flex-col gap-1', className)}>
@@ -57,8 +70,8 @@ export const Checkbox = forwardRef<ElementRef<typeof CheckboxPrimitive.Root>, Ch
             ref={ref}
             id={fieldId}
             disabled={disabled}
-            aria-describedby={errorId ?? descId}
-            aria-invalid={Boolean(error) || undefined}
+            aria-describedby={describedBy}
+            aria-invalid={isError ? true : ariaInvalid}
             className={cn(
               'peer relative mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-sm border',
               // WCAG 2.5.8: 16px visual box, ≥24px hit area via an invisible inset halo.
@@ -68,7 +81,7 @@ export const Checkbox = forwardRef<ElementRef<typeof CheckboxPrimitive.Root>, Ch
               'data-[state=checked]:bg-accent data-[state=checked]:border-accent data-[state=checked]:text-on-accent',
               'data-[state=indeterminate]:bg-accent data-[state=indeterminate]:border-accent data-[state=indeterminate]:text-on-accent',
               'disabled:cursor-not-allowed disabled:opacity-50',
-              error ? 'border-danger' : 'border-border-input',
+              'border-border-input aria-invalid:border-danger',
             )}
             {...props}
           >
@@ -82,12 +95,13 @@ export const Checkbox = forwardRef<ElementRef<typeof CheckboxPrimitive.Root>, Ch
           </CheckboxPrimitive.Root>
 
           {label && (
-            <div className={cn('flex flex-col gap-0.5', hideLabel && 'sr-only')}>
+            <div className="flex flex-col gap-0.5">
               <label
                 htmlFor={fieldId}
                 className={cn(
                   'text-foreground text-sm select-none',
                   disabled && 'cursor-not-allowed opacity-50',
+                  hideLabel && 'sr-only',
                 )}
               >
                 {label}
@@ -101,7 +115,7 @@ export const Checkbox = forwardRef<ElementRef<typeof CheckboxPrimitive.Root>, Ch
           )}
         </div>
         {error && (
-          <p id={errorId} role="alert" className="text-danger-text text-xs">
+          <p id={errorId} className="text-danger-text text-xs">
             {error}
           </p>
         )}

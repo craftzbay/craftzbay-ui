@@ -3,7 +3,14 @@ import { ArrowRight, BarChart3, Github, Lock, Menu, Plug, Sparkles, Star, Zap } 
 import { Avatar } from '@craftzbay/ui';
 import { Button } from '@craftzbay/ui';
 import { Card, CardContent } from '@craftzbay/ui';
-import { IconButton, Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '@craftzbay/ui';
+import {
+  IconButton,
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from '@craftzbay/ui';
 import { AuthLayout, SignUpForm } from './Authentication';
 import { Pricing } from './Pricing';
 import type { TemplateProps } from './meta';
@@ -140,7 +147,7 @@ function SectionLink({
 
 function Nav({ brand, onSignUp }: { brand: ReactNode; onSignUp: () => void }) {
   return (
-    <header className="border-border bg-background sticky top-0 z-40 border-b">
+    <header className="border-border bg-background sticky top-0 z-[var(--z-sticky)] border-b">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-8 px-6">
         <div className="text-sm">{brand}</div>
         <nav
@@ -161,7 +168,7 @@ function Nav({ brand, onSignUp }: { brand: ReactNode; onSignUp: () => void }) {
           <Button variant="ghost" size="sm" onClick={onSignUp} className="hidden sm:inline-flex">
             Sign in
           </Button>
-          <Button size="sm" onClick={onSignUp}>
+          <Button size="sm" variant="secondary" onClick={onSignUp}>
             {CTA_LABEL}
           </Button>
           {/* Section links (and Sign in) move into a drawer below md. */}
@@ -190,7 +197,11 @@ function Nav({ brand, onSignUp }: { brand: ReactNode; onSignUp: () => void }) {
                   </SheetClose>
                 ))}
                 <SheetClose asChild>
-                  <Button variant="ghost" className="mt-2 justify-start sm:hidden" onClick={onSignUp}>
+                  <Button
+                    variant="ghost"
+                    className="mt-2 justify-start sm:hidden"
+                    onClick={onSignUp}
+                  >
                     Sign in
                   </Button>
                 </SheetClose>
@@ -218,18 +229,18 @@ function Landing({ brand, onSignUp }: { brand: ReactNode; onSignUp: () => void }
             <Sparkles className="text-accent size-3" aria-hidden />
             New — real-time collaboration is here
           </div>
-          <h1 className="text-4xl leading-tight font-semibold tracking-tight sm:text-6xl">
+          <h1 className="text-4xl leading-tight font-semibold tracking-tight sm:text-5xl">
             The workspace where teams <span className="text-accent">ship faster</span>.
           </h1>
-          <p className="text-foreground-muted mx-auto mt-5 max-w-2xl text-lg leading-relaxed">
+          <p className="text-foreground-muted mx-auto mt-5 max-w-[65ch] text-lg leading-relaxed">
             Plan, track and launch — all in one calm, fast place. Replace the tab-sprawl with a
             single source of truth your whole team trusts.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Button size="lg" onClick={onSignUp}>
+            <Button size="xl" onClick={onSignUp}>
               {CTA_LABEL} <ArrowRight className="ml-1 size-4" aria-hidden />
             </Button>
-            <Button size="lg" variant="outline">
+            <Button size="xl" variant="outline">
               Book a demo
             </Button>
           </div>
@@ -375,7 +386,7 @@ function Landing({ brand, onSignUp }: { brand: ReactNode; onSignUp: () => void }
         <section className="mx-auto max-w-5xl px-6 pb-24">
           <div className="border-border bg-accent text-on-accent rounded-lg border px-8 py-14 text-center">
             <h2 className="text-3xl font-semibold tracking-tight">Ready to ship faster?</h2>
-            <p className="mx-auto mt-3 max-w-xl opacity-90">
+            <p className="mx-auto mt-3 max-w-[65ch] opacity-90">
               Join thousands of teams already moving quicker.
             </p>
             <div className="mt-7 flex justify-center">
@@ -476,7 +487,7 @@ export function LandingTemplate({ screen, setScreen, brand }: TemplateProps) {
             <button
               type="button"
               onClick={() => setScreen('home')}
-              className="text-accent focus-visible:ring-ring rounded-sm font-medium outline-none hover:underline focus-visible:ring-2"
+              className="text-accent focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm font-medium outline-none hover:underline focus-visible:ring-2 focus-visible:ring-offset-2"
             >
               Back to site
             </button>

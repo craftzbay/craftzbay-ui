@@ -3,7 +3,11 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
-import { DesignSystemProvider, brandPresets, type BrandName } from '@/components/ui/DesignSystemProvider';
+import {
+  DesignSystemProvider,
+  brandPresets,
+  type BrandName,
+} from '@/components/ui/DesignSystemProvider';
 import { CodeBlock } from '../widgets/CodeBlock';
 
 const BRANDS: { name: BrandName; label: string }[] = [
@@ -42,9 +46,13 @@ function BrandSwapDemo() {
           <CardContent className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
               <Button size="sm">Primary action</Button>
-              <Button size="sm" variant="outline">Secondary</Button>
+              <Button size="sm" variant="outline">
+                Secondary
+              </Button>
               <Badge tone="accent">v1.0</Badge>
-              <Badge tone="success" dot>Live</Badge>
+              <Badge tone="success" dot>
+                Live
+              </Badge>
             </div>
             <Input label="Email" placeholder="you@company.com" hideLabel />
           </CardContent>
@@ -59,15 +67,15 @@ export function ThemingBody() {
     <div className="prose-block">
       <h2>Per-subtree override (live)</h2>
       <p>
-        <code>DesignSystemProvider</code> applies token overrides to a scoped subtree only.
-        Pick a brand below — every primitive inside the preview card updates instantly.
+        <code>DesignSystemProvider</code> applies token overrides to a scoped subtree only. Pick a
+        brand below — every primitive inside the preview card updates instantly.
       </p>
       <BrandSwapDemo />
 
       <h2>Built-in presets</h2>
       <p>
-        Use the included presets as drop-in starters, or fork them. Each preset is just a
-        record mapping CSS variable names to values.
+        Use the included presets as drop-in starters, or fork them. Each preset is just a record
+        mapping CSS variable names to values.
       </p>
       <CodeBlock
         code={`import { DesignSystemProvider, brandPresets } from '@craftzbay/ui';
@@ -79,8 +87,8 @@ export function ThemingBody() {
 
       <h2>Custom tokens</h2>
       <p>
-        Pass any record of CSS variable names → values. The leading <code>--</code> is
-        optional; the provider normalises both forms.
+        Pass any record of CSS variable names → values. The leading <code>--</code> is optional; the
+        provider normalises both forms.
       </p>
       <CodeBlock
         code={`<DesignSystemProvider
@@ -88,7 +96,7 @@ export function ThemingBody() {
     accent: 'oklch(0.62 0.21 260)',
     'accent-subtle': 'oklch(0.94 0.04 260)',
     'radius-md': '4px',
-    'font-sans': 'Inter, system-ui, sans-serif',
+    'font-sans': 'Geist, Inter, system-ui, sans-serif',
   }}
 >
   <App />
@@ -97,8 +105,8 @@ export function ThemingBody() {
 
       <h2>Global override</h2>
       <p>
-        For app-wide branding, override the same CSS variables in your own stylesheet —
-        loaded after <code>@craftzbay/ui/styles.css</code>:
+        For app-wide branding, override the same CSS variables in your own stylesheet — loaded after{' '}
+        <code>@craftzbay/ui/styles.css</code>:
       </p>
       <CodeBlock
         language="css"
@@ -106,7 +114,7 @@ export function ThemingBody() {
   --accent: oklch(0.62 0.21 260);
   --accent-subtle: oklch(0.94 0.04 260);
   --radius-sm: 4px;
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-sans: 'Geist', 'Inter', system-ui, sans-serif;
 }`}
       />
     </div>

@@ -219,7 +219,11 @@ export function AdminDashboard({
               page={page}
               onWorkspaceChange={setWorkspace}
             />
-            <main className="bg-background-subtle min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
+            <main
+              id="main"
+              tabIndex={-1}
+              className="bg-background-subtle min-h-0 flex-1 overflow-y-auto p-4 outline-none md:p-6"
+            >
               <div className="mx-auto max-w-[1440px]">
                 {page === 'overview' && <Overview onNavigate={navigate} />}
                 {page === 'analytics' && <Analytics onNavigate={navigate} />}

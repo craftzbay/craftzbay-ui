@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
+import { createElement, forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { useStrings } from '@/hooks/use-strings';
 import type { UiStrings } from '@/lib/strings';
@@ -23,6 +23,14 @@ export interface ErrorStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 't
   action?: ReactNode;
   /** When provided, renders a default "Try again" button calling this handler. */
   onRetry?: () => void;
+  /** Heading level of the title. Default 3 — match the surrounding outline. */
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
+  /**
+   * Announce the error politely when it appears in-place (e.g. a failed
+   * refetch inside a panel). Off by default — page-level errors are read as
+   * part of the page and must not double-announce.
+   */
+  live?: boolean;
 }
 
 const presets = (s: UiStrings) => ({
@@ -65,7 +73,18 @@ const presets = (s: UiStrings) => ({
  * @dont Show a raw stack trace to end users.
  */
 export const ErrorState = forwardRef<HTMLDivElement, ErrorStateProps>(function ErrorState(
-  { variant = 'generic', title, description, illustration, action, onRetry, className, ...props },
+  {
+    variant = 'generic',
+    title,
+    description,
+    illustration,
+    action,
+    onRetry,
+    headingLevel = 3,
+    live,
+    className,
+    ...props
+  },
   ref,
 ) {
   const strings = useStrings();
@@ -74,16 +93,19 @@ export const ErrorState = forwardRef<HTMLDivElement, ErrorStateProps>(function E
     <div
       ref={ref}
       className={cn(
-        'flex flex-col items-center justify-center gap-3 rounded-lg border border-border bg-background-subtle p-10 text-center',
+        'border-border bg-background-subtle flex flex-col items-center justify-center gap-3 rounded-lg border p-10 text-center',
         className,
       )}
+      aria-live={live ? 'polite' : undefined}
       {...props}
     >
       {illustration ?? preset.illustration}
-      <h3 className="text-base font-semibold text-foreground leading-tight">
-        {title ?? preset.title}
-      </h3>
-      <p className="max-w-md text-sm text-foreground-muted leading-relaxed">
+      {createElement(
+        `h${headingLevel}`,
+        { className: 'text-base font-semibold text-foreground leading-tight' },
+        title ?? preset.title,
+      )}
+      <p className="text-foreground-muted max-w-md text-sm leading-relaxed">
         {description ?? preset.description}
       </p>
       {(action || onRetry) && (

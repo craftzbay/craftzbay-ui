@@ -15,7 +15,7 @@ export interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 /**
- * Animated placeholder. Use `Skeleton.Text` / `Skeleton.Avatar` for common
+ * Animated placeholder. Use `variant="text"` / `variant="avatar"` for common
  * shapes; pass `className` directly for one-off sizes.
  *
  * @example List item

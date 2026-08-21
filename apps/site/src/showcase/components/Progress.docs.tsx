@@ -38,9 +38,22 @@ const doc: ComponentDoc = {
   api: [
     {
       rows: [
-        { name: 'value', type: 'number', description: '0–100 for determinate. Negative for indeterminate.' },
-        { name: 'aria-label', type: 'string', required: true, description: 'Required accessible name.' },
-        { name: 'className', type: 'string', description: 'Height (Progress) / size (ProgressCircle) overrides.' },
+        {
+          name: 'value',
+          type: 'number',
+          description: '0–100 for determinate. Negative for indeterminate.',
+        },
+        {
+          name: 'aria-label',
+          type: 'string',
+          required: true,
+          description: 'Required accessible name.',
+        },
+        {
+          name: 'className',
+          type: 'string',
+          description: 'Height (Progress) / size (ProgressCircle) overrides.',
+        },
       ],
     },
   ],

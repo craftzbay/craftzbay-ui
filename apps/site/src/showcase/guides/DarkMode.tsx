@@ -6,9 +6,7 @@ import { CodeBlock } from '../widgets/CodeBlock';
 
 function ThemeToggleDemo() {
   const [isDark, setIsDark] = useState<boolean>(() =>
-    typeof document === 'undefined'
-      ? false
-      : document.documentElement.classList.contains('dark'),
+    typeof document === 'undefined' ? false : document.documentElement.classList.contains('dark'),
   );
 
   // Keep state in sync with whatever the showcase ⌘K toggle / TopBar does.
@@ -28,11 +26,12 @@ function ThemeToggleDemo() {
     <Card>
       <CardContent className="flex items-center justify-between gap-4 py-5">
         <div>
-          <p className="text-sm font-medium text-foreground">Current theme</p>
-          <p className="text-xs text-foreground-muted">
-            Toggling here flips <code className="rounded bg-background-muted px-1 py-0.5">.dark</code> on{' '}
-            <code className="rounded bg-background-muted px-1 py-0.5">&lt;html&gt;</code> — every token
-            in the page responds.
+          <p className="text-foreground text-sm font-medium">Current theme</p>
+          <p className="text-foreground-muted text-xs">
+            Toggling here flips{' '}
+            <code className="bg-background-muted rounded px-1 py-0.5">.dark</code> on{' '}
+            <code className="bg-background-muted rounded px-1 py-0.5">&lt;html&gt;</code> — every
+            token in the page responds.
           </p>
         </div>
         <Button onClick={toggle} variant="outline" leadingIcon={isDark ? <Sun /> : <Moon />}>
@@ -49,8 +48,8 @@ export function DarkModeBody() {
       <h2>How it works</h2>
       <p>
         Tokens are declared in two scopes: <code>:root</code> for light, <code>.dark</code> for
-        dark. Toggling the <code>dark</code> class on any ancestor flips every descendant
-        token. No JS in the library — no flash.
+        dark. Toggling the <code>dark</code> class on any ancestor flips every descendant token. No
+        JS in the library — no flash.
       </p>
 
       <h2>Live toggle</h2>

@@ -1,10 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { axe } from 'jest-axe';
 import { Plus } from '../../../icons';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../Dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../Sheet';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '../Drawer';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '../Drawer';
 import { Popover, PopoverContent, PopoverTrigger } from '../Popover';
 import { Tooltip, TooltipProvider } from '../Tooltip';
 import { IconButton } from '../IconButton';
@@ -47,6 +55,19 @@ describe('Overlays (smoke)', () => {
     expect(screen.getByText('Invite')).toBeInTheDocument();
   });
 
+  it('Dialog is axe-clean when open', async () => {
+    render(
+      <Dialog open>
+        <DialogContent aria-describedby={undefined}>
+          <DialogHeader>
+            <DialogTitle>Invite</DialogTitle>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>,
+    );
+    expect(await axe(document.body)).toHaveNoViolations();
+  });
+
   it('Sheet opens from the right by default', async () => {
     const user = userEvent.setup();
     render(
@@ -61,6 +82,35 @@ describe('Overlays (smoke)', () => {
     );
     await user.click(screen.getByRole('button', { name: 'Open' }));
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('Sheet is axe-clean when open', async () => {
+    render(
+      <Sheet open>
+        <SheetContent aria-describedby={undefined}>
+          <SheetHeader>
+            <SheetTitle>Filters</SheetTitle>
+          </SheetHeader>
+        </SheetContent>
+      </Sheet>,
+    );
+    expect(await axe(document.body)).toHaveNoViolations();
+  });
+
+  it('Drawer is axe-clean when open and has a close button', async () => {
+    render(
+      <Drawer open direction="right">
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Quick</DrawerTitle>
+            <DrawerDescription>Actions</DrawerDescription>
+          </DrawerHeader>
+        </DrawerContent>
+      </Drawer>,
+    );
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
+    expect(await axe(document.body)).toHaveNoViolations();
   });
 
   it('Drawer renders trigger', () => {
@@ -87,6 +137,17 @@ describe('Overlays (smoke)', () => {
     );
     await user.click(screen.getByRole('button', { name: 'Open' }));
     expect(await screen.findByText('Hi')).toBeInTheDocument();
+  });
+
+  it('Popover is axe-clean when open', async () => {
+    render(
+      <Popover open>
+        <PopoverTrigger>Open</PopoverTrigger>
+        <PopoverContent aria-label="Greeting">Hi</PopoverContent>
+      </Popover>,
+    );
+    await screen.findByText('Hi');
+    expect(await axe(document.body)).toHaveNoViolations();
   });
 
   it('Tooltip renders inside provider', () => {

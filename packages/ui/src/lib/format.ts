@@ -17,17 +17,29 @@ export interface FormatDateOptions {
 
 const pad = (n: number, w = 2) => String(n).padStart(w, '0');
 
+/** Intl.DateTimeFormat construction is expensive (~ms); cache per zone. */
+const dtfCache = new Map<string, Intl.DateTimeFormat>();
+
+export function getDateTimeFormat(tz: string): Intl.DateTimeFormat {
+  let dtf = dtfCache.get(tz);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      hourCycle: 'h23',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+    dtfCache.set(tz, dtf);
+  }
+  return dtf;
+}
+
 function parts(d: Date, tz: string) {
-  const dtf = new Intl.DateTimeFormat('en-US', {
-    timeZone: tz,
-    hourCycle: 'h23',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
+  const dtf = getDateTimeFormat(tz);
   const out: Record<string, number> = {};
   for (const p of dtf.formatToParts(d)) {
     if (p.type !== 'literal') out[p.type] = Number(p.value);
@@ -103,10 +115,11 @@ export function formatNumber(
   }: FormatNumberOptions = {},
 ): string {
   if (!Number.isFinite(n)) return '';
-  const sign = n < 0 ? '-' : '';
   const fixed = Math.abs(n).toFixed(maximumFractionDigits);
   let [int, frac = ''] = fixed.split('.');
   frac = frac.replace(/0+$/, '');
+  // Normalise -0 and values that round to zero (e.g. -0.001) → "0", not "-0".
+  const sign = n < 0 && Number(fixed) !== 0 ? '-' : '';
   while (frac.length < minimumFractionDigits) frac += '0';
   int = int.replace(/\B(?=(\d{3})+(?!\d))/g, group);
   return `${sign}${int}${frac ? decimal + frac : ''}`;

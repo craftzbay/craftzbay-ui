@@ -67,7 +67,7 @@ function FormDemo() {
               control={form.control}
               name="marketing"
               render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-md border border-border bg-background-subtle px-3 py-2">
+                <FormItem className="border-border bg-background-subtle flex items-center justify-between rounded-md border px-3 py-2">
                   <FormLabel className="!m-0">Marketing emails</FormLabel>
                   <FormControl>
                     <Switch
@@ -88,8 +88,8 @@ function FormDemo() {
         </Form>
 
         {submitted && (
-          <div className="rounded-md border border-border bg-background-muted p-3 text-xs">
-            <p className="mb-1 font-medium text-foreground">Submitted values:</p>
+          <div className="border-border bg-background-muted rounded-md border p-3 text-xs">
+            <p className="text-foreground mb-1 font-medium">Submitted values:</p>
             <pre className="overflow-x-auto font-mono">{JSON.stringify(submitted, null, 2)}</pre>
           </div>
         )}
@@ -103,9 +103,9 @@ export function FormsBody() {
     <div className="prose-block">
       <h2>Why react-hook-form</h2>
       <p>
-        Battle-tested, fast (no re-render storm), tiny, and works with any validation library
-        (Zod, Yup, custom). All <code>@craftzbay/ui</code> inputs forward refs correctly so
-        they slot into RHF without adapters.
+        Battle-tested, fast (no re-render storm), tiny, and works with any validation library (Zod,
+        Yup, custom). All <code>@craftzbay/ui</code> inputs forward refs correctly so they slot into
+        RHF without adapters.
       </p>
 
       <h2>Live sign-in demo</h2>
@@ -156,9 +156,17 @@ const form = useForm({ resolver: zodResolver(schema) });`}
 
       <h2>Tips</h2>
       <ul>
-        <li><code>FormLabel</code>, <code>FormControl</code>, and <code>FormError</code> auto-link via <code>aria-describedby</code> + <code>aria-invalid</code>.</li>
-        <li>Switch / Checkbox bind via <code>field.value</code> + <code>field.onChange</code> — not <code>field</code> spread.</li>
-        <li>For async validation, return a Promise from <code>rules.validate</code>.</li>
+        <li>
+          <code>FormLabel</code>, <code>FormControl</code>, and <code>FormError</code> auto-link via{' '}
+          <code>aria-describedby</code> + <code>aria-invalid</code>.
+        </li>
+        <li>
+          Switch / Checkbox bind via <code>field.value</code> + <code>field.onChange</code> — not{' '}
+          <code>field</code> spread.
+        </li>
+        <li>
+          For async validation, return a Promise from <code>rules.validate</code>.
+        </li>
       </ul>
     </div>
   );

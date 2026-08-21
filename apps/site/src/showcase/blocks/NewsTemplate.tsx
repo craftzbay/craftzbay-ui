@@ -19,10 +19,42 @@ import type { TemplateProps } from './meta';
 const CATEGORIES = ['All', 'World', 'Business', 'Technology', 'Science', 'Culture', 'Sport'];
 
 const ARTICLES = [
-  { cat: 'Technology', title: 'The quiet design system revolution reshaping the web', excerpt: 'How token-driven UI libraries are collapsing the gap between design and code.', author: 'A. Bold', initials: 'AB', time: '2h ago', hue: 250 },
-  { cat: 'Business', title: 'Markets steady as central banks signal a pause', excerpt: 'Investors weigh softer inflation against a cooling labour market.', author: 'B. Erdene', initials: 'BE', time: '4h ago', hue: 150 },
-  { cat: 'Science', title: 'Deep-sea survey finds dozens of unknown species', excerpt: 'A months-long expedition mapped ridges no instrument had reached before.', author: 'T. Ganbat', initials: 'TG', time: '6h ago', hue: 200 },
-  { cat: 'Culture', title: 'The slow return of the long-form essay', excerpt: 'Readers are paying for depth again — and writers are noticing.', author: 'S. Khan', initials: 'SK', time: '9h ago', hue: 320 },
+  {
+    cat: 'Technology',
+    title: 'The quiet design system revolution reshaping the web',
+    excerpt: 'How token-driven UI libraries are collapsing the gap between design and code.',
+    author: 'A. Bold',
+    initials: 'AB',
+    time: '2h ago',
+    hue: 250,
+  },
+  {
+    cat: 'Business',
+    title: 'Markets steady as central banks signal a pause',
+    excerpt: 'Investors weigh softer inflation against a cooling labour market.',
+    author: 'B. Erdene',
+    initials: 'BE',
+    time: '4h ago',
+    hue: 150,
+  },
+  {
+    cat: 'Science',
+    title: 'Deep-sea survey finds dozens of unknown species',
+    excerpt: 'A months-long expedition mapped ridges no instrument had reached before.',
+    author: 'T. Ganbat',
+    initials: 'TG',
+    time: '6h ago',
+    hue: 200,
+  },
+  {
+    cat: 'Culture',
+    title: 'The slow return of the long-form essay',
+    excerpt: 'Readers are paying for depth again — and writers are noticing.',
+    author: 'S. Khan',
+    initials: 'SK',
+    time: '9h ago',
+    hue: 320,
+  },
 ];
 
 /** Image placeholder — a flat, per-category tinted surface (solid colour mixed
@@ -33,7 +65,7 @@ function Cover({ hue = 250, className }: { hue?: number; className?: string }) {
   return (
     <div
       aria-hidden
-      className={cn('flex items-center justify-center text-foreground/15', className)}
+      className={cn('text-foreground/15 flex items-center justify-center', className)}
       style={{
         background: `color-mix(in oklch, var(--background-muted) 78%, oklch(0.62 0.14 ${hue}))`,
       }}
@@ -60,11 +92,17 @@ function Masthead({
   const interactive = Boolean(onCategory);
 
   return (
-    <header className="border-b border-border bg-background">
+    <header className="border-border bg-background border-b">
       <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-4 sm:gap-4 sm:px-6">
         <Sheet>
           <SheetTrigger asChild>
-            <IconButton aria-label="Menu" icon={<Menu />} variant="ghost" size="sm" className="md:hidden" />
+            <IconButton
+              aria-label="Menu"
+              icon={<Menu />}
+              variant="ghost"
+              size="sm"
+              className="md:hidden"
+            />
           </SheetTrigger>
           <SheetContent side="left" className="w-72">
             <SheetTitle>Sections</SheetTitle>
@@ -77,7 +115,9 @@ function Masthead({
                   aria-current={active === c ? 'page' : undefined}
                   className={cn(
                     'flex h-11 items-center rounded-md px-3 text-left text-base',
-                    active === c ? 'bg-accent-soft font-medium text-accent' : 'text-foreground hover:bg-background-muted',
+                    active === c
+                      ? 'bg-accent-soft text-accent font-medium'
+                      : 'text-foreground hover:bg-background-muted',
                   )}
                 >
                   {c}
@@ -125,8 +165,8 @@ function Masthead({
           </Button>
         </div>
       </div>
-      <nav className="border-t border-border">
-        <div className="mx-auto flex max-w-5xl snap-x items-center gap-5 overflow-x-auto px-6 py-2.5 text-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <nav className="border-border border-t">
+        <div className="mx-auto flex max-w-5xl snap-x [scrollbar-width:none] items-center gap-5 overflow-x-auto px-6 py-2.5 text-sm [&::-webkit-scrollbar]:hidden">
           {CATEGORIES.map((c) => (
             <button
               key={c}
@@ -134,8 +174,10 @@ function Masthead({
               onClick={() => onCategory?.(c)}
               aria-current={active === c ? 'page' : undefined}
               className={cn(
-                'shrink-0 snap-start whitespace-nowrap py-1',
-                active === c ? 'font-medium text-accent' : 'text-foreground-muted hover:text-foreground',
+                'shrink-0 snap-start py-1 whitespace-nowrap',
+                active === c
+                  ? 'text-accent font-medium'
+                  : 'text-foreground-muted hover:text-foreground',
               )}
             >
               {c}
@@ -149,20 +191,25 @@ function Masthead({
 
 function Footer({ brand }: { brand: React.ReactNode }) {
   return (
-    <footer className="border-t border-border bg-background-subtle">
+    <footer className="border-border bg-background-subtle border-t">
       <div className="mx-auto grid max-w-5xl gap-8 px-6 py-10 sm:grid-cols-3">
         <div>
           <div className="text-base font-semibold tracking-tight">{brand}</div>
-          <p className="mt-2 max-w-xs text-sm leading-relaxed text-foreground-muted">
+          <p className="text-foreground-muted mt-2 max-w-xs text-sm leading-relaxed">
             Independent reporting on technology, business, science and culture — every day.
           </p>
         </div>
         <div>
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground-subtle">Sections</h3>
+          <h3 className="text-foreground-subtle text-xs font-semibold tracking-wider uppercase">
+            Sections
+          </h3>
           <ul className="mt-3 space-y-2 text-sm">
             {CATEGORIES.filter((c) => c !== 'All').map((c) => (
               <li key={c}>
-                <a href={`#/section/${c.toLowerCase()}`} className="text-foreground-muted hover:text-foreground">
+                <a
+                  href={`#/section/${c.toLowerCase()}`}
+                  className="text-foreground-muted hover:text-foreground"
+                >
                   {c}
                 </a>
               </li>
@@ -170,21 +217,38 @@ function Footer({ brand }: { brand: React.ReactNode }) {
           </ul>
         </div>
         <div>
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground-subtle">The Daily Brief</h3>
-          <p className="mt-3 text-sm text-foreground-muted">Top stories in your inbox each morning.</p>
+          <h3 className="text-foreground-subtle text-xs font-semibold tracking-wider uppercase">
+            The Daily Brief
+          </h3>
+          <p className="text-foreground-muted mt-3 text-sm">
+            Top stories in your inbox each morning.
+          </p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <Input size="sm" type="email" placeholder="you@example.com" className="min-w-0 flex-1 basis-40" />
-            <Button size="sm">Sign up</Button>
+            <Input
+              size="sm"
+              type="email"
+              placeholder="you@example.com"
+              className="min-w-0 flex-1 basis-40"
+            />
+            <Button size="sm" variant="secondary">
+              Sign up
+            </Button>
           </div>
         </div>
       </div>
-      <div className="border-t border-border">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-6 py-4 text-xs text-foreground-subtle">
+      <div className="border-border border-t">
+        <div className="text-foreground-subtle mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-6 py-4 text-xs">
           <span>© 2026 {brand}. All rights reserved.</span>
           <span className="flex gap-4">
-            <a href="#/privacy" className="hover:text-foreground">Privacy</a>
-            <a href="#/terms" className="hover:text-foreground">Terms</a>
-            <a href="#/contact" className="hover:text-foreground">Contact</a>
+            <a href="#/privacy" className="hover:text-foreground">
+              Privacy
+            </a>
+            <a href="#/terms" className="hover:text-foreground">
+              Terms
+            </a>
+            <a href="#/contact" className="hover:text-foreground">
+              Contact
+            </a>
           </span>
         </div>
       </div>
@@ -194,7 +258,7 @@ function Footer({ brand }: { brand: React.ReactNode }) {
 
 function Byline({ initials, author, time }: { initials: string; author: string; time: string }) {
   return (
-    <div className="flex items-center gap-2 text-xs text-foreground-subtle">
+    <div className="text-foreground-subtle flex items-center gap-2 text-xs">
       <Avatar size="xs" fallback={initials} />
       <span className="text-foreground-muted">{author}</span>
       <span aria-hidden>·</span>
@@ -219,14 +283,20 @@ function FrontPage({ brand, onOpen }: { brand: React.ReactNode; onOpen: () => vo
   const [lead, ...rest] = filtered;
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <Masthead brand={brand} active={category} onCategory={setCategory} query={query} onQuery={setQuery} />
+    <div className="bg-background flex min-h-dvh flex-col">
+      <Masthead
+        brand={brand}
+        active={category}
+        onCategory={setCategory}
+        query={query}
+        onQuery={setQuery}
+      />
       <main className="mx-auto grid w-full max-w-5xl flex-1 gap-10 px-6 py-10 lg:grid-cols-[1fr_18rem]">
         <div>
           {!lead ? (
-            <div className="rounded-lg border border-border bg-card p-10 text-center">
+            <div className="border-border bg-card rounded-lg border p-10 text-center">
               <p className="text-sm font-medium">No stories found</p>
-              <p className="mt-1 text-sm text-foreground-muted">
+              <p className="text-foreground-muted mt-1 text-sm">
                 Nothing matches “{query}” in {category === 'All' ? 'any section' : category}.
               </p>
               <Button
@@ -247,11 +317,15 @@ function FrontPage({ brand, onOpen }: { brand: React.ReactNode; onOpen: () => vo
               <button onClick={onOpen} className="group block w-full text-left">
                 <Cover hue={lead.hue} className="aspect-[16/8] w-full rounded-lg" />
                 <div className="mt-4">
-                  <Badge tone="accent" variant="outline">{lead.cat}</Badge>
-                  <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight group-hover:text-accent">
+                  <Badge tone="accent" variant="outline">
+                    {lead.cat}
+                  </Badge>
+                  <h1 className="group-hover:text-accent mt-3 text-3xl leading-tight font-semibold tracking-tight">
                     {lead.title}
                   </h1>
-                  <p className="mt-2 text-base leading-relaxed text-foreground-muted">{lead.excerpt}</p>
+                  <p className="text-foreground-muted mt-2 text-base leading-relaxed">
+                    {lead.excerpt}
+                  </p>
                   <div className="mt-3">
                     <Byline {...lead} />
                   </div>
@@ -261,14 +335,22 @@ function FrontPage({ brand, onOpen }: { brand: React.ReactNode; onOpen: () => vo
               {rest.length > 0 && (
                 <>
                   <Separator className="my-8" />
-                  <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-foreground-subtle">Latest</h2>
+                  <h2 className="text-foreground-subtle mb-4 text-xs font-semibold tracking-wider uppercase">
+                    Latest
+                  </h2>
                   <div className="grid gap-6 sm:grid-cols-2">
                     {rest.map((a) => (
                       <button key={a.title} onClick={onOpen} className="group text-left">
                         <Cover hue={a.hue} className="aspect-[16/9] w-full rounded-md" />
-                        <Badge tone="neutral" variant="outline" className="mt-3">{a.cat}</Badge>
-                        <h3 className="mt-2 font-semibold leading-snug text-foreground group-hover:text-accent">{a.title}</h3>
-                        <p className="mt-1 text-sm leading-relaxed text-foreground-muted">{a.excerpt}</p>
+                        <Badge tone="neutral" variant="outline" className="mt-3">
+                          {a.cat}
+                        </Badge>
+                        <h3 className="text-foreground group-hover:text-accent mt-2 leading-snug font-semibold">
+                          {a.title}
+                        </h3>
+                        <p className="text-foreground-muted mt-1 text-sm leading-relaxed">
+                          {a.excerpt}
+                        </p>
                         <div className="mt-2">
                           <Byline {...a} />
                         </div>
@@ -282,24 +364,30 @@ function FrontPage({ brand, onOpen }: { brand: React.ReactNode; onOpen: () => vo
         </div>
 
         {/* Trending sidebar */}
-        <aside className="lg:border-l lg:border-border lg:pl-8">
-          <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-foreground-subtle">Trending</h2>
+        <aside className="lg:border-border lg:border-l lg:pl-8">
+          <h2 className="text-foreground-subtle mb-4 text-xs font-semibold tracking-wider uppercase">
+            Trending
+          </h2>
           <ol className="space-y-5">
             {ARTICLES.map((a, i) => (
               <li key={a.title}>
                 <button onClick={onOpen} className="group flex gap-3 text-left">
-                  <span className="text-xl font-semibold tabular text-border-strong">{i + 1}</span>
-                  <span className="text-sm font-medium leading-snug text-foreground group-hover:text-accent">
+                  <span className="tabular text-border-strong text-xl font-semibold">{i + 1}</span>
+                  <span className="text-foreground group-hover:text-accent text-sm leading-snug font-medium">
                     {a.title}
                   </span>
                 </button>
               </li>
             ))}
           </ol>
-          <div className="mt-8 rounded-lg border border-border bg-card p-5">
+          <div className="border-border bg-card mt-8 rounded-lg border p-5">
             <h3 className="text-sm font-semibold">The Daily Brief</h3>
-            <p className="mt-1 text-sm text-foreground-muted">Top stories in your inbox each morning.</p>
-            <Button size="sm" className="mt-3 w-full">Sign up free</Button>
+            <p className="text-foreground-muted mt-1 text-sm">
+              Top stories in your inbox each morning.
+            </p>
+            <Button size="sm" variant="secondary" className="mt-3 w-full">
+              Sign up free
+            </Button>
           </div>
         </aside>
       </main>
@@ -311,7 +399,7 @@ function FrontPage({ brand, onOpen }: { brand: React.ReactNode; onOpen: () => vo
 function Article({ brand, onBack }: { brand: React.ReactNode; onBack: () => void }) {
   const a = ARTICLES[0];
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="bg-background flex min-h-dvh flex-col">
       <Masthead brand={brand} />
       <article className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
         {/* `flex w-fit` (not inline-flex): an inline-level button shares the
@@ -319,19 +407,21 @@ function Article({ brand, onBack }: { brand: React.ReactNode; onBack: () => void
             the category chip. */}
         <button
           onClick={onBack}
-          className="mb-6 flex w-fit items-center gap-1.5 text-sm text-foreground-muted hover:text-foreground"
+          className="text-foreground-muted hover:text-foreground mb-6 flex w-fit items-center gap-1.5 text-sm"
         >
           <ArrowLeft className="size-4" aria-hidden /> Back to front page
         </button>
-        <Badge tone="accent" variant="outline">{a.cat}</Badge>
-        <h1 className="mt-3 text-4xl font-semibold leading-tight tracking-tight">{a.title}</h1>
-        <p className="mt-4 text-lg leading-relaxed text-foreground-muted">{a.excerpt}</p>
+        <Badge tone="accent" variant="outline">
+          {a.cat}
+        </Badge>
+        <h1 className="mt-3 text-4xl leading-tight font-semibold tracking-tight">{a.title}</h1>
+        <p className="text-foreground-muted mt-4 text-lg leading-relaxed">{a.excerpt}</p>
         <div className="mt-5 flex items-center justify-between">
           <Byline {...a} />
-          <span className="text-xs text-foreground-subtle">6 min read</span>
+          <span className="text-foreground-subtle text-xs">6 min read</span>
         </div>
         <Cover hue={a.hue} className="mt-6 aspect-[16/9] w-full rounded-lg" />
-        <div className="mt-8 space-y-4 text-base leading-relaxed text-foreground">
+        <div className="text-foreground mt-8 max-w-[65ch] space-y-4 text-base leading-relaxed">
           <p>
             For years the boundary between design and engineering was a stack of hand-offs. A new
             generation of token-driven libraries is quietly erasing it — and teams are shipping

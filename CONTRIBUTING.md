@@ -8,12 +8,15 @@ Releases are fully automated via [`changesets/action`](https://github.com/change
 
 1. Make your changes on a branch.
 2. Add a changeset describing the user-facing impact:
+
    ```bash
    pnpm changeset
    ```
+
    - Pick the affected packages (currently `@craftzbay/ui`).
    - Pick the bump level: `patch` (bug fix), `minor` (new feature, backwards-compatible), `major` (breaking).
    - Write a short summary — it becomes the CHANGELOG entry.
+
 3. Commit the `.changeset/*.md` file with your code change.
 4. Open a PR. Merge to `main` when reviewed.
 

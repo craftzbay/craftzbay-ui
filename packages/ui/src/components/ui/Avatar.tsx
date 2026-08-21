@@ -1,7 +1,10 @@
 'use client';
 
 import {
+  Children,
+  cloneElement,
   forwardRef,
+  isValidElement,
   type ComponentPropsWithoutRef,
   type ElementRef,
   type HTMLAttributes,
@@ -28,7 +31,8 @@ const avatarWrapper = cva('relative inline-flex shrink-0', {
 });
 
 export interface AvatarProps
-  extends ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>,
+  extends
+    ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>,
     VariantProps<typeof avatarWrapper> {
   /** Image URL. If absent or fails to load, fallback initials are shown. */
   src?: string;
@@ -66,13 +70,10 @@ export const Avatar = forwardRef<ElementRef<typeof AvatarPrimitive.Root>, Avatar
   function Avatar({ className, size, src, alt, fallback, status, ...props }, ref) {
     const strings = useStrings();
     return (
-      <span className={avatarWrapper({ size })}>
+      <span className={cn(avatarWrapper({ size }), className)}>
         <AvatarPrimitive.Root
           ref={ref}
-          className={cn(
-            'block size-full overflow-hidden rounded-full bg-background-muted text-foreground-muted',
-            className,
-          )}
+          className="bg-background-muted text-foreground-muted block size-full overflow-hidden rounded-full"
           {...props}
         >
           {src && (
@@ -84,16 +85,17 @@ export const Avatar = forwardRef<ElementRef<typeof AvatarPrimitive.Root>, Avatar
           )}
           <AvatarPrimitive.Fallback
             delayMs={src ? 200 : 0}
-            className="flex size-full items-center justify-center bg-background-muted font-medium uppercase"
+            className="bg-background-muted flex size-full items-center justify-center font-medium uppercase"
           >
             {fallback ?? '?'}
           </AvatarPrimitive.Fallback>
         </AvatarPrimitive.Root>
         {status && (
           <span
+            role="img"
             aria-label={formatString(strings.avatar.status, { status })}
             className={cn(
-              'absolute bottom-0 right-0 block size-[28%] rounded-full ring-2 ring-background',
+              'ring-background absolute right-0 bottom-0 block size-[28%] rounded-full ring-2',
               statusColour[status],
             )}
           />
@@ -107,7 +109,7 @@ Avatar.displayName = 'Avatar';
 export interface AvatarGroupProps extends HTMLAttributes<HTMLDivElement> {
   /** Maximum visible avatars before showing a "+N" overflow chip. */
   max?: number;
-  /** Avatar size applied to children + overflow. */
+  /** Avatar size applied to children (unless a child sets its own) + overflow. */
   size?: keyof typeof sizeMap;
   /** Children — Avatars. */
   children: ReactNode;
@@ -121,21 +123,23 @@ export const AvatarGroup = forwardRef<HTMLDivElement, AvatarGroupProps>(function
   ref,
 ) {
   const strings = useStrings();
-  const items = Array.isArray(children) ? children : [children];
+  const items = Children.toArray(children);
   const visible = items.slice(0, max);
   const overflow = items.length - visible.length;
 
   return (
     <div ref={ref} className={cn('flex items-center -space-x-2', className)} {...props}>
       {visible.map((child, i) => (
-        <div key={i} className="ring-2 ring-background rounded-full">
-          {child}
+        <div key={i} className="ring-background rounded-full ring-2">
+          {isValidElement<AvatarProps>(child) && child.props.size === undefined
+            ? cloneElement(child, { size })
+            : child}
         </div>
       ))}
       {overflow > 0 && (
         <div
           className={cn(
-            'inline-flex items-center justify-center rounded-full bg-background-muted text-foreground-muted ring-2 ring-background',
+            'bg-background-muted text-foreground-muted ring-background inline-flex items-center justify-center rounded-full ring-2',
             sizeMap[size],
             'font-medium',
           )}

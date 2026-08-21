@@ -88,17 +88,19 @@ function Shell() {
 
   if (isFullBleedRoute(route) && route.kind === 'preview') {
     // key: switching template from the preview dock must reset screen state.
-    return <PreviewPage
+    return (
+      <PreviewPage
         key={route.slug}
         slug={route.slug}
         initialScreen={route.screen}
         initialVariant={route.variant}
         initialPage={route.page}
-      />;
+      />
+    );
   }
 
   return (
-    <div className="bg-background text-foreground flex min-h-screen flex-col">
+    <div className="bg-background text-foreground flex min-h-dvh flex-col">
       <SkipLink />
       <ShowcaseTopBar onOpenPalette={() => setCmdOpen(true)} current={route} />
       <div className="flex-1">
@@ -148,7 +150,7 @@ function SkipLink() {
         e.preventDefault();
         document.getElementById('main')?.focus();
       }}
-      className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[var(--z-toast)] focus:rounded-md focus:bg-card focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-foreground focus:shadow-md focus:outline-none focus:ring-2 focus:ring-ring"
+      className="focus:bg-card focus:text-foreground focus:ring-ring sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[var(--z-toast)] focus:rounded-md focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:shadow-md focus:ring-2 focus:outline-none"
     >
       Skip to content
     </a>
@@ -251,12 +253,14 @@ function RouteView({ route }: { route: Route }) {
     case 'preview':
       // Handled by Shell before reaching here; kept so the switch is exhaustive.
       // key: switching template from the preview dock must reset screen state.
-    return <PreviewPage
-        key={route.slug}
-        slug={route.slug}
-        initialScreen={route.screen}
-        initialVariant={route.variant}
-      />;
+      return (
+        <PreviewPage
+          key={route.slug}
+          slug={route.slug}
+          initialScreen={route.screen}
+          initialVariant={route.variant}
+        />
+      );
 
     case 'not-found':
       return <NotFound />;

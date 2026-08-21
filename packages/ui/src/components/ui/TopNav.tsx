@@ -1,6 +1,8 @@
 'use client';
 
-import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
+import { forwardRef, type AnchorHTMLAttributes, type HTMLAttributes, type ReactNode } from 'react';
+import { Slot } from '@radix-ui/react-slot';
+import { useStrings } from '@/hooks/use-strings';
 import { cn } from '@/lib/utils';
 
 export interface TopNavProps extends HTMLAttributes<HTMLElement> {
@@ -12,6 +14,8 @@ export interface TopNavProps extends HTMLAttributes<HTMLElement> {
   search?: ReactNode;
   /** Right-aligned cluster — notifications, theme toggle, user menu. */
   actions?: ReactNode;
+  /** Accessible name of the inner `<nav>` landmark. Default "Primary". */
+  navLabel?: string;
 }
 
 /**
@@ -31,41 +35,52 @@ export interface TopNavProps extends HTMLAttributes<HTMLElement> {
  *       put them below the bar inside the page content.
  */
 export const TopNav = forwardRef<HTMLElement, TopNavProps>(function TopNav(
-  { logo, nav, search, actions, className, ...props },
+  { logo, nav, search, actions, navLabel, className, ...props },
   ref,
 ) {
+  const strings = useStrings();
   return (
     <header
       ref={ref}
       className={cn(
         'sticky top-0 z-[var(--z-sticky)] flex h-14 w-full items-center gap-4',
-        'border-b border-border bg-background px-4',
+        'border-border bg-background border-b px-4',
         className,
       )}
       {...props}
     >
       <div className="flex min-w-0 items-center gap-6">
         {logo}
-        {nav && <nav className="hidden md:flex items-center gap-1">{nav}</nav>}
+        {nav && (
+          <nav
+            aria-label={navLabel ?? strings.topNav.label}
+            className="hidden items-center gap-1 md:flex"
+          >
+            {nav}
+          </nav>
+        )}
       </div>
-      {search && <div className="flex-1 max-w-md mx-auto">{search}</div>}
-      {actions && <div className="ml-auto flex items-center gap-2 shrink-0">{actions}</div>}
+      {search && <div className="mx-auto max-w-md flex-1">{search}</div>}
+      {actions && <div className="ml-auto flex shrink-0 items-center gap-2">{actions}</div>}
     </header>
   );
 });
 TopNav.displayName = 'TopNav';
 
-export interface TopNavLinkProps extends HTMLAttributes<HTMLAnchorElement> {
-  href: string;
+export interface TopNavLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
+  href?: string;
   active?: boolean;
+  /** Render the child (e.g. router `<Link>`) instead of an `<a>`. */
+  asChild?: boolean;
 }
 
 export const TopNavLink = forwardRef<HTMLAnchorElement, TopNavLinkProps>(function TopNavLink(
-  { href, active, className, children, ...props },
+  { href, active, asChild, className, children, ...props },
   ref,
 ) {
+  const Comp = asChild ? Slot : 'a';
   return (
-    <a
+    <Comp
       ref={ref}
       href={href}
       aria-current={active ? 'page' : undefined}
@@ -73,13 +88,13 @@ export const TopNavLink = forwardRef<HTMLAnchorElement, TopNavLinkProps>(functio
         'inline-flex h-9 items-center rounded-md px-3 text-sm font-medium outline-none',
         'transition-colors duration-[var(--duration-fast)]',
         active ? 'text-foreground' : 'text-foreground-muted hover:text-foreground',
-        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+        'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
         className,
       )}
       {...props}
     >
       {children}
-    </a>
+    </Comp>
   );
 });
 TopNavLink.displayName = 'TopNavLink';

@@ -6,17 +6,19 @@ export function MigrationBody() {
   return (
     <div className="prose-block">
       <Alert variant="info" title="Backwards-compatible by default">
-        Every prop introduced in 0.5 and 0.6 is optional with a default that matches the
-        pre-0.5 demo content. Existing call sites continue to render unchanged — you
-        only need to act when you want the new flexibility.
+        Every prop introduced in 0.5 and 0.6 is optional with a default that matches the pre-0.5
+        demo content. Existing call sites continue to render unchanged — you only need to act when
+        you want the new flexibility.
       </Alert>
 
       <h2>
-        <Badge tone="accent" variant="outline">0.4 → 0.5</Badge>
+        <Badge tone="accent" variant="outline">
+          0.4 → 0.5
+        </Badge>
       </h2>
       <p>
-        0.5.0 turned 6 hard-coded patterns into props-driven templates. The exports stay
-        the same; the prop surface expanded.
+        0.5.0 turned 6 hard-coded patterns into props-driven templates. The exports stay the same;
+        the prop surface expanded.
       </p>
 
       <h3>SettingsPage</h3>
@@ -85,7 +87,10 @@ export function MigrationBody() {
       />
 
       <h3>DataTablePage</h3>
-      <p>Now generic over the row type. Hard-coded demo data is gone — pass your own rows + columns + filters.</p>
+      <p>
+        Now generic over the row type. Hard-coded demo data is gone — pass your own rows + columns +
+        filters.
+      </p>
       <CodeBlock
         code={`<DataTablePage<User>
   title="Members"
@@ -114,13 +119,15 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormError } from '@c
       />
 
       <h2>
-        <Badge tone="accent" variant="outline">0.5 → 0.6</Badge>
+        <Badge tone="accent" variant="outline">
+          0.5 → 0.6
+        </Badge>
       </h2>
 
       <h3>AppShell — sidebar is now data-driven</h3>
       <p>
-        The internal hard-coded nav still renders by default. Pass <code>navSections</code>{' '}
-        or <code>sidebar</code> to customise.
+        The internal hard-coded nav still renders by default. Pass <code>navSections</code> or{' '}
+        <code>sidebar</code> to customise.
       </p>
       <CodeBlock
         code={`<AppShell
@@ -156,11 +163,11 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormError } from '@c
 
       <h3>EmptyState / ErrorState — illustrations by default</h3>
       <p>
-        <code>EmptyState</code> with no <code>icon</code> or <code>illustration</code> now
-        renders the built-in <code>InboxEmpty</code> line illustration. To keep the old
-        "icon-only" look explicitly pass an icon. <code>ErrorState</code> swaps in
-        <code>NotFound</code> / <code>ServerError</code> / <code>ConnectionLost</code> per
-        variant; opt out via the new <code>illustration</code> prop.
+        <code>EmptyState</code> with no <code>icon</code> or <code>illustration</code> now renders
+        the built-in <code>InboxEmpty</code> line illustration. To keep the old "icon-only" look
+        explicitly pass an icon. <code>ErrorState</code> swaps in
+        <code>NotFound</code> / <code>ServerError</code> / <code>ConnectionLost</code> per variant;
+        opt out via the new <code>illustration</code> prop.
       </p>
       <CodeBlock
         code={`{/* New default look (large illustration) */}
@@ -177,13 +184,14 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormError } from '@c
       />
 
       <h2>
-        <Badge tone="neutral" variant="outline">No breaking changes</Badge>
+        <Badge tone="neutral" variant="outline">
+          No breaking changes
+        </Badge>
       </h2>
       <p>
-        All exports from 0.4 are still exported. All previously-required props remain
-        required. New props are additive. Aside from the FormMessage → FormError rename
-        (which was never publicly exported), no consumer code needs changes to take
-        0.6.x.
+        All exports from 0.4 are still exported. All previously-required props remain required. New
+        props are additive. Aside from the FormMessage → FormError rename (which was never publicly
+        exported), no consumer code needs changes to take 0.6.x.
       </p>
     </div>
   );

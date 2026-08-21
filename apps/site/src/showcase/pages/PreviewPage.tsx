@@ -64,10 +64,7 @@ export function PreviewPage({
     // App shells lock to the viewport so a leaking pane can never scroll the
     // document; page-style templates keep normal document scroll.
     <div
-      className={cn(
-        'bg-background',
-        doc.shell === 'app' ? 'h-dvh overflow-hidden' : 'min-h-screen',
-      )}
+      className={cn('bg-background', doc.shell === 'app' ? 'h-dvh overflow-hidden' : 'min-h-dvh')}
     >
       <Suspense
         fallback={
@@ -88,85 +85,85 @@ export function PreviewPage({
       {/* Floating preview dock — bottom-right so the template renders edge to
           edge like a real deployment. */}
       {!embedded && (
-      <div className="fixed bottom-4 right-4 z-[var(--z-toast)] flex items-center gap-2 rounded-full border border-border bg-card py-1.5 pl-3 pr-1.5 shadow-lg">
-        <a
-          href={`#${routeToHash({ kind: 'template', slug })}`}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground-muted transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="size-3.5" aria-hidden />
-          Docs
-        </a>
-        <span className="h-4 w-px bg-border" aria-hidden />
-        {/* Template / screen switcher — jump between previews without going
+        <div className="border-border bg-card fixed right-4 bottom-4 z-[var(--z-toast)] flex items-center gap-2 rounded-full border py-1.5 pr-1.5 pl-3 shadow-lg">
+          <a
+            href={`#${routeToHash({ kind: 'template', slug })}`}
+            className="text-foreground-muted hover:text-foreground inline-flex items-center gap-1.5 text-xs font-medium transition-colors"
+          >
+            <ArrowLeft className="size-3.5" aria-hidden />
+            Docs
+          </a>
+          <span className="bg-border h-4 w-px" aria-hidden />
+          {/* Template / screen switcher — jump between previews without going
             back through the docs. */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="inline-flex h-7 items-center gap-1.5 rounded-full px-2 text-xs text-foreground-muted outline-none transition-colors hover:bg-background-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-              aria-label={`Template: ${doc.name}. Switch template or screen`}
-            >
-              <span className="inline-flex size-1.5 rounded-full bg-accent" aria-hidden />
-              <span className="whitespace-nowrap font-medium text-foreground">{doc.name}</span>
-              <ChevronDown className="size-3.5" aria-hidden />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent side="top" align="center" className="min-w-56">
-            <DropdownMenuLabel>Templates</DropdownMenuLabel>
-            {blockMeta.map((b) => (
-              <DropdownMenuItem
-                key={b.slug}
-                onSelect={() => {
-                  window.location.hash = routeToHash({ kind: 'preview', slug: b.slug });
-                }}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="text-foreground-muted hover:bg-background-muted hover:text-foreground focus-visible:ring-ring inline-flex h-7 items-center gap-1.5 rounded-full px-2 text-xs transition-colors outline-none focus-visible:ring-2"
+                aria-label={`Template: ${doc.name}. Switch template or screen`}
               >
-                <span className="flex-1">{b.name}</span>
-                {b.slug === slug && <Check className="size-4 text-accent" aria-hidden />}
-              </DropdownMenuItem>
-            ))}
-            {doc.screens.length > 1 && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel>{doc.name} screens</DropdownMenuLabel>
-                {doc.screens.map((sc) => (
-                  <DropdownMenuItem key={sc.key} onSelect={() => setScreen(sc.key)}>
-                    <span className="flex-1">{sc.label}</span>
-                    {sc.key === screen && <Check className="size-4 text-accent" aria-hidden />}
-                  </DropdownMenuItem>
-                ))}
-              </>
-            )}
-            {doc.variants && doc.variants.length > 1 && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel>Layout</DropdownMenuLabel>
-                {doc.variants.map((v) => (
-                  <DropdownMenuItem
-                    key={v.key}
-                    role="menuitemradio"
-                    aria-checked={v.key === variant}
-                    title={v.description}
-                    onSelect={() => {
-                      setVariant(v.key);
-                      window.location.hash = routeToHash({
-                        kind: 'preview',
-                        slug,
-                        screen,
-                        variant: v.key,
-                      });
-                    }}
-                  >
-                    <span className="flex-1">{v.label}</span>
-                    {v.key === variant && <Check className="size-4 text-accent" aria-hidden />}
-                  </DropdownMenuItem>
-                ))}
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <BrandSwitcher />
-        <ThemeToggle />
-      </div>
+                <span className="bg-accent inline-flex size-1.5 rounded-full" aria-hidden />
+                <span className="text-foreground font-medium whitespace-nowrap">{doc.name}</span>
+                <ChevronDown className="size-3.5" aria-hidden />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" align="center" className="min-w-56">
+              <DropdownMenuLabel>Templates</DropdownMenuLabel>
+              {blockMeta.map((b) => (
+                <DropdownMenuItem
+                  key={b.slug}
+                  onSelect={() => {
+                    window.location.hash = routeToHash({ kind: 'preview', slug: b.slug });
+                  }}
+                >
+                  <span className="flex-1">{b.name}</span>
+                  {b.slug === slug && <Check className="text-accent size-4" aria-hidden />}
+                </DropdownMenuItem>
+              ))}
+              {doc.screens.length > 1 && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>{doc.name} screens</DropdownMenuLabel>
+                  {doc.screens.map((sc) => (
+                    <DropdownMenuItem key={sc.key} onSelect={() => setScreen(sc.key)}>
+                      <span className="flex-1">{sc.label}</span>
+                      {sc.key === screen && <Check className="text-accent size-4" aria-hidden />}
+                    </DropdownMenuItem>
+                  ))}
+                </>
+              )}
+              {doc.variants && doc.variants.length > 1 && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Layout</DropdownMenuLabel>
+                  {doc.variants.map((v) => (
+                    <DropdownMenuItem
+                      key={v.key}
+                      role="menuitemradio"
+                      aria-checked={v.key === variant}
+                      title={v.description}
+                      onSelect={() => {
+                        setVariant(v.key);
+                        window.location.hash = routeToHash({
+                          kind: 'preview',
+                          slug,
+                          screen,
+                          variant: v.key,
+                        });
+                      }}
+                    >
+                      <span className="flex-1">{v.label}</span>
+                      {v.key === variant && <Check className="text-accent size-4" aria-hidden />}
+                    </DropdownMenuItem>
+                  ))}
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <BrandSwitcher />
+          <ThemeToggle />
+        </div>
       )}
     </div>
   );

@@ -28,15 +28,14 @@ const snackbar = cva(
 
 const iconForVariant: Record<NonNullable<VariantProps<typeof snackbar>['variant']>, ReactNode> = {
   default: null,
-  info: <Info className="size-4 shrink-0 mt-0.5 text-info-text" aria-hidden />,
-  success: <CheckCircle2 className="size-4 shrink-0 mt-0.5 text-success-text" aria-hidden />,
-  warning: <AlertTriangle className="size-4 shrink-0 mt-0.5 text-warning-text" aria-hidden />,
-  danger: <XCircle className="size-4 shrink-0 mt-0.5 text-danger-text" aria-hidden />,
+  info: <Info className="text-info-text mt-0.5 size-4 shrink-0" aria-hidden />,
+  success: <CheckCircle2 className="text-success-text mt-0.5 size-4 shrink-0" aria-hidden />,
+  warning: <AlertTriangle className="text-warning-text mt-0.5 size-4 shrink-0" aria-hidden />,
+  danger: <XCircle className="text-danger-text mt-0.5 size-4 shrink-0" aria-hidden />,
 };
 
 export interface SnackbarProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, 'title'>,
-    VariantProps<typeof snackbar> {
+  extends Omit<HTMLAttributes<HTMLDivElement>, 'title'>, VariantProps<typeof snackbar> {
   /** Headline. */
   title?: ReactNode;
   /** Action button rendered on the right. */
@@ -56,7 +55,7 @@ export const Snackbar = forwardRef<HTMLDivElement, SnackbarProps>(function Snack
   ref,
 ) {
   const strings = useStrings();
-  const renderedIcon = icon === false ? null : icon ?? iconForVariant[variant ?? 'default'];
+  const renderedIcon = icon === false ? null : (icon ?? iconForVariant[variant ?? 'default']);
 
   return (
     <div ref={ref} role="status" className={cn(snackbar({ variant }), className)} {...props}>
@@ -71,11 +70,12 @@ export const Snackbar = forwardRef<HTMLDivElement, SnackbarProps>(function Snack
           type="button"
           onClick={onClose}
           aria-label={strings.snackbar.dismiss}
-          className="rounded p-1 text-foreground-muted hover:bg-background-muted hover:text-foreground"
+          className="text-foreground-muted hover:bg-background-muted hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-card rounded p-1 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
         >
-          <X className="size-4" />
+          <X className="size-4" aria-hidden />
         </button>
       )}
     </div>
   );
 });
+Snackbar.displayName = 'Snackbar';

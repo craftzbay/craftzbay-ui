@@ -26,6 +26,8 @@ const field = cva(
     'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)]',
     'has-disabled:opacity-50 has-disabled:pointer-events-none',
     'focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-background',
+    // Invalid state comes from the input's aria-invalid so Form wiring needs no extra prop.
+    'has-aria-invalid:border-danger has-aria-invalid:focus-within:border-danger has-aria-invalid:focus-within:ring-danger',
   ],
   {
     variants: {
@@ -57,10 +59,21 @@ const innerInput = cva([
 
 type InputType = NonNullable<InputHTMLAttributes<HTMLInputElement>['type']>;
 
+// Inline clear / password buttons: 24px box (WCAG 2.5.8 minimum) with a halo
+// that extends the hit area without growing the field.
+const innerButton = cn(
+  'text-foreground-subtle hover:text-foreground relative -m-1 flex size-6 shrink-0 items-center justify-center rounded-sm',
+  'before:absolute before:-inset-0.5 before:content-[""]',
+  'focus-visible:ring-ring focus-visible:ring-offset-background outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+  'disabled:pointer-events-none',
+);
+
 export interface InputProps
   extends
-    Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'prefix'>,
+    Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'prefix' | 'value'>,
     VariantProps<typeof field> {
+  /** Controlled value. `null` is treated as an empty controlled value (no React warning). */
+  value?: InputHTMLAttributes<HTMLInputElement>['value'] | null;
   /** Field type. `password` enables a show/hide toggle; `search` adds a clear button. */
   type?: InputType;
   /** Visible label rendered above the input. */
@@ -120,19 +133,24 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     hideLabel,
     id,
     disabled,
-    value,
+    value: valueProp,
     defaultValue,
     onInput,
+    'aria-describedby': ariaDescribedby,
+    'aria-invalid': ariaInvalid,
     ...props
   },
   ref,
 ) {
   const strings = useStrings();
-  const isError = Boolean(error);
+  const isError = Boolean(error) || ariaInvalid === true || ariaInvalid === 'true';
   const { fieldId, helperId, errorId, describedBy } = useFieldIds(id, {
     hasHelper: Boolean(helperText),
-    hasError: isError,
+    hasError: Boolean(error),
+    extra: ariaDescribedby,
   });
+  // `null` (nullable form state) is a controlled empty value, not "uncontrolled".
+  const value = valueProp === null ? '' : valueProp;
   const innerRef = useRef<HTMLInputElement | null>(null);
   const setRefs = (el: HTMLInputElement | null) => {
     innerRef.current = el;
@@ -202,7 +220,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           value={value}
           defaultValue={defaultValue}
           onInput={handleInput}
-          aria-invalid={isError || undefined}
+          aria-invalid={isError ? true : ariaInvalid}
           aria-describedby={describedBy}
           className={cn(innerInput())}
           {...props}
@@ -212,8 +230,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           <button
             type="button"
             onClick={handleClear}
+            disabled={disabled}
+            tabIndex={disabled ? -1 : undefined}
             aria-label={strings.input.clear}
-            className="text-foreground-subtle hover:text-foreground focus-visible:ring-ring -m-1 flex size-6 items-center justify-center rounded-sm outline-none focus-visible:ring-2"
+            className={innerButton}
           >
             <X className="size-4" aria-hidden />
           </button>
@@ -223,9 +243,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           <button
             type="button"
             onClick={() => setShowPassword((p) => !p)}
+            disabled={disabled}
+            tabIndex={disabled ? -1 : undefined}
             aria-label={showPassword ? strings.input.hidePassword : strings.input.showPassword}
             aria-pressed={showPassword}
-            className="text-foreground-subtle hover:text-foreground focus-visible:ring-ring -m-1 flex size-6 items-center justify-center rounded-sm outline-none focus-visible:ring-2"
+            className={innerButton}
           >
             {showPassword ? (
               <EyeOff className="size-4" aria-hidden />
@@ -241,7 +263,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       </div>
 
       {error ? (
-        <p id={errorId} role="alert" className="text-danger-text text-xs">
+        <p id={errorId} className="text-danger-text text-xs">
           {error}
         </p>
       ) : helperText ? (

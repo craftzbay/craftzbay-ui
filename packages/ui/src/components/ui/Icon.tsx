@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  lazy,
-  Suspense,
-  useMemo,
-  type LazyExoticComponent,
-  type ReactNode,
-} from 'react';
+import { lazy, Suspense, useMemo, type LazyExoticComponent, type ReactNode } from 'react';
 import dynamicIconImports from 'lucide-react/dynamicIconImports';
 import type { LucideIcon, LucideProps } from 'lucide-react';
 
@@ -19,11 +13,23 @@ export const iconNames = Object.keys(dynamicIconImports) as IconName[];
 // lazy() must return a stable component per name or React remounts (and
 // re-suspends) on every render.
 const cache = new Map<IconName, LazyExoticComponent<LucideIcon>>();
+const warned = new Set<string>();
 
-function getIcon(name: IconName): LazyExoticComponent<LucideIcon> {
+function getIcon(name: IconName): LazyExoticComponent<LucideIcon> | null {
   const cached = cache.get(name);
   if (cached) return cached;
-  const created = lazy(dynamicIconImports[name]);
+  const loader = dynamicIconImports[name];
+  if (typeof loader !== 'function') {
+    // Unknown name (data-driven input) → render nothing, warn once in dev.
+    if (process.env.NODE_ENV !== 'production' && !warned.has(name)) {
+      warned.add(name);
+      console.warn(
+        `[@craftzbay/ui] <Icon name="${name}"> is not a lucide icon; rendering nothing.`,
+      );
+    }
+    return null;
+  }
+  const created = lazy(loader);
   cache.set(name, created);
   return created;
 }
@@ -61,9 +67,12 @@ export function Icon({ name, fallback, ...props }: IconProps) {
   const placeholder = fallback ?? (
     <span
       aria-hidden
+      className={props.className}
       style={{ display: 'inline-block', width: props.size ?? '1em', height: props.size ?? '1em' }}
     />
   );
+
+  if (!LucideIcon) return null;
 
   return (
     <Suspense fallback={placeholder}>

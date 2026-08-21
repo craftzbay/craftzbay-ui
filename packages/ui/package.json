@@ -74,7 +74,8 @@
     "changeset:version": "changeset version",
     "changeset:release": "pnpm build && changeset publish",
     "prepublishOnly": "pnpm build",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "test:treeshake": "vitest run src/__tests__/treeshake.test.ts"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.2",
@@ -142,10 +143,14 @@
   "peerDependencies": {
     "react": "^18 || ^19",
     "react-dom": "^18 || ^19",
-    "tailwindcss": "^4"
+    "tailwindcss": "^4",
+    "tw-animate-css": "^1"
   },
   "peerDependenciesMeta": {
     "tailwindcss": {
+      "optional": true
+    },
+    "tw-animate-css": {
       "optional": true
     }
   }

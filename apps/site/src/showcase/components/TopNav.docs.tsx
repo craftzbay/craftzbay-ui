@@ -14,12 +14,14 @@ const doc: ComponentDoc = {
     {
       title: 'Default',
       preview: (
-        <div className="w-full max-w-2xl overflow-hidden rounded-md border border-border">
+        <div className="border-border w-full max-w-2xl overflow-hidden rounded-md border">
           <TopNav
             logo={<span className="text-sm font-semibold">Atlas</span>}
             nav={
               <nav className="flex items-center gap-3 text-sm">
-                <TopNavLink href="#" active>Home</TopNavLink>
+                <TopNavLink href="#" active>
+                  Home
+                </TopNavLink>
                 <TopNavLink href="#">Projects</TopNavLink>
                 <TopNavLink href="#">Members</TopNavLink>
               </nav>
@@ -46,23 +48,28 @@ const doc: ComponentDoc = {
       rows: [
         { name: 'logo', type: 'ReactNode', description: 'Leftmost slot — brand mark or wordmark.' },
         { name: 'nav', type: 'ReactNode', description: 'Center slot — link list.' },
-        { name: 'actions', type: 'ReactNode', description: 'Right slot — search, profile, notifications.' },
+        {
+          name: 'actions',
+          type: 'ReactNode',
+          description: 'Right slot — search, profile, notifications.',
+        },
       ],
     },
     {
       title: 'TopNavLink',
       rows: [
         { name: 'href', type: 'string', required: true, description: 'Destination.' },
-        { name: 'active', type: 'boolean', default: 'false', description: 'Highlights as current.' },
+        {
+          name: 'active',
+          type: 'boolean',
+          default: 'false',
+          description: 'Highlights as current.',
+        },
       ],
     },
   ],
-  accessibility: [
-    'TopNavLink with `active` sets aria-current="page".',
-  ],
-  related: [
-    { slug: 'sidebar', reason: 'For vertical app nav.' },
-  ],
+  accessibility: ['TopNavLink with `active` sets aria-current="page".'],
+  related: [{ slug: 'sidebar', reason: 'For vertical app nav.' }],
 };
 
 export default doc;

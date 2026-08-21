@@ -3,10 +3,11 @@
 import {
   forwardRef,
   useEffect,
-  useState,
   type ComponentPropsWithoutRef,
+  type Dispatch,
   type ElementRef,
   type ReactNode,
+  type SetStateAction,
 } from 'react';
 import { Command as CommandPrimitive } from 'cmdk';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
@@ -61,10 +62,12 @@ CommandInput.displayName = 'CommandInput';
 export const CommandList = forwardRef<
   ElementRef<typeof CommandPrimitive.List>,
   ComponentPropsWithoutRef<typeof CommandPrimitive.List>
->(function CommandList({ className, ...props }, ref) {
+>(function CommandList({ className, label, ...props }, ref) {
+  const strings = useStrings();
   return (
     <CommandPrimitive.List
       ref={ref}
+      label={label ?? strings.command.suggestions}
       className={cn('max-h-[320px] overflow-y-auto p-1', className)}
       {...props}
     />
@@ -75,11 +78,11 @@ CommandList.displayName = 'CommandList';
 export const CommandEmpty = forwardRef<
   ElementRef<typeof CommandPrimitive.Empty>,
   ComponentPropsWithoutRef<typeof CommandPrimitive.Empty>
->(function CommandEmpty(props, ref) {
+>(function CommandEmpty({ className, ...props }, ref) {
   return (
     <CommandPrimitive.Empty
       ref={ref}
-      className="text-foreground-subtle py-8 text-center text-sm"
+      className={cn('text-foreground-subtle py-8 text-center text-sm', className)}
       {...props}
     />
   );
@@ -158,6 +161,7 @@ export function CommandShortcut({
     </span>
   );
 }
+CommandShortcut.displayName = 'CommandShortcut';
 
 /* -----------------------------------------------------------------------------
  *  Dialog wrapper — a ready-to-use ⌘K palette.
@@ -227,14 +231,13 @@ export function CommandDialog({ open, onOpenChange, children, title }: CommandDi
  * @dont Hide essential actions behind the palette only — keep at least one
  *       button entry in the UI.
  */
-export function useCommandPaletteShortcut(setOpen: (open: boolean) => void): void {
-  const [_, force] = useState(0);
+export function useCommandPaletteShortcut(setOpen: Dispatch<SetStateAction<boolean>>): void {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+      if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey) && !e.altKey) {
         e.preventDefault();
-        setOpen(true);
-        force((n) => n + 1);
+        // Functional update: ⌘K toggles without the hook tracking open state.
+        setOpen((prev) => !prev);
       }
     };
     window.addEventListener('keydown', onKey);

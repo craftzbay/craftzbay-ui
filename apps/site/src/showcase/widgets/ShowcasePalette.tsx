@@ -72,7 +72,7 @@ export function ShowcasePalette({
           {components.map((it) => (
             <CommandItem key={it.href} value={it.value} onSelect={() => go(it.href)}>
               <span>{it.label}</span>
-              <span className="ml-auto text-xs text-foreground-subtle">{it.hint}</span>
+              <span className="text-foreground-subtle ml-auto text-xs">{it.hint}</span>
             </CommandItem>
           ))}
         </CommandGroup>
@@ -88,7 +88,7 @@ export function ShowcasePalette({
               }}
             >
               <span>{it.label}</span>
-              <span className="ml-auto text-xs text-foreground-subtle">Preview ↗</span>
+              <span className="text-foreground-subtle ml-auto text-xs">Preview ↗</span>
             </CommandItem>
           ))}
         </CommandGroup>
@@ -97,7 +97,7 @@ export function ShowcasePalette({
           {guides.map((it) => (
             <CommandItem key={it.href} value={it.value} onSelect={() => go(it.href)}>
               <span>{it.label}</span>
-              <span className="ml-auto text-xs text-foreground-subtle">Guide</span>
+              <span className="text-foreground-subtle ml-auto text-xs">Guide</span>
             </CommandItem>
           ))}
         </CommandGroup>

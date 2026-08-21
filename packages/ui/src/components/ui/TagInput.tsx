@@ -137,7 +137,8 @@ export const TagInput = forwardRef<HTMLDivElement, TagInputProps>(function TagIn
             <button
               type="button"
               onClick={() => remove(i)}
-              className="text-foreground-muted hover:bg-background-subtle hover:text-foreground focus-visible:ring-ring rounded-sm p-0.5 outline-none focus-visible:ring-2"
+              // 16px glyph box + halo → ≥24px hit area (WCAG 2.5.8) without growing the chip.
+              className="text-foreground-muted hover:bg-background-subtle hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background relative rounded-sm p-0.5 outline-none before:absolute before:-inset-1.5 before:content-[''] focus-visible:ring-2 focus-visible:ring-offset-1"
               aria-label={formatString(strings.tagInput.remove, { tag: t })}
             >
               <X className="size-3" aria-hidden />
@@ -164,7 +165,7 @@ export const TagInput = forwardRef<HTMLDivElement, TagInputProps>(function TagIn
         />
       </div>
       {hasErrorMessage ? (
-        <p id={errorId} role="alert" className="text-danger-text text-xs">
+        <p id={errorId} className="text-danger-text text-xs">
           {error}
         </p>
       ) : description ? (

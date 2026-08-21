@@ -1,6 +1,15 @@
 'use client';
 
-import { useCallback, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  type HTMLAttributes,
+  type KeyboardEvent,
+  type ReactNode,
+} from 'react';
 import { ChevronRight, File as FileIcon, Folder, FolderOpen } from '@/icons';
 import { cn } from '@/lib/utils';
 import { useStrings } from '@/hooks/use-strings';
@@ -14,7 +23,7 @@ export interface TreeNode {
   icon?: ReactNode;
 }
 
-export interface TreeProps {
+export interface TreeProps extends Omit<HTMLAttributes<HTMLUListElement>, 'onSelect'> {
   /** The root nodes. */
   data: TreeNode[];
   /** Ids to expand by default (uncontrolled). */
@@ -23,15 +32,23 @@ export interface TreeProps {
   expanded?: string[];
   /** Called with the full next set of expanded ids. */
   onExpandedChange?: (next: string[]) => void;
-  /** Currently selected node id (controlled). Alias: `selected`. */
+  /**
+   * @deprecated Use `selected` + `onSelectedChange`. Kept for backward
+   * compatibility; ignored when `selected` is present.
+   */
   selectedId?: string;
-  /** Controlled selected id. Takes precedence over `selectedId`. */
+  /**
+   * Controlled selected id. The component is controlled whenever this key is
+   * present in props (even as `undefined`), mirroring React inputs.
+   */
   selected?: string;
   /** Default selected id (uncontrolled). */
   defaultSelected?: string;
-  /** Called when a node is activated (click / Enter / Space). */
+  /**
+   * @deprecated Use `onSelectedChange`. Still called on every activation.
+   */
   onSelect?: (id: string) => void;
-  /** Alias of `onSelect` for the controlled `selected` pair. */
+  /** Called when a node is activated (click / Enter / Space). */
   onSelectedChange?: (id: string) => void;
   /** Accessible name for the tree. */
   'aria-label'?: string;
@@ -56,20 +73,23 @@ interface FlatNode {
  * Expansion and selection are uncontrolled by default; pass
  * `expanded`/`onExpandedChange` and `selected`/`onSelectedChange` to control.
  */
-export function Tree({
-  data,
-  defaultExpanded = [],
-  expanded: expandedProp,
-  onExpandedChange,
-  selectedId,
-  selected: selectedProp,
-  defaultSelected,
-  onSelect,
-  onSelectedChange,
-  className,
-  'aria-label': ariaLabel,
-  'aria-labelledby': ariaLabelledby,
-}: TreeProps) {
+export const Tree = forwardRef<HTMLUListElement, TreeProps>(function Tree(props, ref) {
+  const {
+    data,
+    defaultExpanded = [],
+    expanded: expandedProp,
+    onExpandedChange,
+    selectedId,
+    selected: selectedProp,
+    defaultSelected,
+    onSelect,
+    onSelectedChange,
+    className,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledby,
+    ...rest
+  } = props;
+  const isControlled = 'selected' in props || 'selectedId' in props;
   const strings = useStrings();
   const [internalExpanded, setInternalExpanded] = useState<Set<string>>(
     () => new Set(defaultExpanded),
@@ -80,7 +100,7 @@ export function Tree({
   );
 
   const [internalSelected, setInternalSelected] = useState<string | undefined>(defaultSelected);
-  const selected = selectedProp ?? selectedId ?? internalSelected;
+  const selected = isControlled ? (selectedProp ?? selectedId) : internalSelected;
 
   const [focusedId, setFocusedId] = useState<string | undefined>(undefined);
   const itemRefs = useRef(new Map<string, HTMLLIElement>());
@@ -106,11 +126,11 @@ export function Tree({
 
   const select = useCallback(
     (id: string) => {
-      if (selectedProp === undefined && selectedId === undefined) setInternalSelected(id);
+      if (!isControlled) setInternalSelected(id);
       onSelect?.(id);
       onSelectedChange?.(id);
     },
-    [onSelect, onSelectedChange, selectedProp, selectedId],
+    [onSelect, onSelectedChange, isControlled],
   );
 
   // Flatten the *visible* nodes in DOM order — this is what arrow keys walk.
@@ -225,7 +245,7 @@ export function Tree({
         className="outline-none"
       >
         <div
-          style={{ paddingLeft: (level - 1) * 16 + 8 }}
+          style={{ paddingLeft: `${level - 1 + 0.5}rem` }}
           className={cn(
             'flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pr-2 text-left text-sm',
             'hover:bg-background-muted',
@@ -267,13 +287,15 @@ export function Tree({
 
   return (
     <ul
+      ref={ref}
       role="tree"
       aria-label={ariaLabel ?? (ariaLabelledby ? undefined : strings.tree.label)}
       aria-labelledby={ariaLabelledby}
       className={cn('flex flex-col gap-0.5', className)}
+      {...rest}
     >
       {data.map((n, i) => renderNode(n, 1, data.length, i + 1, null))}
     </ul>
   );
-}
+});
 Tree.displayName = 'Tree';

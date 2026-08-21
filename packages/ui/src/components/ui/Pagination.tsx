@@ -114,8 +114,16 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
   const pageSizeId = useId();
   const pages = useMemo(() => pageRange(page, pageCount), [page, pageCount]);
 
-  const from = pageSize ? (page - 1) * pageSize + 1 : undefined;
-  const to = pageSize && totalItems ? Math.min(page * pageSize, totalItems) : undefined;
+  const empty = !totalItems || pageCount <= 0;
+  const from = pageSize === undefined ? undefined : empty ? 0 : (page - 1) * pageSize + 1;
+  const to =
+    pageSize === undefined || totalItems === undefined
+      ? undefined
+      : empty
+        ? 0
+        : Math.min(page * pageSize, totalItems);
+  const atStart = page <= 1 || pageCount <= 0;
+  const atEnd = page >= pageCount;
 
   const goto = (p: number) => {
     if (p < 1 || p > pageCount || p === page) return;
@@ -161,7 +169,7 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
             <button
               type="button"
               aria-label={labels.first}
-              disabled={page === 1}
+              disabled={atStart}
               onClick={() => goto(1)}
               className={navButtonClass}
             >
@@ -173,7 +181,7 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
           <button
             type="button"
             aria-label={labels.prev}
-            disabled={page === 1}
+            disabled={atStart}
             onClick={() => goto(page - 1)}
             className={navButtonClass}
           >
@@ -214,7 +222,7 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
           <button
             type="button"
             aria-label={labels.next}
-            disabled={page === pageCount}
+            disabled={atEnd}
             onClick={() => goto(page + 1)}
             className={navButtonClass}
           >
@@ -226,7 +234,7 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
             <button
               type="button"
               aria-label={labels.last}
-              disabled={page === pageCount}
+              disabled={atEnd}
               onClick={() => goto(pageCount)}
               className={navButtonClass}
             >

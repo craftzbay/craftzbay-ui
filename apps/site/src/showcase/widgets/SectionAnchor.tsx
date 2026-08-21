@@ -20,8 +20,8 @@ export function SectionAnchor({ id, level = 2, children, className }: SectionAnc
       className={cn(
         'group scroll-mt-24',
         level === 2
-          ? 'mb-3 mt-12 text-xl font-semibold tracking-tight'
-          : 'mb-2 mt-8 text-base font-semibold',
+          ? 'mt-12 mb-3 text-xl font-semibold tracking-tight'
+          : 'mt-8 mb-2 text-base font-semibold',
         className,
       )}
     >

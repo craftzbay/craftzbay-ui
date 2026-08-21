@@ -83,9 +83,7 @@ export function DocSidebar({
         ...s,
         groups: groupEntries(
           s.entries.filter(
-            (e) =>
-              e.label.toLowerCase().includes(q) ||
-              e.group.toLowerCase().includes(q),
+            (e) => e.label.toLowerCase().includes(q) || e.group.toLowerCase().includes(q),
           ),
         ),
       }))
@@ -150,8 +148,8 @@ export function DocSidebar({
     <aside
       className={
         variant === 'mobile'
-          ? 'h-full w-full overflow-y-auto bg-background px-4 py-4'
-          : 'sticky top-14 hidden h-[calc(100vh-3.5rem)] w-64 shrink-0 overflow-y-auto border-r border-border bg-background px-4 py-6 md:block'
+          ? 'bg-background h-full w-full overflow-y-auto px-4 py-4'
+          : 'border-border bg-background sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-64 shrink-0 overflow-y-auto border-r px-4 py-6 md:block'
       }
     >
       <div className="mb-4">
@@ -168,7 +166,7 @@ export function DocSidebar({
           onClear={() => setQuery('')}
         />
         {isSearching && flatResults.length > 0 && (
-          <p className="mt-1.5 px-2 text-xs text-foreground-subtle">
+          <p className="text-foreground-subtle mt-1.5 px-2 text-xs">
             ↑↓ to navigate · ↵ to open · Esc to clear
           </p>
         )}
@@ -177,8 +175,7 @@ export function DocSidebar({
       {!isSearching && topLinks.length > 0 && (
         <nav className="mb-6 flex flex-col gap-px">
           {topLinks.map((link) => {
-            const isActive =
-              link.route.kind === current?.kind && !('slug' in link.route);
+            const isActive = link.route.kind === current?.kind && !('slug' in link.route);
             return (
               <SidebarLink
                 key={link.label}
@@ -194,22 +191,20 @@ export function DocSidebar({
       )}
 
       {isSearching && renderedSections.length === 0 && (
-        <p className="px-2 py-4 text-xs text-foreground-muted">
-          No matches for "{query}".
-        </p>
+        <p className="text-foreground-muted px-2 py-4 text-xs">No matches for "{query}".</p>
       )}
 
       {renderedSections.map((section) => (
         <div key={`${section.kind}-${section.title}`} className="mb-6">
           {isSearching && (
             <div className="mb-2 flex items-center justify-between px-2">
-              <div className="text-xs font-semibold uppercase tracking-wider text-foreground-subtle">
+              <div className="text-foreground-subtle text-xs font-semibold tracking-wider uppercase">
                 {KIND_LABEL[section.kind]}
               </div>
               {section.kind !== current?.kind && (
                 <a
                   href={`#${routeToHash(indexRouteFor(section.kind))}`}
-                  className="inline-flex items-center gap-0.5 text-xs text-foreground-subtle hover:text-accent"
+                  className="text-foreground-subtle hover:text-accent inline-flex items-center gap-0.5 text-xs"
                 >
                   Open <ArrowRight className="size-2.5" aria-hidden />
                 </a>
@@ -219,14 +214,13 @@ export function DocSidebar({
           {section.groups.map((group) => (
             <div key={group.name} className="mb-3">
               {!isSearching && (
-                <div className="mb-1 px-2 text-xs font-medium uppercase tracking-wide text-foreground-subtle/80">
+                <div className="text-foreground-subtle/80 mb-1 px-2 text-xs font-medium tracking-wide uppercase">
                   {group.name}
                 </div>
               )}
               <div className="flex flex-col gap-px">
                 {group.entries.map((entry) => {
-                  const active =
-                    current?.kind === section.kind && current.slug === entry.slug;
+                  const active = current?.kind === section.kind && current.slug === entry.slug;
                   const hash = routeToHash({
                     kind: section.kind,
                     slug: entry.slug,
@@ -281,10 +275,10 @@ function SidebarLink({
       className={cn(
         'rounded-md px-2 py-1.5 text-sm transition-colors',
         active
-          ? 'bg-accent-soft font-medium text-on-accent-soft'
+          ? 'bg-accent-soft text-on-accent-soft font-medium'
           : highlighted
-          ? 'bg-background-muted text-foreground'
-          : 'text-foreground-muted hover:bg-background-muted hover:text-foreground',
+            ? 'bg-background-muted text-foreground'
+            : 'text-foreground-muted hover:bg-background-muted hover:text-foreground',
       )}
     >
       {children}

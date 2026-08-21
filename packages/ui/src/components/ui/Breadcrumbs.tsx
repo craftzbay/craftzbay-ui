@@ -18,6 +18,8 @@ export interface BreadcrumbsProps extends HTMLAttributes<HTMLElement> {
   maxItems?: number;
   /** Custom link renderer (for next/link, react-router, etc.). */
   renderLink?: (href: string, children: ReactNode) => ReactNode;
+  /** sr-only text for the collapsed ellipsis. Default "Hidden items". */
+  collapsedLabel?: string;
 }
 
 /**
@@ -37,32 +39,46 @@ export interface BreadcrumbsProps extends HTMLAttributes<HTMLElement> {
  * @dont Use Breadcrumbs for flat navigation. Use TopNav links instead.
  */
 export const Breadcrumbs = forwardRef<HTMLElement, BreadcrumbsProps>(function Breadcrumbs(
-  { items, maxItems = 4, renderLink, className, ...props },
+  {
+    items,
+    maxItems = 4,
+    renderLink,
+    collapsedLabel: collapsedLabelProp,
+    className,
+    'aria-label': ariaLabel,
+    ...props
+  },
   ref,
 ) {
   const strings = useStrings();
+  const collapsedLabel = collapsedLabelProp ?? strings.breadcrumbs.collapsed;
   const shouldCollapse = items.length > maxItems;
-  const displayItems =
-    !shouldCollapse
-      ? items
-      : [items[0], { collapsed: true } as const, ...items.slice(-2)];
+  const displayItems = !shouldCollapse
+    ? items
+    : [items[0], { collapsed: true } as const, ...items.slice(-2)];
 
   return (
-    <nav ref={ref} aria-label={props['aria-label'] ?? strings.breadcrumbs.label} className={cn('text-sm', className)} {...props}>
-      <ol className="flex flex-wrap items-center gap-1.5 text-foreground-subtle">
+    <nav
+      ref={ref}
+      aria-label={ariaLabel ?? strings.breadcrumbs.label}
+      className={cn('text-sm', className)}
+      {...props}
+    >
+      <ol className="text-foreground-subtle flex flex-wrap items-center gap-1.5">
         {displayItems.map((it, i) => {
           const isLast = i === displayItems.length - 1;
           if ('collapsed' in it) {
             return (
               <li key={`ellipsis-${i}`} className="flex items-center gap-1.5">
                 <MoreHorizontal className="size-4" aria-hidden />
+                <span className="sr-only">{collapsedLabel}</span>
                 <ChevronRight className="size-3.5" aria-hidden />
               </li>
             );
           }
           const item = it as BreadcrumbItem;
           const labelNode = isLast ? (
-            <span aria-current="page" className="font-medium text-foreground">
+            <span aria-current="page" className="text-foreground font-medium">
               {item.label}
             </span>
           ) : item.href ? (
@@ -71,7 +87,7 @@ export const Breadcrumbs = forwardRef<HTMLElement, BreadcrumbsProps>(function Br
             ) : (
               <a
                 href={item.href}
-                className="hover:text-foreground transition-colors duration-[var(--duration-fast)] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+                className="hover:text-foreground focus-visible:ring-ring rounded-sm transition-colors duration-[var(--duration-fast)] outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
               >
                 {item.label}
               </a>

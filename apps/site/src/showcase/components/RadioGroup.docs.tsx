@@ -32,9 +32,23 @@ const doc: ComponentDoc = {
       rows: [
         { name: 'value', type: 'string', description: 'Controlled selection.' },
         { name: 'defaultValue', type: 'string', description: 'Uncontrolled initial.' },
-        { name: 'onValueChange', type: '(value: string) => void', description: 'Fires on selection.' },
-        { name: 'orientation', type: `'horizontal' | 'vertical'`, default: `'vertical'`, description: 'Layout direction.' },
-        { name: 'disabled', type: 'boolean', default: 'false', description: 'Disables the whole group.' },
+        {
+          name: 'onValueChange',
+          type: '(value: string) => void',
+          description: 'Fires on selection.',
+        },
+        {
+          name: 'orientation',
+          type: `'horizontal' | 'vertical'`,
+          default: `'vertical'`,
+          description: 'Layout direction.',
+        },
+        {
+          name: 'disabled',
+          type: 'boolean',
+          default: 'false',
+          description: 'Disables the whole group.',
+        },
       ],
     },
     {
@@ -43,7 +57,12 @@ const doc: ComponentDoc = {
         { name: 'value', type: 'string', required: true, description: 'Reported when selected.' },
         { name: 'label', type: 'ReactNode', description: 'Primary label.' },
         { name: 'description', type: 'ReactNode', description: 'Optional secondary text.' },
-        { name: 'disabled', type: 'boolean', default: 'false', description: 'Skip in keyboard nav.' },
+        {
+          name: 'disabled',
+          type: 'boolean',
+          default: 'false',
+          description: 'Skip in keyboard nav.',
+        },
       ],
     },
   ],

@@ -16,16 +16,18 @@ function BreakpointIndicator() {
     <Card>
       <CardContent className="space-y-3 py-5">
         <div className="flex items-baseline justify-between gap-3">
-          <span className="text-xs uppercase tracking-wider text-foreground-subtle">
+          <span className="text-foreground-subtle text-xs tracking-wider uppercase">
             Active breakpoint
           </span>
-          <Badge tone="accent" className="text-base">{active}</Badge>
+          <Badge tone="accent" className="text-base">
+            {active}
+          </Badge>
         </div>
-        <p className="text-xs text-foreground-muted">
-          Resize your browser. The hook returns booleans for each min-width media query —
-          chain them or render layout variants directly.
+        <p className="text-foreground-muted text-xs">
+          Resize your browser. The hook returns booleans for each min-width media query — chain them
+          or render layout variants directly.
         </p>
-        <div className="grid grid-cols-5 gap-1 text-center text-xs uppercase tracking-wider">
+        <div className="grid grid-cols-5 gap-1 text-center text-xs tracking-wider uppercase">
           {[
             { label: 'sm', on: sm },
             { label: 'md', on: md },
@@ -37,8 +39,8 @@ function BreakpointIndicator() {
               key={b.label}
               className={
                 b.on
-                  ? 'rounded-sm bg-accent-soft px-2 py-1 text-on-accent-soft'
-                  : 'rounded-sm bg-background-muted px-2 py-1 text-foreground-subtle'
+                  ? 'bg-accent-soft text-on-accent-soft rounded-sm px-2 py-1'
+                  : 'bg-background-muted text-foreground-subtle rounded-sm px-2 py-1'
               }
             >
               {b.label}
@@ -55,11 +57,21 @@ export function ResponsiveBody() {
     <div className="prose-block">
       <h2>Breakpoints (Tailwind v4 defaults)</h2>
       <ul>
-        <li><code>sm</code> — 640px</li>
-        <li><code>md</code> — 768px</li>
-        <li><code>lg</code> — 1024px</li>
-        <li><code>xl</code> — 1280px</li>
-        <li><code>2xl</code> — 1536px</li>
+        <li>
+          <code>sm</code> — 640px
+        </li>
+        <li>
+          <code>md</code> — 768px
+        </li>
+        <li>
+          <code>lg</code> — 1024px
+        </li>
+        <li>
+          <code>xl</code> — 1280px
+        </li>
+        <li>
+          <code>2xl</code> — 1536px
+        </li>
       </ul>
 
       <h2>Live breakpoint indicator</h2>
@@ -67,11 +79,23 @@ export function ResponsiveBody() {
 
       <h2>Components with built-in responsive behavior</h2>
       <ul>
-        <li><b>Sidebar</b> — collapses to icon-only at <code>md</code>. Use <code>useSidebar()</code> to react to collapsed state.</li>
-        <li><b>Dialog</b> — full-screen on mobile (~&lt; 640 px), centered modal on larger.</li>
-        <li><b>Sheet vs Drawer</b> — switch by intent: right-side sheets often become bottom drawers on touch.</li>
-        <li><b>AppShell TopBar</b> — collapses to a hamburger + mobile sheet at <code>md</code>.</li>
-        <li><b>DataGrid</b> — its container scrolls horizontally; cells don't reflow.</li>
+        <li>
+          <b>Sidebar</b> — collapses to icon-only at <code>md</code>. Use <code>useSidebar()</code>{' '}
+          to react to collapsed state.
+        </li>
+        <li>
+          <b>Dialog</b> — full-screen on mobile (~&lt; 640 px), centered modal on larger.
+        </li>
+        <li>
+          <b>Sheet vs Drawer</b> — switch by intent: right-side sheets often become bottom drawers
+          on touch.
+        </li>
+        <li>
+          <b>AppShell TopBar</b> — collapses to a hamburger + mobile sheet at <code>md</code>.
+        </li>
+        <li>
+          <b>DataGrid</b> — its container scrolls horizontally; cells don't reflow.
+        </li>
       </ul>
 
       <h2>useMediaQuery hook</h2>
@@ -85,8 +109,8 @@ return isMobile ? <Drawer>{children}</Drawer> : <Sheet>{children}</Sheet>;`}
 
       <h2>prefers-reduced-motion</h2>
       <p>
-        The library respects <code>prefers-reduced-motion</code> automatically. To branch on it
-        in your own code:
+        The library respects <code>prefers-reduced-motion</code> automatically. To branch on it in
+        your own code:
       </p>
       <CodeBlock
         code={`import { usePrefersReducedMotion } from '@craftzbay/ui';

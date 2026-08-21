@@ -141,7 +141,5 @@ export function getComponentDoc(slug: string): ComponentDoc | undefined {
 }
 
 export function getRelatedDocs(slugs: string[]): ComponentDoc[] {
-  return slugs
-    .map((s) => getComponentDoc(s))
-    .filter((d): d is ComponentDoc => Boolean(d));
+  return slugs.map((s) => getComponentDoc(s)).filter((d): d is ComponentDoc => Boolean(d));
 }

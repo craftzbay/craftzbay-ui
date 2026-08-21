@@ -13,6 +13,15 @@ export interface UiStrings {
   dialog: { close: string };
   sheet: { close: string };
   toast: { close: string; region: string };
+  drawer: { close: string };
+  command: { suggestions: string };
+  calendar: {
+    previous: string;
+    next: string;
+    chooseMonth: string;
+    chooseYear: string;
+    nav: string;
+  };
   confirmationDialog: { confirm: string; cancel: string };
   commandDialog: { title: string };
   carousel: { label: string; previous: string; next: string; slide: string };
@@ -27,10 +36,17 @@ export interface UiStrings {
     perPage: string;
     nav: string;
   };
-  breadcrumbs: { label: string };
-  stepper: { label: string };
+  breadcrumbs: { label: string; collapsed: string };
+  stepper: { label: string; complete: string; current: string; upcoming: string };
+  topNav: { label: string };
   sidebar: { label: string; collapse: string; expand: string; collapseShort: string };
-  combobox: { placeholder: string; searchPlaceholder: string; empty: string; clear: string };
+  combobox: {
+    placeholder: string;
+    searchPlaceholder: string;
+    empty: string;
+    clear: string;
+    loadError: string;
+  };
   multiSelect: { placeholder: string; empty: string; clearAll: string; remove: string };
   tagInput: { placeholder: string; remove: string };
   dataGrid: {
@@ -41,7 +57,7 @@ export interface UiStrings {
     filterRows: string;
   };
   datePicker: { pickDate: string; pickRange: string };
-  fileUpload: { drop: string; remove: string };
+  fileUpload: { drop: string; remove: string; bytes: string; kilobytes: string; megabytes: string };
   input: { clear: string; showPassword: string; hidePassword: string };
   slider: { minimum: string; maximum: string; value: string };
   spinner: { loading: string };
@@ -65,6 +81,9 @@ export interface UiStrings {
     viewAsTable: string;
     hideTable: string;
     tableCaption: string;
+    summary: string;
+    point: string;
+    seriesNav: string;
   };
   relativeTime: {
     justNow: string;
@@ -85,6 +104,15 @@ export const defaultStrings: UiStrings = {
   dialog: { close: 'Close' },
   sheet: { close: 'Close' },
   toast: { close: 'Close', region: 'Notifications' },
+  drawer: { close: 'Close' },
+  command: { suggestions: 'Suggestions' },
+  calendar: {
+    previous: 'Previous month',
+    next: 'Next month',
+    chooseMonth: 'Choose the month',
+    chooseYear: 'Choose the year',
+    nav: 'Calendar navigation',
+  },
   confirmationDialog: { confirm: 'Confirm', cancel: 'Cancel' },
   commandDialog: { title: 'Command palette' },
   carousel: { label: 'Carousel', previous: 'Previous', next: 'Next', slide: '{index} of {count}' },
@@ -99,8 +127,9 @@ export const defaultStrings: UiStrings = {
     perPage: '{n} / page',
     nav: 'Pagination',
   },
-  breadcrumbs: { label: 'Breadcrumb' },
-  stepper: { label: 'Progress' },
+  breadcrumbs: { label: 'Breadcrumb', collapsed: 'Hidden items' },
+  stepper: { label: 'Progress', complete: 'Completed', current: 'Current', upcoming: 'Upcoming' },
+  topNav: { label: 'Primary' },
   sidebar: {
     label: 'Primary',
     collapse: 'Collapse sidebar',
@@ -112,6 +141,7 @@ export const defaultStrings: UiStrings = {
     searchPlaceholder: 'Search…',
     empty: 'No results.',
     clear: 'Clear selection',
+    loadError: "Couldn't load options.",
   },
   multiSelect: {
     placeholder: 'Select…',
@@ -128,7 +158,13 @@ export const defaultStrings: UiStrings = {
     filterRows: 'Filter rows',
   },
   datePicker: { pickDate: 'Pick a date', pickRange: 'Pick a range' },
-  fileUpload: { drop: 'Drop files here, or click to browse', remove: 'Remove {name}' },
+  fileUpload: {
+    drop: 'Drop files here, or click to browse',
+    remove: 'Remove {name}',
+    bytes: '{n} B',
+    kilobytes: '{n} KB',
+    megabytes: '{n} MB',
+  },
   input: { clear: 'Clear input', showPassword: 'Show password', hidePassword: 'Hide password' },
   slider: { minimum: 'Minimum', maximum: 'Maximum', value: 'Value' },
   spinner: { loading: 'Loading' },
@@ -152,6 +188,9 @@ export const defaultStrings: UiStrings = {
     viewAsTable: 'View as table',
     hideTable: 'Hide table',
     tableCaption: 'Data table for {name}',
+    summary: '{name}: {count} points, min {min}, max {max}, last {x}: {y}',
+    point: '{x}: {y}',
+    seriesNav: '{name}, {count} points. Use arrow keys to move between points.',
   },
   relativeTime: {
     justNow: 'just now',
@@ -175,13 +214,28 @@ export function formatString(
   });
 }
 
-/** Deep-merge a partial override on top of a complete strings object. */
+/** Deep-merge a partial override on top of a complete strings object. `undefined` leaves are ignored. */
 export function mergeStrings(base: UiStrings, override?: DeepPartial<UiStrings>): UiStrings {
   if (!override) return base;
-  const out = { ...base } as Record<string, Record<string, string>>;
-  for (const [group, values] of Object.entries(override)) {
-    if (!values) continue;
-    out[group] = { ...out[group], ...(values as Record<string, string>) };
+  return deepMerge(
+    base as unknown as Record<string, unknown>,
+    override as Record<string, unknown>,
+  ) as unknown as UiStrings;
+}
+
+function isPlainObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null && !Array.isArray(v);
+}
+
+function deepMerge(
+  base: Record<string, unknown>,
+  override: Record<string, unknown>,
+): Record<string, unknown> {
+  const out: Record<string, unknown> = { ...base };
+  for (const [key, value] of Object.entries(override)) {
+    if (value === undefined) continue;
+    const current = out[key];
+    out[key] = isPlainObject(value) && isPlainObject(current) ? deepMerge(current, value) : value;
   }
-  return out as unknown as UiStrings;
+  return out;
 }

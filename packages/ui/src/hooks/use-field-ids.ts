@@ -5,7 +5,7 @@ import { useId } from 'react';
 export interface FieldIds {
   /** Id for the control itself (`<input id>` / `<label htmlFor>`). */
   fieldId: string;
-  /** Id for the description / helper text element. */
+  /** Id for the description / helper text element (`<fieldId>-desc`). */
   helperId: string;
   /** Id for the validation message element. */
   errorId: string;
@@ -29,11 +29,16 @@ export interface FieldIds {
  */
 export function useFieldIds(
   id?: string,
-  present: { hasHelper?: boolean; hasError?: boolean; extra?: string } = {},
+  present: {
+    hasHelper?: boolean;
+    hasError?: boolean;
+    /** Consumer-supplied `aria-describedby` ids, appended after the helper / error id. */
+    extra?: string;
+  } = {},
 ): FieldIds {
   const autoId = useId();
   const fieldId = id ?? autoId;
-  const helperId = `${fieldId}-helper`;
+  const helperId = `${fieldId}-desc`;
   const errorId = `${fieldId}-error`;
   const parts = [
     present.hasError ? errorId : present.hasHelper ? helperId : undefined,

@@ -14,12 +14,12 @@ export function PropsTable({ groups }: PropsTableProps) {
       {groups.map((group, gi) => (
         <div key={gi}>
           {group.title && (
-            <h3 className="mb-3 text-sm font-semibold text-foreground">{group.title}</h3>
+            <h3 className="text-foreground mb-3 text-sm font-semibold">{group.title}</h3>
           )}
-          <div className="overflow-x-auto rounded-md border border-border">
+          <div className="border-border overflow-x-auto rounded-md border">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-border bg-background-subtle/60 text-xs uppercase tracking-wider text-foreground-subtle">
+                <tr className="border-border bg-background-subtle/60 text-foreground-subtle border-b text-xs tracking-wider uppercase">
                   <th className="px-3 py-2 font-medium">Prop</th>
                   <th className="px-3 py-2 font-medium">Type</th>
                   <th className="px-3 py-2 font-medium">Default</th>
@@ -28,18 +28,18 @@ export function PropsTable({ groups }: PropsTableProps) {
               </thead>
               <tbody>
                 {group.rows.map((r) => (
-                  <tr key={r.name} className="border-b border-border last:border-b-0 align-top">
-                    <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-foreground">
+                  <tr key={r.name} className="border-border border-b align-top last:border-b-0">
+                    <td className="text-foreground px-3 py-2 font-mono text-xs whitespace-nowrap">
                       {r.name}
-                      {r.required && <span className="ml-0.5 text-danger-text">*</span>}
+                      {r.required && <span className="text-danger-text ml-0.5">*</span>}
                     </td>
-                    <td className="px-3 py-2 font-mono text-xs text-foreground-muted">
-                      <span className="rounded bg-background-muted px-1.5 py-0.5">{r.type}</span>
+                    <td className="text-foreground-muted px-3 py-2 font-mono text-xs">
+                      <span className="bg-background-muted rounded px-1.5 py-0.5">{r.type}</span>
                     </td>
-                    <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-foreground-subtle">
+                    <td className="text-foreground-subtle px-3 py-2 font-mono text-xs whitespace-nowrap">
                       {r.default ?? '—'}
                     </td>
-                    <td className="px-3 py-2 text-foreground-muted">{r.description}</td>
+                    <td className="text-foreground-muted px-3 py-2">{r.description}</td>
                   </tr>
                 ))}
               </tbody>

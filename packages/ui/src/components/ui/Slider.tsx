@@ -3,6 +3,7 @@
 import {
   forwardRef,
   useId,
+  useState,
   type ComponentPropsWithoutRef,
   type ElementRef,
   type ReactNode,
@@ -47,10 +48,22 @@ export interface SliderProps extends Omit<
  */
 export const Slider = forwardRef<ElementRef<typeof SliderPrimitive.Root>, SliderProps>(
   function Slider(
-    { className, label, showValue, formatValue = (v) => String(v), value, defaultValue, ...props },
+    {
+      className,
+      label,
+      showValue,
+      formatValue = (v) => String(v),
+      value,
+      defaultValue,
+      onValueChange,
+      ...props
+    },
     ref,
   ) {
-    const currentValue = value ?? defaultValue ?? [0];
+    // Uncontrolled sliders track their own value so `showValue` stays live.
+    const [internal, setInternal] = useState<number[]>(defaultValue ?? [0]);
+    const isControlled = value !== undefined;
+    const currentValue = isControlled ? value : internal;
     const isRange = currentValue.length > 1;
     const labelId = useId();
     const strings = useStrings();
@@ -87,6 +100,10 @@ export const Slider = forwardRef<ElementRef<typeof SliderPrimitive.Root>, Slider
           ref={ref}
           value={value}
           defaultValue={defaultValue}
+          onValueChange={(v) => {
+            if (!isControlled) setInternal(v);
+            onValueChange?.(v);
+          }}
           className="relative flex w-full touch-none items-center py-3.5 select-none"
           aria-labelledby={label && !stringLabel ? labelId : undefined}
           {...props}
@@ -103,7 +120,7 @@ export const Slider = forwardRef<ElementRef<typeof SliderPrimitive.Root>, Slider
                 'before:absolute before:top-1/2 before:left-1/2 before:size-11 before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:content-[""]',
                 'focus-visible:ring-ring focus-visible:ring-offset-background outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
                 'transition-transform duration-[var(--duration-fast)] ease-[var(--ease-out)]',
-                'hover:scale-110 disabled:pointer-events-none disabled:opacity-50',
+                'hover:scale-110 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
               )}
               aria-label={thumbLabel(i)}
               aria-labelledby={!isRange && label && !stringLabel ? labelId : undefined}

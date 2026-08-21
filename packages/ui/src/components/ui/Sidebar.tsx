@@ -4,12 +4,15 @@ import {
   createContext,
   forwardRef,
   useContext,
+  useId,
   useState,
   type AnchorHTMLAttributes,
   type ButtonHTMLAttributes,
   type HTMLAttributes,
   type ReactNode,
+  type Ref,
 } from 'react';
+import { Slot } from '@radix-ui/react-slot';
 import { ChevronDown, ChevronsLeft, ChevronsRight } from '@/icons';
 import { cn } from '@/lib/utils';
 import { useStrings } from '@/hooks/use-strings';
@@ -68,6 +71,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
     footer,
     className,
     children,
+    'aria-label': ariaLabel,
     ...props
   },
   ref,
@@ -84,12 +88,12 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
     <SidebarContext.Provider value={{ collapsed }}>
       <nav
         ref={ref}
-        aria-label={props['aria-label'] ?? strings.sidebar.label}
+        aria-label={ariaLabel ?? strings.sidebar.label}
         className={cn(
-          'border-border bg-background-subtle sticky top-0 hidden h-screen shrink-0 flex-col gap-2 border-r md:flex',
+          'border-border bg-background-subtle sticky top-0 hidden h-dvh shrink-0 flex-col gap-2 border-r md:flex',
           // Deliberate motion exception: the rail's own width transitions (layout).
           // Only the rail and the main column it flanks move; no content inside reflows.
-          'transition-[width] duration-[var(--duration-base)] ease-[var(--ease-out)]',
+          'transition-[width] duration-[var(--duration-base)] ease-[var(--ease-out)] motion-reduce:transition-none',
           collapsed ? 'w-14' : 'w-60',
           className,
         )}
@@ -141,14 +145,24 @@ export interface SidebarSectionProps extends HTMLAttributes<HTMLDivElement> {
 
 export function SidebarSection({ label, className, children, ...props }: SidebarSectionProps) {
   const { collapsed } = useContext(SidebarContext);
+  const labelId = useId();
   return (
     <div className={cn('mb-3', className)} {...props}>
-      {label && !collapsed && (
-        <div className="text-foreground-subtle px-4 pt-2 pb-1 text-xs font-medium tracking-wide uppercase">
+      {label && (
+        // Kept in the DOM (sr-only) while collapsed so the list stays labelled.
+        <div
+          id={labelId}
+          className={cn(
+            'text-foreground-subtle px-4 pt-2 pb-1 text-xs font-medium tracking-wide uppercase',
+            collapsed && 'sr-only',
+          )}
+        >
           {label}
         </div>
       )}
-      <ul className="flex flex-col gap-px">{children}</ul>
+      <ul aria-labelledby={label ? labelId : undefined} className="flex flex-col gap-px">
+        {children}
+      </ul>
     </div>
   );
 }
@@ -168,6 +182,11 @@ interface SidebarItemBaseProps {
    * when that is a plain string.
    */
   tooltip?: ReactNode;
+  /**
+   * Render the child element (router `<Link>`) instead of `<a>`/`<button>`.
+   * The child receives className, aria-current and the item content.
+   */
+  asChild?: boolean;
 }
 
 type SidebarItemAnchorProps = SidebarItemBaseProps &
@@ -184,104 +203,150 @@ type SidebarItemButtonProps = SidebarItemBaseProps &
 /** Discriminated on `href`: with it the item is an anchor, without it a button. */
 export type SidebarItemProps = SidebarItemAnchorProps | SidebarItemButtonProps;
 
-export function SidebarItem(props: SidebarItemProps) {
-  const { icon, active, trailing, sub, tooltip, className, children, ...rest } = props;
-  const { collapsed } = useContext(SidebarContext);
+export const SidebarItem = forwardRef<HTMLElement, SidebarItemProps>(
+  function SidebarItem(props, ref) {
+    const { icon, active, trailing, sub, tooltip, asChild, className, children, ...rest } = props;
+    const { collapsed } = useContext(SidebarContext);
 
-  const classes = cn(
-    'flex h-8 w-full items-center gap-2 rounded-md px-2 text-sm outline-none',
-    'transition-colors duration-[var(--duration-fast)]',
-    'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-    active
-      ? 'bg-background-muted text-foreground font-medium'
-      : 'text-foreground-muted hover:bg-background-muted hover:text-foreground',
-    sub && !collapsed && 'ml-6',
-    collapsed && 'justify-center',
-    className,
-  );
-
-  const labelTitle = typeof children === 'string' ? children : undefined;
-
-  const content = (
-    <>
-      {icon && <span className="flex shrink-0 items-center [&_svg]:size-4">{icon}</span>}
-      {collapsed ? (
-        <span className="sr-only">{children}</span>
-      ) : (
-        <span className="flex-1 truncate text-left" title={labelTitle}>
-          {children}
-        </span>
-      )}
-      {!collapsed && trailing && <span className="ml-auto">{trailing}</span>}
-    </>
-  );
-
-  let element: ReactNode;
-  if (rest.href !== undefined) {
-    const { href, ...anchorProps } = rest as Omit<
-      SidebarItemAnchorProps,
-      keyof SidebarItemBaseProps
-    >;
-    element = (
-      <a
-        href={href}
-        aria-current={active ? 'page' : undefined}
-        className={classes}
-        {...anchorProps}
-      >
-        {content}
-      </a>
+    const classes = cn(
+      'flex h-8 w-full items-center gap-2 rounded-md px-2 text-sm outline-none',
+      'transition-colors duration-[var(--duration-fast)]',
+      'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+      active
+        ? 'bg-background-muted text-foreground font-medium'
+        : 'text-foreground-muted hover:bg-background-muted hover:text-foreground',
+      sub && !collapsed && 'ml-6',
+      collapsed && 'justify-center',
+      className,
     );
-  } else {
-    const {
-      href: _href,
-      type,
-      ...buttonProps
-    } = rest as Omit<SidebarItemButtonProps, keyof SidebarItemBaseProps>;
-    element = (
-      <button
-        type={type ?? 'button'}
-        aria-current={active ? 'page' : undefined}
-        className={classes}
-        {...buttonProps}
-      >
-        {content}
-      </button>
-    );
-  }
 
-  const tip = tooltip ?? labelTitle;
-  return (
-    <li className="px-2">
-      {collapsed && tip ? (
-        <Tooltip label={tip} side="right">
-          {element}
-        </Tooltip>
-      ) : (
-        element
-      )}
-    </li>
-  );
-}
+    const labelTitle = typeof children === 'string' ? children : undefined;
+    const tip = tooltip ?? labelTitle;
+    // Collapsed: the Tooltip already supplies the accessible name, so no
+    // sr-only copy — otherwise AT reads the label twice. Without a tooltip
+    // (non-string children) keep an sr-only label.
+    const showTooltip = collapsed && !!tip;
+
+    const content = (
+      <>
+        {icon && <span className="flex shrink-0 items-center [&_svg]:size-4">{icon}</span>}
+        {collapsed ? (
+          !showTooltip && <span className="sr-only">{children}</span>
+        ) : (
+          <span className="flex-1 truncate text-left" title={labelTitle}>
+            {children}
+          </span>
+        )}
+        {!collapsed && trailing && <span className="ml-auto">{trailing}</span>}
+      </>
+    );
+
+    let element: ReactNode;
+    if (asChild) {
+      const { href: _href, type: _type, ...slotProps } = rest as Record<string, unknown>;
+      element = (
+        <Slot
+          ref={ref}
+          aria-current={active ? 'page' : undefined}
+          className={classes}
+          {...(slotProps as HTMLAttributes<HTMLElement>)}
+        >
+          {children && typeof children === 'object' && 'props' in (children as object)
+            ? children
+            : null}
+        </Slot>
+      );
+    } else if (rest.href !== undefined) {
+      const { href, ...anchorProps } = rest as Omit<
+        SidebarItemAnchorProps,
+        keyof SidebarItemBaseProps
+      >;
+      element = (
+        <a
+          ref={ref as Ref<HTMLAnchorElement>}
+          href={href}
+          aria-current={active ? 'page' : undefined}
+          className={classes}
+          {...anchorProps}
+        >
+          {content}
+        </a>
+      );
+    } else {
+      const {
+        href: _href,
+        type,
+        ...buttonProps
+      } = rest as Omit<SidebarItemButtonProps, keyof SidebarItemBaseProps>;
+      element = (
+        <button
+          ref={ref as Ref<HTMLButtonElement>}
+          type={type ?? 'button'}
+          aria-current={active ? 'page' : undefined}
+          className={classes}
+          {...buttonProps}
+        >
+          {content}
+        </button>
+      );
+    }
+
+    return (
+      <li className="px-2">
+        {showTooltip ? (
+          <Tooltip label={tip} side="right">
+            {element}
+          </Tooltip>
+        ) : (
+          element
+        )}
+      </li>
+    );
+  },
+);
 SidebarItem.displayName = 'SidebarItem';
 
 /** Lightweight collapsible sub-section inside the sidebar. */
-export interface SidebarGroupProps {
+export interface SidebarGroupProps extends Omit<HTMLAttributes<HTMLLIElement>, 'children'> {
   icon?: ReactNode;
   label: ReactNode;
+  /** Initial open state (uncontrolled). */
   defaultOpen?: boolean;
+  /** Controlled open state. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   children: ReactNode;
 }
 
-export function SidebarGroup({ icon, label, defaultOpen = true, children }: SidebarGroupProps) {
+export const SidebarGroup = forwardRef<HTMLLIElement, SidebarGroupProps>(function SidebarGroup(
+  {
+    icon,
+    label,
+    defaultOpen = true,
+    open: controlled,
+    onOpenChange,
+    className,
+    children,
+    ...props
+  },
+  ref,
+) {
   const { collapsed } = useContext(SidebarContext);
-  const [open, setOpen] = useState(defaultOpen);
+  const [internal, setInternal] = useState(defaultOpen);
+  const open = controlled ?? internal;
+  const listId = useId();
+  const toggle = () => {
+    const next = !open;
+    if (controlled === undefined) setInternal(next);
+    onOpenChange?.(next);
+  };
   if (collapsed) return <>{children}</>;
   return (
-    <li>
+    <li ref={ref} className={className} {...props}>
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={toggle}
+        aria-controls={open ? listId : undefined}
         aria-expanded={open}
         className={cn(
           'text-foreground-muted mx-2 flex h-8 w-[calc(100%-1rem)] items-center gap-2 rounded-md px-2 text-sm outline-none',
@@ -297,8 +362,12 @@ export function SidebarGroup({ icon, label, defaultOpen = true, children }: Side
           aria-hidden
         />
       </button>
-      {open && <ul className="flex flex-col gap-px">{children}</ul>}
+      {open && (
+        <ul id={listId} className="flex flex-col gap-px">
+          {children}
+        </ul>
+      )}
     </li>
   );
-}
+});
 SidebarGroup.displayName = 'SidebarGroup';

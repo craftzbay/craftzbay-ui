@@ -49,7 +49,12 @@ const doc: ComponentDoc = {
   api: [
     {
       rows: [
-        { name: 'items', type: 'Array<{ label: ReactNode; href?: string }>', required: true, description: 'Trail items. The last item should omit href.' },
+        {
+          name: 'items',
+          type: 'Array<{ label: ReactNode; href?: string }>',
+          required: true,
+          description: 'Trail items. The last item should omit href.',
+        },
         { name: 'maxItems', type: 'number', default: '4', description: 'Collapse threshold.' },
       ],
     },

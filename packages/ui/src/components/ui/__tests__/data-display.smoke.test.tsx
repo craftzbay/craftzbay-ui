@@ -72,7 +72,7 @@ describe('Data Display (smoke)', () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 
-  it('TableRow selected exposes aria-selected; TableHead uppercase is opt-in', () => {
+  it('TableRow selected exposes data-state (aria-selected only for role=row); TableHead uppercase is opt-in', () => {
     render(
       <Table>
         <TableHeader>
@@ -88,7 +88,9 @@ describe('Data Display (smoke)', () => {
         </TableBody>
       </Table>,
     );
-    expect(screen.getByText('Picked').closest('tr')).toHaveAttribute('aria-selected', 'true');
+    const row = screen.getByText('Picked').closest('tr');
+    expect(row).toHaveAttribute('data-state', 'selected');
+    expect(row).not.toHaveAttribute('aria-selected');
     expect(screen.getByText('Plain')).not.toHaveClass('uppercase');
     expect(screen.getByText('Caps')).toHaveClass('uppercase');
   });
@@ -164,7 +166,7 @@ describe('Data Display (smoke)', () => {
     expect(container.querySelector('svg')).toBeInTheDocument();
   });
 
-  it('Charts are axe-clean with focusable points and a table fallback', async () => {
+  it('Charts are axe-clean with one tab stop per series and a table fallback', async () => {
     const { container } = render(
       <div>
         <LineChart
@@ -192,7 +194,8 @@ describe('Data Display (smoke)', () => {
     const table = container.querySelector('table[data-chart-table]');
     expect(table).toHaveClass('sr-only');
     expect(table?.querySelectorAll('tbody tr')).toHaveLength(2);
-    expect(screen.getByRole('img', { name: 'A — Feb: 2' })).toHaveAttribute('tabindex', '0');
+    expect(screen.getByRole('group', { name: /^A, 2 points/ })).toHaveAttribute('tabindex', '0');
+    expect(container.querySelectorAll('circle[tabindex], rect[tabindex]')).toHaveLength(0);
     expect(await axe(container)).toHaveNoViolations();
   });
 

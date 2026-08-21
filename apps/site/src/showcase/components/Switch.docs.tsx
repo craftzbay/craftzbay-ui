@@ -16,7 +16,11 @@ const doc: ComponentDoc = {
         <div className="flex flex-col gap-3">
           <Switch label="Email notifications" defaultChecked />
           <Switch label="SMS notifications" />
-          <Switch label="In-app notifications" defaultChecked description="Show toast banners in the bottom-right." />
+          <Switch
+            label="In-app notifications"
+            defaultChecked
+            description="Show toast banners in the bottom-right."
+          />
         </div>
       ),
       code: `<Switch label="Email notifications" defaultChecked />
@@ -38,10 +42,19 @@ const doc: ComponentDoc = {
       rows: [
         { name: 'checked', type: 'boolean', description: 'Controlled.' },
         { name: 'defaultChecked', type: 'boolean', description: 'Uncontrolled initial.' },
-        { name: 'onCheckedChange', type: '(checked: boolean) => void', description: 'Fires immediately on toggle.' },
+        {
+          name: 'onCheckedChange',
+          type: '(checked: boolean) => void',
+          description: 'Fires immediately on toggle.',
+        },
         { name: 'label', type: 'ReactNode', description: 'Primary label.' },
         { name: 'description', type: 'ReactNode', description: 'Secondary text below label.' },
-        { name: 'disabled', type: 'boolean', default: 'false', description: 'Disables interaction.' },
+        {
+          name: 'disabled',
+          type: 'boolean',
+          default: 'false',
+          description: 'Disables interaction.',
+        },
       ],
     },
   ],
@@ -49,9 +62,7 @@ const doc: ComponentDoc = {
     'Backed by @radix-ui/react-switch — Space toggles, label is clickable.',
     'aria-checked reflects state; respects prefers-reduced-motion for the slide.',
   ],
-  related: [
-    { slug: 'checkbox', reason: 'For deferred-apply boolean fields.' },
-  ],
+  related: [{ slug: 'checkbox', reason: 'For deferred-apply boolean fields.' }],
 };
 
 export default doc;

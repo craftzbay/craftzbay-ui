@@ -1,7 +1,9 @@
 import { createContext, forwardRef, useContext, type ReactNode } from 'react';
 import {
   Bell,
+  AlertTriangle,
   Check,
+  Circle,
   ChevronsUpDown,
   CreditCard,
   LogOut,
@@ -93,7 +95,7 @@ export function WorkspaceSwitcher({
           type="button"
           aria-label={collapsed ? `Workspace: ${ws.name}` : undefined}
           className={cn(
-            'flex items-center gap-2.5 rounded-md text-left transition-colors outline-none',
+            'flex items-center gap-2 rounded-md text-left transition-colors outline-none',
             'hover:bg-background-muted focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
             variant === 'bar' ? 'h-9 min-w-0 px-1.5' : 'h-10 w-full',
             variant === 'sidebar' && (collapsed ? 'justify-center px-0' : 'px-1.5'),
@@ -107,7 +109,9 @@ export function WorkspaceSwitcher({
           />
           {variant === 'bar' ? (
             <>
-              <span className="text-foreground truncate text-sm font-semibold">{ws.name}</span>
+              <span className="text-foreground truncate text-sm font-semibold" title={ws.name}>
+                {ws.name}
+              </span>
               <Badge tone="neutral" variant="outline" className="hidden sm:inline-flex">
                 {ws.plan}
               </Badge>
@@ -117,7 +121,10 @@ export function WorkspaceSwitcher({
             !collapsed && (
               <>
                 <span className="min-w-0 flex-1 leading-tight">
-                  <span className="text-foreground block truncate text-sm font-semibold">
+                  <span
+                    className="text-foreground block truncate text-sm font-semibold"
+                    title={ws.name}
+                  >
                     {ws.name}
                   </span>
                   <span className="text-foreground-subtle block text-xs">{ws.plan} plan</span>
@@ -132,17 +139,19 @@ export function WorkspaceSwitcher({
         <DropdownMenuLabel>Workspaces</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {WORKSPACES.map((w) => (
-          <DropdownMenuItem key={w.id} onSelect={() => onChange(w.id)} className="gap-2.5">
+          <DropdownMenuItem key={w.id} onSelect={() => onChange(w.id)} className="gap-2">
             <Avatar size="sm" fallback={w.initial} alt="" />
             <span className="flex min-w-0 flex-1 flex-col">
-              <span className="text-foreground truncate text-sm">{w.name}</span>
+              <span className="text-foreground truncate text-sm" title={w.name}>
+                {w.name}
+              </span>
               <span className="text-foreground-subtle text-xs">{w.plan}</span>
             </span>
             {w.id === value && <Check className="text-accent size-4" aria-hidden />}
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="gap-2.5">
+        <DropdownMenuItem className="gap-2">
           <span className="border-border text-foreground-subtle inline-flex size-6 items-center justify-center rounded-md border border-dashed">
             <Plus className="size-3.5" aria-hidden />
           </span>
@@ -214,12 +223,16 @@ function NavItems({
 function UserCard() {
   const { collapsed } = useSidebar();
   return (
-    <div className={cn('flex items-center gap-2.5', collapsed ? 'justify-center' : 'px-1')}>
+    <div className={cn('flex items-center gap-2', collapsed ? 'justify-center' : 'px-1')}>
       <Avatar size="sm" fallback={USER.initials} alt={USER.name} status="online" />
       {!collapsed && (
         <div className="min-w-0 leading-tight">
-          <div className="text-foreground truncate text-sm font-medium">{USER.name}</div>
-          <div className="text-foreground-subtle truncate text-xs">{USER.email}</div>
+          <div className="text-foreground truncate text-sm font-medium" title={USER.name}>
+            {USER.name}
+          </div>
+          <div className="text-foreground-subtle truncate text-xs" title={USER.email}>
+            {USER.email}
+          </div>
         </div>
       )}
     </div>
@@ -360,9 +373,9 @@ function ModuleTabs({
                 : undefined
             }
             className={cn(
-              'inline-flex h-8 shrink-0 snap-start items-center justify-center gap-1.5 rounded-[5px] px-2.5 text-sm whitespace-nowrap outline-none [&_svg]:size-4',
+              'inline-flex h-8 shrink-0 snap-start items-center justify-center gap-1.5 rounded-md px-2.5 text-sm whitespace-nowrap outline-none [&_svg]:size-4',
               'transition-colors duration-[var(--duration-fast)]',
-              'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-1',
+              'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
               active
                 ? 'bg-background text-foreground font-medium shadow-sm'
                 : 'text-foreground-muted hover:text-foreground',
@@ -375,6 +388,20 @@ function ModuleTabs({
       })}
     </div>
   );
+}
+
+/**
+ * Leading icon for status badges — shape + colour, so status never relies on
+ * colour alone. Decorative: the badge text carries the meaning.
+ */
+export function StatusIcon({
+  tone,
+}: {
+  tone: 'success' | 'warning' | 'danger' | 'neutral' | 'accent' | 'info';
+}) {
+  const Icon =
+    tone === 'success' ? Check : tone === 'danger' || tone === 'warning' ? AlertTriangle : Circle;
+  return <Icon className="size-3 shrink-0" aria-hidden />;
 }
 
 function PanelHeader({ label }: { label: string }) {
@@ -738,7 +765,7 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
               {NOTIFICATIONS.map((n) => (
                 <DropdownMenuItem
                   key={n.id}
-                  className="flex items-start gap-2.5"
+                  className="flex items-start gap-2"
                   onSelect={() => onNavigate('inbox')}
                 >
                   <Avatar size="xs" fallback={n.initials} alt="" className="mt-0.5" />

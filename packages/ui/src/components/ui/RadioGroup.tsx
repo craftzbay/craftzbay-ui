@@ -11,7 +11,7 @@ import * as RadioGroupPrimitive from '@radix-ui/react-radio-group';
 import { cn } from '@/lib/utils';
 
 export interface RadioGroupProps extends ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root> {
-  /** Lay out the radios horizontally (default) or vertically. */
+  /** Lay out the radios vertically (default) or horizontally. Also drives arrow-key navigation. */
   orientation?: 'horizontal' | 'vertical';
 }
 
@@ -20,6 +20,7 @@ export const RadioGroup = forwardRef<ElementRef<typeof RadioGroupPrimitive.Root>
     return (
       <RadioGroupPrimitive.Root
         ref={ref}
+        orientation={orientation}
         className={cn(
           'flex gap-3',
           orientation === 'vertical' ? 'flex-col' : 'flex-row flex-wrap',
@@ -56,10 +57,23 @@ export interface RadioItemProps extends Omit<
  * @dont Use RadioGroup for binary choices — use Switch.
  */
 export const RadioItem = forwardRef<ElementRef<typeof RadioGroupPrimitive.Item>, RadioItemProps>(
-  function RadioItem({ className, label, description, hideLabel, id, disabled, ...props }, ref) {
+  function RadioItem(
+    {
+      className,
+      label,
+      description,
+      hideLabel,
+      id,
+      disabled,
+      'aria-describedby': ariaDescribedby,
+      ...props
+    },
+    ref,
+  ) {
     const autoId = useId();
     const fieldId = id ?? autoId;
     const descId = description ? `${fieldId}-desc` : undefined;
+    const describedBy = [descId, ariaDescribedby].filter(Boolean).join(' ') || undefined;
 
     return (
       <div className={cn('flex items-start gap-2.5', className)}>
@@ -67,7 +81,7 @@ export const RadioItem = forwardRef<ElementRef<typeof RadioGroupPrimitive.Item>,
           ref={ref}
           id={fieldId}
           disabled={disabled}
-          aria-describedby={descId}
+          aria-describedby={describedBy}
           className={cn(
             'bg-card relative mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border',
             // WCAG 2.5.8: 16px visual box, ≥24px hit area via an invisible inset halo.
@@ -76,7 +90,7 @@ export const RadioItem = forwardRef<ElementRef<typeof RadioGroupPrimitive.Item>,
             'focus-visible:ring-ring focus-visible:ring-offset-background outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
             'data-[state=checked]:border-accent',
             'disabled:cursor-not-allowed disabled:opacity-50',
-            'border-border-input',
+            'border-border-input aria-invalid:border-danger',
           )}
           {...props}
         >
@@ -86,12 +100,13 @@ export const RadioItem = forwardRef<ElementRef<typeof RadioGroupPrimitive.Item>,
         </RadioGroupPrimitive.Item>
 
         {label && (
-          <div className={cn('flex flex-col gap-0.5', hideLabel && 'sr-only')}>
+          <div className="flex flex-col gap-0.5">
             <label
               htmlFor={fieldId}
               className={cn(
                 'text-foreground text-sm select-none',
                 disabled && 'cursor-not-allowed opacity-50',
+                hideLabel && 'sr-only',
               )}
             >
               {label}

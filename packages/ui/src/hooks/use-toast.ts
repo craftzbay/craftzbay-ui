@@ -1,9 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useSyncExternalStore, type ReactNode } from 'react';
 
 /* -----------------------------------------------------------------------------
- *  Minimal toast queue + hook. The host app mounts a single <ToastHub> near
+ *  Minimal toast queue + hook. The host app mounts a single <Toaster> near
  *  the root which subscribes to this store; any component can call
  *  `useToast().push({...})` from anywhere.
  *
@@ -13,7 +13,7 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 export type ToastVariant = 'default' | 'success' | 'warning' | 'danger' | 'info';
 
 export interface ToastDescriptor {
-  /** Auto-generated; consumers can pass an explicit id to update an in-flight toast. */
+  /** Auto-generated; pass an explicit id to update an in-flight toast in place. */
   id?: string;
   title?: ReactNode;
   description?: ReactNode;
@@ -33,7 +33,10 @@ interface InternalToast extends ToastDescriptor {
   open: boolean;
 }
 
-type Listener = (toasts: InternalToast[]) => void;
+type Listener = () => void;
+
+/** Max auto-dismissing toasts kept in the queue. Persistent (`duration: 0`) toasts never count. */
+const MAX_VISIBLE = 3;
 
 interface ToastStore {
   toasts: InternalToast[];
@@ -44,28 +47,59 @@ interface ToastStore {
   remove(id: string): void;
 }
 
-const store: ToastStore = {
-  toasts: [],
-  listeners: new Set<Listener>(),
-  emit() {
-    for (const listener of this.listeners) listener(this.toasts);
-  },
-  push(t: ToastDescriptor) {
-    const id = t.id ?? `t_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    const next: InternalToast = { open: true, duration: 5000, variant: 'default', ...t, id };
-    this.toasts = [next, ...this.toasts].slice(0, 3);
-    this.emit();
-    return id;
-  },
-  dismiss(id: string) {
-    this.toasts = this.toasts.map((t: InternalToast) => (t.id === id ? { ...t, open: false } : t));
-    this.emit();
-  },
-  remove(id: string) {
-    this.toasts = this.toasts.filter((t: InternalToast) => t.id !== id);
-    this.emit();
-  },
+const EMPTY: InternalToast[] = [];
+
+function createStore(): ToastStore {
+  return {
+    toasts: EMPTY,
+    listeners: new Set<Listener>(),
+    emit() {
+      for (const listener of this.listeners) listener();
+    },
+    push(t) {
+      const id = t.id ?? `t_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      const existing = this.toasts.find((x) => x.id === id);
+      let merged: InternalToast[];
+      if (existing) {
+        // Same id → update in place, keep queue position, re-open if it was closing.
+        merged = this.toasts.map((x) => (x.id === id ? { ...x, ...t, id, open: true } : x));
+      } else {
+        const next: InternalToast = { open: true, duration: 5000, variant: 'default', ...t, id };
+        merged = [next, ...this.toasts];
+      }
+      let kept = 0;
+      this.toasts = merged.filter((x) => x.duration === 0 || kept++ < MAX_VISIBLE);
+      this.emit();
+      return id;
+    },
+    dismiss(id) {
+      this.toasts = this.toasts.map((t) => (t.id === id ? { ...t, open: false } : t));
+      this.emit();
+    },
+    remove(id) {
+      this.toasts = this.toasts.filter((t) => t.id !== id);
+      this.emit();
+    },
+  };
+}
+
+// Created lazily on first use so a server process never holds toasts that
+// leak across requests; on the client there is exactly one queue.
+let store: ToastStore | null = null;
+function getStore(): ToastStore {
+  if (!store) store = createStore();
+  return store;
+}
+
+const subscribe = (listener: Listener) => {
+  const s = getStore();
+  s.listeners.add(listener);
+  return () => {
+    s.listeners.delete(listener);
+  };
 };
+const getSnapshot = () => getStore().toasts;
+const getServerSnapshot = () => EMPTY;
 
 /**
  * Subscribe to the toast queue and dispatch new toasts.
@@ -81,22 +115,14 @@ const store: ToastStore = {
  *   });
  */
 export function useToast() {
-  const [toasts, setToasts] = useState<InternalToast[]>(() => [...store.toasts]);
+  const toasts = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  useEffect(() => {
-    const listener: Listener = (next) => setToasts([...next]);
-    store.listeners.add(listener);
-    return () => {
-      store.listeners.delete(listener);
-    };
-  }, []);
-
-  const push = useCallback((t: ToastDescriptor) => store.push(t), []);
-  const dismiss = useCallback((id: string) => store.dismiss(id), []);
-  const remove = useCallback((id: string) => store.remove(id), []);
+  const push = useCallback((t: ToastDescriptor) => getStore().push(t), []);
+  const dismiss = useCallback((id: string) => getStore().dismiss(id), []);
+  const remove = useCallback((id: string) => getStore().remove(id), []);
 
   return { toasts, push, dismiss, remove };
 }
 
 /** Convenience export — dispatch a toast outside React (e.g. from an API client). */
-export const toast = (t: ToastDescriptor) => store.push(t);
+export const toast = (t: ToastDescriptor) => getStore().push(t);

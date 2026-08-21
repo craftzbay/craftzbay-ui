@@ -101,10 +101,15 @@ export function Pricing({
 }: PricingProps = {}) {
   const cols = tiers.length;
   return (
-    <section aria-labelledby="pricing-title" className={cn('mx-auto max-w-5xl space-y-8 px-6 py-16', className)}>
+    <section
+      aria-labelledby="pricing-title"
+      className={cn('mx-auto max-w-5xl space-y-8 px-6 py-16', className)}
+    >
       <header className="space-y-3 text-center">
-        <h2 id="pricing-title" className="text-3xl font-semibold tracking-tight text-foreground">{title}</h2>
-        {subtitle && <p className="mx-auto max-w-xl text-sm text-foreground-muted">{subtitle}</p>}
+        <h2 id="pricing-title" className="text-foreground text-3xl font-semibold tracking-tight">
+          {title}
+        </h2>
+        {subtitle && <p className="text-foreground-muted mx-auto max-w-xl text-sm">{subtitle}</p>}
       </header>
 
       <div
@@ -120,31 +125,31 @@ export function Pricing({
           <div
             key={tier.name}
             className={cn(
-              'flex flex-col gap-6 rounded-lg border bg-card p-6',
+              'bg-card flex flex-col gap-6 rounded-lg border p-6',
               tier.highlighted ? 'border-accent shadow-sm' : 'border-border',
             )}
           >
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-semibold text-foreground">{tier.name}</h3>
+                <h3 className="text-foreground text-base font-semibold">{tier.name}</h3>
                 {tier.highlighted && <Badge tone="accent">{highlightedLabel}</Badge>}
               </div>
               {tier.description && (
-                <p className="text-sm text-foreground-muted">{tier.description}</p>
+                <p className="text-foreground-muted text-sm">{tier.description}</p>
               )}
             </div>
 
             <div className="flex items-baseline gap-1.5">
-              <span className="tabular text-3xl font-semibold text-foreground">{tier.price}</span>
+              <span className="tabular text-foreground text-3xl font-semibold">{tier.price}</span>
               {tier.cadence && (
-                <span className="text-sm text-foreground-subtle">{tier.cadence}</span>
+                <span className="text-foreground-subtle text-sm">{tier.cadence}</span>
               )}
             </div>
 
             <ul className="space-y-2 text-sm">
               {tier.features.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-foreground">
-                  <Check className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden />
+                <li key={f} className="text-foreground flex items-start gap-2">
+                  <Check className="text-accent mt-0.5 size-4 shrink-0" aria-hidden />
                   {f}
                 </li>
               ))}

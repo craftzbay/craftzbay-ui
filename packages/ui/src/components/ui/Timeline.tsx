@@ -48,10 +48,16 @@ export interface TimelineTimeProps extends TimeHTMLAttributes<HTMLTimeElement> {
   children: ReactNode;
 }
 
+/** Accept only values `Date` can parse — an invalid `dateTime` is worse than none. */
+function validDateTime(v: string | undefined): string | undefined {
+  if (!v || Number.isNaN(Date.parse(v))) return undefined;
+  return v;
+}
+
 export function TimelineTime({ className, children, dateTime, ...props }: TimelineTimeProps) {
   return (
     <time
-      dateTime={dateTime ?? (typeof children === 'string' ? children : undefined)}
+      dateTime={validDateTime(dateTime ?? (typeof children === 'string' ? children : undefined))}
       className={cn('text-foreground-subtle block text-xs', className)}
       {...props}
     >

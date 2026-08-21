@@ -1,6 +1,14 @@
 'use client';
 
-import { forwardRef, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { Command as CommandPrimitive } from 'cmdk';
 import { Check, ChevronsUpDown, Loader2, X } from '@/icons';
@@ -45,6 +53,8 @@ export interface ComboboxProps {
   searchPlaceholder?: string;
   /** Empty state copy when nothing matches. */
   emptyText?: string;
+  /** Message shown when `loadOptions` rejects. */
+  loadErrorText?: string;
   /** Allow clearing the selection with an inline ×. */
   clearable?: boolean;
   /** Disable the entire field. */
@@ -87,6 +97,7 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(function Combo
     placeholder: placeholderProp,
     searchPlaceholder: searchPlaceholderProp,
     emptyText: emptyTextProp,
+    loadErrorText: loadErrorTextProp,
     clearable = true,
     disabled,
     size = 'md',
@@ -99,17 +110,22 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(function Combo
   const placeholder = placeholderProp ?? strings.combobox.placeholder;
   const searchPlaceholder = searchPlaceholderProp ?? strings.combobox.searchPlaceholder;
   const emptyText = emptyTextProp ?? strings.combobox.empty;
+  const loadErrorText = loadErrorTextProp ?? strings.combobox.loadError;
   const isError = Boolean(error);
   const { fieldId, helperId, errorId, describedBy } = useFieldIds(id, {
     hasHelper: Boolean(helperText),
     hasError: isError,
   });
-  const listId = `${fieldId}-list`;
+  // cmdk assigns its own id to the list, so read it back from the node once
+  // the portal mounts; aria-controls is only set while the listbox exists.
+  const [listId, setListId] = useState<string | undefined>(undefined);
+  const listRef = useCallback((el: HTMLDivElement | null) => setListId(el?.id), []);
 
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [loaded, setLoaded] = useState<ComboboxOption[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   // In async mode the option list only exists after the first search, so the
   // chosen option is remembered here to keep its label on the trigger.
   const [selectedOption, setSelectedOption] = useState<ComboboxOption | null>(null);
@@ -120,13 +136,28 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(function Combo
     [loadOptions, loaded, options],
   );
 
+  // Latest loader in a ref so an inline `loadOptions={async q => …}` does not
+  // retrigger the fetch on every parent render — only query / open do.
+  const loadRef = useRef(loadOptions);
   useEffect(() => {
-    if (!loadOptions || !open) return;
+    loadRef.current = loadOptions;
+  });
+  const hasLoader = Boolean(loadOptions);
+  useEffect(() => {
+    const load = loadRef.current;
+    if (!load || !open) return;
     let cancelled = false;
     setLoading(true);
-    loadOptions(query)
+    setLoadError(false);
+    load(query)
       .then((res) => {
         if (!cancelled) setLoaded(res);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setLoaded([]);
+          setLoadError(true);
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -134,7 +165,7 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(function Combo
     return () => {
       cancelled = true;
     };
-  }, [query, open, loadOptions]);
+  }, [query, open, hasLoader]);
 
   const selected = useMemo<ComboboxOption | null>(() => {
     if (value === null || value === undefined) return null;
@@ -172,7 +203,7 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(function Combo
               role="combobox"
               aria-expanded={open}
               aria-haspopup="listbox"
-              aria-controls={listId}
+              aria-controls={open ? listId : undefined}
               aria-invalid={isError || undefined}
               aria-describedby={describedBy}
               disabled={disabled}
@@ -237,13 +268,19 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(function Combo
                   <Loader2 className="text-foreground-subtle size-4 animate-spin" aria-hidden />
                 )}
               </div>
-              <CommandPrimitive.List id={listId} className="max-h-64 overflow-y-auto p-1">
+              <CommandPrimitive.List
+                ref={listRef}
+                label={strings.command.suggestions}
+                className="max-h-64 overflow-y-auto p-1"
+              >
                 {items.map((opt) => {
                   const isSelected = opt.value === value;
                   return (
                     <CommandPrimitive.Item
                       key={opt.value}
                       value={opt.value}
+                      // cmdk matches on value + keywords; users type the label, not the id.
+                      keywords={opt.description ? [opt.label, opt.description] : [opt.label]}
                       disabled={opt.disabled}
                       onSelect={(v) => {
                         setSelectedOption(opt);
@@ -264,7 +301,13 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(function Combo
                     </CommandPrimitive.Item>
                   );
                 })}
-                {!loading && items.length === 0 && (
+                {loadError && !loading && (
+                  <div className="text-danger-text px-2 py-6 text-center text-sm">
+                    {loadErrorText}
+                  </div>
+                )}
+                {/* cmdk only shows Empty when no item matches the query, so it can always be mounted. */}
+                {!loading && !loadError && (
                   <CommandPrimitive.Empty className="text-foreground-subtle px-2 py-6 text-center text-sm">
                     {emptyText}
                   </CommandPrimitive.Empty>
@@ -276,7 +319,7 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(function Combo
       </PopoverPrimitive.Root>
 
       {error ? (
-        <p id={errorId} role="alert" className="text-danger-text text-xs">
+        <p id={errorId} className="text-danger-text text-xs">
           {error}
         </p>
       ) : helperText ? (

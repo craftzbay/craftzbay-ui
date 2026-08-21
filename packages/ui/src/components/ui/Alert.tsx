@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, useState, type HTMLAttributes, type ReactNode } from 'react';
+import { createElement, forwardRef, useState, type HTMLAttributes, type ReactNode } from 'react';
 import { AlertTriangle, CheckCircle2, Info, X, XCircle } from '@/icons';
 import { cn } from '@/lib/utils';
 import { useStrings } from '@/hooks/use-strings';
@@ -35,8 +35,24 @@ export interface AlertProps
   dismissible?: boolean;
   /** Called when the user dismisses. */
   onDismiss?: () => void;
+  /**
+   * Controlled visibility. Omit for the default uncontrolled behaviour
+   * (visible until dismissed).
+   */
+  open?: boolean;
+  /** Called with the next visibility when the user dismisses. */
+  onOpenChange?: (open: boolean) => void;
   /** Override the variant's default icon. Pass `false` to suppress the icon. */
   icon?: ReactNode | false;
+  /**
+   * Announce the alert to screen readers when it appears: `role="alert"` for
+   * `danger`, `role="status"` otherwise. Off by default — content that is on
+   * the page at load should not be announced as a live update.
+   * @default false
+   */
+  live?: boolean;
+  /** Heading level of `title`. Default 3 — fits under a page h1 / section h2. */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
 }
 
 /**
@@ -58,15 +74,30 @@ export interface AlertProps
  * @dont Use Alert for one-time confirmations — that's Toast.
  */
 export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  { className, variant = 'default', title, dismissible, onDismiss, icon, children, ...props },
+  {
+    className,
+    variant = 'default',
+    title,
+    dismissible,
+    onDismiss,
+    open: openProp,
+    onOpenChange,
+    icon,
+    live = false,
+    headingLevel = 3,
+    children,
+    ...props
+  },
   ref,
 ) {
   const strings = useStrings();
-  const [open, setOpen] = useState(true);
+  const [internalOpen, setInternalOpen] = useState(true);
+  const open = openProp ?? internalOpen;
   if (!open) return null;
 
   const handleDismiss = () => {
-    setOpen(false);
+    if (openProp === undefined) setInternalOpen(false);
+    onOpenChange?.(false);
     onDismiss?.();
   };
 
@@ -76,13 +107,14 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
     <div
       ref={ref}
       // Only errors interrupt the screen reader; everything else is polite.
-      role={variant === 'danger' ? 'alert' : 'status'}
+      role={live ? (variant === 'danger' ? 'alert' : 'status') : undefined}
       className={cn(alert({ variant }), className)}
       {...props}
     >
       {renderedIcon}
       <div className="min-w-0 flex-1">
-        {title && <h5 className="mb-1 leading-tight font-medium">{title}</h5>}
+        {title &&
+          createElement(`h${headingLevel}`, { className: 'mb-1 leading-tight font-medium' }, title)}
         <div className="text-sm leading-relaxed [&_p]:leading-relaxed">{children}</div>
       </div>
       {dismissible && (

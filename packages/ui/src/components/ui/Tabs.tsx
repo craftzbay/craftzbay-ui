@@ -1,7 +1,9 @@
 'use client';
 
 import {
+  createContext,
   forwardRef,
+  useContext,
   type ComponentPropsWithoutRef,
   type ElementRef,
 } from 'react';
@@ -15,6 +17,11 @@ import { cva, type VariantProps } from '@/lib/cva';
  * --------------------------------------------------------------------------- */
 
 export const Tabs = TabsPrimitive.Root;
+
+type TabsVariant = 'underline' | 'pills';
+/* Triggers read the list variant from context and stamp their own
+   `data-variant`, so no ancestor selector can leak into nested Tabs. */
+const TabsVariantContext = createContext<TabsVariant>('underline');
 
 const list = cva('inline-flex items-center', {
   variants: {
@@ -32,18 +39,19 @@ const list = cva('inline-flex items-center', {
 });
 
 export interface TabsListProps
-  extends ComponentPropsWithoutRef<typeof TabsPrimitive.List>,
-    VariantProps<typeof list> {}
+  extends ComponentPropsWithoutRef<typeof TabsPrimitive.List>, VariantProps<typeof list> {}
 
 export const TabsList = forwardRef<ElementRef<typeof TabsPrimitive.List>, TabsListProps>(
   function TabsList({ className, variant = 'underline', size, ...props }, ref) {
     return (
-      <TabsPrimitive.List
-        ref={ref}
-        data-variant={variant}
-        className={cn(list({ variant, size }), className)}
-        {...props}
-      />
+      <TabsVariantContext.Provider value={variant ?? 'underline'}>
+        <TabsPrimitive.List
+          ref={ref}
+          data-variant={variant}
+          className={cn(list({ variant, size }), className)}
+          {...props}
+        />
+      </TabsVariantContext.Provider>
     );
   },
 );
@@ -53,31 +61,33 @@ export const TabsTrigger = forwardRef<
   ElementRef<typeof TabsPrimitive.Trigger>,
   ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
 >(function TabsTrigger({ className, ...props }, ref) {
+  const variant = useContext(TabsVariantContext);
   return (
     <TabsPrimitive.Trigger
       ref={ref}
+      data-variant={variant}
       className={cn(
-        'inline-flex items-center gap-2 whitespace-nowrap font-medium',
-        'outline-none transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)]',
-        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+        'inline-flex items-center gap-2 font-medium whitespace-nowrap',
+        'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] outline-none',
+        'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
         'disabled:pointer-events-none disabled:opacity-50',
         // Underline variant
-        '[[data-variant=underline]_&]:relative [[data-variant=underline]_&]:h-full',
-        '[[data-variant=underline]_&]:px-1 [[data-variant=underline]_&]:text-foreground-muted',
-        '[[data-variant=underline]_&]:hover:text-foreground',
-        '[[data-variant=underline]_&]:data-[state=active]:text-foreground',
-        '[[data-variant=underline]_&]:data-[state=active]:after:absolute',
-        '[[data-variant=underline]_&]:data-[state=active]:after:inset-x-0',
-        '[[data-variant=underline]_&]:data-[state=active]:after:-bottom-px',
-        '[[data-variant=underline]_&]:data-[state=active]:after:h-0.5',
-        '[[data-variant=underline]_&]:data-[state=active]:after:bg-accent',
+        'data-[variant=underline]:relative data-[variant=underline]:h-full',
+        'data-[variant=underline]:text-foreground-muted data-[variant=underline]:px-1',
+        'data-[variant=underline]:hover:text-foreground',
+        'data-[variant=underline]:data-[state=active]:text-foreground',
+        'data-[variant=underline]:data-[state=active]:after:absolute',
+        'data-[variant=underline]:data-[state=active]:after:inset-x-0',
+        'data-[variant=underline]:data-[state=active]:after:-bottom-px',
+        'data-[variant=underline]:data-[state=active]:after:h-0.5',
+        'data-[variant=underline]:data-[state=active]:after:bg-accent',
         // Pills variant
-        '[[data-variant=pills]_&]:h-full [[data-variant=pills]_&]:rounded-md [[data-variant=pills]_&]:px-3',
-        '[[data-variant=pills]_&]:text-foreground-muted',
-        '[[data-variant=pills]_&]:hover:text-foreground',
-        '[[data-variant=pills]_&]:data-[state=active]:bg-card',
-        '[[data-variant=pills]_&]:data-[state=active]:text-foreground',
-        '[[data-variant=pills]_&]:data-[state=active]:shadow-xs',
+        'data-[variant=pills]:h-full data-[variant=pills]:rounded-md data-[variant=pills]:px-3',
+        'data-[variant=pills]:text-foreground-muted',
+        'data-[variant=pills]:hover:text-foreground',
+        'data-[variant=pills]:data-[state=active]:bg-card',
+        'data-[variant=pills]:data-[state=active]:text-foreground',
+        'data-[variant=pills]:data-[state=active]:shadow-xs',
         className,
       )}
       {...props}
@@ -95,7 +105,7 @@ export const TabsContent = forwardRef<
       ref={ref}
       className={cn(
         'mt-4 outline-none',
-        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+        'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
         className,
       )}
       {...props}

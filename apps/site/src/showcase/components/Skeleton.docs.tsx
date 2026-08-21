@@ -36,7 +36,7 @@ const doc: ComponentDoc = {
     {
       title: 'Card placeholder',
       preview: (
-        <div className="w-full max-w-md space-y-3 rounded-md border border-border bg-card p-4">
+        <div className="border-border bg-card w-full max-w-md space-y-3 rounded-md border p-4">
           <Skeleton className="h-4 w-1/2" />
           <Skeleton className="h-3 w-full" />
           <Skeleton className="h-3 w-5/6" />
@@ -54,7 +54,11 @@ const doc: ComponentDoc = {
   api: [
     {
       rows: [
-        { name: 'className', type: 'string', description: 'Tailwind classes for size, shape, and spacing.' },
+        {
+          name: 'className',
+          type: 'string',
+          description: 'Tailwind classes for size, shape, and spacing.',
+        },
       ],
     },
   ],

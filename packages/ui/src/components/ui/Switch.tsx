@@ -26,10 +26,11 @@ export interface SwitchProps extends Omit<
   hideLabel?: boolean;
 }
 
-// `sm` is 28×16 visually; the `before:` halo lifts its hit area to ≥24px tall (WCAG 2.5.8).
+// Tracks are 28×16 (`sm`) / 36×20 (`md`) visually; the `before:` halo lifts
+// the hit area to ≥24px tall without changing the drawing (WCAG 2.5.8).
 const trackSize = {
   sm: 'h-4 w-7 before:absolute before:-inset-x-1 before:-inset-y-1.5 before:content-[""]',
-  md: 'h-5 w-9',
+  md: 'h-5 w-9 before:absolute before:-inset-x-1 before:-inset-y-1 before:content-[""]',
 } as const;
 const thumbSize = {
   sm: 'size-3 data-[state=checked]:translate-x-3',
@@ -65,6 +66,7 @@ export const Switch = forwardRef<ElementRef<typeof SwitchPrimitive.Root>, Switch
       hideLabel,
       id,
       disabled,
+      'aria-describedby': ariaDescribedby,
       ...props
     },
     ref,
@@ -72,19 +74,21 @@ export const Switch = forwardRef<ElementRef<typeof SwitchPrimitive.Root>, Switch
     const autoId = useId();
     const fieldId = id ?? autoId;
     const descId = description ? `${fieldId}-desc` : undefined;
+    const describedBy = [descId, ariaDescribedby].filter(Boolean).join(' ') || undefined;
 
     const control = (
       <SwitchPrimitive.Root
         ref={ref}
         id={fieldId}
         disabled={disabled}
-        aria-describedby={descId}
+        aria-describedby={describedBy}
         className={cn(
           'peer relative inline-flex shrink-0 items-center rounded-full border-2 border-transparent',
           'transition-colors duration-[var(--duration-base)] ease-[var(--ease-out)]',
           'focus-visible:ring-ring focus-visible:ring-offset-background outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
           'disabled:cursor-not-allowed disabled:opacity-50',
           'data-[state=checked]:bg-accent data-[state=unchecked]:bg-switch-track-off',
+          'aria-invalid:ring-danger aria-invalid:ring-2',
           trackSize[size],
         )}
         {...props}
@@ -101,10 +105,14 @@ export const Switch = forwardRef<ElementRef<typeof SwitchPrimitive.Root>, Switch
     );
 
     const labelBlock = label && (
-      <div className={cn('flex flex-col gap-0.5 select-none', hideLabel && 'sr-only')}>
+      <div className="flex flex-col gap-0.5 select-none">
         <label
           htmlFor={fieldId}
-          className={cn('text-foreground text-sm', disabled && 'cursor-not-allowed opacity-50')}
+          className={cn(
+            'text-foreground text-sm',
+            disabled && 'cursor-not-allowed opacity-50',
+            hideLabel && 'sr-only',
+          )}
         >
           {label}
         </label>

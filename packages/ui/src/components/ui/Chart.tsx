@@ -1,6 +1,15 @@
 'use client';
 
-import { useId, useState, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from 'react';
 import { cn } from '@/lib/utils';
 import { useStrings } from '@/hooks/use-strings';
 import { formatString, type UiStrings } from '@/lib/strings';
@@ -9,8 +18,11 @@ import { Skeleton } from './Skeleton';
 /**
  * Tiny, dependency-free chart primitives for inline dashboards — sparklines,
  * KPI cards, at-a-glance trends. For heavy interactive visualisations reach for
- * a charting library. These render as responsive SVG (the line/area stretch to
- * the container width; strokes stay crisp via non-scaling-stroke).
+ * a charting library. The SVG is drawn in real pixels: a ResizeObserver
+ * measures the container width, so points and bars are never distorted.
+ *
+ * Keyboard: one tab stop per series; ←/→ (Home/End) move between points and
+ * the active point is announced via a polite live region.
  */
 
 export interface ChartPoint {
@@ -26,6 +38,39 @@ export interface ChartSeries {
 }
 
 export type ChartState = 'loading' | 'empty' | 'error';
+
+/** Text builders for the accessible summary + point labels (i18n). */
+export interface ChartLabels {
+  /** `<desc>` sentence per series. */
+  summary: (s: {
+    name: string;
+    count: number;
+    min: number;
+    max: number;
+    lastX: string | number | undefined;
+    lastY: number | undefined;
+  }) => string;
+  /** Label of one data point (tooltip, live region). */
+  point: (name: string | undefined, x: string | number, y: number) => string;
+  /** Accessible name of a series' tab stop. */
+  series: (name: string, count: number) => string;
+}
+
+export const defaultChartLabels: ChartLabels = {
+  summary: ({ name, count, min, max, lastX, lastY }) =>
+    `${name}: ${count} points, min ${min}, max ${max}, last ${lastX}: ${lastY}`,
+  point: (name, x, y) => `${name ? `${name} — ` : ''}${x}: ${y}`,
+  series: (name, count) => `${name}, ${count} points. Use arrow keys to move between points.`,
+};
+
+function chartLabelsFromStrings(t: UiStrings['chart']): ChartLabels {
+  return {
+    summary: ({ name, count, min, max, lastX, lastY }) =>
+      formatString(t.summary, { name, count, min, max, x: lastX, y: lastY }),
+    point: (name, x, y) => (name ? `${name} — ` : '') + formatString(t.point, { x, y }),
+    series: (name, count) => formatString(t.seriesNav, { name, count }),
+  };
+}
 
 export interface ChartProps {
   /** Primary series. Ignored when `series` is provided. */
@@ -57,6 +102,8 @@ export interface ChartProps {
   showTableToggle?: boolean;
   /** Replace the drawing with a loading skeleton / empty / error message. */
   state?: ChartState;
+  /** Override the generated accessible text (English defaults). */
+  labels?: Partial<ChartLabels>;
   className?: string;
 }
 
@@ -69,10 +116,27 @@ export const DEFAULT_CHART_COLORS = [
   'var(--chart-6)',
 ];
 
-// Fixed internal coordinate space; preserveAspectRatio="none" stretches it to
-// the container, so this only controls smoothing resolution, not the aspect.
-const VB_W = 600;
+// Width used before the container has been measured (SSR / first paint).
+const FALLBACK_W = 600;
 const PAD = 6;
+
+/** Measure the container's content width; re-renders on resize. */
+function useMeasuredWidth<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  const [width, setWidth] = useState(0);
+  const useIso = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+  useIso(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => setWidth(el.clientWidth);
+    update();
+    if (typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return { ref, width: width || FALLBACK_W };
+}
 const MAX_TICKS = 5;
 
 /** 1234 → "1.2K", 3_400_000 → "3.4M". */
@@ -128,8 +192,8 @@ function domain(all: ChartSeries[], includeZero = true) {
   return { min, max, range: max - min || 1, ticks };
 }
 
-function scales(length: number, h: number, min: number, range: number) {
-  const innerW = VB_W - PAD * 2;
+function scales(length: number, w: number, h: number, min: number, range: number) {
+  const innerW = w - PAD * 2;
   const innerH = h - PAD * 2;
   const sx = (i: number) => (length <= 1 ? PAD + innerW / 2 : PAD + (i / (length - 1)) * innerW);
   const sy = (v: number) => PAD + innerH - ((v - min) / range) * innerH;
@@ -178,21 +242,26 @@ const seriesName = (s: ChartSeries, i: number, t: UiStrings['chart']) =>
   s.name ?? formatString(t.series, { n: i + 1 });
 
 /** Plain-language summary for the `<desc>` element. */
-function describe(all: ChartSeries[], t: UiStrings['chart']): string {
+function describe(all: ChartSeries[], t: UiStrings['chart'], labels: ChartLabels): string {
   return all
     .map((s, i) => {
       const ys = s.data.map((d) => d.y).filter(isNum);
       const name = seriesName(s, i, t);
       if (!ys.length) return `${name}: ${t.noData}`;
-      const min = Math.min(...ys);
-      const max = Math.max(...ys);
       const last = [...s.data].reverse().find((d) => isNum(d.y));
-      return `${name}: ${ys.length} points, min ${min}, max ${max}, last ${last?.x}: ${last?.y}`;
+      return labels.summary({
+        name,
+        count: ys.length,
+        min: Math.min(...ys),
+        max: Math.max(...ys),
+        lastX: last?.x,
+        lastY: last?.y ?? undefined,
+      });
     })
     .join('. ');
 }
 
-function Grid({ height, lines }: { height: number; lines: number }) {
+function Grid({ width, height, lines }: { width: number; height: number; lines: number }) {
   const innerH = height - PAD * 2;
   const n = Math.max(1, lines);
   return (
@@ -203,12 +272,11 @@ function Grid({ height, lines }: { height: number; lines: number }) {
           <line
             key={i}
             x1={0}
-            x2={VB_W}
+            x2={width}
             y1={y}
             y2={y}
             stroke="var(--color-border)"
             strokeWidth={1}
-            vectorEffect="non-scaling-stroke"
             opacity={0.6}
           />
         );
@@ -217,10 +285,7 @@ function Grid({ height, lines }: { height: number; lines: number }) {
   );
 }
 
-/**
- * Axis labels are rendered in HTML (not inside the stretched SVG) so the text
- * is never distorted by `preserveAspectRatio="none"`.
- */
+/** Axis labels are HTML so they follow the document font and wrap normally. */
 function YAxis({ ticks }: { ticks: number[] }) {
   return (
     <div
@@ -247,11 +312,13 @@ function XAxis({ first, last }: { first?: ChartPoint; last?: ChartPoint }) {
 }
 
 function DataTable({
+  id,
   all,
   name,
   visible,
   t,
 }: {
+  id: string;
   all: ChartSeries[];
   name?: string;
   visible: boolean;
@@ -261,6 +328,7 @@ function DataTable({
   const xs = all.find((s) => s.data.length === longest)?.data ?? [];
   return (
     <table
+      id={id}
       data-chart-table
       className={cn(
         visible ? 'tabular text-foreground-muted mt-2 w-full text-left text-xs' : 'sr-only',
@@ -318,6 +386,7 @@ function Frame({
   tableFallback,
   showTableToggle,
   state,
+  labels,
   children,
 }: {
   caption?: ReactNode;
@@ -334,25 +403,34 @@ function Frame({
   tableFallback: boolean;
   showTableToggle?: boolean;
   state?: ChartState;
-  children: ReactNode;
+  labels: ChartLabels;
+  children: (ctx: FrameContext) => ReactNode;
 }) {
   const t = useStrings().chart;
   const id = useId().replace(/:/g, '');
   const captionId = `chart-cap-${id}`;
   const titleId = `chart-title-${id}`;
   const descId = `chart-desc-${id}`;
+  const tableId = `chart-table-${id}`;
   const name = ariaLabel ?? title;
   const [tableOpen, setTableOpen] = useState(false);
+  const { ref: plotRef, width: plotW } = useMeasuredWidth<HTMLDivElement>();
+  const roving = useRovingPoints(all, t, labels);
 
-  if (import.meta.env?.DEV && !name && !caption) {
+  if (process.env.NODE_ENV !== 'production' && !name && !caption) {
     console.warn(
       '[craftzbay/ui] Chart: provide `caption`, `aria-label`, or `title` so the chart has an accessible name.',
     );
   }
 
+  const tableRendered = (tableFallback || tableOpen) && !state;
+
   const stateNode =
     state === 'loading' ? (
-      <Skeleton style={{ height }} className="w-full" />
+      <div role="status" aria-label={t.loading} style={{ height }} className="w-full">
+        <Skeleton style={{ height }} className="w-full" />
+        <span className="sr-only">{t.loading}</span>
+      </div>
     ) : state ? (
       <div
         role={state === 'error' ? 'alert' : 'status'}
@@ -374,23 +452,28 @@ function Frame({
         <>
           <div className="flex">
             {showAxis && <YAxis ticks={ticks} />}
-            {/* role=group (not img): the points inside are focusable and carry their own labels. */}
-            <svg
-              viewBox={`0 0 ${VB_W} ${height}`}
-              width="100%"
-              height={height}
-              preserveAspectRatio="none"
-              role="group"
-              aria-labelledby={caption ? captionId : name ? titleId : undefined}
-              aria-describedby={descId}
-              className="min-w-0 flex-1 overflow-visible"
-            >
-              {name && <title id={titleId}>{name}</title>}
-              <desc id={descId}>{describe(all, t)}</desc>
-              {children}
-            </svg>
+            {/* The plot area is measured; the SVG is drawn 1:1 in px inside it. */}
+            <div ref={plotRef} className="min-w-0 flex-1">
+              {/* role=group (not img): series inside are focusable and carry their own labels. */}
+              <svg
+                viewBox={`0 0 ${plotW} ${height}`}
+                width={plotW}
+                height={height}
+                role="group"
+                aria-labelledby={caption ? captionId : name ? titleId : undefined}
+                aria-describedby={descId}
+                className="block max-w-full overflow-visible"
+              >
+                {name && <title id={titleId}>{name}</title>}
+                <desc id={descId}>{describe(all, t, labels)}</desc>
+                {children({ width: plotW, ...roving })}
+              </svg>
+            </div>
           </div>
           {showAxis && <XAxis first={xFirst} last={xLast} />}
+          <span className="sr-only" aria-live="polite" aria-atomic="true">
+            {roving.announcement}
+          </span>
         </>
       )}
       {showTableToggle && !state && (
@@ -398,13 +481,18 @@ function Frame({
           type="button"
           onClick={() => setTableOpen((v) => !v)}
           aria-expanded={tableOpen}
-          className="text-foreground-subtle hover:text-foreground focus-visible:ring-ring self-start rounded-sm text-xs underline-offset-2 outline-none hover:underline focus-visible:ring-2"
+          aria-controls={tableRendered ? tableId : undefined}
+          className={cn(
+            'text-foreground-subtle hover:text-foreground self-start rounded-sm text-xs underline-offset-2 outline-none hover:underline',
+            'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
+          )}
         >
           {tableOpen ? t.hideTable : t.viewAsTable}
         </button>
       )}
-      {(tableFallback || tableOpen) && !state && (
+      {tableRendered && (
         <DataTable
+          id={tableId}
           all={all}
           name={name ?? (typeof caption === 'string' ? caption : undefined)}
           visible={tableOpen}
@@ -415,19 +503,92 @@ function Frame({
   );
 }
 
-/** Focusable, labelled data point. Invisible until hovered/focused unless `always`. */
+interface FrameContext {
+  width: number;
+  active: { series: number; index: number } | null;
+  seriesProps: (si: number) => {
+    tabIndex: number;
+    role: 'group';
+    'aria-label': string;
+    onKeyDown: (e: KeyboardEvent<SVGGElement>) => void;
+    onFocus: () => void;
+    onBlur: () => void;
+    className: string;
+  };
+}
+
+/**
+ * Roving focus: each series is a single tab stop; ←/→/Home/End move the
+ * active point and the live region announces it. Per-point tab stops would
+ * make a 200-point chart a 200-tab ordeal.
+ */
+function useRovingPoints(all: ChartSeries[], t: UiStrings['chart'], labels: ChartLabels) {
+  const [active, setActive] = useState<{ series: number; index: number } | null>(null);
+  const [announcement, setAnnouncement] = useState('');
+
+  const announce = useCallback(
+    (si: number, idx: number) => {
+      const s = all[si];
+      const d = s?.data[idx];
+      if (!d || !isNum(d.y)) return;
+      setActive({ series: si, index: idx });
+      setAnnouncement(labels.point(s.name, d.x, d.y));
+    },
+    [all, labels],
+  );
+
+  const validIndices = (si: number) =>
+    all[si].data.map((d, i) => (isNum(d.y) ? i : -1)).filter((i) => i >= 0);
+
+  const seriesProps = (si: number) => ({
+    tabIndex: 0,
+    role: 'group' as const,
+    'aria-label': labels.series(seriesName(all[si], si, t), validIndices(si).length),
+    className: cn(
+      'outline-none',
+      '[&:focus-visible_[data-active]]:stroke-[var(--ring)] [&:focus-visible_[data-active]]:stroke-[3px]',
+    ),
+    onFocus: () => {
+      const idxs = validIndices(si);
+      if (idxs.length) announce(si, active?.series === si ? active.index : idxs[idxs.length - 1]);
+    },
+    onBlur: () => {
+      setActive(null);
+      setAnnouncement('');
+    },
+    onKeyDown: (e: KeyboardEvent<SVGGElement>) => {
+      const idxs = validIndices(si);
+      if (!idxs.length) return;
+      const pos = active?.series === si ? idxs.indexOf(active.index) : idxs.length - 1;
+      let next = pos;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') next = Math.min(idxs.length - 1, pos + 1);
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') next = Math.max(0, pos - 1);
+      else if (e.key === 'Home') next = 0;
+      else if (e.key === 'End') next = idxs.length - 1;
+      else return;
+      e.preventDefault();
+      announce(si, idxs[next]);
+    },
+  });
+
+  return { active, announcement, seriesProps };
+}
+
+/** Labelled data point. Invisible until hovered / active unless `always`. */
 function Point({
   x,
   y,
   color,
   label,
   always,
+  active,
 }: {
   x: number;
   y: number;
   color: string;
   label: string;
   always?: boolean;
+  active?: boolean;
 }) {
   return (
     <circle
@@ -435,14 +596,8 @@ function Point({
       cy={y}
       r={3.5}
       fill={color}
-      tabIndex={0}
-      role="img"
-      aria-label={label}
-      vectorEffect="non-scaling-stroke"
-      className={cn(
-        'outline-none focus-visible:stroke-[var(--ring)] focus-visible:stroke-[3px]',
-        !always && 'opacity-0 hover:opacity-100 focus-visible:opacity-100',
-      )}
+      data-active={active || undefined}
+      className={cn(!always && !active && 'opacity-0 hover:opacity-100')}
     >
       <title>{label}</title>
     </circle>
@@ -463,8 +618,11 @@ export function LineChart({
   tableFallback = true,
   showTableToggle,
   state,
+  labels: labelsProp,
   className,
 }: ChartProps) {
+  const t = useStrings().chart;
+  const labels = { ...chartLabelsFromStrings(t), ...labelsProp };
   const all = resolveSeries(data, series);
   const { min, range, ticks } = domain(all);
   const longest = Math.max(...all.map((s) => s.data.length));
@@ -486,48 +644,53 @@ export function LineChart({
       tableFallback={tableFallback}
       showTableToggle={showTableToggle}
       state={state}
+      labels={labels}
     >
-      {grid && <Grid height={height} lines={ticks.length - 1} />}
-      {all.map((s, si) => {
-        const color = colors[si % colors.length];
-        const { sx, sy } = scales(longest, height, min, range);
-        const segs = segments(s.data, sx, sy);
-        const line = segs.map(smoothPath).join(' ');
-        const baseline = sy(Math.max(min, 0));
-        const area = segs
-          .map(
-            (pts) =>
-              `${smoothPath(pts)} L${pts[pts.length - 1][0].toFixed(1)},${baseline.toFixed(1)} L${pts[0][0].toFixed(1)},${baseline.toFixed(1)} Z`,
-          )
-          .join(' ');
-        const lastIdx = s.data.map((d) => isNum(d.y)).lastIndexOf(true);
-        return (
-          <g key={si}>
-            {area && <path d={area} fill={color} fillOpacity={0.08} />}
-            <path
-              d={line}
-              fill="none"
-              stroke={color}
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              vectorEffect="non-scaling-stroke"
-            />
-            {s.data.map((d, i) =>
-              isNum(d.y) ? (
-                <Point
-                  key={i}
-                  x={sx(i)}
-                  y={sy(d.y)}
-                  color={color}
-                  always={i === lastIdx}
-                  label={`${s.name ? `${s.name} — ` : ''}${d.x}: ${d.y}`}
+      {({ width: w, active, seriesProps }) => (
+        <>
+          {grid && <Grid width={w} height={height} lines={ticks.length - 1} />}
+          {all.map((s, si) => {
+            const color = colors[si % colors.length];
+            const { sx, sy } = scales(longest, w, height, min, range);
+            const segs = segments(s.data, sx, sy);
+            const line = segs.map(smoothPath).join(' ');
+            const baseline = sy(Math.max(min, 0));
+            const area = segs
+              .map(
+                (pts) =>
+                  `${smoothPath(pts)} L${pts[pts.length - 1][0].toFixed(1)},${baseline.toFixed(1)} L${pts[0][0].toFixed(1)},${baseline.toFixed(1)} Z`,
+              )
+              .join(' ');
+            const lastIdx = s.data.map((d) => isNum(d.y)).lastIndexOf(true);
+            return (
+              <g key={si} {...seriesProps(si)}>
+                {area && <path d={area} fill={color} fillOpacity={0.08} />}
+                <path
+                  d={line}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
-              ) : null,
-            )}
-          </g>
-        );
-      })}
+                {s.data.map((d, i) =>
+                  isNum(d.y) ? (
+                    <Point
+                      key={i}
+                      x={sx(i)}
+                      y={sy(d.y)}
+                      color={color}
+                      always={i === lastIdx}
+                      active={active?.series === si && active.index === i}
+                      label={labels.point(s.name, d.x, d.y)}
+                    />
+                  ) : null,
+                )}
+              </g>
+            );
+          })}
+        </>
+      )}
     </Frame>
   );
 }
@@ -551,16 +714,14 @@ export function BarChart({
   tableFallback = true,
   showTableToggle,
   state,
+  labels: labelsProp,
   className,
 }: ChartProps) {
+  const t = useStrings().chart;
+  const labels = { ...chartLabelsFromStrings(t), ...labelsProp };
   const all = resolveSeries(data, series);
-  const innerW = VB_W - PAD * 2;
-  const innerH = height - PAD * 2;
   const longest = Math.max(...all.map((s) => s.data.length));
-  const slot = innerW / Math.max(1, longest);
-  const groupW = slot * 0.62;
-  const barW = Math.max(2, groupW / all.length);
-  const { max, ticks } = domain(all);
+  const { min, range, ticks } = domain(all);
   const primary = all[0].data;
 
   return (
@@ -579,33 +740,59 @@ export function BarChart({
       tableFallback={tableFallback}
       showTableToggle={showTableToggle}
       state={state}
+      labels={labels}
     >
-      {grid && <Grid height={height} lines={ticks.length - 1} />}
-      {all.map((s, si) =>
-        s.data.map((d, i) => {
-          if (!isNum(d.y)) return null;
-          const h = (Math.max(0, d.y) / max) * innerH;
-          const x = PAD + i * slot + (slot - groupW) / 2 + si * barW;
-          const label = `${s.name ? `${s.name} — ` : ''}${d.x}: ${d.y}`;
-          return (
-            <rect
-              key={`${si}-${i}`}
-              x={x}
-              y={PAD + innerH - h}
-              width={barW}
-              height={Math.max(0, h)}
-              fill={colors[si % colors.length]}
-              rx={2}
-              tabIndex={0}
-              role="img"
-              aria-label={label}
-              className="transition-opacity outline-none hover:opacity-80 focus-visible:stroke-[var(--ring)] focus-visible:stroke-[3px]"
-            >
-              <title>{label}</title>
-            </rect>
-          );
-        }),
-      )}
+      {({ width: w, active, seriesProps }) => {
+        const innerW = w - PAD * 2;
+        const slot = innerW / Math.max(1, longest);
+        const groupW = slot * 0.62;
+        const barW = Math.max(2, groupW / all.length);
+        const { sy } = scales(longest, w, height, min, range);
+        // Bars grow from the zero line, so negatives hang below it.
+        const zeroY = sy(Math.min(Math.max(0, min), min + range));
+        return (
+          <>
+            {grid && <Grid width={w} height={height} lines={ticks.length - 1} />}
+            {min < 0 && (
+              <line
+                aria-hidden
+                x1={0}
+                x2={w}
+                y1={zeroY}
+                y2={zeroY}
+                stroke="var(--color-border-strong)"
+                strokeWidth={1}
+              />
+            )}
+            {all.map((s, si) => (
+              <g key={si} {...seriesProps(si)}>
+                {s.data.map((d, i) => {
+                  if (!isNum(d.y)) return null;
+                  const yv = sy(d.y);
+                  const x = PAD + i * slot + (slot - groupW) / 2 + si * barW;
+                  const label = labels.point(s.name, d.x, d.y);
+                  const isActive = active?.series === si && active.index === i;
+                  return (
+                    <rect
+                      key={i}
+                      x={x}
+                      y={Math.min(zeroY, yv)}
+                      width={barW}
+                      height={Math.abs(zeroY - yv)}
+                      fill={colors[si % colors.length]}
+                      rx={2}
+                      data-active={isActive || undefined}
+                      className="transition-opacity hover:opacity-80"
+                    >
+                      <title>{label}</title>
+                    </rect>
+                  );
+                })}
+              </g>
+            ))}
+          </>
+        );
+      }}
     </Frame>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, type HTMLAttributes } from 'react';
+import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { cva, type VariantProps } from '@/lib/cva';
 
@@ -35,8 +35,16 @@ const badge = cva(
       // Outline — coloured border + text, transparent fill.
       { variant: 'outline', tone: 'neutral', class: 'border-border text-foreground-muted' },
       { variant: 'outline', tone: 'accent', class: 'border-accent text-accent' },
-      { variant: 'outline', tone: 'success', class: 'border-success-border-soft text-success-text' },
-      { variant: 'outline', tone: 'warning', class: 'border-warning-border-soft text-warning-text' },
+      {
+        variant: 'outline',
+        tone: 'success',
+        class: 'border-success-border-soft text-success-text',
+      },
+      {
+        variant: 'outline',
+        tone: 'warning',
+        class: 'border-warning-border-soft text-warning-text',
+      },
       { variant: 'outline', tone: 'danger', class: 'border-danger-border-soft text-danger-text' },
       { variant: 'outline', tone: 'info', class: 'border-info-border-soft text-info-text' },
     ],
@@ -44,11 +52,11 @@ const badge = cva(
   },
 );
 
-export interface BadgeProps
-  extends HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof badge> {
+export interface BadgeProps extends HTMLAttributes<HTMLSpanElement>, VariantProps<typeof badge> {
   /** Show a leading status dot in the same tone. */
   dot?: boolean;
+  /** Leading icon (decorative — sized 12px, `aria-hidden`). Overrides `dot`. */
+  icon?: ReactNode;
 }
 
 const dotColour = {
@@ -73,12 +81,17 @@ const dotColour = {
  * @dont Use a badge as a button. Wrap it in a Button or use a Toggle.
  */
 export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
-  { className, variant, tone = 'neutral', dot, children, ...props },
+  { className, variant, tone = 'neutral', dot, icon, children, ...props },
   ref,
 ) {
   return (
     <span ref={ref} className={cn(badge({ variant, tone }), className)} {...props}>
-      {dot && (
+      {icon && (
+        <span aria-hidden className="inline-flex shrink-0 [&_svg]:size-3">
+          {icon}
+        </span>
+      )}
+      {dot && !icon && (
         <span
           aria-hidden
           className={cn('inline-block size-1.5 rounded-full', dotColour[tone ?? 'neutral'])}

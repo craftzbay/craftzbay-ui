@@ -25,7 +25,8 @@ const doc: ComponentDoc = {
     },
     {
       title: 'Indeterminate',
-      description: 'Common in table "select all" headers when some — but not all — rows are selected.',
+      description:
+        'Common in table "select all" headers when some — but not all — rows are selected.',
       preview: <Checkbox label="Select 3 of 12" checked="indeterminate" />,
       code: `<Checkbox label="Select 3 of 12" checked="indeterminate" />`,
     },
@@ -46,14 +47,32 @@ const doc: ComponentDoc = {
   api: [
     {
       rows: [
-        { name: 'checked', type: `boolean | 'indeterminate'`, description: 'Controlled checked state.' },
+        {
+          name: 'checked',
+          type: `boolean | 'indeterminate'`,
+          description: 'Controlled checked state.',
+        },
         { name: 'defaultChecked', type: 'boolean', description: 'Uncontrolled initial state.' },
-        { name: 'onCheckedChange', type: '(checked: boolean) => void', description: 'Fires on toggle.' },
+        {
+          name: 'onCheckedChange',
+          type: '(checked: boolean) => void',
+          description: 'Fires on toggle.',
+        },
         { name: 'label', type: 'ReactNode', description: 'Primary label, clickable.' },
         { name: 'description', type: 'ReactNode', description: 'Secondary descriptive text.' },
         { name: 'error', type: 'ReactNode', description: 'Error message below the field.' },
-        { name: 'hideLabel', type: 'boolean', default: 'false', description: 'Visually hide label.' },
-        { name: 'disabled', type: 'boolean', default: 'false', description: 'Disables interaction.' },
+        {
+          name: 'hideLabel',
+          type: 'boolean',
+          default: 'false',
+          description: 'Visually hide label.',
+        },
+        {
+          name: 'disabled',
+          type: 'boolean',
+          default: 'false',
+          description: 'Disables interaction.',
+        },
       ],
     },
   ],

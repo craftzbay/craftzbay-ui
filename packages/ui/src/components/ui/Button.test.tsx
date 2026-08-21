@@ -17,9 +17,10 @@ describe('Button', () => {
     expect(onClick).toHaveBeenCalledOnce();
   });
 
-  it('is disabled when `loading`', () => {
+  it('is aria-disabled (not disabled) when `loading`', () => {
     render(<Button loading>Saving…</Button>);
-    expect(screen.getByRole('button')).toBeDisabled();
+    expect(screen.getByRole('button')).not.toBeDisabled();
+    expect(screen.getByRole('button')).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByRole('button')).toHaveAttribute('aria-busy', 'true');
   });
 

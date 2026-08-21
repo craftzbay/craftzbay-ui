@@ -57,9 +57,7 @@ describe('DocSidebar', () => {
 
   it('shows results from cross-kind sections when searching', async () => {
     const user = userEvent.setup();
-    render(
-      <DocSidebar sections={componentSections} crossKindSections={crossKind} />,
-    );
+    render(<DocSidebar sections={componentSections} crossKindSections={crossKind} />);
     await user.type(screen.getByPlaceholderText('Search…'), 'dash');
 
     // Templates result surfaces while user is on the Components sidebar
@@ -69,9 +67,7 @@ describe('DocSidebar', () => {
   });
 
   it('does NOT show cross-kind entries when the query is empty', () => {
-    render(
-      <DocSidebar sections={componentSections} crossKindSections={crossKind} />,
-    );
+    render(<DocSidebar sections={componentSections} crossKindSections={crossKind} />);
     expect(screen.getByText('Button')).toBeInTheDocument();
     expect(screen.queryByText('Dashboard')).not.toBeInTheDocument();
     expect(screen.queryByText('Quick start')).not.toBeInTheDocument();

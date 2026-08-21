@@ -17,7 +17,7 @@ const doc: ComponentDoc = {
           <CarouselContent>
             {[1, 2, 3, 4].map((i) => (
               <CarouselItem key={i}>
-                <div className="flex aspect-video items-center justify-center rounded-md border border-border bg-card text-xl font-medium">
+                <div className="border-border bg-card flex aspect-video items-center justify-center rounded-md border text-xl font-medium">
                   Slide {i}
                 </div>
               </CarouselItem>
@@ -39,8 +39,17 @@ const doc: ComponentDoc = {
   api: [
     {
       rows: [
-        { name: 'opts', type: 'EmblaOptionsType', description: 'Embla options (loop, align, dragFree, …).' },
-        { name: 'orientation', type: `'horizontal' | 'vertical'`, default: `'horizontal'`, description: 'Scroll direction.' },
+        {
+          name: 'opts',
+          type: 'EmblaOptionsType',
+          description: 'Embla options (loop, align, dragFree, …).',
+        },
+        {
+          name: 'orientation',
+          type: `'horizontal' | 'vertical'`,
+          default: `'horizontal'`,
+          description: 'Scroll direction.',
+        },
       ],
     },
   ],

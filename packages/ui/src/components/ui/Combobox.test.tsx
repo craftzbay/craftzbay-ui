@@ -20,7 +20,7 @@ describe('Combobox', () => {
     render(<Demo initial="a" />);
     const trigger = screen.getByRole('combobox', { name: 'Fruit' });
     expect(trigger).toHaveAttribute('aria-haspopup', 'listbox');
-    expect(trigger).toHaveAttribute('aria-controls');
+    expect(trigger).not.toHaveAttribute('aria-controls');
     expect(trigger.querySelector('button, [role="button"]')).toBeNull();
     const clear = screen.getByRole('button', { name: 'Clear selection' });
     expect(clear).not.toHaveAttribute('tabindex', '-1');

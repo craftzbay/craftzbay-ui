@@ -29,7 +29,10 @@ function Demo() {
         <FormField
           control={form.control}
           name="password"
-          rules={{ required: 'Password is required', minLength: { value: 8, message: 'At least 8 characters' } }}
+          rules={{
+            required: 'Password is required',
+            minLength: { value: 8, message: 'At least 8 characters' },
+          }}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Password</FormLabel>
@@ -57,7 +60,8 @@ const doc: ComponentDoc = {
   examples: [
     {
       title: 'Sign-in form',
-      description: 'rules can be inline (as shown) or a Zod resolver — anything react-hook-form supports.',
+      description:
+        'rules can be inline (as shown) or a Zod resolver — anything react-hook-form supports.',
       preview: <Demo />,
       code: `const form = useForm({ defaultValues: { email: '', password: '' } });
 
@@ -85,15 +89,35 @@ const doc: ComponentDoc = {
   api: [
     {
       title: 'Form (root)',
-      rows: [{ name: '…useFormReturn', type: 'UseFormReturn<TFieldValues>', description: 'Spread the result of useForm().' }],
+      rows: [
+        {
+          name: '…useFormReturn',
+          type: 'UseFormReturn<TFieldValues>',
+          description: 'Spread the result of useForm().',
+        },
+      ],
     },
     {
       title: 'FormField',
       rows: [
-        { name: 'control', type: 'Control', required: true, description: 'form.control from useForm.' },
+        {
+          name: 'control',
+          type: 'Control',
+          required: true,
+          description: 'form.control from useForm.',
+        },
         { name: 'name', type: 'string', required: true, description: 'Field key.' },
-        { name: 'rules', type: 'RegisterOptions', description: 'react-hook-form validation rules.' },
-        { name: 'render', type: '({ field, fieldState }) => ReactNode', required: true, description: 'Render the input bound to field.' },
+        {
+          name: 'rules',
+          type: 'RegisterOptions',
+          description: 'react-hook-form validation rules.',
+        },
+        {
+          name: 'render',
+          type: '({ field, fieldState }) => ReactNode',
+          required: true,
+          description: 'Render the input bound to field.',
+        },
       ],
     },
   ],
@@ -101,9 +125,7 @@ const doc: ComponentDoc = {
     'FormLabel and FormError auto-link to the input via aria-describedby and aria-invalid.',
     'FormError renders the active error from react-hook-form automatically.',
   ],
-  related: [
-    { slug: 'input', reason: 'Common form field.' },
-  ],
+  related: [{ slug: 'input', reason: 'Common form field.' }],
 };
 
 export default doc;

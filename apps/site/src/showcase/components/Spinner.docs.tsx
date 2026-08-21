@@ -29,7 +29,7 @@ const doc: ComponentDoc = {
         <div className="flex items-center gap-4">
           <Spinner tone="accent" label="Loading" />
           <Spinner tone="neutral" label="Loading" />
-          <span className="rounded-md bg-accent px-3 py-2">
+          <span className="bg-accent rounded-md px-3 py-2">
             <Spinner tone="on-accent" label="Loading" />
           </span>
         </div>
@@ -43,9 +43,23 @@ const doc: ComponentDoc = {
     {
       rows: [
         { name: 'size', type: `'sm' | 'md' | 'lg'`, default: `'md'`, description: 'Diameter.' },
-        { name: 'tone', type: `'accent' | 'neutral' | 'on-accent'`, default: `'accent'`, description: 'Color tone.' },
-        { name: 'label', type: 'string', description: 'Accessible name (defaults to "Loading"). Set decorative to omit.' },
-        { name: 'decorative', type: 'boolean', default: 'false', description: 'Skip role="status" — use when redundant with neighbor text.' },
+        {
+          name: 'tone',
+          type: `'accent' | 'neutral' | 'on-accent'`,
+          default: `'accent'`,
+          description: 'Color tone.',
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name (defaults to "Loading"). Set decorative to omit.',
+        },
+        {
+          name: 'decorative',
+          type: 'boolean',
+          default: 'false',
+          description: 'Skip role="status" — use when redundant with neighbor text.',
+        },
       ],
     },
   ],

@@ -1,0 +1,6 @@
+pnpm-lock.yaml
+**/dist/
+**/dist-lib/
+**/CHANGELOG.md
+apps/site/src/generated/
+packages/create-app/templates/

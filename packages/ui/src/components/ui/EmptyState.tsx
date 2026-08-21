@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
+import { createElement, forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { InboxEmpty } from '@/illustrations';
 
@@ -24,6 +24,8 @@ export interface EmptyStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 't
   action?: ReactNode;
   /** Secondary helper link — "Learn more", "Import existing", etc. */
   secondaryAction?: ReactNode;
+  /** Heading level of the title. Default 3 — match the surrounding outline. */
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
 }
 
 /**
@@ -50,14 +52,24 @@ export interface EmptyStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 't
  *   />
  */
 export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(function EmptyState(
-  { icon, illustration, title, description, action, secondaryAction, className, ...props },
+  {
+    icon,
+    illustration,
+    title,
+    description,
+    action,
+    secondaryAction,
+    headingLevel = 3,
+    className,
+    ...props
+  },
   ref,
 ) {
   return (
     <div
       ref={ref}
       className={cn(
-        'flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border bg-background-subtle p-10 text-center',
+        'border-border bg-background-subtle flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed p-10 text-center',
         className,
       )}
       {...props}
@@ -66,15 +78,19 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(function E
       {illustration ? (
         illustration
       ) : icon ? (
-        <div className="inline-flex size-12 items-center justify-center rounded-full bg-background-muted text-foreground-muted [&_svg]:size-6">
+        <div className="bg-background-muted text-foreground-muted inline-flex size-12 items-center justify-center rounded-full [&_svg]:size-6">
           {icon}
         </div>
       ) : (
         <InboxEmpty className="size-24" />
       )}
-      <h3 className="text-base font-semibold text-foreground leading-tight">{title}</h3>
+      {createElement(
+        `h${headingLevel}`,
+        { className: 'text-base font-semibold text-foreground leading-tight' },
+        title,
+      )}
       {description && (
-        <p className="max-w-md text-sm text-foreground-muted leading-relaxed">{description}</p>
+        <p className="text-foreground-muted max-w-md text-sm leading-relaxed">{description}</p>
       )}
       {(action || secondaryAction) && (
         <div className="mt-2 flex items-center gap-2">

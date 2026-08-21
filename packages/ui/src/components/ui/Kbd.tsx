@@ -26,7 +26,7 @@ export const Kbd = forwardRef<HTMLElement, KbdProps>(function Kbd(
     <kbd
       ref={ref}
       className={cn(
-        'inline-flex items-center justify-center rounded-sm border border-border bg-background-subtle font-mono',
+        'border-border bg-background-subtle inline-flex items-center justify-center rounded-sm border font-mono',
         'text-foreground-muted shadow-xs',
         size === 'sm' ? 'h-5 min-w-5 px-1 text-xs' : 'h-6 min-w-6 px-1.5 text-xs',
         className,

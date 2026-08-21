@@ -39,11 +39,7 @@ const doc: ComponentDoc = {
           current={1}
           orientation="vertical"
           className="w-full max-w-xs"
-          steps={[
-            { title: 'Connect repo' },
-            { title: 'Configure build' },
-            { title: 'Deploy' },
-          ]}
+          steps={[{ title: 'Connect repo' }, { title: 'Configure build' }, { title: 'Deploy' }]}
         />
       ),
       code: `<Stepper orientation="vertical" current={1} steps={[…]} />`,
@@ -53,17 +49,23 @@ const doc: ComponentDoc = {
     {
       rows: [
         { name: 'current', type: 'number', required: true, description: '0-indexed active step.' },
-        { name: 'steps', type: 'Array<{ title: ReactNode; description?: ReactNode }>', required: true, description: 'Step descriptors.' },
-        { name: 'orientation', type: `'horizontal' | 'vertical'`, default: `'horizontal'`, description: 'Layout.' },
+        {
+          name: 'steps',
+          type: 'Array<{ title: ReactNode; description?: ReactNode }>',
+          required: true,
+          description: 'Step descriptors.',
+        },
+        {
+          name: 'orientation',
+          type: `'horizontal' | 'vertical'`,
+          default: `'horizontal'`,
+          description: 'Layout.',
+        },
       ],
     },
   ],
-  accessibility: [
-    'Each step is announced as "Step X of Y" with completion state.',
-  ],
-  related: [
-    { slug: 'tabs', reason: 'For non-linear section switches.' },
-  ],
+  accessibility: ['Each step is announced as "Step X of Y" with completion state.'],
+  related: [{ slug: 'tabs', reason: 'For non-linear section switches.' }],
 };
 
 export default doc;

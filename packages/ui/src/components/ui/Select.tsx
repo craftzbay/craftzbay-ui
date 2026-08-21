@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  forwardRef,
-  type ComponentPropsWithoutRef,
-  type ElementRef,
-  type ReactNode,
-} from 'react';
+import { forwardRef, type ComponentPropsWithoutRef, type ElementRef, type ReactNode } from 'react';
 import * as SelectPrimitive from '@radix-ui/react-select';
 import { Check, ChevronDown, ChevronUp, ChevronsUpDown } from '@/icons';
 import { cn } from '@/lib/utils';
@@ -30,8 +25,10 @@ import { cn } from '@/lib/utils';
 export const Select = SelectPrimitive.Root;
 export const SelectValue = SelectPrimitive.Value;
 
-export interface SelectTriggerProps
-  extends Omit<ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>, 'children'> {
+export interface SelectTriggerProps extends Omit<
+  ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>,
+  'children'
+> {
   /** Placeholder shown when no value is selected. */
   placeholder?: string;
   /** Trigger height — matches Input sizes. */
@@ -48,12 +45,12 @@ export const SelectTrigger = forwardRef<
     <SelectPrimitive.Trigger
       ref={ref}
       className={cn(
-        'inline-flex w-full items-center justify-between gap-2 rounded-md border bg-card text-lg md:text-sm text-foreground',
+        'bg-card text-foreground inline-flex w-full items-center justify-between gap-2 rounded-md border text-lg md:text-sm',
         '[&>span]:min-w-0 [&>span]:truncate',
         'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)]',
         'outline-none',
-        'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-        'disabled:opacity-50 disabled:cursor-not-allowed',
+        'focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
+        'disabled:cursor-not-allowed disabled:opacity-50',
         'data-[placeholder]:text-foreground-subtle',
         size === 'sm' && 'h-8 px-2.5',
         size === 'md' && 'h-9 px-3',
@@ -67,15 +64,14 @@ export const SelectTrigger = forwardRef<
     >
       <SelectPrimitive.Value placeholder={placeholder} />
       <SelectPrimitive.Icon asChild>
-        <ChevronsUpDown className="size-4 text-foreground-subtle shrink-0" aria-hidden />
+        <ChevronsUpDown className="text-foreground-subtle size-4 shrink-0" aria-hidden />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   );
 });
 SelectTrigger.displayName = 'SelectTrigger';
 
-const scrollBtn =
-  'flex h-6 cursor-default items-center justify-center text-foreground-subtle';
+const scrollBtn = 'flex h-6 cursor-default items-center justify-center text-foreground-subtle';
 
 export const SelectScrollUpButton = forwardRef<
   ElementRef<typeof SelectPrimitive.ScrollUpButton>,
@@ -111,8 +107,8 @@ export const SelectContent = forwardRef<
         ref={ref}
         position={position}
         className={cn(
-          'z-[var(--z-popover)] min-w-[var(--radix-select-trigger-width)] max-h-96',
-          'overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground',
+          'z-[var(--z-popover)] max-h-96 min-w-[var(--radix-select-trigger-width)]',
+          'border-border bg-popover text-popover-foreground overflow-hidden rounded-lg border',
           'shadow-md',
           'data-[state=open]:animate-in data-[state=closed]:animate-out',
           'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
@@ -139,49 +135,47 @@ export const SelectLabel = forwardRef<
   return (
     <SelectPrimitive.Label
       ref={ref}
-      className={cn('px-2 py-1.5 text-xs font-medium text-foreground-subtle', className)}
+      className={cn('text-foreground-subtle px-2 py-1.5 text-xs font-medium', className)}
       {...props}
     />
   );
 });
 SelectLabel.displayName = 'SelectLabel';
 
-export interface SelectItemProps
-  extends ComponentPropsWithoutRef<typeof SelectPrimitive.Item> {
+export interface SelectItemProps extends ComponentPropsWithoutRef<typeof SelectPrimitive.Item> {
   /** Icon shown to the left of the label. */
   leadingIcon?: ReactNode;
 }
 
-export const SelectItem = forwardRef<
-  ElementRef<typeof SelectPrimitive.Item>,
-  SelectItemProps
->(function SelectItem({ className, children, leadingIcon, ...props }, ref) {
-  return (
-    <SelectPrimitive.Item
-      ref={ref}
-      className={cn(
-        'relative flex w-full cursor-default select-none items-center gap-2',
-        'rounded-sm px-2 py-1.5 pr-8 text-sm text-foreground outline-none',
-        'data-[highlighted]:bg-background-muted data-[highlighted]:text-foreground',
-        'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
-        className,
-      )}
-      {...props}
-    >
-      {leadingIcon && (
-        <span className="flex items-center text-foreground-subtle [&_svg]:size-4">
-          {leadingIcon}
+export const SelectItem = forwardRef<ElementRef<typeof SelectPrimitive.Item>, SelectItemProps>(
+  function SelectItem({ className, children, leadingIcon, ...props }, ref) {
+    return (
+      <SelectPrimitive.Item
+        ref={ref}
+        className={cn(
+          'relative flex w-full cursor-default items-center gap-2 select-none',
+          'text-foreground rounded-sm px-2 py-1.5 pr-8 text-sm outline-none',
+          'data-[highlighted]:bg-background-muted data-[highlighted]:text-foreground',
+          'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+          className,
+        )}
+        {...props}
+      >
+        {leadingIcon && (
+          <span className="text-foreground-subtle flex items-center [&_svg]:size-4">
+            {leadingIcon}
+          </span>
+        )}
+        <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+        <span className="absolute right-2 flex items-center justify-center">
+          <SelectPrimitive.ItemIndicator>
+            <Check className="text-accent size-4" aria-hidden />
+          </SelectPrimitive.ItemIndicator>
         </span>
-      )}
-      <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
-      <span className="absolute right-2 flex items-center justify-center">
-        <SelectPrimitive.ItemIndicator>
-          <Check className="size-4 text-accent" aria-hidden />
-        </SelectPrimitive.ItemIndicator>
-      </span>
-    </SelectPrimitive.Item>
-  );
-});
+      </SelectPrimitive.Item>
+    );
+  },
+);
 SelectItem.displayName = 'SelectItem';
 
 export const SelectSeparator = forwardRef<
@@ -191,7 +185,7 @@ export const SelectSeparator = forwardRef<
   return (
     <SelectPrimitive.Separator
       ref={ref}
-      className={cn('-mx-1 my-1 h-px bg-border', className)}
+      className={cn('bg-border -mx-1 my-1 h-px', className)}
       {...props}
     />
   );
@@ -199,21 +193,19 @@ export const SelectSeparator = forwardRef<
 SelectSeparator.displayName = 'SelectSeparator';
 
 /** Optional grouping with a label header. Pure composition over Radix Group + Label. */
-export interface SelectGroupProps
-  extends ComponentPropsWithoutRef<typeof SelectPrimitive.Group> {
+export interface SelectGroupProps extends ComponentPropsWithoutRef<typeof SelectPrimitive.Group> {
   label?: ReactNode;
 }
-export const SelectGroup = forwardRef<
-  ElementRef<typeof SelectPrimitive.Group>,
-  SelectGroupProps
->(function SelectGroup({ label, children, ...props }, ref) {
-  return (
-    <SelectPrimitive.Group ref={ref} {...props}>
-      {label && <SelectLabel>{label}</SelectLabel>}
-      {children}
-    </SelectPrimitive.Group>
-  );
-});
+export const SelectGroup = forwardRef<ElementRef<typeof SelectPrimitive.Group>, SelectGroupProps>(
+  function SelectGroup({ label, children, ...props }, ref) {
+    return (
+      <SelectPrimitive.Group ref={ref} {...props}>
+        {label && <SelectLabel>{label}</SelectLabel>}
+        {children}
+      </SelectPrimitive.Group>
+    );
+  },
+);
 SelectGroup.displayName = 'SelectGroup';
 
 /**

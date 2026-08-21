@@ -9,14 +9,14 @@ import { BrandMark } from '../components/BrandMark';
 export function ShowcaseFooter() {
   const year = new Date().getFullYear();
   return (
-    <footer className="mt-20 border-t border-border bg-background">
+    <footer className="border-border bg-background mt-20 border-t">
       <div className="mx-auto flex max-w-[1400px] flex-col gap-6 px-6 py-8 md:flex-row md:items-start md:justify-between">
         <div className="space-y-2">
           <BrandMark className="text-sm" />
-          <p className="max-w-xs text-xs text-foreground-muted">
+          <p className="text-foreground-muted max-w-xs text-xs">
             Refined-minimal Tailwind v4 + React design system. MIT-licensed.
           </p>
-          <p className="text-xs text-foreground-subtle">
+          <p className="text-foreground-subtle text-xs">
             © {year} craftzbay · v{VERSION}
           </p>
         </div>
@@ -41,7 +41,10 @@ export function ShowcaseFooter() {
           <Column
             title="Resources"
             links={[
-              { label: 'Quick start', href: `#${routeToHash({ kind: 'guide', slug: 'quickstart' })}` },
+              {
+                label: 'Quick start',
+                href: `#${routeToHash({ kind: 'guide', slug: 'quickstart' })}`,
+              },
               { label: 'Theming', href: `#${routeToHash({ kind: 'guide', slug: 'theming' })}` },
               { label: 'Dashboard preview', href: previewUrl('dashboard'), external: true },
             ]}
@@ -61,7 +64,7 @@ function Column({
 }) {
   return (
     <div>
-      <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-foreground-subtle">
+      <div className="text-foreground-subtle mb-2 text-xs font-semibold tracking-wider uppercase">
         {title}
       </div>
       <ul className="space-y-1.5">
@@ -74,7 +77,7 @@ function Column({
               className="text-foreground-muted hover:text-foreground"
             >
               {l.label}
-              {l.external && <span className="ml-0.5 text-foreground-subtle">↗</span>}
+              {l.external && <span className="text-foreground-subtle ml-0.5">↗</span>}
             </a>
           </li>
         ))}

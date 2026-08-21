@@ -20,7 +20,8 @@ const quickstart: GuideDoc = {
       <h2>1. Install</h2>
       <CodeBlock language="bash" code="pnpm add @craftzbay/ui" />
       <p>
-        Peer dependencies: <code>react@&gt;=18</code>, <code>react-dom@&gt;=18</code>. Already in your app — no extra setup.
+        Peer dependencies: <code>react@&gt;=18</code>, <code>react-dom@&gt;=18</code>. Already in
+        your app — no extra setup.
       </p>
 
       <h2>2. Import the stylesheet</h2>
@@ -47,7 +48,8 @@ export function ExportDialog() {
 
       <h2>4. Dark mode</h2>
       <p>
-        Toggle the <code>dark</code> class on any container — usually <code>&lt;html&gt;</code>. All token-coloured surfaces flip automatically.
+        Toggle the <code>dark</code> class on any container — usually <code>&lt;html&gt;</code>. All
+        token-coloured surfaces flip automatically.
       </p>
       <CodeBlock code={`document.documentElement.classList.toggle('dark');`} />
     </div>
@@ -57,7 +59,8 @@ export function ExportDialog() {
 const theming: GuideDoc = {
   slug: 'theming',
   title: 'Theming',
-  description: 'Change the brand colour, fonts, and surfaces — globally or per subtree. Live brand-swap demo included.',
+  description:
+    'Change the brand colour, fonts, and surfaces — globally or per subtree. Live brand-swap demo included.',
   body: <ThemingBody />,
 };
 
@@ -70,18 +73,35 @@ const accessibility: GuideDoc = {
       <h2>Built-in guarantees</h2>
       <ul>
         <li>WCAG AA contrast on every token pair (light + dark).</li>
-        <li>Visible focus ring on every interactive element (<code>:focus-visible</code>).</li>
+        <li>
+          Visible focus ring on every interactive element (<code>:focus-visible</code>).
+        </li>
         <li>Keyboard parity — every action reachable without a mouse.</li>
-        <li>All overlays (Dialog, Sheet, Popover, …) trap and restore focus correctly via Radix.</li>
-        <li><code>prefers-reduced-motion</code> respected — animations downgrade to subtle fades.</li>
+        <li>
+          All overlays (Dialog, Sheet, Popover, …) trap and restore focus correctly via Radix.
+        </li>
+        <li>
+          <code>prefers-reduced-motion</code> respected — animations downgrade to subtle fades.
+        </li>
       </ul>
 
       <h2>What you must do</h2>
       <ul>
-        <li>Always pass <code>aria-label</code> to <code>IconButton</code> (TypeScript enforces it).</li>
-        <li>Provide an <code>alt</code> on <code>Avatar</code> images; <code>fallback</code> initials are required.</li>
-        <li>Inside a <code>Dialog</code>, always render <code>DialogTitle</code> — Radix will warn otherwise.</li>
-        <li>For <code>Input</code>, set <code>label</code> (use <code>hideLabel</code> to visually hide but stay in the a11y tree).</li>
+        <li>
+          Always pass <code>aria-label</code> to <code>IconButton</code> (TypeScript enforces it).
+        </li>
+        <li>
+          Provide an <code>alt</code> on <code>Avatar</code> images; <code>fallback</code> initials
+          are required.
+        </li>
+        <li>
+          Inside a <code>Dialog</code>, always render <code>DialogTitle</code> — Radix will warn
+          otherwise.
+        </li>
+        <li>
+          For <code>Input</code>, set <code>label</code> (use <code>hideLabel</code> to visually
+          hide but stay in the a11y tree).
+        </li>
       </ul>
     </div>
   ),
@@ -90,7 +110,8 @@ const accessibility: GuideDoc = {
 const forms: GuideDoc = {
   slug: 'forms',
   title: 'Forms (react-hook-form)',
-  description: 'Use Form + FormField for consistent labels, errors, and validation. Includes a live working sign-in form.',
+  description:
+    'Use Form + FormField for consistent labels, errors, and validation. Includes a live working sign-in form.',
   body: <FormsBody />,
 };
 
@@ -111,7 +132,8 @@ const responsive: GuideDoc = {
 const migration: GuideDoc = {
   slug: 'migration',
   title: 'Migration guide',
-  description: 'Upgrade notes by release (0.4 → 0.6). Later releases are additive — see the changelog for details.',
+  description:
+    'Upgrade notes by release (0.4 → 0.6). Later releases are additive — see the changelog for details.',
   body: <MigrationBody />,
 };
 

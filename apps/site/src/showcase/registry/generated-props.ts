@@ -134,16 +134,42 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": "Show a dismiss (×) button."
         },
         {
+          "name": "headingLevel",
+          "type": "enum",
+          "default": "3",
+          "required": false,
+          "description": "Heading level of `title`. Default 3 — fits under a page h1 / section h2."
+        },
+        {
           "name": "icon",
           "type": "ReactNode",
           "required": false,
           "description": "Override the variant's default icon. Pass `false` to suppress the icon."
         },
         {
+          "name": "live",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "description": "Announce the alert to screen readers when it appears: `role=\"alert\"` for `danger`, `role=\"status\"` otherwise. Off by default — content that is on the page at load should not be announced as a live update."
+        },
+        {
           "name": "onDismiss",
           "type": "(() => void)",
           "required": false,
           "description": "Called when the user dismisses."
+        },
+        {
+          "name": "onOpenChange",
+          "type": "((open: boolean) => void)",
+          "required": false,
+          "description": "Called with the next visibility when the user dismisses."
+        },
+        {
+          "name": "open",
+          "type": "boolean",
+          "required": false,
+          "description": "Controlled visibility. Omit for the default uncontrolled behaviour (visible until dismissed)."
         },
         {
           "name": "title",
@@ -205,6 +231,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "number",
           "required": false,
           "description": "Drawing height in px."
+        },
+        {
+          "name": "labels",
+          "type": "Partial<ChartLabels>",
+          "required": false,
+          "description": "Override the generated accessible text (English defaults)."
         },
         {
           "name": "series",
@@ -315,7 +347,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "enum",
           "default": "md",
           "required": false,
-          "description": "Avatar size applied to children + overflow."
+          "description": "Avatar size applied to children (unless a child sets its own) + overflow."
         }
       ]
     }
@@ -328,6 +360,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "boolean",
           "required": false,
           "description": "Show a leading status dot in the same tone."
+        },
+        {
+          "name": "icon",
+          "type": "ReactNode",
+          "required": false,
+          "description": "Leading icon (decorative — sized 12px, `aria-hidden`). Overrides `dot`."
         },
         {
           "name": "tone",
@@ -394,6 +432,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": "Drawing height in px."
         },
         {
+          "name": "labels",
+          "type": "Partial<ChartLabels>",
+          "required": false,
+          "description": "Override the generated accessible text (English defaults)."
+        },
+        {
           "name": "series",
           "type": "ChartSeries[]",
           "required": false,
@@ -451,6 +495,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": ""
         },
         {
+          "name": "collapsedLabel",
+          "type": "string",
+          "required": false,
+          "description": "sr-only text for the collapsed ellipsis. Default \"Hidden items\"."
+        },
+        {
           "name": "maxItems",
           "type": "number",
           "default": "4",
@@ -487,11 +537,11 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "boolean",
           "default": "false",
           "required": false,
-          "description": "Show a spinner in place of the leading icon and disable the button. Use for async actions where the user must wait."
+          "description": "Show a spinner in place of the leading icon and block interaction while keeping keyboard focus (`aria-disabled` + `aria-busy`, not `disabled`, so focus is not lost mid-submit). With `asChild` no spinner is rendered — the child is only marked busy and made inert."
         },
         {
           "name": "size",
-          "type": "\"sm\" | \"md\" | \"lg\" | \"icon\" | null",
+          "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | \"icon\" | null",
           "required": false,
           "description": ""
         },
@@ -514,6 +564,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
     {
       "rows": [
         {
+          "name": "asChild",
+          "type": "boolean",
+          "required": false,
+          "description": "Render the child element (e.g. a router `<Link>`) with Card styles."
+        },
+        {
           "name": "padding",
           "type": "\"none\" | \"sm\" | \"md\" | \"lg\" | null",
           "required": false,
@@ -532,8 +588,21 @@ export const generatedProps: Record<string, PropGroup[]> = {
     {
       "rows": [
         {
-          "name": "className",
-          "type": "string",
+          "name": "opts",
+          "type": "Partial<OptionsType>",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "orientation",
+          "type": "enum",
+          "default": "horizontal",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "setApi",
+          "type": "((api: EmblaCarouselType) => void)",
           "required": false,
           "description": ""
         }
@@ -548,6 +617,66 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "number",
           "required": false,
           "description": "0-based position, used for the default \"{i+1} of {n}\" label."
+        }
+      ]
+    }
+  ],
+  "CarouselNext": [
+    {
+      "rows": [
+        {
+          "name": "aria-label",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "required": false,
+          "description": "Show a spinner instead of the icon; blocks interaction but keeps focus (`aria-disabled`)."
+        },
+        {
+          "name": "size",
+          "type": "\"sm\" | \"md\" | \"lg\" | null",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "variant",
+          "type": "\"primary\" | \"secondary\" | \"outline\" | \"ghost\" | \"destructive\" | null",
+          "required": false,
+          "description": ""
+        }
+      ]
+    }
+  ],
+  "CarouselPrevious": [
+    {
+      "rows": [
+        {
+          "name": "aria-label",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "required": false,
+          "description": "Show a spinner instead of the icon; blocks interaction but keeps focus (`aria-disabled`)."
+        },
+        {
+          "name": "size",
+          "type": "\"sm\" | \"md\" | \"lg\" | null",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "variant",
+          "type": "\"primary\" | \"secondary\" | \"outline\" | \"ghost\" | \"destructive\" | null",
+          "required": false,
+          "description": ""
         }
       ]
     }
@@ -669,6 +798,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "ReactNode",
           "required": false,
           "description": "Visible label above the field."
+        },
+        {
+          "name": "loadErrorText",
+          "type": "string",
+          "required": false,
+          "description": "Message shown when `loadOptions` rejects."
         },
         {
           "name": "loadOptions",
@@ -957,7 +1092,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "name": "onConfirm",
           "type": "() => void | Promise<void>",
           "required": true,
-          "description": "Called when the user confirms. Awaited — shows a spinner while pending."
+          "description": "Called when the user confirms. Awaited — the confirm button shows a spinner while pending and a rejection is rendered inline (the dialog stays open so the user can retry or cancel)."
         },
         {
           "name": "onOpenChange",
@@ -1003,10 +1138,16 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": ""
         },
         {
+          "name": "formatError",
+          "type": "((err: unknown) => ReactNode)",
+          "required": false,
+          "description": "Map a rejected `onConfirm` to the message shown. Defaults to `Error.message`."
+        },
+        {
           "name": "loading",
           "type": "boolean",
           "required": false,
-          "description": "Whether the confirm button is currently submitting."
+          "description": "Force the submitting state from outside (in addition to the awaited `onConfirm`)."
         }
       ]
     }
@@ -1177,6 +1318,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": ""
         },
         {
+          "name": "inset",
+          "type": "boolean",
+          "required": false,
+          "description": ""
+        },
+        {
           "name": "onSelect",
           "type": "((event: Event) => void)",
           "required": false,
@@ -1196,6 +1343,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
       "rows": [
         {
           "name": "asChild",
+          "type": "boolean",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "inset",
           "type": "boolean",
           "required": false,
           "description": ""
@@ -1399,6 +1552,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": ""
         },
         {
+          "name": "columnVisibility",
+          "type": "Record<string, boolean>",
+          "required": false,
+          "description": "Controlled column visibility: `{ [key]: boolean }` (missing = visible). Omit for internal state. At least one column always stays visible."
+        },
+        {
           "name": "emptyState",
           "type": "ReactNode",
           "required": false,
@@ -1413,6 +1572,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
         {
           "name": "loading",
           "type": "boolean",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "onColumnVisibilityChange",
+          "type": "((next: Record<string, boolean>) => void)",
           "required": false,
           "description": ""
         },
@@ -1604,9 +1769,9 @@ export const generatedProps: Record<string, PropGroup[]> = {
         },
         {
           "name": "tokens",
-          "type": "BrandTokens",
+          "type": "BrandTokenPair | BrandTokens",
           "required": false,
-          "description": "Token overrides (CSS variable name → value)."
+          "description": "Token overrides (CSS variable name → value). A flat record applies in both modes; a `{ light, dark }` pair applies `dark` under `.dark`."
         }
       ]
     }
@@ -2005,7 +2170,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "enum",
           "default": "bottom",
           "required": false,
-          "description": "Side the drawer slides in from. Default `bottom`."
+          "description": "Side the drawer slides in from. Prefer setting `direction` on `<Drawer>` (vaul needs it there for drag physics); this prop only overrides the visual placement."
         },
         {
           "name": "forceMount",
@@ -2054,6 +2219,13 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "((event: PointerDownOutsideEvent) => void)",
           "required": false,
           "description": "Event handler called when the a `pointerdown` event happens outside of the `DismissableLayer`. Can be prevented."
+        },
+        {
+          "name": "showClose",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "description": "Show the close (×) button. Default `true`."
         }
       ]
     }
@@ -2563,6 +2735,13 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": "Description. One or two sentences max."
         },
         {
+          "name": "headingLevel",
+          "type": "enum",
+          "default": "3",
+          "required": false,
+          "description": "Heading level of the title. Default 3 — match the surrounding outline."
+        },
+        {
           "name": "icon",
           "type": "ReactNode",
           "required": false,
@@ -2599,10 +2778,23 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": "Override the default description."
         },
         {
+          "name": "headingLevel",
+          "type": "enum",
+          "default": "3",
+          "required": false,
+          "description": "Heading level of the title. Default 3 — match the surrounding outline."
+        },
+        {
           "name": "illustration",
           "type": "ReactNode",
           "required": false,
           "description": "Override the variant's default illustration. Pass any ReactNode (e.g. `<Illustrations.Construction className=\"size-32\" />`)."
+        },
+        {
+          "name": "live",
+          "type": "boolean",
+          "required": false,
+          "description": "Announce the error politely when it appears in-place (e.g. a failed refetch inside a panel). Off by default — page-level errors are read as part of the page and must not double-announce."
         },
         {
           "name": "onRetry",
@@ -2909,7 +3101,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "name": "loading",
           "type": "boolean",
           "required": false,
-          "description": "Show a spinner instead of the icon."
+          "description": "Show a spinner instead of the icon; blocks interaction but keeps focus (`aria-disabled`)."
         },
         {
           "name": "size",
@@ -2995,6 +3187,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "default": "text",
           "required": false,
           "description": "Field type. `password` enables a show/hide toggle; `search` adds a clear button."
+        },
+        {
+          "name": "value",
+          "type": "string | number | readonly string[] | null",
+          "required": false,
+          "description": "Controlled value. `null` is treated as an empty controlled value (no React warning)."
         }
       ]
     }
@@ -3059,6 +3257,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "default": "160",
           "required": false,
           "description": "Drawing height in px."
+        },
+        {
+          "name": "labels",
+          "type": "Partial<ChartLabels>",
+          "required": false,
+          "description": "Override the generated accessible text (English defaults)."
         },
         {
           "name": "series",
@@ -3466,13 +3670,14 @@ export const generatedProps: Record<string, PropGroup[]> = {
         {
           "name": "max",
           "type": "number",
+          "default": "100",
           "required": false,
           "description": ""
         },
         {
           "name": "size",
           "type": "enum",
-          "default": "36",
+          "default": "md",
           "required": false,
           "description": "Bar height."
         },
@@ -3487,7 +3692,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "name": "value",
           "type": "number | null",
           "required": false,
-          "description": "0–100. Omit for indeterminate."
+          "description": "0–`max` (default 100). Clamped. Omit for indeterminate."
         }
       ]
     }
@@ -3503,10 +3708,10 @@ export const generatedProps: Record<string, PropGroup[]> = {
         },
         {
           "name": "size",
-          "type": "number",
-          "default": "36",
+          "type": "number | \"sm\" | \"md\" | \"lg\"",
+          "default": "md",
           "required": false,
-          "description": "Pixel size of the SVG."
+          "description": "`sm` 24 / `md` 36 / `lg` 48, or an explicit pixel size."
         },
         {
           "name": "thickness",
@@ -3581,7 +3786,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "enum",
           "default": "vertical",
           "required": false,
-          "description": "Lay out the radios horizontally (default) or vertically."
+          "description": "Lay out the radios vertically (default) or horizontally. Also drives arrow-key navigation."
         },
         {
           "name": "required",
@@ -4206,13 +4411,25 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "boolean",
           "default": "true",
           "required": false,
-          "description": ""
+          "description": "Initial open state (uncontrolled)."
         },
         {
           "name": "icon",
           "type": "ReactNode",
           "required": false,
           "description": ""
+        },
+        {
+          "name": "onOpenChange",
+          "type": "((open: boolean) => void)",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "open",
+          "type": "boolean",
+          "required": false,
+          "description": "Controlled open state."
         }
       ]
     }
@@ -4225,6 +4442,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "boolean",
           "required": false,
           "description": "Mark as the current page."
+        },
+        {
+          "name": "asChild",
+          "type": "boolean",
+          "required": false,
+          "description": "Render the child element (router `<Link>`) instead of `<a>`/`<button>`. The child receives className, aria-current and the item content."
         },
         {
           "name": "icon",
@@ -4489,6 +4712,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "default": "horizontal",
           "required": false,
           "description": "Layout direction."
+        },
+        {
+          "name": "stateLabels",
+          "type": "{ complete: string; current: string; upcoming: string; }",
+          "required": false,
+          "description": "sr-only state words announced after each title (i18n)."
         }
       ]
     }
@@ -4555,9 +4784,47 @@ export const generatedProps: Record<string, PropGroup[]> = {
       ]
     }
   ],
+  "Table": [
+    {
+      "rows": [
+        {
+          "name": "containerClassName",
+          "type": "string",
+          "required": false,
+          "description": "Class for the scroll wrapper (border, radius, height)."
+        },
+        {
+          "name": "maxHeight",
+          "type": "MaxHeight<string | number>",
+          "required": false,
+          "description": "Max height of the scroll wrapper. Required for the sticky header to work — `<thead>` sticks to the nearest scroll container, so a wrapper with no height cap never scrolls. e.g. `maxHeight=\"24rem\"`."
+        }
+      ]
+    }
+  ],
+  "TableCell": [
+    {
+      "rows": [
+        {
+          "name": "align",
+          "type": "enum",
+          "default": "left",
+          "required": false,
+          "description": "Horizontal alignment; `right` also applies tabular figures for numbers."
+        }
+      ]
+    }
+  ],
   "TableHead": [
     {
       "rows": [
+        {
+          "name": "align",
+          "type": "enum",
+          "default": "left",
+          "required": false,
+          "description": "Horizontal alignment; `right` also applies tabular figures."
+        },
         {
           "name": "uppercase",
           "type": "boolean",
@@ -4575,7 +4842,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "name": "selected",
           "type": "boolean",
           "required": false,
-          "description": ""
+          "description": "Visual selected state (`data-state=\"selected\"`). `aria-selected` is only valid on rows of an ARIA grid, so it is emitted only when the row carries `role=\"row\"` (i.e. you opted into `role=\"grid\"` on the table)."
         }
       ]
     }
@@ -4600,35 +4867,25 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "string",
           "required": true,
           "description": "Stable column key used in `currentSort.key`."
-        }
-      ]
-    }
-  ],
-  "TabsContent": [
-    {
-      "rows": [
+        },
         {
-          "name": "asChild",
+          "name": "align",
+          "type": "enum",
+          "default": "left",
+          "required": false,
+          "description": "Horizontal alignment; `right` also applies tabular figures."
+        },
+        {
+          "name": "uppercase",
           "type": "boolean",
+          "default": "false",
           "required": false,
-          "description": ""
-        },
-        {
-          "name": "forceMount",
-          "type": "true",
-          "required": false,
-          "description": "Used to force mounting when more control is needed. Useful when controlling animation with React animation libraries."
-        },
-        {
-          "name": "value",
-          "type": "string",
-          "required": false,
-          "description": "The value for the selected tab, if controlled"
+          "description": "Render the header label in small caps (`uppercase tracking-wide`). Off by default — mixed case reads better for long / Cyrillic labels."
         }
       ]
     }
   ],
-  "TabsList": [
+  "Tabs": [
     {
       "rows": [
         {
@@ -4672,6 +4929,61 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "type": "string",
           "required": false,
           "description": "The value for the selected tab, if controlled"
+        }
+      ]
+    }
+  ],
+  "TabsContent": [
+    {
+      "rows": [
+        {
+          "name": "asChild",
+          "type": "boolean",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "forceMount",
+          "type": "true",
+          "required": false,
+          "description": "Used to force mounting when more control is needed. Useful when controlling animation with React animation libraries."
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": false,
+          "description": "The value for the selected tab, if controlled"
+        }
+      ]
+    }
+  ],
+  "TabsList": [
+    {
+      "rows": [
+        {
+          "name": "asChild",
+          "type": "boolean",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "loop",
+          "type": "boolean",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "size",
+          "type": "\"sm\" | \"md\" | \"lg\" | null",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "variant",
+          "type": "\"underline\" | \"pills\" | null",
+          "default": "underline",
+          "required": false,
+          "description": ""
         }
       ]
     }
@@ -5340,6 +5652,12 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "description": "Primary navigation links — typically a list of `<TopNavLink>`."
         },
         {
+          "name": "navLabel",
+          "type": "string",
+          "required": false,
+          "description": "Accessible name of the inner `<nav>` landmark. Default \"Primary\"."
+        },
+        {
           "name": "search",
           "type": "ReactNode",
           "required": false,
@@ -5352,14 +5670,20 @@ export const generatedProps: Record<string, PropGroup[]> = {
     {
       "rows": [
         {
-          "name": "href",
-          "type": "string",
-          "required": true,
+          "name": "active",
+          "type": "boolean",
+          "required": false,
           "description": ""
         },
         {
-          "name": "active",
+          "name": "asChild",
           "type": "boolean",
+          "required": false,
+          "description": "Render the child (e.g. router `<Link>`) instead of an `<a>`."
+        },
+        {
+          "name": "href",
+          "type": "string",
           "required": false,
           "description": ""
         }
@@ -5385,7 +5709,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "name": "aria-labelledby",
           "type": "string",
           "required": false,
-          "description": ""
+          "description": "Identifies the element (or elements) that labels the current element."
         },
         {
           "name": "className",
@@ -5396,7 +5720,6 @@ export const generatedProps: Record<string, PropGroup[]> = {
         {
           "name": "defaultExpanded",
           "type": "string[]",
-          "default": "[]",
           "required": false,
           "description": "Ids to expand by default (uncontrolled)."
         },
@@ -5422,25 +5745,25 @@ export const generatedProps: Record<string, PropGroup[]> = {
           "name": "onSelect",
           "type": "((id: string) => void)",
           "required": false,
-          "description": "Called when a node is activated (click / Enter / Space)."
+          "description": "@deprecated Use `onSelectedChange`. Still called on every activation."
         },
         {
           "name": "onSelectedChange",
           "type": "((id: string) => void)",
           "required": false,
-          "description": "Alias of `onSelect` for the controlled `selected` pair."
+          "description": "Called when a node is activated (click / Enter / Space)."
         },
         {
           "name": "selected",
           "type": "string",
           "required": false,
-          "description": "Controlled selected id. Takes precedence over `selectedId`."
+          "description": "Controlled selected id. The component is controlled whenever this key is present in props (even as `undefined`), mirroring React inputs."
         },
         {
           "name": "selectedId",
           "type": "string",
           "required": false,
-          "description": "Currently selected node id (controlled). Alias: `selected`."
+          "description": "@deprecated Use `selected` + `onSelectedChange`. Kept for backward compatibility; ignored when `selected` is present."
         }
       ]
     }
@@ -5491,7 +5814,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
     {
       "rows": [
         {
-          "name": "__@hasInstance@10058",
+          "name": "__@hasInstance@10292",
           "type": "(value: any) => boolean",
           "required": true,
           "description": "Determines whether the given value inherits from this function if this function was used as a constructor function. A constructor function can control which objects are recognized as its instances by 'instanceof' by overriding this method."

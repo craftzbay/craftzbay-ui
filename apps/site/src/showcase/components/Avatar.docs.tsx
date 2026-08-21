@@ -62,15 +62,34 @@ const doc: ComponentDoc = {
       rows: [
         { name: 'src', type: 'string', description: 'Image URL.' },
         { name: 'alt', type: 'string', description: 'Image alt text.' },
-        { name: 'fallback', type: 'string', required: true, description: '2-character initials shown when no image.' },
-        { name: 'size', type: `'xs' | 'sm' | 'md' | 'lg' | 'xl'`, default: `'md'`, description: 'Diameter.' },
-        { name: 'status', type: `'online' | 'busy' | 'away' | 'offline'`, description: 'Status dot in the bottom-right.' },
+        {
+          name: 'fallback',
+          type: 'string',
+          required: true,
+          description: '2-character initials shown when no image.',
+        },
+        {
+          name: 'size',
+          type: `'xs' | 'sm' | 'md' | 'lg' | 'xl'`,
+          default: `'md'`,
+          description: 'Diameter.',
+        },
+        {
+          name: 'status',
+          type: `'online' | 'busy' | 'away' | 'offline'`,
+          description: 'Status dot in the bottom-right.',
+        },
       ],
     },
     {
       title: 'AvatarGroup',
       rows: [
-        { name: 'max', type: 'number', default: '3', description: 'How many avatars render before showing "+N".' },
+        {
+          name: 'max',
+          type: 'number',
+          default: '3',
+          description: 'How many avatars render before showing "+N".',
+        },
       ],
     },
   ],

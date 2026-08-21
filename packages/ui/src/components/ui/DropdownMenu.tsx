@@ -38,11 +38,16 @@ export const DropdownMenuSubTrigger = forwardRef<
   return (
     <DropdownMenuPrimitive.SubTrigger
       ref={ref}
-      className={cn(itemClasses, 'data-[state=open]:bg-background-muted', inset && 'pl-8', className)}
+      className={cn(
+        itemClasses,
+        'data-[state=open]:bg-background-muted',
+        inset && 'pl-8',
+        className,
+      )}
       {...props}
     >
       {children}
-      <ChevronRight className="ml-auto size-4 text-foreground-subtle" aria-hidden />
+      <ChevronRight className="text-foreground-subtle ml-auto size-4" aria-hidden />
     </DropdownMenuPrimitive.SubTrigger>
   );
 });
@@ -56,7 +61,7 @@ export const DropdownMenuSubContent = forwardRef<
     <DropdownMenuPrimitive.SubContent
       ref={ref}
       className={cn(
-        'z-[var(--z-popover)] min-w-[8rem] overflow-hidden rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-md',
+        'border-border bg-popover text-popover-foreground z-[var(--z-popover)] min-w-[8rem] overflow-hidden rounded-lg border p-1 shadow-md',
         'data-[state=open]:animate-in data-[state=closed]:animate-out',
         'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
         'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
@@ -71,6 +76,9 @@ DropdownMenuSubContent.displayName = 'DropdownMenuSubContent';
 export const DropdownMenuContent = forwardRef<
   ElementRef<typeof DropdownMenuPrimitive.Content>,
   ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
+  // `align` defaults to 'end' (Radix default is 'center'): triggers are
+  // usually right-aligned icon buttons in toolbars/table rows. Pass
+  // `align="start"` for left-anchored triggers.
 >(function DropdownMenuContent({ className, sideOffset = 4, align = 'end', ...props }, ref) {
   return (
     <DropdownMenuPortal>
@@ -79,7 +87,7 @@ export const DropdownMenuContent = forwardRef<
         sideOffset={sideOffset}
         align={align}
         className={cn(
-          'z-[var(--z-popover)] min-w-[12rem] overflow-hidden rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-md',
+          'border-border bg-popover text-popover-foreground z-[var(--z-popover)] min-w-[12rem] overflow-hidden rounded-lg border p-1 shadow-md',
           'data-[state=open]:animate-in data-[state=closed]:animate-out',
           'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
           'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
@@ -129,7 +137,7 @@ export const DropdownMenuCheckboxItem = forwardRef<
     >
       <span className="absolute left-2 flex size-4 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
-          <Check className="size-4 text-accent" aria-hidden />
+          <Check className="text-accent size-4" aria-hidden />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -150,7 +158,7 @@ export const DropdownMenuRadioItem = forwardRef<
     >
       <span className="absolute left-2 flex size-4 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
-          <Circle className="size-2 fill-accent text-accent" aria-hidden />
+          <Circle className="fill-accent text-accent size-2" aria-hidden />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -169,7 +177,7 @@ export const DropdownMenuLabel = forwardRef<
     <DropdownMenuPrimitive.Label
       ref={ref}
       className={cn(
-        'px-2 py-1.5 text-xs font-medium text-foreground-subtle',
+        'text-foreground-subtle px-2 py-1.5 text-xs font-medium',
         inset && 'pl-8',
         className,
       )}
@@ -186,7 +194,7 @@ export const DropdownMenuSeparator = forwardRef<
   return (
     <DropdownMenuPrimitive.Separator
       ref={ref}
-      className={cn('-mx-1 my-1 h-px bg-border', className)}
+      className={cn('bg-border -mx-1 my-1 h-px', className)}
       {...props}
     />
   );
@@ -200,7 +208,7 @@ DropdownMenuSeparator.displayName = 'DropdownMenuSeparator';
 export function DropdownMenuShortcut({ className, ...props }: HTMLAttributes<HTMLSpanElement>) {
   return (
     <span
-      className={cn('ml-auto text-xs tracking-widest text-foreground-subtle font-mono', className)}
+      className={cn('text-foreground-subtle ml-auto font-mono text-xs tracking-widest', className)}
       {...props}
     />
   );

@@ -9,14 +9,14 @@
 @source '../../../packages/ui/src';
 @source './';
 
-/* Embedded template preview: full-page templates use min-h-screen / h-screen
+/* Embedded template preview: full-page templates use min-h-dvh / h-dvh
  * (viewport units), which inside the doc page's fixed-height preview box would
  * force ~100vh and a giant scroll (most visible on the centered auth screens).
  * Within an embedded preview, resolve those to the box height instead. */
-.embedded-preview .min-h-screen {
+.embedded-preview .min-h-dvh {
   min-height: 100% !important;
 }
-.embedded-preview .h-screen {
+.embedded-preview .h-dvh {
   height: 100% !important;
 }
 

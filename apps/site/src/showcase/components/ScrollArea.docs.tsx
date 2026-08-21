@@ -13,7 +13,7 @@ const doc: ComponentDoc = {
     {
       title: 'Vertical list',
       preview: (
-        <ScrollArea className="h-48 w-full max-w-sm rounded-md border border-border p-3">
+        <ScrollArea className="border-border h-48 w-full max-w-sm rounded-md border p-3">
           <ul className="space-y-1 text-sm">
             {Array.from({ length: 30 }).map((_, i) => (
               <li key={i}>Row #{i + 1}</li>
@@ -31,7 +31,11 @@ const doc: ComponentDoc = {
   api: [
     {
       rows: [
-        { name: 'className', type: 'string', description: 'Apply fixed height / width to enable scrolling.' },
+        {
+          name: 'className',
+          type: 'string',
+          description: 'Apply fixed height / width to enable scrolling.',
+        },
         { name: 'children', type: 'ReactNode', description: 'Scrollable content.' },
       ],
     },

@@ -46,21 +46,36 @@ const doc: ComponentDoc = {
   api: [
     {
       rows: [
-        { name: 'variant', type: `'404' | '500' | 'generic'`, default: `'generic'`, description: 'Preset illustration + default copy.' },
+        {
+          name: 'variant',
+          type: `'404' | '500' | 'generic'`,
+          default: `'generic'`,
+          description: 'Preset illustration + default copy.',
+        },
         { name: 'title', type: 'ReactNode', description: 'Override the default title.' },
         { name: 'description', type: 'ReactNode', description: 'Override the default body.' },
-        { name: 'illustration', type: 'ReactNode', description: 'Override the variant\'s default illustration.' },
-        { name: 'action', type: 'ReactNode', description: 'Primary action. Replaces the default retry button.' },
-        { name: 'onRetry', type: '() => void', description: 'Renders a default "Try again" button calling this handler.' },
+        {
+          name: 'illustration',
+          type: 'ReactNode',
+          description: "Override the variant's default illustration.",
+        },
+        {
+          name: 'action',
+          type: 'ReactNode',
+          description: 'Primary action. Replaces the default retry button.',
+        },
+        {
+          name: 'onRetry',
+          type: '() => void',
+          description: 'Renders a default "Try again" button calling this handler.',
+        },
       ],
     },
   ],
   accessibility: [
     'Renders without a live-region role — it is static page content, not an interruption. Wrap it in role="alert" yourself only when the error appears asynchronously and must be announced.',
   ],
-  related: [
-    { slug: 'empty-state', reason: 'For non-error "nothing here yet" cases.' },
-  ],
+  related: [{ slug: 'empty-state', reason: 'For non-error "nothing here yet" cases.' }],
 };
 
 export default doc;

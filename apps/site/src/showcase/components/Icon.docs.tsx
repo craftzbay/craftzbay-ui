@@ -32,7 +32,11 @@ const doc: ComponentDoc = {
       preview: (
         <div className="grid grid-cols-6 gap-3 sm:grid-cols-12">
           {SAMPLE.map((n) => (
-            <div key={n} className="flex items-center justify-center rounded-md border border-border p-2.5 text-foreground-muted" title={n}>
+            <div
+              key={n}
+              className="border-border text-foreground-muted flex items-center justify-center rounded-md border p-2.5"
+              title={n}
+            >
               <Icon name={n} className="size-4" />
             </div>
           ))}
@@ -61,20 +65,43 @@ const doc: ComponentDoc = {
   api: [
     {
       rows: [
-        { name: 'name', type: 'IconName', required: true, description: 'Lucide icon name in kebab-case, e.g. "chevrons-up-down". Typed union — autocompletes.' },
-        { name: 'size', type: 'number | string', default: '24', description: 'Pixel size; prefer Tailwind size-* via className.' },
-        { name: 'strokeWidth', type: 'number', default: '2', description: 'Stroke width. The design system mostly uses 1.5.' },
-        { name: 'fallback', type: 'ReactNode', description: 'Shown while the icon chunk loads (first use only). Defaults to an invisible same-size square.' },
-        { name: 'iconNames', type: 'IconName[]', description: 'Exported list of all names — useful for icon pickers.' },
+        {
+          name: 'name',
+          type: 'IconName',
+          required: true,
+          description:
+            'Lucide icon name in kebab-case, e.g. "chevrons-up-down". Typed union — autocompletes.',
+        },
+        {
+          name: 'size',
+          type: 'number | string',
+          default: '24',
+          description: 'Pixel size; prefer Tailwind size-* via className.',
+        },
+        {
+          name: 'strokeWidth',
+          type: 'number',
+          default: '2',
+          description: 'Stroke width. The design system mostly uses 1.5.',
+        },
+        {
+          name: 'fallback',
+          type: 'ReactNode',
+          description:
+            'Shown while the icon chunk loads (first use only). Defaults to an invisible same-size square.',
+        },
+        {
+          name: 'iconNames',
+          type: 'IconName[]',
+          description: 'Exported list of all names — useful for icon pickers.',
+        },
       ],
     },
   ],
   accessibility: [
     'Decorative icons are aria-hidden by lucide default; pass aria-label when the icon is the only label.',
   ],
-  related: [
-    { slug: 'icon-button', reason: 'Icon-only action button.' },
-  ],
+  related: [{ slug: 'icon-button', reason: 'Icon-only action button.' }],
 };
 
 export default doc;

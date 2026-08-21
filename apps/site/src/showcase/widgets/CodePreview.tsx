@@ -23,8 +23,8 @@ export function CodePreview({
   const [tab, setTab] = useState<'preview' | 'code'>('preview');
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-background">
-      <div className="flex items-center border-b border-border bg-background-subtle/60 px-2">
+    <div className="border-border bg-background overflow-hidden rounded-lg border">
+      <div className="border-border bg-background-subtle/60 flex items-center border-b px-2">
         <Tab active={tab === 'preview'} onClick={() => setTab('preview')}>
           Preview
         </Tab>
@@ -34,12 +34,7 @@ export function CodePreview({
       </div>
 
       {tab === 'preview' ? (
-        <div
-          className={cn(
-            'flex min-h-[180px] items-center justify-center p-8',
-            surfaceClassName,
-          )}
-        >
+        <div className={cn('flex min-h-[180px] items-center justify-center p-8', surfaceClassName)}>
           {preview}
         </div>
       ) : (
@@ -64,10 +59,10 @@ function Tab({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'relative px-3 py-2 text-xs font-medium outline-none transition-colors',
-        'focus-visible:ring-2 focus-visible:ring-ring rounded-sm',
+        'relative px-3 py-2 text-xs font-medium transition-colors outline-none',
+        'focus-visible:ring-ring rounded-sm focus-visible:ring-2',
         active
-          ? 'text-foreground after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-accent'
+          ? 'text-foreground after:bg-accent after:absolute after:right-0 after:bottom-0 after:left-0 after:h-px'
           : 'text-foreground-muted hover:text-foreground',
       )}
     >

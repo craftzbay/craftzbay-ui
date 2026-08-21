@@ -2,6 +2,7 @@
 
 import {
   forwardRef,
+  useState,
   type ComponentPropsWithoutRef,
   type ElementRef,
   type HTMLAttributes,
@@ -26,7 +27,7 @@ export const DialogOverlay = forwardRef<
     <DialogPrimitive.Overlay
       ref={ref}
       className={cn(
-        'fixed inset-0 z-[var(--z-overlay)] bg-overlay',
+        'bg-overlay fixed inset-0 z-[var(--z-overlay)]',
         'data-[state=open]:animate-in data-[state=closed]:animate-out',
         'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
         className,
@@ -37,8 +38,9 @@ export const DialogOverlay = forwardRef<
 });
 DialogOverlay.displayName = 'DialogOverlay';
 
-export interface DialogContentProps
-  extends ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
+export interface DialogContentProps extends ComponentPropsWithoutRef<
+  typeof DialogPrimitive.Content
+> {
   /** Show the default close (×) button in the top-right. */
   showClose?: boolean;
   /** Dialog width — `sm` 400 / `md` 520 / `lg` 720. */
@@ -56,8 +58,8 @@ export const DialogContent = forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          'fixed left-1/2 top-1/2 z-[var(--z-modal)] -translate-x-1/2 -translate-y-1/2',
-          'w-[calc(100%-2rem)] rounded-lg border border-border bg-card text-card-foreground shadow-lg',
+          'fixed top-1/2 left-1/2 z-[var(--z-modal)] -translate-x-1/2 -translate-y-1/2',
+          'border-border bg-card text-card-foreground w-[calc(100%-2rem)] rounded-lg border shadow-lg',
           'p-6',
           'data-[state=open]:animate-in data-[state=closed]:animate-out',
           'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
@@ -74,9 +76,9 @@ export const DialogContent = forwardRef<
           <DialogPrimitive.Close
             aria-label={strings.dialog.close}
             className={cn(
-              'absolute right-4 top-4 inline-flex size-8 items-center justify-center rounded-md text-foreground-subtle',
+              'text-foreground-subtle absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-md',
               'hover:bg-background-muted hover:text-foreground',
-              'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card',
+              'focus-visible:ring-ring focus-visible:ring-offset-card outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
               'transition-colors duration-[var(--duration-fast)]',
             )}
           >
@@ -111,7 +113,7 @@ export const DialogTitle = forwardRef<
   return (
     <DialogPrimitive.Title
       ref={ref}
-      className={cn('text-lg font-semibold text-foreground leading-tight', className)}
+      className={cn('text-foreground text-lg leading-tight font-semibold', className)}
       {...props}
     />
   );
@@ -125,7 +127,7 @@ export const DialogDescription = forwardRef<
   return (
     <DialogPrimitive.Description
       ref={ref}
-      className={cn('text-sm text-foreground-muted', className)}
+      className={cn('text-foreground-muted text-sm', className)}
       {...props}
     />
   );
@@ -149,10 +151,16 @@ export interface ConfirmationDialogProps {
   cancelLabel?: string;
   /** Variant of the confirm button — typically `primary` or `destructive`. */
   confirmVariant?: ButtonProps['variant'];
-  /** Called when the user confirms. Awaited — shows a spinner while pending. */
+  /**
+   * Called when the user confirms. Awaited — the confirm button shows a
+   * spinner while pending and a rejection is rendered inline (the dialog stays
+   * open so the user can retry or cancel).
+   */
   onConfirm: () => void | Promise<void>;
-  /** Whether the confirm button is currently submitting. */
+  /** Force the submitting state from outside (in addition to the awaited `onConfirm`). */
   loading?: boolean;
+  /** Map a rejected `onConfirm` to the message shown. Defaults to `Error.message`. */
+  formatError?: (err: unknown) => ReactNode;
 }
 
 /**
@@ -182,25 +190,60 @@ export function ConfirmationDialog({
   confirmVariant = 'primary',
   onConfirm,
   loading,
+  formatError = defaultFormatError,
 }: ConfirmationDialogProps) {
   const strings = useStrings();
+  const [pending, setPending] = useState(false);
+  const [failure, setFailure] = useState<ReactNode>(null);
+  const busy = Boolean(loading) || pending;
+
+  const handleConfirm = async () => {
+    setFailure(null);
+    setPending(true);
+    try {
+      await onConfirm();
+    } catch (err) {
+      setFailure(formatError(err));
+    } finally {
+      setPending(false);
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent size="sm">
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) setFailure(null);
+        onOpenChange(next);
+      }}
+    >
+      {/* No description → drop aria-describedby so Radix does not warn and AT is not pointed at nothing. */}
+      <DialogContent size="sm" {...(description ? {} : { 'aria-describedby': undefined })}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
+        {failure && (
+          <p role="alert" className="text-danger-text text-sm">
+            {failure}
+          </p>
+        )}
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">{cancelLabel ?? strings.confirmationDialog.cancel}</Button>
+            <Button variant="outline" disabled={busy}>
+              {cancelLabel ?? strings.confirmationDialog.cancel}
+            </Button>
           </DialogClose>
-          <Button variant={confirmVariant} loading={loading} onClick={onConfirm}>
+          <Button variant={confirmVariant} loading={busy} onClick={handleConfirm}>
             {confirmLabel ?? strings.confirmationDialog.confirm}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
+}
+
+function defaultFormatError(err: unknown): ReactNode {
+  return err instanceof Error ? err.message : String(err);
 }
 ConfirmationDialog.displayName = 'ConfirmationDialog';

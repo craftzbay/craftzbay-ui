@@ -12,12 +12,16 @@ describe('Buttons (smoke)', () => {
   });
 
   it('IconButton is axe-clean', async () => {
-    const { container } = render(<IconButton aria-label="Delete" icon={<Trash2 />} variant="ghost" />);
+    const { container } = render(
+      <IconButton aria-label="Delete" icon={<Trash2 />} variant="ghost" />,
+    );
     expect(await axe(container)).toHaveNoViolations();
   });
 
   it('Pagination renders numbered pages + nav buttons', () => {
-    render(<Pagination page={3} pageCount={10} totalItems={200} pageSize={20} onPageChange={() => {}} />);
+    render(
+      <Pagination page={3} pageCount={10} totalItems={200} pageSize={20} onPageChange={() => {}} />,
+    );
     expect(screen.getByRole('navigation', { name: /pagination/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /next/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /previous/i })).toBeInTheDocument();

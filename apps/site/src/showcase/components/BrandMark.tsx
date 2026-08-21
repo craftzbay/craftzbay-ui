@@ -15,7 +15,7 @@ export function BrandMark({
 }) {
   return (
     <span className={cn('flex items-center gap-2 font-semibold', className)}>
-      <span className="inline-flex size-6 items-center justify-center rounded-md bg-accent text-xs text-on-accent">
+      <span className="bg-accent text-on-accent inline-flex size-6 items-center justify-center rounded-md text-xs">
         ✦
       </span>
       {showName && <span>{PKG_NAME}</span>}

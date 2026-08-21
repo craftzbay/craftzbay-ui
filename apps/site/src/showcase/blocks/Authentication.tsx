@@ -30,17 +30,15 @@ export interface AuthLayoutProps {
 
 export function AuthLayout({ brand, title, subtitle, children, footer }: AuthLayoutProps) {
   return (
-    <main className="grid min-h-screen place-items-center bg-background-subtle px-4 py-12">
+    <main className="bg-background-subtle grid min-h-dvh place-items-center px-4 py-12">
       <div className="w-full max-w-[400px] space-y-6">
         {brand && <div className="flex justify-center">{brand}</div>}
         <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
-          {subtitle && <p className="text-sm text-foreground-muted">{subtitle}</p>}
+          <h1 className="text-foreground text-2xl font-semibold tracking-tight">{title}</h1>
+          {subtitle && <p className="text-foreground-muted text-sm">{subtitle}</p>}
         </div>
-        <div className="rounded-lg border border-border bg-card p-6">{children}</div>
-        {footer && (
-          <p className="text-center text-sm text-foreground-muted">{footer}</p>
-        )}
+        <div className="border-border bg-card rounded-lg border p-6">{children}</div>
+        {footer && <p className="text-foreground-muted text-center text-sm">{footer}</p>}
       </div>
     </main>
   );
@@ -59,14 +57,30 @@ export function SsoButtons({ onProvider }: SsoButtonsProps) {
   return (
     <div className="space-y-4">
       <div className="grid gap-2 sm:grid-cols-2">
-        <Button type="button" variant="outline" className="w-full" leadingIcon={<GoogleMark />} onClick={() => onProvider?.('google')}>
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          leadingIcon={<GoogleMark />}
+          onClick={() => onProvider?.('google')}
+        >
           Google
         </Button>
-        <Button type="button" variant="outline" className="w-full" leadingIcon={<Github />} onClick={() => onProvider?.('github')}>
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          leadingIcon={<Github />}
+          onClick={() => onProvider?.('github')}
+        >
           GitHub
         </Button>
       </div>
-      <div className="flex items-center gap-3 text-xs uppercase tracking-wider text-foreground-subtle" role="separator" aria-label="or">
+      <div
+        className="text-foreground-subtle flex items-center gap-3 text-xs tracking-wider uppercase"
+        role="separator"
+        aria-label="or"
+      >
         <Separator className="flex-1" />
         or
         <Separator className="flex-1" />
@@ -97,7 +111,13 @@ export interface SignInFormProps {
   onForgot?: () => void;
 }
 
-export function SignInForm({ onSubmit, loading, error, forgotHref = '/forgot', onForgot }: SignInFormProps) {
+export function SignInForm({
+  onSubmit,
+  loading,
+  error,
+  forgotHref = '/forgot',
+  onForgot,
+}: SignInFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -131,14 +151,14 @@ export function SignInForm({ onSubmit, loading, error, forgotHref = '/forgot', o
           <button
             type="button"
             onClick={onForgot}
-            className="rounded-sm font-medium text-accent outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+            className="text-accent focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm font-medium outline-none hover:underline focus-visible:ring-2 focus-visible:ring-offset-2"
           >
             Forgot password?
           </button>
         ) : (
           <a
             href={forgotHref}
-            className="rounded-sm font-medium text-accent outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+            className="text-accent focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm font-medium outline-none hover:underline focus-visible:ring-2 focus-visible:ring-offset-2"
           >
             Forgot password?
           </a>
@@ -193,7 +213,7 @@ export function SignUpForm({ onSubmit, loading, error }: SignUpFormProps) {
       <Button type="submit" loading={loading} className="w-full">
         Create account
       </Button>
-      <p className="text-xs text-foreground-subtle text-center">
+      <p className="text-foreground-subtle text-center text-xs">
         By signing up you agree to our Terms of Service and Privacy Policy.
       </p>
     </form>
@@ -241,21 +261,20 @@ export interface MagicLinkSentProps {
 export function MagicLinkSent({ email, onResend }: MagicLinkSentProps) {
   return (
     <div className="space-y-4 text-center">
-      <div className="mx-auto inline-flex size-12 items-center justify-center rounded-full bg-success-soft text-success-text">
+      <div className="bg-success-soft text-success-text mx-auto inline-flex size-12 items-center justify-center rounded-full">
         <CheckCircle2 className="size-6" aria-hidden />
       </div>
-      <p className="text-sm text-foreground-muted">
-        We sent a sign-in link to{' '}
-        <span className="font-medium text-foreground">{email}</span>. Open it on this device to
-        continue.
+      <p className="text-foreground-muted text-sm">
+        We sent a sign-in link to <span className="text-foreground font-medium">{email}</span>. Open
+        it on this device to continue.
       </p>
       <Separator />
-      <p className="text-xs text-foreground-subtle">
+      <p className="text-foreground-subtle text-xs">
         Didn't get it?{' '}
         <button
           type="button"
           onClick={onResend}
-          className="font-medium text-accent hover:underline outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+          className="text-accent focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm font-medium outline-none hover:underline focus-visible:ring-2 focus-visible:ring-offset-2"
         >
           Resend
         </button>

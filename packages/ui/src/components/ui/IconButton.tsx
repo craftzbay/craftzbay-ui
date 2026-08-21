@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode, type SyntheticEvent } from 'react';
 import { Loader2 } from '@/icons';
 import { cn } from '@/lib/utils';
 import { cva, type VariantProps } from '@/lib/cva';
@@ -14,6 +14,7 @@ const iconButton = cva(
     'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'focus-visible:ring-offset-background',
     'disabled:pointer-events-none disabled:opacity-50',
+    'aria-busy:pointer-events-none',
     '[&_svg]:pointer-events-none',
   ],
   {
@@ -51,7 +52,7 @@ export interface IconButtonProps
   'aria-label': string;
   /** The Lucide icon to render. */
   icon: ReactNode;
-  /** Show a spinner instead of the icon. */
+  /** Show a spinner instead of the icon; blocks interaction but keeps focus (`aria-disabled`). */
   loading?: boolean;
 }
 
@@ -71,17 +72,18 @@ export interface IconButtonProps
  *       recognised. If users need to learn the icon, ship a Button with text.
  */
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
-  { className, variant, size, icon, loading, disabled, type = 'button', ...props },
+  { className, variant, size, icon, loading, disabled, type = 'button', onClick, ...props },
   ref,
 ) {
-  const isDisabled = disabled || loading;
   return (
     <button
       ref={ref}
       type={type}
       aria-busy={loading || undefined}
-      disabled={isDisabled}
+      aria-disabled={loading || undefined}
+      disabled={disabled}
       className={cn(iconButton({ variant, size }), className)}
+      onClick={loading ? blockEvent : onClick}
       {...props}
     >
       {loading ? <Loader2 className="animate-spin" aria-hidden="true" /> : icon}
@@ -90,3 +92,8 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
 });
 
 IconButton.displayName = 'IconButton';
+
+function blockEvent(e: SyntheticEvent) {
+  e.preventDefault();
+  e.stopPropagation();
+}

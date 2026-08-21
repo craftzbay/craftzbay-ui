@@ -45,10 +45,21 @@ export const Spinner = forwardRef<SVGSVGElement, SpinnerProps>(function Spinner(
       role={decorative ? undefined : 'status'}
       aria-label={decorative ? undefined : (label ?? strings.spinner.loading)}
       aria-hidden={decorative || undefined}
+      // Under prefers-reduced-motion theme.css swaps the spin for a slow
+      // (1.6s) opacity pulse via this attribute — busy state stays perceivable.
+      data-motion-keep=""
       className={cn('animate-spin', sizeMap[size], toneMap[tone], className)}
       {...props}
     >
-      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5" strokeOpacity={0.2} fill="none" />
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeOpacity={0.2}
+        fill="none"
+      />
       <path
         d="M12 2a10 10 0 0 1 10 10"
         stroke="currentColor"

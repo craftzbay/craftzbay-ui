@@ -1,6 +1,7 @@
 # Design Philosophy — Refined-Minimal
 
 > The rules below are the library-specific distillation of the [craftzbay design-research](https://github.com/craftzbay/design-research) guidelines ([rendered](https://craftzbay.github.io/design-research/)).
+> **Precedence:** design-research is the source of truth; this file summarises it. When the two disagree, design-research wins — the canonical numbers live in [`14-defaults.md`](https://github.com/craftzbay/design-research/blob/main/14-defaults.md).
 
 This system is built for **internal product teams** at the company. It must work across
 any product surface, so it favours discipline and clarity over decoration. The visual
@@ -46,7 +47,8 @@ Inline surfaces are bounded by a 1px `border` token. Shadows exist only for floa
 surfaces — popover, modal, toast, dropdown. A card on the page has a border; a card
 floating above the page has a soft shadow. Shadows are neutral; never tinted.
 
-- **Do**: page card → `border border-border bg-card`.
+- **Do**: page card → `border border-border bg-card`; padding 16px (compact / mobile) or
+  24px (default desktop) — never 20.
 - **Don't**: page card → `shadow-lg` with no border.
 
 ## 5. Whitespace is content.
@@ -61,7 +63,8 @@ contexts, never a default.
 
 ## 6. Motion is fast and quiet.
 
-UI motion is 120–200ms. Entrances ease-out, exits ease-in. No bounce, no overshoot,
+UI motion is 120–240ms (`--duration-fast` 120 / `--duration-base` 160 / `--duration-slow`
+240 — 240ms is the ceiling). Entrances ease-out, exits ease-in. No bounce, no overshoot,
 no springs on chrome. Decorative motion is reserved for empty states and onboarding
 illustrations. All motion respects `prefers-reduced-motion`.
 
@@ -89,7 +92,10 @@ These are instant disqualifiers in code review:
 
 - **Sans**: **Geist** — Vercel's grotesk, designed specifically for UI. Distinctive
   but neutral enough to fit any internal product; the digit kerning is unusually
-  good for dashboards.
+  good for dashboards. Cyrillic is covered via the `cyrillic-ext` subset. Load it
+  from Google Fonts (`preconnect` + `display=swap`, weights 400/500/600 only) or
+  self-host — ≤4 woff2 files total. **Inter is a fallback in the stack only, never
+  the default.**
 - **Mono**: **Geist Mono** — pairs natively with Geist; we use it for `Kbd`, code,
   tabular numbers, and IDs.
 - **Neutral**: **cool-gray** (slight blue undertone, hue ≈ 220°). Reads as precise
@@ -97,3 +103,20 @@ These are instant disqualifiers in code review:
 - **Accent**: **graphite-indigo** — a desaturated indigo (`hsl(238 70% 58%)` at 500).
   Distinct from Tailwind's vivid `indigo-500`; intentionally muted so it can carry
   weight without shouting.
+
+## Theming
+
+Dark mode is the `.dark` class on `<html>` — three user states (light / dark /
+system), resolved by a blocking pre-paint script that also sets `color-scheme`.
+`data-theme` is not used. Every semantic token flips under `.dark`; components never
+branch on the theme themselves.
+
+## Vocabulary
+
+| Term        | Meaning                                                                                                                                                                                                                                                                                            |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `variant`   | Visual style of a component (`primary`, `secondary`, `outline`, `ghost`, `destructive`, `link`; `subtle` / `outline` on Badge). Default Button variant stays `primary` — but a view shows **at most one** primary; pass `variant="secondary"` (or `outline` / `ghost`) explicitly everywhere else. |
+| `size`      | Scale step: `sm` 32 / `md` 36 / `lg` 40 / `xl` 44px (xl = marketing CTA / touch-first).                                                                                                                                                                                                            |
+| `tone`      | Status colour on Badge / Spinner (`neutral`, `accent`, `success`, `warning`, `danger`, `info`). On inputs `tone` is **deprecated** — use `aria-invalid` for the error look.                                                                                                                        |
+| State model | Every data-bearing component handles five states: **loading / empty** (first-run or filtered) **/ error / success / permission-denied**.                                                                                                                                                           |
+| Direction   | LTR only — RTL is not supported yet.                                                                                                                                                                                                                                                               |

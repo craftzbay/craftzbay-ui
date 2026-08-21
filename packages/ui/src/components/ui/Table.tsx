@@ -1,6 +1,12 @@
 'use client';
 
-import { forwardRef, type HTMLAttributes, type ThHTMLAttributes, type TdHTMLAttributes } from 'react';
+import {
+  forwardRef,
+  type CSSProperties,
+  type HTMLAttributes,
+  type ThHTMLAttributes,
+  type TdHTMLAttributes,
+} from 'react';
 import { ArrowDown, ArrowUp, ArrowUpDown } from '@/icons';
 import { cn } from '@/lib/utils';
 
@@ -10,77 +16,97 @@ import { cn } from '@/lib/utils';
  *  Empty + loading states are pure composition with the rest of the system.
  * --------------------------------------------------------------------------- */
 
-export const Table = forwardRef<HTMLTableElement, HTMLAttributes<HTMLTableElement>>(
-  function Table({ className, ...props }, ref) {
-    return (
-      <div className="relative w-full overflow-auto">
-        <table
-          ref={ref}
-          className={cn('w-full caption-bottom text-sm border-collapse', className)}
-          {...props}
-        />
-      </div>
-    );
-  },
-);
+export interface TableProps extends HTMLAttributes<HTMLTableElement> {
+  /** Class for the scroll wrapper (border, radius, height). */
+  containerClassName?: string;
+  /**
+   * Max height of the scroll wrapper. Required for the sticky header to
+   * work — `<thead>` sticks to the nearest scroll container, so a wrapper
+   * with no height cap never scrolls. e.g. `maxHeight="24rem"`.
+   */
+  maxHeight?: CSSProperties['maxHeight'];
+}
+
+export const Table = forwardRef<HTMLTableElement, TableProps>(function Table(
+  { className, containerClassName, maxHeight, ...props },
+  ref,
+) {
+  return (
+    <div
+      className={cn('relative isolate w-full overflow-auto', containerClassName)}
+      style={maxHeight !== undefined ? { maxHeight } : undefined}
+    >
+      <table
+        ref={ref}
+        className={cn('w-full caption-bottom border-collapse text-sm', className)}
+        {...props}
+      />
+    </div>
+  );
+});
 Table.displayName = 'Table';
 
-export const TableHeader = forwardRef<HTMLTableSectionElement, HTMLAttributes<HTMLTableSectionElement>>(
-  function TableHeader({ className, ...props }, ref) {
-    return (
-      <thead
-        ref={ref}
-        className={cn(
-          'sticky top-0 z-10 bg-background-subtle text-foreground-muted',
-          '[&_tr]:border-b [&_tr]:border-border',
-          className,
-        )}
-        {...props}
-      />
-    );
-  },
-);
+export const TableHeader = forwardRef<
+  HTMLTableSectionElement,
+  HTMLAttributes<HTMLTableSectionElement>
+>(function TableHeader({ className, ...props }, ref) {
+  return (
+    <thead
+      ref={ref}
+      className={cn(
+        'bg-background-subtle text-foreground-muted sticky top-0 z-10',
+        '[&_tr]:border-border [&_tr]:border-b',
+        className,
+      )}
+      {...props}
+    />
+  );
+});
 TableHeader.displayName = 'TableHeader';
 
-export const TableBody = forwardRef<HTMLTableSectionElement, HTMLAttributes<HTMLTableSectionElement>>(
-  function TableBody({ className, ...props }, ref) {
-    return (
-      <tbody
-        ref={ref}
-        className={cn('[&_tr:last-child]:border-0', className)}
-        {...props}
-      />
-    );
-  },
-);
+export const TableBody = forwardRef<
+  HTMLTableSectionElement,
+  HTMLAttributes<HTMLTableSectionElement>
+>(function TableBody({ className, ...props }, ref) {
+  return <tbody ref={ref} className={cn('[&_tr:last-child]:border-0', className)} {...props} />;
+});
 TableBody.displayName = 'TableBody';
 
-export const TableFooter = forwardRef<HTMLTableSectionElement, HTMLAttributes<HTMLTableSectionElement>>(
-  function TableFooter({ className, ...props }, ref) {
-    return (
-      <tfoot
-        ref={ref}
-        className={cn('border-t border-border bg-background-subtle font-medium', className)}
-        {...props}
-      />
-    );
-  },
-);
+export const TableFooter = forwardRef<
+  HTMLTableSectionElement,
+  HTMLAttributes<HTMLTableSectionElement>
+>(function TableFooter({ className, ...props }, ref) {
+  return (
+    <tfoot
+      ref={ref}
+      className={cn('border-border bg-background-subtle border-t font-medium', className)}
+      {...props}
+    />
+  );
+});
 TableFooter.displayName = 'TableFooter';
 
 export const TableRow = forwardRef<
   HTMLTableRowElement,
-  HTMLAttributes<HTMLTableRowElement> & { selected?: boolean }
->(function TableRow({ className, selected, ...props }, ref) {
+  HTMLAttributes<HTMLTableRowElement> & {
+    /**
+     * Visual selected state (`data-state="selected"`). `aria-selected` is only
+     * valid on rows of an ARIA grid, so it is emitted only when the row
+     * carries `role="row"` (i.e. you opted into `role="grid"` on the table).
+     */
+    selected?: boolean;
+  }
+>(function TableRow({ className, selected, role, ...props }, ref) {
   return (
     <tr
       ref={ref}
-      data-selected={selected || undefined}
-      aria-selected={selected || undefined}
+      role={role}
+      data-state={selected ? 'selected' : undefined}
+      aria-selected={selected && role === 'row' ? true : undefined}
       className={cn(
-        'border-b border-border transition-colors duration-[var(--duration-fast)]',
+        'border-border border-b transition-colors duration-[var(--duration-fast)]',
         'hover:bg-background-subtle',
-        'data-[selected]:bg-accent-soft data-[selected]:hover:bg-accent-soft',
+        'data-[state=selected]:bg-accent-soft data-[state=selected]:hover:bg-accent-soft',
         className,
       )}
       {...props}
@@ -89,7 +115,18 @@ export const TableRow = forwardRef<
 });
 TableRow.displayName = 'TableRow';
 
-export interface TableHeadProps extends ThHTMLAttributes<HTMLTableCellElement> {
+export type TableCellAlign = 'left' | 'center' | 'right';
+
+const alignClass: Record<TableCellAlign, string> = {
+  left: 'text-left',
+  center: 'text-center',
+  /* Numeric columns: right-aligned + tabular figures so digits line up. */
+  right: 'text-right tabular',
+};
+
+export interface TableHeadProps extends Omit<ThHTMLAttributes<HTMLTableCellElement>, 'align'> {
+  /** Horizontal alignment; `right` also applies tabular figures. */
+  align?: TableCellAlign;
   /**
    * Render the header label in small caps (`uppercase tracking-wide`).
    * Off by default — mixed case reads better for long / Cyrillic labels.
@@ -99,15 +136,16 @@ export interface TableHeadProps extends ThHTMLAttributes<HTMLTableCellElement> {
 }
 
 export const TableHead = forwardRef<HTMLTableCellElement, TableHeadProps>(function TableHead(
-  { className, uppercase = false, ...props },
+  { className, uppercase = false, align = 'left', ...props },
   ref,
 ) {
   return (
     <th
       ref={ref}
       className={cn(
-        'h-10 px-3 text-left align-middle text-xs font-medium text-foreground-subtle',
-        uppercase && 'uppercase tracking-wide',
+        'text-foreground-subtle h-10 px-3 align-middle text-xs font-medium',
+        alignClass[align],
+        uppercase && 'tracking-wide uppercase',
         '[&:has([role=checkbox])]:w-10 [&:has([role=checkbox])]:pr-0',
         className,
       )}
@@ -117,34 +155,40 @@ export const TableHead = forwardRef<HTMLTableCellElement, TableHeadProps>(functi
 });
 TableHead.displayName = 'TableHead';
 
-export const TableCell = forwardRef<
-  HTMLTableCellElement,
-  TdHTMLAttributes<HTMLTableCellElement>
->(function TableCell({ className, ...props }, ref) {
+export interface TableCellProps extends Omit<TdHTMLAttributes<HTMLTableCellElement>, 'align'> {
+  /** Horizontal alignment; `right` also applies tabular figures for numbers. */
+  align?: TableCellAlign;
+}
+
+export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(function TableCell(
+  { className, align = 'left', ...props },
+  ref,
+) {
   return (
     <td
       ref={ref}
-      className={cn('px-3 py-3 align-middle text-foreground', className)}
+      className={cn('text-foreground px-3 py-3 align-middle', alignClass[align], className)}
       {...props}
     />
   );
 });
 TableCell.displayName = 'TableCell';
 
-export const TableCaption = forwardRef<HTMLTableCaptionElement, HTMLAttributes<HTMLTableCaptionElement>>(
-  function TableCaption({ className, ...props }, ref) {
-    return (
-      <caption
-        ref={ref}
-        className={cn('mt-4 text-sm text-foreground-subtle', className)}
-        {...props}
-      />
-    );
-  },
-);
+export const TableCaption = forwardRef<
+  HTMLTableCaptionElement,
+  HTMLAttributes<HTMLTableCaptionElement>
+>(function TableCaption({ className, ...props }, ref) {
+  return (
+    <caption
+      ref={ref}
+      className={cn('text-foreground-subtle mt-4 text-sm', className)}
+      {...props}
+    />
+  );
+});
 TableCaption.displayName = 'TableCaption';
 
-export interface TableSortHeaderProps extends ThHTMLAttributes<HTMLTableCellElement> {
+export interface TableSortHeaderProps extends TableHeadProps {
   /** Stable column key used in `currentSort.key`. */
   sortKey: string;
   /** Currently sorted column + direction (or null). */
@@ -167,7 +211,7 @@ export interface TableSortHeaderProps extends ThHTMLAttributes<HTMLTableCellElem
  */
 export const TableSortHeader = forwardRef<HTMLTableCellElement, TableSortHeaderProps>(
   function TableSortHeader(
-    { sortKey, currentSort, onSortChange, children, className, ...props },
+    { sortKey, currentSort, onSortChange, children, className, align = 'left', ...props },
     ref,
   ) {
     const active = currentSort?.key === sortKey;
@@ -176,15 +220,24 @@ export const TableSortHeader = forwardRef<HTMLTableCellElement, TableSortHeaderP
       onSortChange(sortKey, active && direction === 'asc' ? 'desc' : 'asc');
     };
     return (
-      <TableHead ref={ref} className={cn('p-0', className)} aria-sort={active ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'} {...props}>
+      <TableHead
+        ref={ref}
+        align={align}
+        className={cn('p-0', className)}
+        // aria-sort only on the sorted column — 'none' everywhere else is noise.
+        aria-sort={active ? (direction === 'asc' ? 'ascending' : 'descending') : undefined}
+        {...props}
+      >
         <button
           type="button"
           onClick={handle}
           className={cn(
             'inline-flex h-10 w-full items-center gap-1.5 px-3 outline-none',
+            align === 'right' && 'flex-row-reverse',
+            align === 'center' && 'justify-center',
             'transition-colors duration-[var(--duration-fast)]',
             'hover:text-foreground focus-visible:text-foreground',
-            'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm',
+            'focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm focus-visible:ring-2 focus-visible:ring-offset-2',
             active && 'text-foreground',
           )}
         >

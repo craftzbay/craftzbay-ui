@@ -1,13 +1,14 @@
 'use client';
 
 import {
+  Children,
   createContext,
   forwardRef,
+  isValidElement,
   useContext,
-  useEffect,
   useId,
-  useState,
   type HTMLAttributes,
+  type ReactNode,
 } from 'react';
 import * as LabelPrimitive from '@radix-ui/react-label';
 import {
@@ -15,8 +16,10 @@ import {
   FormProvider,
   useFormContext,
   type ControllerProps,
+  type FieldErrors,
   type FieldPath,
   type FieldValues,
+  type FormProviderProps,
 } from 'react-hook-form';
 import { Slot } from '@radix-ui/react-slot';
 import { cn } from '@/lib/utils';
@@ -40,9 +43,57 @@ import { cn } from '@/lib/utils';
  *        )}
  *      />
  *    </Form>
+ *
+ *  Ids: `<item>-item` (control), `<item>-desc`, `<item>-error` — the same
+ *  `-desc` / `-error` suffixes the standalone fields use (useFieldIds).
+ *  Invalid styling is driven purely by `aria-invalid` on the control; no
+ *  `aria-invalid` is set on the control; style from `aria-invalid:` (no `tone` injection).
  * --------------------------------------------------------------------------- */
 
-export const Form = FormProvider;
+function collectMessages(errors: FieldErrors | undefined, out: string[] = []): string[] {
+  if (!errors) return out;
+  for (const value of Object.values(errors)) {
+    if (!value || typeof value !== 'object') continue;
+    const message = (value as { message?: unknown }).message;
+    if (typeof message === 'string' && message) out.push(message);
+    else if (!('type' in value)) collectMessages(value as FieldErrors, out);
+  }
+  return out;
+}
+
+/**
+ * Single polite live region per form. Field-level `FormError` elements are
+ * plain text wired via `aria-describedby`; this region announces the current
+ * error set once instead of one `role="alert"` per field firing in parallel.
+ */
+function FormLiveRegion() {
+  const { formState } = useFormContext();
+  const messages = collectMessages(formState.errors);
+  return (
+    <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+      {messages.join('. ')}
+    </div>
+  );
+}
+
+/**
+ * Form context provider. Spread the `useForm()` return value into it, exactly
+ * like react-hook-form's `FormProvider` — plus one shared live region for
+ * validation announcements.
+ */
+export function Form<
+  TFieldValues extends FieldValues = FieldValues,
+  TContext = unknown,
+  TTransformedValues = TFieldValues,
+>({ children, ...form }: FormProviderProps<TFieldValues, TContext, TTransformedValues>) {
+  return (
+    <FormProvider {...form}>
+      {children}
+      <FormLiveRegion />
+    </FormProvider>
+  );
+}
+Form.displayName = 'Form';
 
 interface FormFieldContextValue<
   TFieldValues extends FieldValues = FieldValues,
@@ -66,9 +117,8 @@ export function FormField<
 
 interface FormItemContextValue {
   id: string;
-  /** Whether a <FormDescription> is mounted — drives aria-describedby. */
+  /** Whether a <FormDescription> is rendered — drives aria-describedby. */
   hasDescription: boolean;
-  setHasDescription: (v: boolean) => void;
 }
 const FormItemContext = createContext<FormItemContextValue | null>(null);
 
@@ -92,13 +142,29 @@ export function useFormField() {
   };
 }
 
+/** Synchronous scan for a <FormDescription> among the item's children (through fragments / host elements). */
+function containsDescription(children: ReactNode): boolean {
+  return Children.toArray(children).some((child) => {
+    if (!isValidElement(child)) return false;
+    if (child.type === FormDescription) return true;
+    const nested = (child.props as { children?: ReactNode }).children;
+    // Only descend into host elements / fragments — custom components own their subtree.
+    return (typeof child.type === 'string' || typeof child.type === 'symbol') && nested
+      ? containsDescription(nested)
+      : false;
+  });
+}
+
 export const FormItem = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  function FormItem({ className, ...props }, ref) {
+  function FormItem({ className, children, ...props }, ref) {
     const id = useId();
-    const [hasDescription, setHasDescription] = useState(false);
+    // Derived during render (no effect → no second pass / hydration flip).
+    const hasDescription = containsDescription(children);
     return (
-      <FormItemContext.Provider value={{ id, hasDescription, setHasDescription }}>
-        <div ref={ref} className={cn('flex flex-col gap-1.5', className)} {...props} />
+      <FormItemContext.Provider value={{ id, hasDescription }}>
+        <div ref={ref} className={cn('flex flex-col gap-1.5', className)} {...props}>
+          {children}
+        </div>
       </FormItemContext.Provider>
     );
   },
@@ -130,17 +196,12 @@ export const FormControl = forwardRef<HTMLElement, React.ComponentPropsWithoutRe
       [hasDescription ? formDescriptionId : null, error ? formMessageId : null]
         .filter(Boolean)
         .join(' ') || undefined;
-    // Input-style children read `tone="error"` for the red border; plain
-    // elements ignore the unknown prop via Slot merging only when they accept it,
-    // so it is only set while there is an error.
-    const toneProps = error ? { tone: 'error' as const } : {};
     return (
       <Slot
         ref={ref}
         id={formItemId}
         aria-describedby={describedBy}
         aria-invalid={!!error}
-        {...toneProps}
         {...props}
       />
     );
@@ -153,12 +214,6 @@ export const FormDescription = forwardRef<
   HTMLAttributes<HTMLParagraphElement>
 >(function FormDescription({ className, ...props }, ref) {
   const { formDescriptionId } = useFormField();
-  const itemContext = useContext(FormItemContext);
-  const setHasDescription = itemContext?.setHasDescription;
-  useEffect(() => {
-    setHasDescription?.(true);
-    return () => setHasDescription?.(false);
-  }, [setHasDescription]);
   return (
     <p
       ref={ref}
@@ -170,6 +225,11 @@ export const FormDescription = forwardRef<
 });
 FormDescription.displayName = 'FormDescription';
 
+/**
+ * Field-level validation message. Not a live region on its own — it is
+ * referenced from the control via `aria-describedby`, and the form's single
+ * live region announces changes.
+ */
 export const FormError = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLParagraphElement>>(
   function FormError({ className, children, ...props }, ref) {
     const { error, formMessageId } = useFormField();
@@ -179,7 +239,6 @@ export const FormError = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLPar
       <p
         ref={ref}
         id={formMessageId}
-        role="alert"
         className={cn('text-danger-text text-xs', className)}
         {...props}
       >

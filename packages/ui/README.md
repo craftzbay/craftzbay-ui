@@ -18,7 +18,7 @@ primitives — Button through DataGrid — plus composed patterns
 pnpm add @craftzbay/ui            # peers: react ^18 || ^19, react-dom ^18 || ^19
 ```
 
-**1. Fonts** — Geist + Geist Mono are referenced by the tokens but not bundled. Add to `<head>`:
+**1. Fonts** — Geist + Geist Mono are referenced by the tokens but not bundled (Inter is only a fallback in the stack). Google Fonts serves the `cyrillic-ext` subset automatically; self-hosting (≤4 woff2, weights 400/500/600) is equally fine. Add to `<head>`:
 
 ```html
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -37,11 +37,14 @@ pnpm add @craftzbay/ui            # peers: react ^18 || ^19, react-dom ^18 || ^1
 
 /* b) Your app already uses Tailwind v4: share the tokens and let Tailwind compile the library's classes */
 @import 'tailwindcss';
+@import 'tw-animate-css'; /* required on this path — overlays use animate-in / animate-out */
 @import '@craftzbay/ui/theme.css';
 @source "../node_modules/@craftzbay/ui/dist-lib";
 ```
 
-**3. Dark mode** — toggle the `dark` class on `<html>`; every token flips. Set it before first paint to avoid a flash.
+Path (b) needs `tw-animate-css` installed (`pnpm add -D tw-animate-css`; it is an optional peer). Path (a) already bundles it.
+
+**3. Dark mode** — toggle the `dark` class on `<html>`; every token flips and `color-scheme` follows. Set it from a blocking script before first paint to avoid a flash (three states: light / dark / system). `data-theme` is not used.
 
 **4. Providers** — `<Toaster />` once near the root if you use `toast()`; wrap the app in `<TooltipProvider>` if you use `Tooltip`. Nothing else is required.
 
@@ -58,7 +61,7 @@ export function App() {
 }
 ```
 
-**Next.js App Router** — components use hooks/context, so import them from a file marked `'use client'` (or re-export the ones you need from a local `components/ui.ts` with that directive). Put the CSS import and fonts in `app/layout.tsx`.
+**Next.js App Router** — since 0.10 every built module carries a `'use client'` banner, so `import { Button } from '@craftzbay/ui'` works directly inside Server Components without a local re-export file. Put the CSS import and fonts in `app/layout.tsx`. Note: the pure helpers (`formatDate`, `formatNumber`, `formatMNT`, `mnStrings`, `defaultStrings`) are also client-marked today — they still run fine in Server Components (the directive only affects the boundary), but they are not tree-shaken into a server-only chunk.
 
 **Name-addressed icons** — `Icons.*` (curated, tree-shaken) ships in the main entry. The lazy `<Icon name="…">` + `iconNames` list lives in a separate entry so its ~1500-icon import map never enters your bundle unless asked for:
 
@@ -85,7 +88,8 @@ Precedence is per-component props (`placeholder`, `labels`, `aria-label`) → ne
 
 This library implements the [craftzbay design-research](https://github.com/craftzbay/design-research) guidelines
 ([rendered site](https://craftzbay.github.io/design-research/)) — colour, type, spacing, components, accessibility, tokens.
-The library-specific distillation is [`docs/PHILOSOPHY.md`](./docs/PHILOSOPHY.md).
+design-research is the source of truth (canonical numbers in [`14-defaults.md`](https://github.com/craftzbay/design-research/blob/main/14-defaults.md));
+[`docs/PHILOSOPHY.md`](./docs/PHILOSOPHY.md) is the library-specific summary.
 
 ## Local development
 
@@ -104,7 +108,7 @@ Inside `packages/ui` itself, `pnpm build` produces the distributable bundle and
 
 ## Tech stack
 
-- **Tailwind CSS v4** — tokens defined in `@theme` in `src/styles/globals.css`
+- **Tailwind CSS v4** — tokens defined in `@theme` in `src/styles/theme.css` (`globals.css` = tailwind + tw-animate-css + theme)
 - **React 18 / 19** + **TypeScript 5.7**
 - **Radix UI** primitives for accessibility-correct overlays
 - **class-variance-authority** + `cn()` (`clsx` + `tailwind-merge`)
@@ -116,12 +120,14 @@ Inside `packages/ui` itself, `pnpm build` produces the distributable bundle and
 ```
 src/
 ├── styles/
-│   └── globals.css           # @theme tokens, semantic vars, base layer
+│   ├── theme.css             # @theme tokens, semantic vars, dark variant, base layer
+│   └── globals.css           # tailwindcss + tw-animate-css + theme.css
 ├── lib/
 │   ├── utils.ts              # cn() + uid()
-│   └── cva.ts
+│   ├── format.ts             # formatDate / formatNumber / formatMNT
+│   └── strings.ts            # UiStrings, defaultStrings (+ strings.mn.ts)
 ├── components/
-│   ├── ui/                   # primitives — 40 components
+│   ├── ui/                   # primitives — 52 components
 │   └── patterns/             # composed layouts
 ├── hooks/
 │   ├── use-toast.ts

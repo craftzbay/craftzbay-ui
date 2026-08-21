@@ -1,5 +1,5 @@
 ---
-'@craftzbay/ui': patch
+'@craftzbay/ui': minor
 ---
 
 Accessibility / localisation compliance pass (additive, no breaking changes):

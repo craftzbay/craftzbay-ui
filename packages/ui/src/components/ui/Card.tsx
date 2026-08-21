@@ -1,6 +1,7 @@
 'use client';
 
-import { forwardRef, type HTMLAttributes, type KeyboardEvent, type MouseEvent } from 'react';
+import { forwardRef, type HTMLAttributes, type KeyboardEvent } from 'react';
+import { Slot } from '@radix-ui/react-slot';
 import { cn } from '@/lib/utils';
 import { cva, type VariantProps } from '@/lib/cva';
 
@@ -22,7 +23,8 @@ const card = cva(
       padding: {
         none: '',
         sm: 'p-4',
-        md: 'p-5',
+        /* CANON: 16 compact/mobile, 24 desktop — never 20. */
+        md: 'p-4 md:p-6',
         lg: 'p-6',
       },
     },
@@ -33,9 +35,10 @@ const card = cva(
   },
 );
 
-export interface CardProps
-  extends HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof card> {}
+export interface CardProps extends HTMLAttributes<HTMLDivElement>, VariantProps<typeof card> {
+  /** Render the child element (e.g. a router `<Link>`) with Card styles. */
+  asChild?: boolean;
+}
 
 /**
  * Bounded surface used to group related content. Per the refined-minimal
@@ -60,22 +63,25 @@ export interface CardProps
  *       refined-minimal direction.
  */
 export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
-  { className, variant, padding, onClick, onKeyDown, role, tabIndex, ...props },
+  { className, variant, padding, onClick, onKeyDown, role, tabIndex, asChild, ...props },
   ref,
 ) {
+  const Comp = asChild ? Slot : 'div';
   // An interactive card with a click handler must be reachable and operable
   // from the keyboard: expose it as a button and map Enter/Space to click.
   const isButtonLike = variant === 'interactive' && typeof onClick === 'function';
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     onKeyDown?.(event);
     if (event.defaultPrevented || !isButtonLike) return;
+    // Only when the card itself is focused — nested controls handle their own keys.
+    if (event.target !== event.currentTarget) return;
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      onClick?.(event as unknown as MouseEvent<HTMLDivElement>);
+      event.currentTarget.click();
     }
   };
   return (
-    <div
+    <Comp
       ref={ref}
       role={role ?? (isButtonLike ? 'button' : undefined)}
       tabIndex={tabIndex ?? (isButtonLike ? 0 : undefined)}
@@ -90,13 +96,7 @@ Card.displayName = 'Card';
 
 export const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   function CardHeader({ className, ...props }, ref) {
-    return (
-      <div
-        ref={ref}
-        className={cn('flex flex-col gap-1 pb-4', className)}
-        {...props}
-      />
-    );
+    return <div ref={ref} className={cn('flex flex-col gap-1 pb-4', className)} {...props} />;
   },
 );
 CardHeader.displayName = 'CardHeader';
@@ -106,7 +106,7 @@ export const CardTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadi
     return (
       <h3
         ref={ref}
-        className={cn('text-base font-semibold text-foreground leading-tight', className)}
+        className={cn('text-foreground text-base leading-tight font-semibold', className)}
         {...props}
       >
         {children}
@@ -120,32 +120,20 @@ export const CardDescription = forwardRef<
   HTMLParagraphElement,
   HTMLAttributes<HTMLParagraphElement>
 >(function CardDescription({ className, ...props }, ref) {
-  return (
-    <p
-      ref={ref}
-      className={cn('text-sm text-foreground-muted', className)}
-      {...props}
-    />
-  );
+  return <p ref={ref} className={cn('text-foreground-muted text-sm', className)} {...props} />;
 });
 CardDescription.displayName = 'CardDescription';
 
 export const CardContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   function CardContent({ className, ...props }, ref) {
-    return <div ref={ref} className={cn('text-sm text-foreground', className)} {...props} />;
+    return <div ref={ref} className={cn('text-foreground text-sm', className)} {...props} />;
   },
 );
 CardContent.displayName = 'CardContent';
 
 export const CardFooter = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   function CardFooter({ className, ...props }, ref) {
-    return (
-      <div
-        ref={ref}
-        className={cn('flex items-center gap-2 pt-4', className)}
-        {...props}
-      />
-    );
+    return <div ref={ref} className={cn('flex items-center gap-2 pt-4', className)} {...props} />;
   },
 );
 CardFooter.displayName = 'CardFooter';

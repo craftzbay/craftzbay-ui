@@ -1,5 +1,16 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeft, Heart, Minus, Plus, Search, ShoppingCart, Star, Trash2, X, ImageIcon } from '@/icons';
+import {
+  ArrowLeft,
+  Heart,
+  Minus,
+  Plus,
+  Search,
+  ShoppingCart,
+  Star,
+  Trash2,
+  X,
+  ImageIcon,
+} from '@/icons';
 import { Badge } from '@craftzbay/ui';
 import { Button } from '@craftzbay/ui';
 import { Card, CardContent } from '@craftzbay/ui';
@@ -39,7 +50,7 @@ function Shot({ hue = 250, className }: { hue?: number; className?: string }) {
   return (
     <div
       aria-hidden
-      className={cn('flex items-center justify-center text-foreground/15', className)}
+      className={cn('text-foreground/15 flex items-center justify-center', className)}
       style={{
         background: `color-mix(in oklch, var(--background-muted) 78%, oklch(0.62 0.14 ${hue}))`,
       }}
@@ -51,7 +62,7 @@ function Shot({ hue = 250, className }: { hue?: number; className?: string }) {
 
 function Stars({ rating }: { rating: number }) {
   return (
-    <span className="inline-flex items-center gap-1 text-xs text-warning-text">
+    <span className="text-warning-text inline-flex items-center gap-1 text-xs">
       <Star className="size-3.5 fill-current" aria-hidden />
       <span className="tabular text-foreground-muted">{rating.toFixed(1)}</span>
     </span>
@@ -68,7 +79,7 @@ function QtyStepper({
   min?: number;
 }) {
   return (
-    <div className="inline-flex items-center rounded-md border border-border">
+    <div className="border-border inline-flex items-center rounded-md border">
       <IconButton
         aria-label="Decrease"
         icon={<Minus />}
@@ -77,8 +88,14 @@ function QtyStepper({
         disabled={qty <= min}
         onClick={() => onChange(qty - 1)}
       />
-      <span className="w-8 text-center text-sm tabular">{qty}</span>
-      <IconButton aria-label="Increase" icon={<Plus />} variant="ghost" size="sm" onClick={() => onChange(qty + 1)} />
+      <span className="tabular w-8 text-center text-sm">{qty}</span>
+      <IconButton
+        aria-label="Increase"
+        icon={<Plus />}
+        variant="ghost"
+        size="sm"
+        onClick={() => onChange(qty + 1)}
+      />
     </div>
   );
 }
@@ -102,10 +119,10 @@ function ShopHeader({
   const searchable = Boolean(onQuery);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
+    <header className="border-border bg-background sticky top-0 z-[var(--z-sticky)] border-b">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-6">
         <div className="text-sm">{brand}</div>
-        <nav className="hidden items-center gap-5 text-sm text-foreground-muted md:flex">
+        <nav className="text-foreground-muted hidden items-center gap-5 text-sm md:flex">
           {CATEGORIES.slice(1).map((c) => (
             <button
               key={c}
@@ -152,11 +169,11 @@ function ShopHeader({
           <button
             onClick={onCart}
             aria-label="Cart"
-            className="relative inline-flex size-9 items-center justify-center rounded-md text-foreground-muted hover:bg-background-muted hover:text-foreground"
+            className="text-foreground-muted hover:bg-background-muted hover:text-foreground relative inline-flex size-9 items-center justify-center rounded-md"
           >
             <ShoppingCart className="size-4" aria-hidden />
             {cartCount > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 inline-flex min-w-4 items-center justify-center rounded-full bg-accent px-1 text-xs font-medium text-on-accent">
+              <span className="bg-accent text-on-accent absolute -top-0.5 -right-0.5 inline-flex min-w-4 items-center justify-center rounded-full px-1 text-xs font-medium">
                 {cartCount}
               </span>
             )}
@@ -164,6 +181,36 @@ function ShopHeader({
         </div>
       </div>
     </header>
+  );
+}
+
+function ShopFooter() {
+  return (
+    <footer className="border-border bg-background-subtle mt-auto border-t">
+      <div className="text-foreground-subtle mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-6 py-6 text-xs">
+        <span>© 2026 Shop demo. Prices are placeholders.</span>
+        <nav aria-label="Footer" className="flex gap-4">
+          <a
+            href="#/help/shipping"
+            className="hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          >
+            Shipping
+          </a>
+          <a
+            href="#/help/returns"
+            className="hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          >
+            Returns
+          </a>
+          <a
+            href="#/help/support"
+            className="hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          >
+            Support
+          </a>
+        </nav>
+      </div>
+    </footer>
   );
 }
 
@@ -201,7 +248,7 @@ function Shop({
     });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background flex min-h-dvh flex-col">
       <ShopHeader
         brand={brand}
         cartCount={cartCount}
@@ -214,7 +261,9 @@ function Shop({
         <div className="flex items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">New arrivals</h1>
-            <p className="mt-1 text-sm text-foreground-muted">Thoughtfully made gear for everyday use.</p>
+            <p className="text-foreground-muted mt-1 text-sm">
+              Thoughtfully made gear for everyday use.
+            </p>
           </div>
         </div>
         <div className="mt-6 flex flex-wrap gap-1.5">
@@ -234,9 +283,11 @@ function Shop({
           ))}
         </div>
         {products.length === 0 ? (
-          <div className="mt-8 rounded-lg border border-border bg-card p-10 text-center">
+          <div className="border-border bg-card mt-8 rounded-lg border p-10 text-center">
             <p className="text-sm font-medium">No products found</p>
-            <p className="mt-1 text-sm text-foreground-muted">Nothing matches “{query}” in {category}.</p>
+            <p className="text-foreground-muted mt-1 text-sm">
+              Nothing matches “{query}” in {category}.
+            </p>
             <Button
               variant="outline"
               size="sm"
@@ -254,33 +305,51 @@ function Shop({
             {products.map((p) => (
               <Card key={p.name} padding="none" className="group overflow-hidden">
                 <div className="relative">
-                  <button onClick={onOpen} aria-label={`View ${p.name}`} className="block w-full text-left">
+                  <button
+                    onClick={onOpen}
+                    aria-label={`View ${p.name}`}
+                    className="block w-full text-left"
+                  >
                     <Shot hue={p.hue} className="aspect-square w-full" />
                   </button>
                   <button
                     onClick={() => toggleWish(p.name)}
-                    aria-label={wishlist.has(p.name) ? `Remove ${p.name} from wishlist` : `Add ${p.name} to wishlist`}
+                    aria-label={
+                      wishlist.has(p.name)
+                        ? `Remove ${p.name} from wishlist`
+                        : `Add ${p.name} to wishlist`
+                    }
                     aria-pressed={wishlist.has(p.name)}
-                    className={`absolute right-2 top-2 inline-flex size-7 items-center justify-center rounded-full bg-card transition-colors ${
-                      wishlist.has(p.name) ? 'text-danger-text' : 'text-foreground-muted hover:text-foreground'
+                    className={`bg-card absolute top-2 right-2 inline-flex size-7 items-center justify-center rounded-full transition-colors ${
+                      wishlist.has(p.name)
+                        ? 'text-danger-text'
+                        : 'text-foreground-muted hover:text-foreground'
                     }`}
                   >
-                    <Heart className={`size-3.5 ${wishlist.has(p.name) ? 'fill-current' : ''}`} aria-hidden />
+                    <Heart
+                      className={`size-3.5 ${wishlist.has(p.name) ? 'fill-current' : ''}`}
+                      aria-hidden
+                    />
                   </button>
                 </div>
                 <button onClick={onOpen} className="block w-full p-4 text-left">
                   <div className="flex items-center justify-between gap-2">
-                    <Badge tone="neutral" variant="outline">{p.tag}</Badge>
+                    <Badge tone="neutral" variant="outline">
+                      {p.tag}
+                    </Badge>
                     <Stars rating={p.rating} />
                   </div>
-                  <h3 className="mt-2 text-sm font-medium leading-snug text-foreground group-hover:text-accent">{p.name}</h3>
-                  <div className="mt-1 font-semibold tabular text-foreground">{money(p.price)}</div>
+                  <h3 className="text-foreground group-hover:text-accent mt-2 text-sm leading-snug font-medium">
+                    {p.name}
+                  </h3>
+                  <div className="tabular text-foreground mt-1 font-semibold">{money(p.price)}</div>
                 </button>
               </Card>
             ))}
           </div>
         )}
       </main>
+      <ShopFooter />
     </div>
   );
 }
@@ -304,10 +373,13 @@ function Product({
   const [qty, setQty] = useState(1);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background flex min-h-dvh flex-col">
       <ShopHeader brand={brand} cartCount={cartCount} onCart={onCart} onCategory={onCategory} />
       <main className="mx-auto max-w-5xl px-6 py-8">
-        <button onClick={onBack} className="mb-6 flex w-fit items-center gap-1.5 text-sm text-foreground-muted hover:text-foreground">
+        <button
+          onClick={onBack}
+          className="text-foreground-muted hover:text-foreground mb-6 flex w-fit items-center gap-1.5 text-sm"
+        >
           <ArrowLeft className="size-4" aria-hidden /> Back to shop
         </button>
         <div className="grid gap-10 md:grid-cols-2">
@@ -320,14 +392,18 @@ function Product({
             </div>
           </div>
           <div>
-            <Badge tone="neutral" variant="outline">{p.tag}</Badge>
+            <Badge tone="neutral" variant="outline">
+              {p.tag}
+            </Badge>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight">{p.name}</h1>
             <div className="mt-2 flex items-center gap-3">
               <Stars rating={p.rating} />
-              <span className="text-xs text-foreground-subtle">· 214 reviews</span>
+              <span className="text-foreground-subtle text-xs">· 214 reviews</span>
             </div>
-            <div className="mt-4 text-2xl font-semibold tabular text-foreground">{money(p.price)}</div>
-            <p className="mt-4 text-sm leading-relaxed text-foreground-muted">
+            <div className="tabular text-foreground mt-4 text-2xl font-semibold">
+              {money(p.price)}
+            </div>
+            <p className="text-foreground-muted mt-4 text-sm leading-relaxed">
               Reference-grade 40mm drivers, adaptive noise cancellation and a 40-hour battery.
               Machined aluminium, recycled fabric, and a case that finally fits in a pocket.
             </p>
@@ -353,6 +429,7 @@ function Product({
           </div>
         </div>
       </main>
+      <ShopFooter />
     </div>
   );
 }
@@ -378,15 +455,17 @@ function CartScreen({
   const shipping = items.length > 0 ? 9 : 0;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background flex min-h-dvh flex-col">
       <ShopHeader brand={brand} cartCount={cartCount} onCart={() => {}} onCategory={onCategory} />
       <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
         <h1 className="text-2xl font-semibold tracking-tight">Your cart</h1>
         {items.length === 0 ? (
-          <div className="mt-6 rounded-lg border border-border bg-card p-12 text-center">
-            <ShoppingCart className="mx-auto size-8 text-foreground-subtle" aria-hidden />
+          <div className="border-border bg-card mt-6 rounded-lg border p-12 text-center">
+            <ShoppingCart className="text-foreground-subtle mx-auto size-8" aria-hidden />
             <p className="mt-3 text-sm font-medium">Your cart is empty</p>
-            <p className="mt-1 text-sm text-foreground-muted">Browse the shop and add something you like.</p>
+            <p className="text-foreground-muted mt-1 text-sm">
+              Browse the shop and add something you like.
+            </p>
             <Button size="sm" className="mt-4" onClick={onShop}>
               Continue shopping
             </Button>
@@ -394,18 +473,18 @@ function CartScreen({
         ) : (
           <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_20rem]">
             <Card padding="none">
-              <ul className="divide-y divide-border">
+              <ul className="divide-border divide-y">
                 {items.map((p) => (
                   <li key={p.name} className="flex flex-wrap items-center gap-x-4 gap-y-3 p-4">
                     <Shot hue={p.hue} className="size-16 shrink-0 rounded-md" />
                     <div className="min-w-0 flex-1 basis-32">
-                      <div className="font-medium text-foreground">{p.name}</div>
-                      <div className="text-sm text-foreground-subtle">{money(p.price)}</div>
+                      <div className="text-foreground font-medium">{p.name}</div>
+                      <div className="text-foreground-subtle text-sm">{money(p.price)}</div>
                     </div>
                     {/* Controls drop to a second, full-width row below sm. */}
                     <div className="flex w-full items-center gap-3 sm:w-auto">
                       <QtyStepper qty={cart[p.name]} onChange={(q) => setQty(p.name, q)} />
-                      <div className="ml-auto min-w-16 text-right font-medium tabular text-foreground">
+                      <div className="tabular text-foreground ml-auto min-w-16 text-right font-medium">
                         {money(p.price * cart[p.name])}
                       </div>
                       <IconButton
@@ -444,6 +523,7 @@ function CartScreen({
           </div>
         )}
       </main>
+      <ShopFooter />
     </div>
   );
 }

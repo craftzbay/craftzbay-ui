@@ -3,7 +3,6 @@
 import {
   forwardRef,
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -114,12 +113,9 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
   const inputRef = useRef<HTMLInputElement>(null);
   const fieldRef = useRef<HTMLDivElement>(null);
   // cmdk assigns its own id to the list (ours is ignored), so read it back
-  // once the portal mounts to keep aria-controls truthful.
-  const listRef = useRef<HTMLDivElement>(null);
+  // from the node once the portal mounts to keep aria-controls truthful.
   const [listId, setListId] = useState<string | undefined>(undefined);
-  useEffect(() => {
-    if (open) setListId(listRef.current?.id);
-  }, [open]);
+  const listRef = useCallback((el: HTMLDivElement | null) => setListId(el?.id), []);
 
   const selected = useMemo(() => options.filter((o) => value.includes(o.value)), [options, value]);
 
@@ -194,7 +190,7 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
                     <button
                       type="button"
                       aria-label={formatString(strings.multiSelect.remove, { label: opt.label })}
-                      className="text-on-accent-soft hover:text-foreground focus-visible:ring-ring inline-flex items-center rounded-sm outline-none focus-visible:ring-2"
+                      className="text-on-accent-soft hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background relative inline-flex items-center rounded-sm outline-none before:absolute before:-inset-1.5 before:content-[''] focus-visible:ring-2 focus-visible:ring-offset-1"
                       onClick={(e) => {
                         e.stopPropagation();
                         toggle(opt.value);
@@ -239,7 +235,7 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
                       e.stopPropagation();
                       clear();
                     }}
-                    className="text-foreground-subtle hover:text-foreground focus-visible:ring-ring rounded-sm outline-none focus-visible:ring-2"
+                    className="text-foreground-subtle hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background relative rounded-sm outline-none before:absolute before:-inset-1 before:content-[''] focus-visible:ring-2 focus-visible:ring-offset-2"
                   >
                     <X className="size-4" aria-hidden />
                   </button>
@@ -266,7 +262,11 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
                 if (target && fieldRef.current?.contains(target)) e.preventDefault();
               }}
             >
-              <CommandPrimitive.List ref={listRef} className="max-h-64 overflow-y-auto p-1">
+              <CommandPrimitive.List
+                ref={listRef}
+                label={strings.command.suggestions}
+                className="max-h-64 overflow-y-auto p-1"
+              >
                 {filtered.map((opt) => {
                   const isSelected = value.includes(opt.value);
                   return (
@@ -311,7 +311,7 @@ export const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(function
       </CommandPrimitive>
 
       {error ? (
-        <p id={errorId} role="alert" className="text-danger-text text-xs">
+        <p id={errorId} className="text-danger-text text-xs">
           {error}
         </p>
       ) : helperText ? (

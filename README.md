@@ -36,18 +36,22 @@ pnpm add @craftzbay/ui
 @import '@craftzbay/ui/styles.css'; /* no Tailwind in your app */
 /* — or, with Tailwind v4 — */
 @import 'tailwindcss';
+@import 'tw-animate-css'; /* required with theme.css */
 @import '@craftzbay/ui/theme.css';
 @source "../node_modules/@craftzbay/ui/dist-lib";
 ```
 
-Add the Geist Google Fonts `<link>`, toggle `.dark` on `<html>` for dark mode, render `<Toaster />` once.
+Add the Geist Google Fonts `<link>` (Inter is a fallback only), toggle `.dark` on `<html>` for dark mode, render `<Toaster />` once.
 ESM-only, per-module output: `import { Button }` is ~8 KB gz. Name-addressed icons: `import { Icon } from '@craftzbay/ui/icon'`.
-Full setup (Next.js note, providers) in [`packages/ui/README.md`](./packages/ui/README.md).
+Next.js App Router: since 0.10 every module ships with a `'use client'` banner — import straight from Server Components, no re-export shim (pure utils such as `formatMNT` / `mnStrings` are client-marked too for now).
+Full setup (providers, fonts, dark mode) in [`packages/ui/README.md`](./packages/ui/README.md).
 
 ## Design rules
 
 The library implements the [craftzbay/design-research](https://github.com/craftzbay/design-research) guidelines
-([rendered](https://craftzbay.github.io/design-research/)); see [`packages/ui/docs/PHILOSOPHY.md`](./packages/ui/docs/PHILOSOPHY.md).
+([rendered](https://craftzbay.github.io/design-research/)) — that repo is the source of truth
+([`14-defaults.md`](https://github.com/craftzbay/design-research/blob/main/14-defaults.md) holds the canonical numbers);
+[`packages/ui/docs/PHILOSOPHY.md`](./packages/ui/docs/PHILOSOPHY.md) summarises it.
 
 ## Develop
 

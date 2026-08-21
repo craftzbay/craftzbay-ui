@@ -4,14 +4,24 @@ import { axe } from 'jest-axe';
 import { Alert } from './Alert';
 
 describe('Alert', () => {
-  it('uses role="status" for non-danger variants', () => {
+  it('has no live-region role by default', () => {
     render(<Alert title="Saved">All changes published.</Alert>);
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('uses role="status" for live non-danger variants', () => {
+    render(
+      <Alert live title="Saved">
+        All changes published.
+      </Alert>,
+    );
     expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
-  it('uses role="alert" for danger', () => {
+  it('uses role="alert" for live danger', () => {
     render(
-      <Alert variant="danger" title="Failed">
+      <Alert live variant="danger" title="Failed">
         Card declined.
       </Alert>,
     );

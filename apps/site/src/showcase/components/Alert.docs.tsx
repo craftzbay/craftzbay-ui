@@ -14,10 +14,18 @@ const doc: ComponentDoc = {
       title: 'Variants',
       preview: (
         <div className="flex w-full max-w-md flex-col gap-2">
-          <Alert variant="info" title="Heads up">Read-only mode is on.</Alert>
-          <Alert variant="success" title="Saved">All changes published.</Alert>
-          <Alert variant="warning" title="Approaching limit">You have used 85% of your quota.</Alert>
-          <Alert variant="danger" title="Build failed">Check the deploy logs for details.</Alert>
+          <Alert variant="info" title="Heads up">
+            Read-only mode is on.
+          </Alert>
+          <Alert variant="success" title="Saved">
+            All changes published.
+          </Alert>
+          <Alert variant="warning" title="Approaching limit">
+            You have used 85% of your quota.
+          </Alert>
+          <Alert variant="danger" title="Build failed">
+            Check the deploy logs for details.
+          </Alert>
         </div>
       ),
       code: `<Alert variant="info" title="Heads up">Read-only mode is on.</Alert>
@@ -40,10 +48,24 @@ const doc: ComponentDoc = {
   api: [
     {
       rows: [
-        { name: 'variant', type: `'default' | 'info' | 'success' | 'warning' | 'danger'`, default: `'default'`, description: 'Tone + auto icon.' },
+        {
+          name: 'variant',
+          type: `'default' | 'info' | 'success' | 'warning' | 'danger'`,
+          default: `'default'`,
+          description: 'Tone + auto icon.',
+        },
         { name: 'title', type: 'ReactNode', description: 'Bold leading text.' },
-        { name: 'icon', type: 'ReactNode | null', description: 'Override (or null to hide) the auto icon.' },
-        { name: 'dismissible', type: 'boolean', default: 'false', description: 'Render a close button.' },
+        {
+          name: 'icon',
+          type: 'ReactNode | null',
+          description: 'Override (or null to hide) the auto icon.',
+        },
+        {
+          name: 'dismissible',
+          type: 'boolean',
+          default: 'false',
+          description: 'Render a close button.',
+        },
         { name: 'onDismiss', type: '() => void', description: 'Fires when close is clicked.' },
       ],
     },

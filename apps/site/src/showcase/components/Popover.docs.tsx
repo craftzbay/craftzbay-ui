@@ -37,10 +37,25 @@ const doc: ComponentDoc = {
     {
       title: 'PopoverContent',
       rows: [
-        { name: 'side', type: `'top' | 'right' | 'bottom' | 'left'`, default: `'bottom'`, description: 'Anchor side.' },
-        { name: 'align', type: `'start' | 'center' | 'end'`, default: `'center'`, description: 'Alignment along the side.' },
+        {
+          name: 'side',
+          type: `'top' | 'right' | 'bottom' | 'left'`,
+          default: `'bottom'`,
+          description: 'Anchor side.',
+        },
+        {
+          name: 'align',
+          type: `'start' | 'center' | 'end'`,
+          default: `'center'`,
+          description: 'Alignment along the side.',
+        },
         { name: 'sideOffset', type: 'number', default: '8', description: 'Gap from the trigger.' },
-        { name: 'collisionPadding', type: 'number', default: '8', description: 'Min distance from viewport edges.' },
+        {
+          name: 'collisionPadding',
+          type: 'number',
+          default: '8',
+          description: 'Min distance from viewport edges.',
+        },
       ],
     },
   ],

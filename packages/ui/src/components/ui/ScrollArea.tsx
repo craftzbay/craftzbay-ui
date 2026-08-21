@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  forwardRef,
-  type ComponentPropsWithoutRef,
-  type ElementRef,
-} from 'react';
+import { forwardRef, type ComponentPropsWithoutRef, type ElementRef } from 'react';
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
 import { cn } from '@/lib/utils';
 
@@ -47,14 +43,14 @@ export const ScrollBar = forwardRef<
       ref={ref}
       orientation={orientation}
       className={cn(
-        'flex touch-none select-none transition-colors duration-[var(--duration-fast)]',
+        'flex touch-none transition-colors duration-[var(--duration-fast)] select-none',
         orientation === 'vertical' && 'h-full w-2 border-l border-l-transparent p-px',
         orientation === 'horizontal' && 'h-2 flex-col border-t border-t-transparent p-px',
         className,
       )}
       {...props}
     >
-      <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-border-strong" />
+      <ScrollAreaPrimitive.ScrollAreaThumb className="bg-border-strong relative flex-1 rounded-full" />
     </ScrollAreaPrimitive.ScrollAreaScrollbar>
   );
 });

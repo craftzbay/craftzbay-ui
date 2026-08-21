@@ -1,6 +1,12 @@
 'use client';
 
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import {
+  forwardRef,
+  type ButtonHTMLAttributes,
+  type MouseEvent,
+  type ReactNode,
+  type SyntheticEvent,
+} from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { Loader2 } from '@/icons';
 import { cn } from '@/lib/utils';
@@ -22,16 +28,14 @@ const button = cva(
     'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'focus-visible:ring-offset-background',
     'disabled:pointer-events-none disabled:opacity-50',
+    // Loading keeps focus (no `disabled`) but blocks interaction.
+    'aria-busy:pointer-events-none',
     '[&_svg]:pointer-events-none [&_svg]:shrink-0',
   ],
   {
     variants: {
       variant: {
-        primary: [
-          'bg-accent text-on-accent',
-          'hover:bg-accent-hover',
-          'active:bg-accent-active',
-        ],
+        primary: ['bg-accent text-on-accent', 'hover:bg-accent-hover', 'active:bg-accent-active'],
         secondary: [
           'bg-background-muted text-foreground border border-border-input',
           'hover:bg-surface-hover',
@@ -62,6 +66,8 @@ const button = cva(
         sm: 'h-8 px-3 text-xs [&_svg]:size-4',
         md: 'h-9 px-3.5 text-sm [&_svg]:size-4',
         lg: 'h-10 px-4 text-sm [&_svg]:size-5',
+        // 44px — touch-first screens and marketing CTAs.
+        xl: 'h-11 px-5 text-base [&_svg]:size-5',
         icon: 'h-9 w-9 [&_svg]:size-4',
       },
     },
@@ -70,6 +76,7 @@ const button = cva(
       { variant: 'link', size: 'sm', class: 'h-auto px-0' },
       { variant: 'link', size: 'md', class: 'h-auto px-0' },
       { variant: 'link', size: 'lg', class: 'h-auto px-0' },
+      { variant: 'link', size: 'xl', class: 'h-auto px-0' },
     ],
     defaultVariants: {
       variant: 'primary',
@@ -79,8 +86,7 @@ const button = cva(
 );
 
 export interface ButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof button> {
+  extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof button> {
   /**
    * Render as a different element via Radix Slot. Useful when wrapping a
    * link: `<Button asChild><a href="…">…</a></Button>`.
@@ -88,8 +94,10 @@ export interface ButtonProps
    */
   asChild?: boolean;
   /**
-   * Show a spinner in place of the leading icon and disable the button.
-   * Use for async actions where the user must wait.
+   * Show a spinner in place of the leading icon and block interaction while
+   * keeping keyboard focus (`aria-disabled` + `aria-busy`, not `disabled`, so
+   * focus is not lost mid-submit). With `asChild` no spinner is rendered —
+   * the child is only marked busy and made inert.
    * @default false
    */
   loading?: boolean;
@@ -135,23 +143,28 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     disabled,
     children,
     type = 'button',
+    onClick,
     ...props
   },
   ref,
 ) {
-  const isDisabled = disabled || loading;
   const classes = cn(button({ variant, size }), className);
 
   if (asChild) {
     // Slot requires exactly one element child — pass the consumer's element
     // through untouched. The consumer is responsible for any leading/trailing
-    // icons inside that element.
+    // icons inside that element. While loading, a capture-phase guard stops
+    // the child's own handlers (and link navigation) before they run.
     return (
       <Slot
         ref={ref}
         aria-busy={loading || undefined}
+        aria-disabled={loading || undefined}
         data-loading={loading || undefined}
         className={classes}
+        onClick={onClick}
+        onClickCapture={loading ? blockEvent : undefined}
+        onKeyDownCapture={loading ? blockActivationKey : undefined}
         {...props}
       >
         {children}
@@ -164,16 +177,14 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       type={type}
       aria-busy={loading || undefined}
-      disabled={isDisabled}
+      aria-disabled={loading || undefined}
+      disabled={disabled}
       data-loading={loading || undefined}
       className={classes}
+      onClick={loading ? blockEvent : onClick}
       {...props}
     >
-      {loading ? (
-        <Loader2 className="animate-spin" aria-hidden="true" />
-      ) : (
-        leadingIcon
-      )}
+      {loading ? <Loader2 className="animate-spin" aria-hidden="true" /> : leadingIcon}
       {children}
       {!loading && trailingIcon}
     </button>
@@ -181,3 +192,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
 });
 
 Button.displayName = 'Button';
+
+function blockEvent(e: SyntheticEvent | MouseEvent) {
+  e.preventDefault();
+  e.stopPropagation();
+}
+
+function blockActivationKey(e: React.KeyboardEvent) {
+  if (e.key === 'Enter' || e.key === ' ') blockEvent(e);
+}

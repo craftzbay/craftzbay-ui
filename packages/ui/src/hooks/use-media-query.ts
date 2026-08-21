@@ -1,29 +1,28 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 
 /**
- * Subscribe to a CSS media query. SSR-safe — returns `false` on the server.
+ * Subscribe to a CSS media query. SSR- and hydration-safe: the server snapshot
+ * is always `false`, and the client re-renders with the real value after
+ * hydration instead of producing a markup mismatch.
  *
  * @example
  *   const isDesktop = useMediaQuery('(min-width: 1024px)');
  */
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return window.matchMedia(query).matches;
-  });
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const list = window.matchMedia(query);
-    const onChange = (event: MediaQueryListEvent) => setMatches(event.matches);
-    setMatches(list.matches);
-    list.addEventListener('change', onChange);
-    return () => list.removeEventListener('change', onChange);
-  }, [query]);
-
-  return matches;
+  const subscribe = useCallback(
+    (onChange: () => void) => {
+      if (typeof window === 'undefined' || !window.matchMedia) return () => {};
+      const list = window.matchMedia(query);
+      list.addEventListener('change', onChange);
+      return () => list.removeEventListener('change', onChange);
+    },
+    [query],
+  );
+  const getSnapshot = () =>
+    typeof window !== 'undefined' && window.matchMedia ? window.matchMedia(query).matches : false;
+  return useSyncExternalStore(subscribe, getSnapshot, () => false);
 }
 
 /** Convenience: respect `prefers-reduced-motion`. */

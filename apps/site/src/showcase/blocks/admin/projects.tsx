@@ -42,6 +42,7 @@ import {
   TableSortHeader,
   Tooltip,
   cn,
+  formatNumber,
   useToast,
 } from '@craftzbay/ui';
 import {
@@ -53,7 +54,7 @@ import {
   type ProjectStatus,
 } from './data';
 import { readHashParams, useHashParams } from './use-hash-params';
-import { PageHeader } from './shell';
+import { PageHeader, StatusIcon } from './shell';
 import { FilterChip, ProjectDialog, useDebounced } from './projects-parts';
 
 /* =============================================================================
@@ -308,6 +309,7 @@ export const Projects = forwardRef<
             </Button>
             <Button
               size="sm"
+              variant={firstRun ? 'secondary' : 'primary'}
               leadingIcon={<Plus />}
               onClick={() => {
                 setEditing(null);
@@ -572,12 +574,13 @@ export const Projects = forwardRef<
                             {p.name}
                           </TableCell>
                           <TableCell>
-                            <Badge tone={STATUS_TONE[p.status]} dot>
+                            <Badge tone={STATUS_TONE[p.status]}>
+                              <StatusIcon tone={STATUS_TONE[p.status]} />
                               {p.status}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-foreground-muted hidden md:table-cell">
-                            {p.owner}
+                            {p.owner || '—'}
                           </TableCell>
                           <TableCell
                             className="tabular text-foreground-subtle hidden text-right sm:table-cell"
@@ -668,7 +671,7 @@ export const Projects = forwardRef<
               pageSize={pageSize}
               pageSizeOptions={PAGE_SIZES}
               labels={{
-                showing: (from, to, total) => `${from}–${to} / ${total.toLocaleString('en-US')}`,
+                showing: (from, to, total) => `${from}–${to} / ${formatNumber(total)}`,
               }}
               onPageSizeChange={(s) => {
                 setPageSize(s);

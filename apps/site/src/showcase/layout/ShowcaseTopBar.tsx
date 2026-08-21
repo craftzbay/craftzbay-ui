@@ -13,8 +13,16 @@ interface ShowcaseTopBarProps {
 }
 
 const NAV: { label: string; route: Route; matchKinds: Route['kind'][] }[] = [
-  { label: 'Components', route: { kind: 'components-index' }, matchKinds: ['components-index', 'component'] },
-  { label: 'Templates', route: { kind: 'templates-index' }, matchKinds: ['templates-index', 'template'] },
+  {
+    label: 'Components',
+    route: { kind: 'components-index' },
+    matchKinds: ['components-index', 'component'],
+  },
+  {
+    label: 'Templates',
+    route: { kind: 'templates-index' },
+    matchKinds: ['templates-index', 'template'],
+  },
   { label: 'Guides', route: { kind: 'guides-index' }, matchKinds: ['guides-index', 'guide'] },
 ];
 
@@ -22,17 +30,17 @@ const NAV: { label: string; route: Route; matchKinds: Route['kind'][] }[] = [
 export function ShowcaseTopBar({ onOpenPalette, current }: ShowcaseTopBarProps) {
   const mod = useModifierKey();
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
+    <header className="border-border bg-background sticky top-0 z-[var(--z-sticky)] border-b">
       <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-6 px-6">
         <a
           href={`#${routeToHash({ kind: 'home' })}`}
-          className="rounded-sm text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm text-sm outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           aria-label="Home"
         >
           <BrandMark />
         </a>
 
-        <nav className="hidden items-center gap-1 text-sm text-foreground-muted sm:flex">
+        <nav className="text-foreground-muted hidden items-center gap-1 text-sm sm:flex">
           {NAV.map((item) => {
             const active = item.matchKinds.includes(current.kind);
             return (
@@ -41,8 +49,8 @@ export function ShowcaseTopBar({ onOpenPalette, current }: ShowcaseTopBarProps) 
                 href={`#${routeToHash(item.route)}`}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'rounded-md px-3 py-1.5 outline-none transition-colors',
-                  'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                  'rounded-md px-3 py-1.5 transition-colors outline-none',
+                  'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
                   active ? 'text-foreground' : 'hover:bg-background-muted hover:text-foreground',
                 )}
               >
@@ -57,7 +65,7 @@ export function ShowcaseTopBar({ onOpenPalette, current }: ShowcaseTopBarProps) 
             type="button"
             onClick={onOpenPalette}
             aria-label={`Search (${mod.label}+K)`}
-            className="hidden h-8 w-44 items-center gap-2 rounded-md border border-border-input bg-card pr-1.5 pl-2.5 text-sm text-foreground-subtle outline-none transition-colors hover:border-border-strong hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:flex lg:w-56"
+            className="border-border-input bg-card text-foreground-subtle hover:border-border-strong hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background hidden h-8 w-44 items-center gap-2 rounded-md border pr-1.5 pl-2.5 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:flex lg:w-56"
           >
             <Search className="size-4 shrink-0" aria-hidden />
             <span className="flex-1 truncate text-left text-xs">Search docs…</span>

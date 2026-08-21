@@ -19,6 +19,8 @@ export interface StepperProps extends HTMLAttributes<HTMLOListElement> {
   current: number;
   /** Layout direction. */
   orientation?: 'horizontal' | 'vertical';
+  /** sr-only state words announced after each title (i18n). */
+  stateLabels?: { complete: string; current: string; upcoming: string };
 }
 
 /**
@@ -40,14 +42,27 @@ export interface StepperProps extends HTMLAttributes<HTMLOListElement> {
  * @dont Use Stepper for free-form navigation. It implies a linear flow.
  */
 export const Stepper = forwardRef<HTMLOListElement, StepperProps>(function Stepper(
-  { steps, current, orientation = 'horizontal', className, ...props },
+  {
+    steps,
+    current,
+    orientation = 'horizontal',
+    stateLabels: stateLabelsProp,
+    className,
+    'aria-label': ariaLabel,
+    ...props
+  },
   ref,
 ) {
   const strings = useStrings();
+  const stateLabels = stateLabelsProp ?? {
+    complete: strings.stepper.complete,
+    current: strings.stepper.current,
+    upcoming: strings.stepper.upcoming,
+  };
   return (
     <ol
       ref={ref}
-      aria-label={props['aria-label'] ?? strings.stepper.label}
+      aria-label={ariaLabel ?? strings.stepper.label}
       className={cn(
         orientation === 'horizontal' ? 'flex w-full items-center' : 'flex flex-col gap-6',
         className,
@@ -67,14 +82,21 @@ export const Stepper = forwardRef<HTMLOListElement, StepperProps>(function Stepp
                 : 'flex items-start gap-3',
             )}
           >
-            <div className={cn(orientation === 'horizontal' ? 'flex items-center gap-3' : 'flex flex-col items-center')}>
+            <div
+              className={cn(
+                orientation === 'horizontal'
+                  ? 'flex items-center gap-3'
+                  : 'flex flex-col items-center',
+              )}
+            >
               <span
                 aria-hidden
                 className={cn(
                   'inline-flex size-7 items-center justify-center rounded-full text-xs font-semibold transition-colors',
                   state === 'complete' && 'bg-accent text-on-accent',
-                  state === 'current' && 'bg-card border-2 border-accent text-accent',
-                  state === 'upcoming' && 'bg-background-muted text-foreground-subtle border border-border',
+                  state === 'current' && 'bg-card border-accent text-accent border-2',
+                  state === 'upcoming' &&
+                    'bg-background-muted text-foreground-subtle border-border border',
                 )}
               >
                 {state === 'complete' ? <Check className="size-4" /> : i + 1}
@@ -82,7 +104,7 @@ export const Stepper = forwardRef<HTMLOListElement, StepperProps>(function Stepp
               {orientation === 'vertical' && !isLast && (
                 <span
                   className={cn(
-                    'mt-1 w-px flex-1 min-h-6',
+                    'mt-1 min-h-6 w-px flex-1',
                     i < current ? 'bg-accent' : 'bg-border',
                   )}
                 />
@@ -96,18 +118,16 @@ export const Stepper = forwardRef<HTMLOListElement, StepperProps>(function Stepp
                 )}
               >
                 {step.title}
+                <span className="sr-only">, {stateLabels[state]}</span>
               </span>
               {orientation === 'vertical' && step.description && (
-                <p className="text-xs text-foreground-muted mt-0.5">{step.description}</p>
+                <p className="text-foreground-muted mt-0.5 text-xs">{step.description}</p>
               )}
             </div>
             {orientation === 'horizontal' && !isLast && (
               <span
                 aria-hidden
-                className={cn(
-                  'h-px flex-1 mx-2',
-                  i < current ? 'bg-accent' : 'bg-border',
-                )}
+                className={cn('mx-2 h-px flex-1', i < current ? 'bg-accent' : 'bg-border')}
               />
             )}
           </li>

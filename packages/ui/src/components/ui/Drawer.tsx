@@ -1,21 +1,36 @@
 'use client';
 
 import {
+  createContext,
   forwardRef,
+  useContext,
   type ComponentPropsWithoutRef,
   type ElementRef,
   type HTMLAttributes,
 } from 'react';
 import { Drawer as DrawerPrimitive } from 'vaul';
+import { X } from '@/icons';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
 
 type Direction = 'top' | 'right' | 'bottom' | 'left';
 
+// vaul needs `direction` on Root for its drag physics; DrawerContent reads it
+// back from here so the side only has to be declared once.
+const DrawerDirectionContext = createContext<Direction>('bottom');
+
 export const Drawer = ({
   shouldScaleBackground = true,
+  direction = 'bottom',
   ...props
 }: ComponentPropsWithoutRef<typeof DrawerPrimitive.Root>) => (
-  <DrawerPrimitive.Root shouldScaleBackground={shouldScaleBackground} {...props} />
+  <DrawerDirectionContext.Provider value={direction}>
+    <DrawerPrimitive.Root
+      shouldScaleBackground={shouldScaleBackground}
+      direction={direction}
+      {...props}
+    />
+  </DrawerDirectionContext.Provider>
 );
 Drawer.displayName = 'Drawer';
 
@@ -40,11 +55,11 @@ DrawerOverlay.displayName = 'DrawerOverlay';
 // Edge-anchored sides pad by the matching safe-area inset (consumers set viewport-fit=cover).
 const directionStyles: Record<Direction, string> = {
   bottom:
-    'inset-x-0 bottom-0 mt-24 flex h-auto max-h-[90vh] flex-col rounded-t-xl border-t border-border pb-[env(safe-area-inset-bottom)]',
-  top: 'inset-x-0 top-0 mb-24 flex h-auto max-h-[90vh] flex-col rounded-b-xl border-b border-border',
-  left: 'inset-y-0 left-0 flex h-full w-[420px] max-w-[90vw] flex-col rounded-r-xl border-r border-border pl-[env(safe-area-inset-left)]',
+    'inset-x-0 bottom-0 mt-24 flex h-auto max-h-[90dvh] flex-col rounded-t-xl border-t border-border pb-[env(safe-area-inset-bottom)]',
+  top: 'inset-x-0 top-0 mb-24 flex h-auto max-h-[90dvh] flex-col rounded-b-xl border-b border-border',
+  left: 'inset-y-0 left-0 flex h-full w-full max-w-[min(26.25rem,90vw)] flex-col rounded-r-xl border-r border-border pl-[env(safe-area-inset-left)]',
   right:
-    'inset-y-0 right-0 flex h-full w-[420px] max-w-[90vw] flex-col rounded-l-xl border-l border-border pr-[env(safe-area-inset-right)]',
+    'inset-y-0 right-0 flex h-full w-full max-w-[min(26.25rem,90vw)] flex-col rounded-l-xl border-l border-border pr-[env(safe-area-inset-right)]',
 };
 
 const handleStyles: Record<Direction, string> = {
@@ -57,16 +72,28 @@ const handleStyles: Record<Direction, string> = {
 export interface DrawerContentProps extends ComponentPropsWithoutRef<
   typeof DrawerPrimitive.Content
 > {
-  /** Side the drawer slides in from. Default `bottom`. */
+  /**
+   * Side the drawer slides in from. Prefer setting `direction` on `<Drawer>`
+   * (vaul needs it there for drag physics); this prop only overrides the
+   * visual placement.
+   */
   direction?: Direction;
   /** Hide the drag handle. */
   hideHandle?: boolean;
+  /** Show the close (×) button. Default `true`. */
+  showClose?: boolean;
 }
 
 export const DrawerContent = forwardRef<
   ElementRef<typeof DrawerPrimitive.Content>,
   DrawerContentProps
->(function DrawerContent({ className, direction = 'bottom', hideHandle, children, ...props }, ref) {
+>(function DrawerContent(
+  { className, direction: directionProp, hideHandle, showClose = true, children, ...props },
+  ref,
+) {
+  const rootDirection = useContext(DrawerDirectionContext);
+  const direction = directionProp ?? rootDirection;
+  const strings = useStrings();
   const isHorizontal = direction === 'left' || direction === 'right';
   return (
     <DrawerPortal>
@@ -85,6 +112,19 @@ export const DrawerContent = forwardRef<
         <div className={cn('min-h-0 min-w-0 flex-1', isHorizontal && 'flex flex-col')}>
           {children}
         </div>
+        {showClose && (
+          <DrawerPrimitive.Close
+            aria-label={strings.drawer.close}
+            className={cn(
+              'text-foreground-subtle absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-md',
+              'hover:bg-background-muted hover:text-foreground',
+              'focus-visible:ring-ring focus-visible:ring-offset-card outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+              'transition-colors duration-[var(--duration-fast)]',
+            )}
+          >
+            <X className="size-4" aria-hidden />
+          </DrawerPrimitive.Close>
+        )}
       </DrawerPrimitive.Content>
     </DrawerPortal>
   );

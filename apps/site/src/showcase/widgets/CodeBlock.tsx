@@ -30,25 +30,25 @@ export function CodeBlock({ code, language = 'tsx', className }: CodeBlockProps)
   return (
     <div
       className={cn(
-        'code-block group relative overflow-hidden rounded-md border border-border bg-card font-mono text-xs leading-relaxed',
+        'code-block group border-border bg-card relative overflow-hidden rounded-md border font-mono text-xs leading-relaxed',
         className,
       )}
     >
-      <div className="flex items-center justify-between border-b border-border bg-background-subtle/60 px-3 py-1.5">
-        <span className="text-xs font-medium uppercase tracking-wider text-foreground-subtle">
+      <div className="border-border bg-background-subtle/60 flex items-center justify-between border-b px-3 py-1.5">
+        <span className="text-foreground-subtle text-xs font-medium tracking-wider uppercase">
           {language}
         </span>
         <button
           type="button"
           onClick={onCopy}
           aria-label={copied ? 'Copied' : 'Copy code'}
-          className="inline-flex items-center gap-1 rounded-sm px-1.5 py-1 text-xs text-foreground-muted outline-none transition-colors hover:bg-background-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          className="text-foreground-muted hover:bg-background-muted hover:text-foreground focus-visible:ring-ring inline-flex items-center gap-1 rounded-sm px-1.5 py-1 text-xs transition-colors outline-none focus-visible:ring-2"
         >
           {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
           {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
-      <pre className="max-h-[70vh] overflow-auto p-4 text-foreground">
+      <pre className="text-foreground max-h-[70vh] overflow-auto p-4">
         <code>{highlight(code, language)}</code>
       </pre>
     </div>

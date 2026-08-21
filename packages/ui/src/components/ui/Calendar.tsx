@@ -1,12 +1,22 @@
 'use client';
 
 import { useMemo, type ChangeEvent } from 'react';
-import { DayPicker, type DayPickerProps, type DropdownProps } from 'react-day-picker';
+import {
+  DayPicker,
+  getDefaultClassNames,
+  type DayPickerProps,
+  type DropdownProps,
+} from 'react-day-picker';
 import * as SelectPrimitive from '@radix-ui/react-select';
 import { ChevronDown, ChevronLeft, ChevronRight } from '@/icons';
-import 'react-day-picker/style.css';
 import { Select, SelectContent, SelectItem } from './Select';
 import { cn } from '@/lib/utils';
+import { useStrings } from '@/hooks/use-strings';
+
+// RDP's structural class names (`rdp-*`). Its stylesheet is intentionally NOT
+// imported — every visual rule below is ours, so there is no cascade to fight
+// and no CSS side effect for tree-shaken consumers.
+const rdp = getDefaultClassNames();
 
 export type CalendarProps = DayPickerProps & { className?: string };
 
@@ -38,7 +48,7 @@ function CalendarDropdown({
         aria-label={ariaLabel}
         className={cn(
           'border-border bg-card text-foreground inline-flex h-7 items-center gap-1 rounded-md border px-2 text-sm font-medium',
-          'hover:bg-background-muted focus-visible:ring-ring outline-none focus-visible:ring-2',
+          'hover:bg-background-muted focus-visible:ring-ring focus-visible:ring-offset-background outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
           'disabled:pointer-events-none disabled:opacity-50',
         )}
       >
@@ -58,6 +68,12 @@ function CalendarDropdown({
   );
 }
 
+const navButton = cn(
+  'pointer-events-auto inline-flex h-7 w-7 items-center justify-center rounded-md text-foreground-muted hover:bg-background-muted',
+  'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+  'disabled:opacity-40 disabled:pointer-events-none',
+);
+
 /**
  * Standalone calendar surface. Used by DatePicker, but can also be embedded
  * directly in popovers, sheets, or inline forms. Wraps `react-day-picker` v9.
@@ -71,8 +87,10 @@ export function Calendar({
   captionLayout = 'dropdown',
   startMonth,
   endMonth,
+  labels,
   ...props
 }: CalendarProps) {
+  const strings = useStrings();
   // Bound the month/year dropdowns. Consumers can narrow this with
   // startMonth / endMonth; the default spans a century back to a decade ahead
   // so the year dropdown is useful for both birthdays and future scheduling.
@@ -93,8 +111,17 @@ export function Calendar({
       startMonth={start}
       endMonth={end}
       className={cn('border-border bg-card inline-block rounded-lg border p-3', className)}
+      labels={{
+        labelPrevious: () => strings.calendar.previous,
+        labelNext: () => strings.calendar.next,
+        labelMonthDropdown: () => strings.calendar.chooseMonth,
+        labelYearDropdown: () => strings.calendar.chooseYear,
+        labelNav: () => strings.calendar.nav,
+        ...labels,
+      }}
       classNames={{
-        root: 'rdp',
+        ...rdp,
+        root: cn(rdp.root, 'relative'),
         months: 'relative flex flex-col gap-4 sm:flex-row sm:gap-6',
         month: 'flex flex-col gap-3',
         month_caption: 'relative flex h-8 items-center justify-center px-8',
@@ -105,25 +132,32 @@ export function Calendar({
         // itself ignores pointer events so the centred dropdowns underneath
         // stay clickable — only the buttons opt back in.
         nav: 'pointer-events-none absolute inset-x-0 top-0 z-10 flex h-8 items-center justify-between',
-        button_previous:
-          'pointer-events-auto inline-flex h-7 w-7 items-center justify-center rounded-md text-foreground-muted hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring outline-none disabled:opacity-40 disabled:pointer-events-none',
-        button_next:
-          'pointer-events-auto inline-flex h-7 w-7 items-center justify-center rounded-md text-foreground-muted hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring outline-none disabled:opacity-40 disabled:pointer-events-none',
+        button_previous: navButton,
+        button_next: navButton,
         month_grid: 'w-full border-collapse',
         weekdays: 'grid grid-cols-7',
         weekday:
           'h-8 w-9 text-center text-xs font-medium uppercase tracking-wide text-foreground-subtle',
         week: 'mt-0.5 grid grid-cols-7',
         day: 'relative h-9 w-9 p-0 text-center',
-        day_button:
-          'inline-flex h-9 w-9 items-center justify-center rounded-md text-sm hover:bg-background-muted focus-visible:ring-2 focus-visible:ring-ring outline-none aria-selected:bg-accent aria-selected:text-on-accent aria-selected:hover:bg-accent-hover',
+        day_button: cn(
+          'inline-flex h-9 w-9 items-center justify-center rounded-md text-sm hover:bg-background-muted',
+          'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+        ),
+        // RDP 9 puts aria-selected / the modifier classes on the <td>, so the
+        // button is styled through its cell. `[&_button:hover]` outranks the
+        // button's own `hover:` rule so selected days keep the accent on hover.
+        selected: cn(
+          '[&_button]:bg-accent [&_button]:text-on-accent [&_button:hover]:bg-accent-hover',
+          '[&_button]:focus-visible:ring-offset-accent-soft',
+        ),
         today: '[&_button]:border [&_button]:border-border',
         outside: 'text-foreground-subtle',
         disabled: 'opacity-40 pointer-events-none',
-        range_start: '[&_button]:bg-accent [&_button]:text-on-accent [&_button]:rounded-r-none',
-        range_end: '[&_button]:bg-accent [&_button]:text-on-accent [&_button]:rounded-l-none',
+        range_start: '[&_button]:rounded-r-none',
+        range_end: '[&_button]:rounded-l-none',
         range_middle:
-          '[&_button]:bg-accent-soft [&_button]:text-foreground [&_button]:rounded-none',
+          '[&_button]:bg-accent-soft [&_button]:text-foreground [&_button:hover]:bg-accent-soft [&_button]:rounded-none',
         hidden: 'invisible',
         ...classNames,
       }}

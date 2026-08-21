@@ -8,7 +8,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
   ConfirmationDialog,
   Dialog,
   DialogContent,
@@ -33,6 +32,7 @@ import {
   TableHeader,
   TableRow,
   cn,
+  formatDate,
   useToast,
 } from '@craftzbay/ui';
 import {
@@ -44,7 +44,7 @@ import {
   type Member,
   type Message,
 } from './data';
-import { PageHeader } from './shell';
+import { PageHeader, StatusIcon } from './shell';
 import { useTheme, type Theme } from '../../theme/theme-context';
 import { useUnsavedGuard } from './unsaved';
 
@@ -87,7 +87,7 @@ export function InboxPage({ onNavigate }: { onNavigate: (key: string) => void })
               <li
                 key={m.id}
                 className={cn(
-                  'hover:bg-background-muted flex items-start gap-3 px-5 py-3.5',
+                  'hover:bg-background-muted flex items-start gap-3 px-4 py-3 md:px-6',
                   m.unread && 'bg-accent-soft/40',
                 )}
               >
@@ -216,7 +216,7 @@ export const Members = forwardRef<MembersHandle, { onNavigate: (key: string) => 
               {items.map((m) => (
                 <TableRow key={m.id}>
                   <TableCell>
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2">
                       <Avatar size="sm" fallback={m.initials} alt="" />
                       <div className="leading-tight">
                         <div className="text-foreground font-medium">{m.name}</div>
@@ -249,11 +249,8 @@ export const Members = forwardRef<MembersHandle, { onNavigate: (key: string) => 
                     </Select>
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      tone={m.status === 'Active' ? 'success' : 'warning'}
-                      variant="outline"
-                      dot
-                    >
+                    <Badge tone={m.status === 'Active' ? 'success' : 'warning'} variant="outline">
+                      <StatusIcon tone={m.status === 'Active' ? 'success' : 'warning'} />
                       {m.status}
                     </Badge>
                   </TableCell>
@@ -368,7 +365,7 @@ export function SettingsPage({ onNavigate }: { onNavigate: (key: string) => void
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Profile</CardTitle>
+            <h2 className="text-foreground text-base leading-none font-semibold">Profile</h2>
             <CardDescription>How others see you.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -417,7 +414,7 @@ export function SettingsPage({ onNavigate }: { onNavigate: (key: string) => void
 
         <Card>
           <CardHeader>
-            <CardTitle>Appearance</CardTitle>
+            <h2 className="text-foreground text-base leading-none font-semibold">Appearance</h2>
             <CardDescription>Applies immediately and follows you across tabs.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -438,7 +435,9 @@ export function SettingsPage({ onNavigate }: { onNavigate: (key: string) => void
         <Card>
           <CardHeader className="flex-row items-start justify-between">
             <div>
-              <CardTitle>Notifications</CardTitle>
+              <h2 className="text-foreground text-base leading-none font-semibold">
+                Notifications
+              </h2>
               <CardDescription>
                 Choose what reaches you. Changes save automatically.
               </CardDescription>
@@ -455,14 +454,7 @@ export function SettingsPage({ onNavigate }: { onNavigate: (key: string) => void
                   description={desc}
                   labelPosition="before"
                   defaultChecked={on}
-                  onCheckedChange={() =>
-                    setSavedAt(
-                      new Date().toLocaleTimeString('en-GB', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      }),
-                    )
-                  }
+                  onCheckedChange={() => setSavedAt(formatDate(new Date(), { pattern: 'HH:mm' }))}
                   className="w-full justify-between"
                 />
               </div>
@@ -501,8 +493,8 @@ export function BillingPage({ onNavigate }: { onNavigate: (key: string) => void 
         </CardContent>
       </Card>
       <Card padding="none" className="mt-4">
-        <CardHeader className="px-5 pt-5">
-          <CardTitle>Invoices</CardTitle>
+        <CardHeader className="px-4 pt-4 md:px-6 md:pt-6">
+          <h2 className="text-foreground text-base leading-none font-semibold">Invoices</h2>
         </CardHeader>
         <Table>
           <TableHeader>
@@ -520,7 +512,8 @@ export function BillingPage({ onNavigate }: { onNavigate: (key: string) => void 
                 <TableCell className="tabular text-foreground-muted">{inv.date}</TableCell>
                 <TableCell className="tabular text-foreground text-right">{inv.amount}</TableCell>
                 <TableCell className="text-right">
-                  <Badge tone="success" variant="outline" dot>
+                  <Badge tone="success" variant="outline">
+                    <StatusIcon tone="success" />
                     {inv.status}
                   </Badge>
                 </TableCell>

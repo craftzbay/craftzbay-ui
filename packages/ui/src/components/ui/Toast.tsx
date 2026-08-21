@@ -140,7 +140,7 @@ export const ToastClose = forwardRef<
       className={cn(
         'text-foreground-subtle absolute top-2 right-2 inline-flex size-7 items-center justify-center rounded-md',
         'hover:text-foreground opacity-0 transition-opacity group-hover:opacity-100',
-        'focus-visible:ring-ring outline-none focus-visible:opacity-100 focus-visible:ring-2',
+        'focus-visible:ring-ring focus-visible:ring-offset-card outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-offset-2',
         className,
       )}
       toast-close=""
@@ -188,7 +188,8 @@ export function Toaster() {
           key={t.id}
           variant={t.variant ?? 'default'}
           open={t.open}
-          duration={t.duration}
+          // Radix treats 0 as "dismiss immediately"; the queue's 0 means "keep open".
+          duration={t.duration === 0 ? Infinity : t.duration}
           onOpenChange={(open) => {
             if (!open) dismiss(t.id);
           }}

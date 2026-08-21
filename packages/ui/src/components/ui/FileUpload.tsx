@@ -12,7 +12,7 @@ import {
 import { File as FileIcon, Upload, X } from '@/icons';
 import { cn } from '@/lib/utils';
 import { useStrings } from '@/hooks/use-strings';
-import { formatString } from '@/lib/strings';
+import { formatString, type UiStrings } from '@/lib/strings';
 
 export type FileRejectReason = 'size' | 'type';
 
@@ -36,10 +36,10 @@ export interface FileUploadProps {
   className?: string;
 }
 
-function formatSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+function formatSize(bytes: number, s: UiStrings['fileUpload']) {
+  if (bytes < 1024) return formatString(s.bytes, { n: bytes });
+  if (bytes < 1024 * 1024) return formatString(s.kilobytes, { n: (bytes / 1024).toFixed(1) });
+  return formatString(s.megabytes, { n: (bytes / 1024 / 1024).toFixed(1) });
 }
 
 /** Mirror the browser's `accept` matching for dropped files (which skip the picker filter). */
@@ -72,6 +72,9 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(function F
   const inputId = useId();
   const [internal, setInternal] = useState<File[]>([]);
   const [over, setOver] = useState(false);
+  // dragenter/dragleave fire for every child element; count nesting depth so
+  // the highlight does not flicker while the pointer crosses the label's children.
+  const dragDepth = useRef(0);
   const files = value ?? internal;
 
   const update = useCallback(
@@ -104,6 +107,7 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(function F
 
   const onDrop = (e: ReactDragEvent<HTMLLabelElement>) => {
     e.preventDefault();
+    dragDepth.current = 0;
     setOver(false);
     if (disabled) return;
     addFiles(e.dataTransfer.files);
@@ -113,11 +117,15 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(function F
     <div ref={ref} className={cn('flex flex-col gap-3', className)}>
       <label
         htmlFor={inputId}
-        onDragOver={(e) => {
-          e.preventDefault();
+        onDragEnter={() => {
+          dragDepth.current += 1;
           if (!disabled) setOver(true);
         }}
-        onDragLeave={() => setOver(false)}
+        onDragOver={(e) => e.preventDefault()}
+        onDragLeave={() => {
+          dragDepth.current = Math.max(0, dragDepth.current - 1);
+          if (dragDepth.current === 0) setOver(false);
+        }}
         onDrop={onDrop}
         className={cn(
           'group relative flex cursor-pointer flex-col items-center justify-center gap-2',
@@ -154,7 +162,7 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(function F
         <ul className="flex flex-col gap-2">
           {files.map((file, idx) => (
             <li
-              key={`${file.name}-${idx}`}
+              key={`${file.name}-${file.size}-${file.lastModified}-${idx}`}
               className="border-border bg-card flex items-center gap-3 rounded-md border px-3 py-2"
             >
               <FileIcon className="text-foreground-muted size-4 shrink-0" aria-hidden />
@@ -162,12 +170,14 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(function F
                 <p className="truncate text-sm" title={file.name}>
                   {file.name}
                 </p>
-                <p className="text-foreground-muted text-xs">{formatSize(file.size)}</p>
+                <p className="text-foreground-muted text-xs">
+                  {formatSize(file.size, strings.fileUpload)}
+                </p>
               </div>
               <button
                 type="button"
                 onClick={() => remove(idx)}
-                className="text-foreground-muted hover:bg-background-muted hover:text-foreground focus-visible:ring-ring rounded-sm p-1 outline-none focus-visible:ring-2"
+                className="text-foreground-muted hover:bg-background-muted hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm p-1 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                 aria-label={formatString(strings.fileUpload.remove, { name: file.name })}
               >
                 <X className="size-4" aria-hidden />

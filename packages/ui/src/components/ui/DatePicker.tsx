@@ -17,8 +17,17 @@ import { useStrings } from '@/hooks/use-strings';
 
 type CalendarLocale = DayPickerProps['locale'];
 
-function defaultFormatDate(d: Date): string {
-  return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+/**
+ * Default trigger text. With a date-fns `locale` the date is rendered in that
+ * locale; without one it is the canonical `yyyy-MM-dd` — deterministic on
+ * server and client, so SSR output never depends on the host's locale.
+ */
+function defaultFormatDate(d: Date, locale?: CalendarLocale): string {
+  if (locale?.code) {
+    return d.toLocaleDateString(locale.code, { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
 /** Merge the fromDate/toDate bounds with any consumer-supplied RDP matcher. */
@@ -90,7 +99,7 @@ function PickerTrigger({
         </button>
       </PopoverPrimitive.Trigger>
       {error && (
-        <p id={errorId} role="alert" className="text-danger-text text-xs">
+        <p id={errorId} className="text-danger-text text-xs">
           {error}
         </p>
       )}
@@ -140,13 +149,14 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(function D
     fromDate,
     toDate,
     disabledDays,
-    formatDate = defaultFormatDate,
+    formatDate: formatDateProp,
     locale,
     className,
   },
   ref,
 ) {
   const strings = useStrings();
+  const formatDate = formatDateProp ?? ((d: Date) => defaultFormatDate(d, locale));
   const placeholder = placeholderProp ?? strings.datePicker.pickDate;
   const fieldId = useId();
   const [open, setOpen] = useState(false);
@@ -216,13 +226,14 @@ export const DateRangePicker = forwardRef<HTMLDivElement, DateRangePickerProps>(
       fromDate,
       toDate,
       disabledDays,
-      formatDate = defaultFormatDate,
+      formatDate: formatDateProp,
       locale,
       className,
     },
     ref,
   ) {
     const strings = useStrings();
+    const formatDate = formatDateProp ?? ((d: Date) => defaultFormatDate(d, locale));
     const placeholder = placeholderProp ?? strings.datePicker.pickRange;
     const fieldId = useId();
     const [open, setOpen] = useState(false);

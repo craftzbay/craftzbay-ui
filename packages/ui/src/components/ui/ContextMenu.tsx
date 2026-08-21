@@ -44,20 +44,26 @@ const itemClasses = cn(
   'relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-foreground outline-none',
   'data-[highlighted]:bg-background-muted data-[highlighted]:text-foreground',
   'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+  'transition-colors duration-[var(--duration-fast)]',
 );
 
 export const ContextMenuSubTrigger = forwardRef<
   ElementRef<typeof ContextMenuPrimitive.SubTrigger>,
-  ComponentPropsWithoutRef<typeof ContextMenuPrimitive.SubTrigger>
->(function ContextMenuSubTrigger({ className, children, ...props }, ref) {
+  ComponentPropsWithoutRef<typeof ContextMenuPrimitive.SubTrigger> & { inset?: boolean }
+>(function ContextMenuSubTrigger({ className, inset, children, ...props }, ref) {
   return (
     <ContextMenuPrimitive.SubTrigger
       ref={ref}
-      className={cn(itemClasses, 'data-[state=open]:bg-background-muted', className)}
+      className={cn(
+        itemClasses,
+        'data-[state=open]:bg-background-muted',
+        inset && 'pl-8',
+        className,
+      )}
       {...props}
     >
       {children}
-      <ChevronRight className="ml-auto size-4 text-foreground-subtle" aria-hidden />
+      <ChevronRight className="text-foreground-subtle ml-auto size-4" aria-hidden />
     </ContextMenuPrimitive.SubTrigger>
   );
 });
@@ -71,7 +77,10 @@ export const ContextMenuSubContent = forwardRef<
     <ContextMenuPrimitive.SubContent
       ref={ref}
       className={cn(
-        'z-[var(--z-popover)] min-w-[8rem] overflow-hidden rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-md',
+        'border-border bg-popover text-popover-foreground z-[var(--z-popover)] min-w-[8rem] overflow-hidden rounded-lg border p-1 shadow-md',
+        'data-[state=open]:animate-in data-[state=closed]:animate-out',
+        'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+        'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
         className,
       )}
       {...props}
@@ -89,9 +98,10 @@ export const ContextMenuContent = forwardRef<
       <ContextMenuPrimitive.Content
         ref={ref}
         className={cn(
-          'z-[var(--z-popover)] min-w-[12rem] overflow-hidden rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-md',
+          'border-border bg-popover text-popover-foreground z-[var(--z-popover)] min-w-[12rem] overflow-hidden rounded-lg border p-1 shadow-md',
           'data-[state=open]:animate-in data-[state=closed]:animate-out',
           'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+          'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
           className,
         )}
         {...props}
@@ -103,13 +113,17 @@ ContextMenuContent.displayName = 'ContextMenuContent';
 
 export const ContextMenuItem = forwardRef<
   ElementRef<typeof ContextMenuPrimitive.Item>,
-  ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Item> & { destructive?: boolean }
->(function ContextMenuItem({ className, destructive, ...props }, ref) {
+  ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Item> & {
+    inset?: boolean;
+    destructive?: boolean;
+  }
+>(function ContextMenuItem({ className, inset, destructive, ...props }, ref) {
   return (
     <ContextMenuPrimitive.Item
       ref={ref}
       className={cn(
         itemClasses,
+        inset && 'pl-8',
         destructive &&
           'text-danger-text data-[highlighted]:bg-danger-soft data-[highlighted]:text-danger-text',
         className,
@@ -132,7 +146,7 @@ export const ContextMenuCheckboxItem = forwardRef<
     >
       <span className="absolute left-2 flex size-4 items-center justify-center">
         <ContextMenuPrimitive.ItemIndicator>
-          <Check className="size-4 text-accent" aria-hidden />
+          <Check className="text-accent size-4" aria-hidden />
         </ContextMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -153,7 +167,7 @@ export const ContextMenuRadioItem = forwardRef<
     >
       <span className="absolute left-2 flex size-4 items-center justify-center">
         <ContextMenuPrimitive.ItemIndicator>
-          <Circle className="size-2 fill-accent text-accent" aria-hidden />
+          <Circle className="fill-accent text-accent size-2" aria-hidden />
         </ContextMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -164,12 +178,16 @@ ContextMenuRadioItem.displayName = 'ContextMenuRadioItem';
 
 export const ContextMenuLabel = forwardRef<
   ElementRef<typeof ContextMenuPrimitive.Label>,
-  ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Label>
->(function ContextMenuLabel({ className, ...props }, ref) {
+  ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Label> & { inset?: boolean }
+>(function ContextMenuLabel({ className, inset, ...props }, ref) {
   return (
     <ContextMenuPrimitive.Label
       ref={ref}
-      className={cn('px-2 py-1.5 text-xs font-medium text-foreground-subtle', className)}
+      className={cn(
+        'text-foreground-subtle px-2 py-1.5 text-xs font-medium',
+        inset && 'pl-8',
+        className,
+      )}
       {...props}
     />
   );
@@ -183,7 +201,7 @@ export const ContextMenuSeparator = forwardRef<
   return (
     <ContextMenuPrimitive.Separator
       ref={ref}
-      className={cn('-mx-1 my-1 h-px bg-border', className)}
+      className={cn('bg-border -mx-1 my-1 h-px', className)}
       {...props}
     />
   );
@@ -193,7 +211,7 @@ ContextMenuSeparator.displayName = 'ContextMenuSeparator';
 export function ContextMenuShortcut({ className, ...props }: HTMLAttributes<HTMLSpanElement>) {
   return (
     <span
-      className={cn('ml-auto text-xs tracking-widest text-foreground-subtle font-mono', className)}
+      className={cn('text-foreground-subtle ml-auto font-mono text-xs tracking-widest', className)}
       {...props}
     />
   );

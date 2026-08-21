@@ -10,14 +10,7 @@ import { TopNav, TopNavLink } from '../TopNav';
 
 describe('Navigation (smoke)', () => {
   it('Breadcrumbs renders nav landmark', () => {
-    render(
-      <Breadcrumbs
-        items={[
-          { label: 'Projects', href: '/' },
-          { label: 'Atlas' },
-        ]}
-      />,
-    );
+    render(<Breadcrumbs items={[{ label: 'Projects', href: '/' }, { label: 'Atlas' }]} />);
     expect(screen.getByRole('navigation', { name: /breadcrumb/i })).toBeInTheDocument();
     expect(screen.getByText('Atlas')).toBeInTheDocument();
   });
@@ -58,14 +51,7 @@ describe('Navigation (smoke)', () => {
 
   it('Stepper renders steps', () => {
     render(
-      <Stepper
-        current={1}
-        steps={[
-          { title: 'One' },
-          { title: 'Two' },
-          { title: 'Three' },
-        ]}
-      />,
+      <Stepper current={1} steps={[{ title: 'One' }, { title: 'Two' }, { title: 'Three' }]} />,
     );
     expect(screen.getByText('One')).toBeInTheDocument();
     expect(screen.getByText('Two')).toBeInTheDocument();

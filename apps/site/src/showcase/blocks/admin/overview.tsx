@@ -8,7 +8,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
   LineChart,
   Select,
   SelectContent,
@@ -21,6 +20,7 @@ import {
   TableHeader,
   TableRow,
   cn,
+  formatNumber,
 } from '@craftzbay/ui';
 import { useState } from 'react';
 import { ACTIVITY, CHANNELS, SERIES_A, SERIES_B } from './data';
@@ -51,7 +51,7 @@ export function KpiTile({
   const up = delta !== undefined && delta >= 0;
   return (
     <Card>
-      <CardContent className="pt-5">
+      <CardContent className="pt-4 md:pt-6">
         <div className="text-foreground-muted text-xs font-medium">{label}</div>
         <div className="tabular text-foreground mt-1 text-2xl font-semibold tracking-tight">
           {value}
@@ -71,7 +71,7 @@ export function KpiTile({
               )}
               <span className="sr-only">{up ? 'up' : 'down'}</span>
               {up ? '+' : '−'}
-              {Math.abs(delta).toLocaleString('en-US', { maximumFractionDigits: 2 })}%
+              {formatNumber(Math.abs(delta))}%
             </span>
             <span className="text-foreground-subtle">{compare}</span>
           </div>
@@ -107,7 +107,10 @@ export function Overview({ onNavigate }: { onNavigate: (key: string) => void }) 
         actions={<RangeSelect value={range} onChange={setRange} />}
         onNavigate={onNavigate}
       />
-      <section aria-label="Key metrics" className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section
+        aria-label="Key metrics"
+        className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4"
+      >
         <KpiTile label="Active users" value="2,840" delta={12} positive compare={compare} />
         <KpiTile label="Sessions" value="8,402" delta={4} positive compare={compare} />
         <KpiTile label="Open issues" value="14" delta={-6} positive compare={compare} />
@@ -116,7 +119,9 @@ export function Overview({ onNavigate }: { onNavigate: (key: string) => void }) 
 
       <Card className="mt-4">
         <CardHeader>
-          <CardTitle>Active users per day</CardTitle>
+          <h2 className="text-foreground text-base leading-none font-semibold">
+            Active users per day
+          </h2>
           <CardDescription>
             Distinct sessions,{' '}
             {range === '7d' ? 'last 7 days' : range === '90d' ? 'last 90 days' : 'last 30 days'}.
@@ -136,8 +141,8 @@ export function Overview({ onNavigate }: { onNavigate: (key: string) => void }) 
       </Card>
 
       <Card padding="none" className="mt-4">
-        <CardHeader className="flex-row flex-wrap items-center justify-between gap-2 px-5 pt-5">
-          <CardTitle>Recent activity</CardTitle>
+        <CardHeader className="flex-row flex-wrap items-center justify-between gap-2 px-4 pt-4 md:px-6 md:pt-6">
+          <h2 className="text-foreground text-base leading-none font-semibold">Recent activity</h2>
           <Button variant="ghost" size="sm" onClick={() => onNavigate('inbox')}>
             View all
           </Button>
@@ -197,7 +202,9 @@ export function Analytics({ onNavigate }: { onNavigate: (key: string) => void })
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Sessions per day</CardTitle>
+            <h2 className="text-foreground text-base leading-none font-semibold">
+              Sessions per day
+            </h2>
             <CardDescription>Last 30 days</CardDescription>
           </CardHeader>
           <CardContent>
@@ -206,7 +213,9 @@ export function Analytics({ onNavigate }: { onNavigate: (key: string) => void })
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Traffic by channel</CardTitle>
+            <h2 className="text-foreground text-base leading-none font-semibold">
+              Traffic by channel
+            </h2>
             <CardDescription>This month</CardDescription>
           </CardHeader>
           <CardContent>
@@ -239,7 +248,9 @@ export function Reports({ onNavigate }: { onNavigate: (key: string) => void }) {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Weekly active users</CardTitle>
+            <h2 className="text-foreground text-base leading-none font-semibold">
+              Weekly active users
+            </h2>
             <CardDescription>Updated daily</CardDescription>
           </CardHeader>
           <CardContent>
@@ -248,7 +259,9 @@ export function Reports({ onNavigate }: { onNavigate: (key: string) => void }) {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Revenue by channel</CardTitle>
+            <h2 className="text-foreground text-base leading-none font-semibold">
+              Revenue by channel
+            </h2>
             <CardDescription>This quarter</CardDescription>
           </CardHeader>
           <CardContent>
