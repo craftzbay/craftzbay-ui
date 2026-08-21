@@ -85,7 +85,7 @@ export function PreviewPage({
       {/* Floating preview dock — bottom-right so the template renders edge to
           edge like a real deployment. */}
       {!embedded && (
-        <div className="border-border bg-card fixed right-4 bottom-4 z-[var(--z-toast)] flex items-center gap-2 rounded-full border py-1.5 pr-1.5 pl-3 shadow-lg">
+        <div className="border-border bg-card fixed right-4 bottom-4 z-[var(--z-toast)] flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-full border py-1.5 pr-1.5 pl-3 shadow-lg">
           <a
             href={`#${routeToHash({ kind: 'template', slug })}`}
             className="text-foreground-muted hover:text-foreground inline-flex items-center gap-1.5 text-xs font-medium transition-colors"
@@ -100,11 +100,13 @@ export function PreviewPage({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="text-foreground-muted hover:bg-background-muted hover:text-foreground focus-visible:ring-ring inline-flex h-7 items-center gap-1.5 rounded-full px-2 text-xs transition-colors outline-none focus-visible:ring-2"
+                className="text-foreground-muted hover:bg-background-muted hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background inline-flex h-7 min-w-0 items-center gap-1.5 rounded-full px-2 text-xs transition-colors outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                 aria-label={`Template: ${doc.name}. Switch template or screen`}
               >
                 <span className="bg-accent inline-flex size-1.5 rounded-full" aria-hidden />
-                <span className="text-foreground font-medium whitespace-nowrap">{doc.name}</span>
+                <span className="text-foreground max-w-[9rem] truncate font-medium">
+                  {doc.name}
+                </span>
                 <ChevronDown className="size-3.5" aria-hidden />
               </button>
             </DropdownMenuTrigger>

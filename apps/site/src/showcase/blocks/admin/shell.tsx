@@ -421,7 +421,9 @@ export function pageCrumbs(page: string, withModule = false) {
   const mod = findModule(page);
   return [
     { label: 'Home', href: 'overview' },
-    ...(withModule ? [{ label: mod.label, href: mod.sections[0].items[0].key }] : []),
+    ...(withModule && mod.label !== nav.section.label
+      ? [{ label: mod.label, href: mod.sections[0].items[0].key }]
+      : []),
     { label: nav.section.label },
     { label: nav.item.label },
   ];
