@@ -41,6 +41,7 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
   const [screen, setScreen] = useState(doc.screens[0]?.key ?? 'home');
   const [width, setWidth] = useState<WidthKey>('desktop');
   const [variant, setVariant] = useState<string | undefined>(doc.variants?.[0]?.key);
+  const [lang, setLang] = useState<'en' | 'mn'>('en');
 
   useEffect(() => {
     setScreen(doc.screens[0]?.key ?? 'home');
@@ -56,7 +57,7 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
   }, [doc.slug, doc.screens, doc.variants]);
 
   const frameWidth = WIDTHS.find((w) => w.key === width)?.width ?? 1280;
-  const src = previewUrl(doc.slug, screen, variant);
+  const src = `${previewUrl(doc.slug, screen, variant)}${lang === 'mn' ? '?lang=mn' : ''}`;
 
   // The docs column is narrower than a real desktop viewport, so the frame
   // keeps its true CSS width (the template's breakpoints stay honest) and is
@@ -166,6 +167,20 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
               ))}
             </div>
           )}
+          <div className="flex flex-wrap gap-1.5" role="group" aria-label="Preview language">
+            {(['en', 'mn'] as const).map((l) => (
+              <button
+                key={l}
+                type="button"
+                onClick={() => setLang(l)}
+                aria-pressed={l === lang}
+                className={pillClass(l === lang)}
+                title={l === 'en' ? 'English' : 'Монгол'}
+              >
+                {l.toUpperCase()}
+              </button>
+            ))}
+          </div>
           <div className="flex flex-wrap gap-1.5" role="group" aria-label="Preview width">
             {WIDTHS.map((w) => (
               <button
@@ -190,7 +205,7 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
         <iframe
           // Remount on screen or width change so the template opens fresh at
           // that viewport (no stale drawer/menu state carried across sizes).
-          key={`${doc.slug}/${screen}/${variant ?? ''}/${width}`}
+          key={`${doc.slug}/${screen}/${variant ?? ''}/${width}/${lang}`}
           src={src}
           title={`${doc.name} preview`}
           loading="lazy"
@@ -208,12 +223,7 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
       </div>
       <p className="text-foreground-subtle mt-2 text-xs">
         Interactive. For the full-screen version,{' '}
-        <a
-          href={previewUrl(doc.slug, screen, variant)}
-          target="_blank"
-          rel="noreferrer"
-          className="prose-link"
-        >
+        <a href={src} target="_blank" rel="noreferrer" className="prose-link">
           open it in a new tab ↗
         </a>
         .

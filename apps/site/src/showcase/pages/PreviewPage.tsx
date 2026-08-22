@@ -15,6 +15,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu';
 import { ThemeToggle, BrandSwitcher } from '../theme/Controls';
+import { DesignSystemProvider } from '@/components/ui/DesignSystemProvider';
+import { mnStrings } from '@/lib/strings.mn';
+import { applyLocale, LocaleProvider, readInitialLocale, type Locale } from '../i18n/locale';
 import { NotFound } from './NotFound';
 
 const BlockPreview = lazy(() => import('../blocks/Preview'));
@@ -133,6 +136,13 @@ export function PreviewPage({
   // already owns the controls — hide the dock.
   const embedded = typeof window !== 'undefined' && window.self !== window.top;
 
+  // EN / MN — template copy via LocaleProvider, library strings via the
+  // DesignSystemProvider. Mirrored to `?lang=` and <html lang>.
+  const [locale, setLocale] = useState<Locale>(readInitialLocale);
+  useEffect(() => {
+    applyLocale(locale);
+  }, [locale]);
+
   // Each template preview is its own tab — name it.
   useEffect(() => {
     if (doc) document.title = `${doc.name} — @craftzbay/ui`;
@@ -148,13 +158,17 @@ export function PreviewPage({
     >
       <PreviewBoundary>
         <Suspense fallback={<DelayedFallback />}>
-          <BlockPreview
-            slug={slug}
-            screen={screen}
-            setScreen={setScreen}
-            variant={variant}
-            page={initialPage}
-          />
+          <LocaleProvider locale={locale}>
+            <DesignSystemProvider strings={locale === 'mn' ? mnStrings : undefined}>
+              <BlockPreview
+                slug={slug}
+                screen={screen}
+                setScreen={setScreen}
+                variant={variant}
+                page={initialPage}
+              />
+            </DesignSystemProvider>
+          </LocaleProvider>
         </Suspense>
       </PreviewBoundary>
 
@@ -241,6 +255,17 @@ export function PreviewPage({
           </DropdownMenu>
           <BrandSwitcher />
           <ThemeToggle />
+          <button
+            type="button"
+            onClick={() => setLocale(locale === 'en' ? 'mn' : 'en')}
+            aria-label={
+              locale === 'en' ? 'Switch template language to Mongolian' : 'Хэлийг англи болгох'
+            }
+            title={locale === 'en' ? 'Монгол' : 'English'}
+            className="text-foreground-muted hover:bg-background-muted hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background inline-flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-xs font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          >
+            {locale === 'en' ? 'MN' : 'EN'}
+          </button>
         </div>
       )}
     </div>

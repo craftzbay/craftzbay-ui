@@ -5,6 +5,8 @@ import { Input } from '@craftzbay/ui';
 import { Alert } from '@craftzbay/ui';
 import { Separator } from '@craftzbay/ui';
 import { Github } from '@/icons';
+import { useT } from '../i18n/locale';
+import { authDict } from '../i18n/auth';
 
 /* -----------------------------------------------------------------------------
  *  Validation — on blur after first interaction, then live on input for a
@@ -31,9 +33,10 @@ function useFormValidation<K extends string>(errors: Errors<K>) {
 }
 
 function ErrorSummary({ errors }: { errors: Record<string, string | undefined> }) {
+  const t = useT(authDict);
   const list = Object.values(errors).filter((e): e is string => Boolean(e));
   return (
-    <Alert variant="danger" title={`Fix ${list.length} fields to continue`} live>
+    <Alert variant="danger" title={t('errSummary', { n: list.length })} live>
       <ul className="list-disc space-y-0.5 pl-4">
         {list.map((e) => (
           <li key={e}>{e}</li>
@@ -44,12 +47,9 @@ function ErrorSummary({ errors }: { errors: Record<string, string | undefined> }
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const emailError = (v: string) =>
-  !v.trim()
-    ? 'Enter your email address.'
-    : !EMAIL_RE.test(v)
-      ? 'Enter a valid email address.'
-      : undefined;
+type T = ReturnType<typeof useT<(typeof authDict)['en']>>;
+const emailError = (t: T, v: string) =>
+  !v.trim() ? t('errEmailEmpty') : !EMAIL_RE.test(v) ? t('errEmailInvalid') : undefined;
 
 /* -----------------------------------------------------------------------------
  *  Authentication pattern — four screens that share the same shell.
@@ -99,9 +99,10 @@ export interface SsoButtonsProps {
  * ≤2 providers on the sign-in card; more belong on a dedicated page.
  */
 export function SsoButtons({ onProvider }: SsoButtonsProps) {
+  const t = useT(authDict);
   return (
     <div className="space-y-4">
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className="grid gap-2">
         <Button
           type="button"
           variant="outline"
@@ -109,7 +110,7 @@ export function SsoButtons({ onProvider }: SsoButtonsProps) {
           leadingIcon={<GoogleMark />}
           onClick={() => onProvider?.('google')}
         >
-          Google
+          {t('ssoGoogle')}
         </Button>
         <Button
           type="button"
@@ -118,16 +119,16 @@ export function SsoButtons({ onProvider }: SsoButtonsProps) {
           leadingIcon={<Github />}
           onClick={() => onProvider?.('github')}
         >
-          GitHub
+          {t('ssoGithub')}
         </Button>
       </div>
       <div
         className="text-foreground-subtle flex items-center gap-3 text-xs tracking-wider uppercase"
         role="separator"
-        aria-label="or"
+        aria-label={t('or')}
       >
         <Separator className="flex-1" />
-        or
+        {t('or')}
         <Separator className="flex-1" />
       </div>
     </div>
@@ -163,11 +164,12 @@ export function SignInForm({
   forgotHref = '/forgot',
   onForgot,
 }: SignInFormProps) {
+  const t = useT(authDict);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const v = useFormValidation<'email' | 'password'>({
-    email: emailError(email),
-    password: password ? undefined : 'Enter your password.',
+    email: emailError(t, email),
+    password: password ? undefined : t('errPasswordEmpty'),
   });
 
   const handle = (e: FormEvent) => {
@@ -189,7 +191,7 @@ export function SignInForm({
       )}
       <Input
         type="email"
-        label="Email"
+        label={t('email')}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         onBlur={() => v.touch('email')}
@@ -199,7 +201,7 @@ export function SignInForm({
       />
       <Input
         type="password"
-        label="Password"
+        label={t('password')}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         onBlur={() => v.touch('password')}
@@ -214,19 +216,19 @@ export function SignInForm({
             onClick={onForgot}
             className="text-accent focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm font-medium outline-none hover:underline focus-visible:ring-2 focus-visible:ring-offset-2"
           >
-            Forgot password?
+            {t('forgotPassword')}
           </button>
         ) : (
           <a
             href={forgotHref}
             className="text-accent focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm font-medium outline-none hover:underline focus-visible:ring-2 focus-visible:ring-offset-2"
           >
-            Forgot password?
+            {t('forgotPassword')}
           </a>
         )}
       </div>
       <Button type="submit" loading={loading} className="w-full" trailingIcon={<ArrowRight />}>
-        Sign in
+        {t('signIn')}
       </Button>
     </form>
   );
@@ -239,13 +241,14 @@ export interface SignUpFormProps {
 }
 
 export function SignUpForm({ onSubmit, loading, error }: SignUpFormProps) {
+  const t = useT(authDict);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const v = useFormValidation<'name' | 'email' | 'password'>({
-    name: name.trim() ? undefined : 'Enter your full name.',
-    email: emailError(email),
-    password: password.length >= 8 ? undefined : 'Password must be at least 8 characters.',
+    name: name.trim() ? undefined : t('errNameEmpty'),
+    email: emailError(t, email),
+    password: password.length >= 8 ? undefined : t('errPasswordShort'),
   });
 
   return (
@@ -268,7 +271,7 @@ export function SignUpForm({ onSubmit, loading, error }: SignUpFormProps) {
         )
       )}
       <Input
-        label="Full name"
+        label={t('fullName')}
         value={name}
         onChange={(e) => setName(e.target.value)}
         onBlur={() => v.touch('name')}
@@ -278,7 +281,7 @@ export function SignUpForm({ onSubmit, loading, error }: SignUpFormProps) {
       />
       <Input
         type="email"
-        label="Work email"
+        label={t('workEmail')}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         onBlur={() => v.touch('email')}
@@ -288,8 +291,8 @@ export function SignUpForm({ onSubmit, loading, error }: SignUpFormProps) {
       />
       <Input
         type="password"
-        label="Password"
-        helperText="At least 8 characters."
+        label={t('password')}
+        helperText={t('passwordHint')}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         onBlur={() => v.touch('password')}
@@ -298,11 +301,9 @@ export function SignUpForm({ onSubmit, loading, error }: SignUpFormProps) {
         required
       />
       <Button type="submit" loading={loading} className="w-full">
-        Create account
+        {t('createAccount')}
       </Button>
-      <p className="text-foreground-subtle text-center text-xs">
-        By signing up you agree to our Terms of Service and Privacy Policy.
-      </p>
+      <p className="text-foreground-subtle text-center text-xs">{t('terms')}</p>
     </form>
   );
 }
@@ -314,8 +315,9 @@ export interface ForgotPasswordFormProps {
 }
 
 export function ForgotPasswordForm({ onSubmit, loading, error }: ForgotPasswordFormProps) {
+  const t = useT(authDict);
   const [email, setEmail] = useState('');
-  const v = useFormValidation<'email'>({ email: emailError(email) });
+  const v = useFormValidation<'email'>({ email: emailError(t, email) });
   return (
     <form
       onSubmit={(e) => {
@@ -332,8 +334,8 @@ export function ForgotPasswordForm({ onSubmit, loading, error }: ForgotPasswordF
       )}
       <Input
         type="email"
-        label="Email"
-        helperText="We'll send a reset link if an account exists."
+        label={t('email')}
+        helperText={t('forgotHelper')}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         onBlur={() => v.touch('email')}
@@ -342,7 +344,7 @@ export function ForgotPasswordForm({ onSubmit, loading, error }: ForgotPasswordF
         required
       />
       <Button type="submit" loading={loading} className="w-full" leadingIcon={<Mail />}>
-        Send reset link
+        {t('sendResetLink')}
       </Button>
     </form>
   );
@@ -354,24 +356,26 @@ export interface MagicLinkSentProps {
 }
 
 export function MagicLinkSent({ email, onResend }: MagicLinkSentProps) {
+  const t = useT(authDict);
   return (
     <div className="space-y-4 text-center">
       <div className="bg-success-soft text-success-text mx-auto inline-flex size-12 items-center justify-center rounded-full">
         <CheckCircle2 className="size-6" aria-hidden />
       </div>
       <p className="text-foreground-muted text-sm">
-        We sent a sign-in link to <span className="text-foreground font-medium">{email}</span>. Open
-        it on this device to continue.
+        {t('sentBefore')}
+        <span className="text-foreground font-medium">{email}</span>
+        {t('sentAfter')}
       </p>
       <Separator />
       <p className="text-foreground-subtle text-xs">
-        Didn't get it?{' '}
+        {t('didntGet')}{' '}
         <button
           type="button"
           onClick={onResend}
           className="text-accent focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm font-medium outline-none hover:underline focus-visible:ring-2 focus-visible:ring-offset-2"
         >
-          Resend
+          {t('resend')}
         </button>
       </p>
     </div>

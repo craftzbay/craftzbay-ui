@@ -7,6 +7,12 @@
 import adminSrc from './AdminDashboard.tsx?raw';
 import adminDataSrc from './admin/data.ts?raw';
 import adminShellSrc from './admin/shell.tsx?raw';
+import localeSrc from '../i18n/locale.tsx?raw';
+import adminDictSrc from '../i18n/admin.ts?raw';
+import authDictSrc from '../i18n/auth.ts?raw';
+import landingDictSrc from '../i18n/landing.ts?raw';
+import newsDictSrc from '../i18n/news.ts?raw';
+import ecommerceDictSrc from '../i18n/ecommerce.ts?raw';
 import adminOverviewSrc from './admin/overview.tsx?raw';
 import adminProjectsSrc from './admin/projects.tsx?raw';
 import adminProjectsPartsSrc from './admin/projects-parts.tsx?raw';
@@ -30,9 +36,23 @@ export const blockSources: Record<string, string> = {
     ['admin/projects-parts.tsx', adminProjectsPartsSrc],
     ['admin/pages.tsx', adminPagesSrc],
     ['admin/data.ts', adminDataSrc],
+    ['i18n/admin.ts', adminDictSrc],
+    ['i18n/locale.tsx', localeSrc],
   ]),
-  auth: authSrc,
-  landing: landingSrc,
-  news: newsSrc,
-  ecommerce: ecommerceSrc,
+  auth: bundle([
+    ['AuthTemplate.tsx', authSrc],
+    ['i18n/auth.ts', authDictSrc],
+  ]),
+  landing: bundle([
+    ['LandingTemplate.tsx', landingSrc],
+    ['i18n/landing.ts', landingDictSrc],
+  ]),
+  news: bundle([
+    ['NewsTemplate.tsx', newsSrc],
+    ['i18n/news.ts', newsDictSrc],
+  ]),
+  ecommerce: bundle([
+    ['EcommerceTemplate.tsx', ecommerceSrc],
+    ['i18n/ecommerce.ts', ecommerceDictSrc],
+  ]),
 };

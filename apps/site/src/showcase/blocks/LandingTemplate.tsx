@@ -14,6 +14,8 @@ import {
 import { AuthLayout, SignUpForm } from './Authentication';
 import { Pricing } from './Pricing';
 import type { TemplateProps } from './meta';
+import { useT } from '../i18n/locale';
+import { landingDict } from '../i18n/landing';
 
 /**
  * Landing page template — a complete SaaS marketing site following the
@@ -21,10 +23,12 @@ import type { TemplateProps } from './meta';
  * pricing → testimonial → FAQ → final CTA → footer. The matching sign-up
  * screen is reached from the preview dock.
  *
- * One primary CTA label (`CTA_LABEL`) is repeated in the nav, hero, pricing
- * and final CTA — a different label reads as a different action.
+ * One primary CTA label (`t('cta')`) is repeated in the nav, hero, pricing
+ * and final CTA — a different label reads as a different action. All copy
+ * lives in `i18n/landing.ts` (EN / MN).
  */
-const CTA_LABEL = 'Start free';
+
+type T = ReturnType<typeof useT<(typeof landingDict)['en']>>;
 
 /** Section ids. Nav + footer links are real anchors to these. */
 const SECTIONS = {
@@ -36,83 +40,35 @@ const SECTIONS = {
   faq: 'faq',
 } as const;
 
-const NAV = [
-  { label: 'Product', id: SECTIONS.product },
-  { label: 'Features', id: SECTIONS.features },
-  { label: 'Pricing', id: SECTIONS.pricing },
-  { label: 'Customers', id: SECTIONS.customers },
-  { label: 'FAQ', id: SECTIONS.faq },
+const navItems = (t: T) => [
+  { label: t('navProduct'), id: SECTIONS.product },
+  { label: t('navFeatures'), id: SECTIONS.features },
+  { label: t('navPricing'), id: SECTIONS.pricing },
+  { label: t('navCustomers'), id: SECTIONS.customers },
+  { label: t('navFaq'), id: SECTIONS.faq },
 ];
 
-const FEATURES = [
-  {
-    icon: Zap,
-    title: 'Fast by default',
-    body: 'Ships a tuned Vite build and tree-shakeable components — your bundle stays lean.',
-  },
-  {
-    icon: Lock,
-    title: 'Secure',
-    body: 'SSO, audit logs and role-based access on every plan. SOC 2 Type II certified.',
-  },
-  {
-    icon: BarChart3,
-    title: 'Insightful',
-    body: 'Real-time dashboards and exportable reports so the whole team sees the numbers.',
-  },
-  {
-    icon: Plug,
-    title: 'Integrates',
-    body: 'Native connectors for Slack, GitHub, Linear and 40+ tools, plus a typed REST API.',
-  },
-  {
-    icon: Sparkles,
-    title: 'Delightful',
-    body: 'A refined, accessible interface your team will actually enjoy using every day.',
-  },
-  {
-    icon: Github,
-    title: 'Open',
-    body: 'Built on open standards with a documented API and first-class self-hosting.',
-  },
+const features = (t: T) => [
+  { icon: Zap, title: t('featFastTitle'), body: t('featFastBody') },
+  { icon: Lock, title: t('featSecureTitle'), body: t('featSecureBody') },
+  { icon: BarChart3, title: t('featInsightTitle'), body: t('featInsightBody') },
+  { icon: Plug, title: t('featIntegrateTitle'), body: t('featIntegrateBody') },
+  { icon: Sparkles, title: t('featDelightTitle'), body: t('featDelightBody') },
+  { icon: Github, title: t('featOpenTitle'), body: t('featOpenBody') },
 ];
 
-const STEPS = [
-  {
-    title: 'Connect your tools',
-    body: 'Link GitHub, Slack and your tracker in two clicks — no migration needed.',
-  },
-  {
-    title: 'Plan in one place',
-    body: 'Roadmaps, issues and docs live together, so nothing falls between tabs.',
-  },
-  {
-    title: 'Ship and measure',
-    body: 'Launch from the same view and watch adoption land on a live dashboard.',
-  },
+const steps = (t: T) => [
+  { title: t('step1Title'), body: t('step1Body') },
+  { title: t('step2Title'), body: t('step2Body') },
+  { title: t('step3Title'), body: t('step3Body') },
 ];
 
-const FAQ = [
-  {
-    q: 'Can I cancel at any time?',
-    a: 'Yes. One click in Settings; your plan stays active until the end of the billing period.',
-  },
-  {
-    q: 'Is there a free plan?',
-    a: 'The Starter plan is free forever for up to 3 projects. Paid plans include a 14-day trial with no card required.',
-  },
-  {
-    q: 'Where is my data stored?',
-    a: 'In the EU or US region you pick at sign-up, encrypted at rest and in transit. We never train on customer data.',
-  },
-  {
-    q: 'Do you support SSO?',
-    a: 'Google and Microsoft SSO ship on the Team plan; SAML and SCIM provisioning on Enterprise.',
-  },
-  {
-    q: 'Can I import from another tool?',
-    a: 'Yes — importers for Jira, Linear, Asana and CSV run in the background and keep your IDs and history.',
-  },
+const faq = (t: T) => [
+  { q: t('faq1Q'), a: t('faq1A') },
+  { q: t('faq2Q'), a: t('faq2A') },
+  { q: t('faq3Q'), a: t('faq3A') },
+  { q: t('faq4Q'), a: t('faq4A') },
+  { q: t('faq5Q'), a: t('faq5A') },
 ];
 
 const LOGOS = ['Northwind', 'Acme', 'Globex', 'Initech', 'Umbrella'];
@@ -146,15 +102,17 @@ function SectionLink({
 }
 
 function Nav({ brand, onSignUp }: { brand: ReactNode; onSignUp: () => void }) {
+  const t = useT(landingDict);
+  const nav = navItems(t);
   return (
     <header className="border-border bg-background sticky top-0 z-[var(--z-sticky)] border-b">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-8 px-6">
         <div className="text-sm">{brand}</div>
         <nav
-          aria-label="Primary"
+          aria-label={t('navPrimary')}
           className="text-foreground-muted hidden items-center gap-6 text-sm md:flex"
         >
-          {NAV.map((n) => (
+          {nav.map((n) => (
             <SectionLink
               key={n.id}
               id={n.id}
@@ -166,16 +124,16 @@ function Nav({ brand, onSignUp }: { brand: ReactNode; onSignUp: () => void }) {
         </nav>
         <div className="ml-auto flex items-center gap-2">
           <Button variant="ghost" size="sm" onClick={onSignUp} className="hidden sm:inline-flex">
-            Sign in
+            {t('signIn')}
           </Button>
           <Button size="sm" variant="secondary" onClick={onSignUp}>
-            {CTA_LABEL}
+            {t('cta')}
           </Button>
           {/* Section links (and Sign in) move into a drawer below md. */}
           <Sheet>
             <SheetTrigger asChild>
               <IconButton
-                aria-label="Open menu"
+                aria-label={t('openMenu')}
                 icon={<Menu />}
                 variant="ghost"
                 size="sm"
@@ -183,9 +141,9 @@ function Nav({ brand, onSignUp }: { brand: ReactNode; onSignUp: () => void }) {
               />
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
-              <SheetTitle>Menu</SheetTitle>
-              <nav aria-label="Primary" className="mt-6 flex flex-col gap-1">
-                {NAV.map((n) => (
+              <SheetTitle>{t('menu')}</SheetTitle>
+              <nav aria-label={t('navPrimary')} className="mt-6 flex flex-col gap-1">
+                {nav.map((n) => (
                   <SheetClose asChild key={n.id}>
                     <a
                       href={`#${n.id}`}
@@ -202,7 +160,7 @@ function Nav({ brand, onSignUp }: { brand: ReactNode; onSignUp: () => void }) {
                     className="mt-2 justify-start sm:hidden"
                     onClick={onSignUp}
                   >
-                    Sign in
+                    {t('signIn')}
                   </Button>
                 </SheetClose>
               </nav>
@@ -215,22 +173,10 @@ function Nav({ brand, onSignUp }: { brand: ReactNode; onSignUp: () => void }) {
 }
 
 type LegalTopic = 'privacy' | 'terms' | 'security';
-const LEGAL: { key: LegalTopic; title: string; body: string }[] = [
-  {
-    key: 'privacy',
-    title: 'Privacy policy',
-    body: 'We store the data you put into Northwind and the account details needed to bill you — nothing is sold or shared with advertisers. Export or delete everything from Settings at any time.',
-  },
-  {
-    key: 'terms',
-    title: 'Terms of service',
-    body: 'Use Northwind for lawful purposes on the plan you chose. Paid plans renew monthly and can be cancelled any time; access continues to the end of the billing period.',
-  },
-  {
-    key: 'security',
-    title: 'Security',
-    body: 'Data is encrypted in transit and at rest, access is role-based with audit logs on every plan, and we are SOC 2 Type II certified. Report a vulnerability from the Help menu in the app.',
-  },
+const legalPages = (t: T): { key: LegalTopic; title: string; body: string }[] => [
+  { key: 'privacy', title: t('privacyTitle'), body: t('privacyBody') },
+  { key: 'terms', title: t('termsTitle'), body: t('termsBody') },
+  { key: 'security', title: t('securityTitle'), body: t('securityBody') },
 ];
 
 /** Legal pages — in-template destinations for the footer links. */
@@ -245,14 +191,16 @@ function LegalPage({
   onBack: () => void;
   onLegal: (t: LegalTopic) => void;
 }) {
-  const active = LEGAL.find((l) => l.key === topic) ?? LEGAL[0];
+  const t = useT(landingDict);
+  const legal = legalPages(t);
+  const active = legal.find((l) => l.key === topic) ?? legal[0];
   return (
     <div className="bg-background min-h-dvh">
       <header className="border-border border-b">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <div className="min-w-0 truncate">{brand}</div>
           <Button variant="ghost" size="sm" onClick={onBack}>
-            Back to site
+            {t('backToSite')}
           </Button>
         </div>
       </header>
@@ -261,19 +209,21 @@ function LegalPage({
         <p className="text-foreground-muted mt-4 max-w-[65ch] text-base leading-relaxed">
           {active.body}
         </p>
-        <nav aria-label="Legal" className="border-border mt-10 border-t pt-6">
+        <nav aria-label={t('legalNav')} className="border-border mt-10 border-t pt-6">
           <ul className="text-foreground-muted flex flex-wrap gap-4 text-sm">
-            {LEGAL.filter((l) => l.key !== active.key).map((l) => (
-              <li key={l.key}>
-                <button
-                  type="button"
-                  onClick={() => onLegal(l.key)}
-                  className="text-accent font-medium hover:underline"
-                >
-                  {l.title}
-                </button>
-              </li>
-            ))}
+            {legal
+              .filter((l) => l.key !== active.key)
+              .map((l) => (
+                <li key={l.key}>
+                  <button
+                    type="button"
+                    onClick={() => onLegal(l.key)}
+                    className="text-accent font-medium hover:underline"
+                  >
+                    {l.title}
+                  </button>
+                </li>
+              ))}
           </ul>
         </nav>
       </main>
@@ -288,8 +238,10 @@ function Landing({
 }: {
   brand: ReactNode;
   onSignUp: () => void;
-  onLegal: (t: LegalTopic) => void;
+  onLegal: (topic: LegalTopic) => void;
 }) {
+  const t = useT(landingDict);
+  const year = new Date().getFullYear();
   return (
     <div className="bg-background">
       <Nav brand={brand} onSignUp={onSignUp} />
@@ -302,33 +254,32 @@ function Landing({
         >
           <div className="border-border bg-card text-foreground-muted mb-5 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs">
             <Sparkles className="text-accent size-3" aria-hidden />
-            New — real-time collaboration is here
+            {t('heroBadge')}
           </div>
           <h1 className="text-4xl leading-tight font-semibold tracking-tight sm:text-5xl">
-            The workspace where teams <span className="text-accent">ship faster</span>.
+            {t('heroTitleBefore')}
+            <span className="text-accent">{t('heroTitleAccent')}</span>
+            {t('heroTitleAfter')}
           </h1>
           <p className="text-foreground-muted mx-auto mt-5 max-w-[65ch] text-lg leading-relaxed">
-            Plan, track and launch — all in one calm, fast place. Replace the tab-sprawl with a
-            single source of truth your whole team trusts.
+            {t('heroBody')}
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button size="xl" onClick={onSignUp}>
-              {CTA_LABEL} <ArrowRight className="ml-1 size-4" aria-hidden />
+              {t('cta')} <ArrowRight className="ml-1 size-4" aria-hidden />
             </Button>
             <Button size="xl" variant="outline">
-              Book a demo
+              {t('bookDemo')}
             </Button>
           </div>
-          <p className="text-foreground-subtle mt-4 text-sm">
-            Free 14-day trial · No credit card required
-          </p>
+          <p className="text-foreground-subtle mt-4 text-sm">{t('heroRisk')}</p>
         </section>
 
         {/* Logo strip — uniform 32px row height, greyscale */}
-        <section aria-label="Customers" className="bg-background-subtle py-8">
+        <section aria-label={t('customersLabel')} className="bg-background-subtle py-8">
           <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-12 gap-y-4 px-6">
             <span className="text-foreground-subtle text-xs font-medium tracking-wider uppercase">
-              Trusted by teams at
+              {t('trustedBy')}
             </span>
             {LOGOS.map((c) => (
               <span
@@ -344,15 +295,11 @@ function Landing({
         {/* Features */}
         <section id={SECTIONS.features} className="mx-auto max-w-6xl scroll-mt-16 px-6 py-24">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-semibold tracking-tight">
-              Everything you need, nothing you don't
-            </h2>
-            <p className="text-foreground-muted mt-3">
-              One tool that replaces five — without the bloat.
-            </p>
+            <h2 className="text-3xl font-semibold tracking-tight">{t('featuresTitle')}</h2>
+            <p className="text-foreground-muted mt-3">{t('featuresBody')}</p>
           </div>
           <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((f) => (
+            {features(t).map((f) => (
               <Card key={f.title}>
                 <CardContent className="pt-6">
                   <div className="bg-accent-soft text-on-accent-soft mb-3 inline-flex size-9 items-center justify-center rounded-md">
@@ -370,15 +317,11 @@ function Landing({
         <section id={SECTIONS.how} className="bg-background-subtle scroll-mt-16 py-24">
           <div className="mx-auto max-w-6xl px-6">
             <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-semibold tracking-tight">
-                Up and running in an afternoon
-              </h2>
-              <p className="text-foreground-muted mt-3">
-                Three steps — no migration project, no consultants.
-              </p>
+              <h2 className="text-3xl font-semibold tracking-tight">{t('howTitle')}</h2>
+              <p className="text-foreground-muted mt-3">{t('howBody')}</p>
             </div>
             <ol className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-3">
-              {STEPS.map((s, i) => (
+              {steps(t).map((s, i) => (
                 <li key={s.title} className="flex gap-4">
                   <span
                     aria-hidden
@@ -388,7 +331,7 @@ function Landing({
                   </span>
                   <div>
                     <h3 className="text-foreground text-base font-semibold">
-                      <span className="sr-only">Step {i + 1}: </span>
+                      <span className="sr-only">{t('stepLabel', { n: i + 1 })}</span>
                       {s.title}
                     </h3>
                     <p className="text-foreground-muted mt-1.5 text-sm leading-relaxed">{s.body}</p>
@@ -410,21 +353,20 @@ function Landing({
             <div
               className="text-warning-text mb-4 flex items-center justify-center gap-1"
               role="img"
-              aria-label="5 out of 5 stars"
+              aria-label={t('ratingLabel')}
             >
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star key={i} className="size-4 fill-current" aria-hidden />
               ))}
             </div>
             <blockquote className="text-foreground text-2xl leading-relaxed font-medium tracking-tight">
-              “We cut our launch cycle in half. It's the first tool the whole company actually
-              agreed on.”
+              {t('quote')}
             </blockquote>
             <div className="mt-6 flex items-center justify-center gap-3">
               <Avatar size="lg" fallback="JM" />
               <div className="text-left text-sm">
-                <div className="text-foreground font-medium">Jamie Morales</div>
-                <div className="text-foreground-subtle">VP Engineering, Northwind</div>
+                <div className="text-foreground font-medium">{t('quoteName')}</div>
+                <div className="text-foreground-subtle">{t('quoteRole')}</div>
               </div>
             </div>
           </div>
@@ -433,13 +375,11 @@ function Landing({
         {/* FAQ — native <details>: keyboard-ready, indexable, no JS */}
         <section id={SECTIONS.faq} className="mx-auto max-w-3xl scroll-mt-16 px-6 py-24">
           <div className="text-center">
-            <h2 className="text-3xl font-semibold tracking-tight">Frequently asked questions</h2>
-            <p className="text-foreground-muted mt-3">
-              Everything you need to know before you start.
-            </p>
+            <h2 className="text-3xl font-semibold tracking-tight">{t('faqTitle')}</h2>
+            <p className="text-foreground-muted mt-3">{t('faqBody')}</p>
           </div>
           <div className="divide-border border-border mt-10 divide-y border-y">
-            {FAQ.map((item) => (
+            {faq(t).map((item) => (
               <details key={item.q} className="group py-4">
                 <summary className="text-foreground focus-visible:ring-ring focus-visible:ring-offset-background flex cursor-pointer list-none items-center justify-between gap-4 rounded-sm text-base font-medium outline-none marker:content-none focus-visible:ring-2 focus-visible:ring-offset-2 [&::-webkit-details-marker]:hidden">
                   {item.q}
@@ -461,16 +401,14 @@ function Landing({
         {/* Final CTA — h2 + one line + the same primary button */}
         <section className="mx-auto max-w-5xl px-6 pb-24">
           <div className="border-border bg-accent text-on-accent rounded-lg border px-8 py-14 text-center">
-            <h2 className="text-3xl font-semibold tracking-tight">Ready to ship faster?</h2>
-            <p className="mx-auto mt-3 max-w-[65ch] opacity-90">
-              Join thousands of teams already moving quicker.
-            </p>
+            <h2 className="text-3xl font-semibold tracking-tight">{t('finalTitle')}</h2>
+            <p className="mx-auto mt-3 max-w-[65ch] opacity-90">{t('finalBody')}</p>
             <div className="mt-7 flex justify-center">
               <Button size="lg" variant="secondary" onClick={onSignUp}>
-                {CTA_LABEL} <ArrowRight className="ml-1 size-4" aria-hidden />
+                {t('cta')} <ArrowRight className="ml-1 size-4" aria-hidden />
               </Button>
             </div>
-            <p className="mt-4 text-sm">No credit card required · 14-day free trial</p>
+            <p className="mt-4 text-sm">{t('finalRisk')}</p>
           </div>
         </section>
       </main>
@@ -480,41 +418,41 @@ function Landing({
       <footer className="border-border border-t">
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-6 py-12 sm:grid-cols-4">
           <FooterColumn
-            heading="Product"
+            heading={t('footProduct')}
             links={[
-              { label: 'Features', id: SECTIONS.features },
-              { label: 'How it works', id: SECTIONS.how },
-              { label: 'Pricing', id: SECTIONS.pricing },
-              { label: 'FAQ', id: SECTIONS.faq },
+              { label: t('navFeatures'), id: SECTIONS.features },
+              { label: t('footHow'), id: SECTIONS.how },
+              { label: t('navPricing'), id: SECTIONS.pricing },
+              { label: t('navFaq'), id: SECTIONS.faq },
             ]}
           />
           <FooterColumn
-            heading="Company"
+            heading={t('footCompany')}
             links={[
-              { label: 'Product', id: SECTIONS.product },
-              { label: 'Customers', id: SECTIONS.customers },
-              { label: 'Contact', id: SECTIONS.faq },
+              { label: t('navProduct'), id: SECTIONS.product },
+              { label: t('navCustomers'), id: SECTIONS.customers },
+              { label: t('footContact'), id: SECTIONS.faq },
             ]}
           />
           <FooterColumn
-            heading="Resources"
+            heading={t('footResources')}
             links={[
-              { label: 'Docs', href: '/docs' },
-              { label: 'API', href: '/docs/api' },
-              { label: 'Status', href: '/status' },
+              { label: t('footDocs'), href: '/docs' },
+              { label: t('footApi'), href: '/docs/api' },
+              { label: t('footStatus'), href: '/status' },
             ]}
           />
           <FooterColumn
-            heading="Legal"
+            heading={t('footLegal')}
             links={[
-              { label: 'Privacy', onClick: () => onLegal('privacy') },
-              { label: 'Terms', onClick: () => onLegal('terms') },
-              { label: 'Security', onClick: () => onLegal('security') },
+              { label: t('footPrivacy'), onClick: () => onLegal('privacy') },
+              { label: t('footTerms'), onClick: () => onLegal('terms') },
+              { label: t('footSecurity'), onClick: () => onLegal('security') },
             ]}
           />
         </div>
         <div className="border-border text-foreground-subtle border-t py-6 text-center text-xs">
-          © {new Date().getFullYear()} Northwind, Inc. · Built with @craftzbay/ui
+          {t('copyright', { year })}
         </div>
       </footer>
     </div>
@@ -555,9 +493,10 @@ function FooterColumn({ heading, links }: { heading: string; links: FooterLink[]
 }
 
 export function LandingTemplate({ screen, setScreen, brand }: TemplateProps) {
+  const t = useT(landingDict);
   const [legalTopic, setLegalTopic] = useState<LegalTopic>('privacy');
-  const openLegal = (t: LegalTopic) => {
-    setLegalTopic(t);
+  const openLegal = (topic: LegalTopic) => {
+    setLegalTopic(topic);
     setScreen('legal');
   };
   if (screen === 'legal') {
@@ -574,17 +513,17 @@ export function LandingTemplate({ screen, setScreen, brand }: TemplateProps) {
     return (
       <AuthLayout
         brand={brand}
-        title="Create your account"
-        subtitle="Start your 14-day free trial."
+        title={t('signupTitle')}
+        subtitle={t('signupSubtitle')}
         footer={
           <>
-            Just looking?{' '}
+            {t('justLooking')}{' '}
             <button
               type="button"
               onClick={() => setScreen('home')}
               className="text-accent focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm font-medium outline-none hover:underline focus-visible:ring-2 focus-visible:ring-offset-2"
             >
-              Back to site
+              {t('backToSite')}
             </button>
           </>
         }

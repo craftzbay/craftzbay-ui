@@ -26,20 +26,24 @@ import {
   formatNumber,
   type ChartState,
 } from '@craftzbay/ui';
-import { useState, type ReactNode } from 'react';
-import { ACTIVITY, CHANNELS, SERIES_A, SERIES_B } from './data';
+import { useMemo, useState, type ReactNode } from 'react';
+import { useStrings } from '@craftzbay/ui';
+import { ACTIVITY, CHANNELS, SERIES_A, SERIES_B, formatRelative } from './data';
 import { PageHeader, useDemo, type DemoState } from './shell';
+import { adminDict, type AdminKey } from '../../i18n/admin';
+import { useT } from '../../i18n/locale';
 
 /** Demo state → chart state (`normal` draws the chart). */
 const chartState = (s: DemoState): ChartState | undefined => (s === 'normal' ? undefined : s);
 
 /** Page-level failure with retry — shared by the three dashboard pages. */
 function PageError({ onRetry }: { onRetry: () => void }) {
+  const t = useT(adminDict);
   return (
     <ErrorState
       variant="500"
-      title="Couldn't load this page"
-      description="The metrics service didn't respond. Nothing was changed — try again."
+      title={t('page.errorTitle')}
+      description={t('page.errorDesc')}
       onRetry={onRetry}
       live
     />
@@ -68,8 +72,9 @@ function KpiRow({
   columns: string;
   children: ReactNode;
 }) {
+  const t = useT(adminDict);
   return (
-    <section aria-label="Key metrics" className={cn('grid grid-cols-1 gap-3', columns)}>
+    <section aria-label={t('kpi.section')} className={cn('grid grid-cols-1 gap-3', columns)}>
       {loading
         ? Array.from({ length: 4 }, (_, i) => <KpiSkeleton key={i} />).slice(0, 4)
         : children}
@@ -81,6 +86,19 @@ function KpiRow({
  *  Admin template — Overview, Analytics, Reports (KPI row → chart → table)
  * ========================================================================== */
 
+/** Chart series/categories carry locale-independent data; labels resolve here. */
+function useChartData() {
+  const t = useT(adminDict);
+  return useMemo(
+    () => ({
+      seriesA: SERIES_A.map((p) => ({ x: t('chart.day', { n: p.day }), y: p.y })),
+      seriesB: SERIES_B.map((p) => ({ x: t('chart.day', { n: p.day }), y: p.y })),
+      channels: CHANNELS.map((c) => ({ x: t(c.label), y: c.y })),
+    }),
+    [t],
+  );
+}
+
 /**
  * KPI tile: label → value (tabular) → delta. The delta carries arrow + sign +
  * colour and names the comparison window, so it reads without colour.
@@ -91,7 +109,7 @@ export function KpiTile({
   delta,
   /** True when the change is good for the business (a falling error rate is positive). */
   positive,
-  compare = 'vs last 30d',
+  compare,
 }: {
   label: string;
   value: string;
@@ -99,6 +117,7 @@ export function KpiTile({
   positive?: boolean;
   compare?: string;
 }) {
+  const t = useT(adminDict);
   const up = delta !== undefined && delta >= 0;
   return (
     <Card>
@@ -120,11 +139,11 @@ export function KpiTile({
               ) : (
                 <ArrowDown className="size-3" aria-hidden />
               )}
-              <span className="sr-only">{up ? 'up' : 'down'}</span>
+              <span className="sr-only">{up ? t('kpi.up') : t('kpi.down')}</span>
               {up ? '+' : '−'}
               {formatNumber(Math.abs(delta))}%
             </span>
-            <span className="text-foreground-subtle">{compare}</span>
+            <span className="text-foreground-subtle">{compare ?? t('kpi.compare')}</span>
           </div>
         )}
       </CardContent>
@@ -133,28 +152,42 @@ export function KpiTile({
 }
 
 /** One period filter at the top, shared by every widget on the page. */
-function RangeSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+const RANGES = ['7d', '30d', '90d'] as const;
+type Range = (typeof RANGES)[number];
+const RANGE_LOWER: Record<Range, AdminKey> = {
+  '7d': 'range.last7',
+  '30d': 'range.last30',
+  '90d': 'range.last90',
+};
+
+function RangeSelect({ value, onChange }: { value: Range; onChange: (v: Range) => void }) {
+  const t = useT(adminDict);
   return (
-    <Select value={value} onValueChange={onChange}>
-      <SelectTrigger size="sm" aria-label="Time range" className="w-36" />
+    <Select value={value} onValueChange={(v) => onChange(v as Range)}>
+      <SelectTrigger size="sm" aria-label={t('range.label')} className="w-44" />
       <SelectContent>
-        <SelectItem value="7d">Last 7 days</SelectItem>
-        <SelectItem value="30d">Last 30 days</SelectItem>
-        <SelectItem value="90d">Last 90 days</SelectItem>
+        {RANGES.map((r) => (
+          <SelectItem key={r} value={r}>
+            {t(`range.${r}`)}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   );
 }
 
 export function Overview({ onNavigate }: { onNavigate: (key: string) => void }) {
-  const [range, setRange] = useState('30d');
+  const [range, setRange] = useState<Range>('30d');
   const demo = useDemo();
-  const compare = `vs previous ${range.replace('d', ' days')}`;
+  const t = useT(adminDict);
+  const { relativeTime } = useStrings();
+  const { seriesA, seriesB } = useChartData();
+  const compare = t('kpi.comparePrev', { n: parseInt(range, 10) });
   const header = (
     <PageHeader
       page="overview"
-      title="Overview"
-      subtitle="What's happening across your workspace."
+      title={t('overview.title')}
+      subtitle={t('overview.subtitle')}
       actions={<RangeSelect value={range} onChange={setRange} />}
       onNavigate={onNavigate}
     />
@@ -173,28 +206,28 @@ export function Overview({ onNavigate }: { onNavigate: (key: string) => void }) 
       {header}
       <KpiRow loading={demo.state === 'loading'} columns="sm:grid-cols-2 xl:grid-cols-4">
         <KpiTile
-          label="Active users"
+          label={t('kpi.activeUsers')}
           value={empty ? '—' : '2,840'}
           delta={empty ? undefined : 12}
           positive
           compare={compare}
         />
         <KpiTile
-          label="Sessions"
+          label={t('kpi.sessions')}
           value={empty ? '—' : '8,402'}
           delta={empty ? undefined : 4}
           positive
           compare={compare}
         />
         <KpiTile
-          label="Open issues"
+          label={t('kpi.openIssues')}
           value={empty ? '—' : '14'}
           delta={empty ? undefined : -6}
           positive
           compare={compare}
         />
         <KpiTile
-          label="Error rate"
+          label={t('kpi.errorRate')}
           value={empty ? '—' : '0.32%'}
           delta={empty ? undefined : 0.05}
           compare={compare}
@@ -204,41 +237,42 @@ export function Overview({ onNavigate }: { onNavigate: (key: string) => void }) 
       <Card className="mt-4">
         <CardHeader>
           <h2 className="text-foreground text-base leading-none font-semibold">
-            Active users per day
+            {t('overview.chartTitle')}
           </h2>
           <CardDescription>
-            Distinct sessions,{' '}
-            {range === '7d' ? 'last 7 days' : range === '90d' ? 'last 90 days' : 'last 30 days'}.
+            {t('overview.chartDesc', { range: t(RANGE_LOWER[range]) })}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {/* Two series → categorical colours, not the brand accent. */}
           <LineChart
             series={[
-              { name: 'This period', data: SERIES_A },
-              { name: 'Previous period', data: SERIES_B },
+              { name: t('series.this'), data: seriesA },
+              { name: t('series.prev'), data: seriesB },
             ]}
             height={200}
             state={chartState(demo.state)}
-            caption="Active users trend up 12% over the period, ahead of the previous period."
+            caption={t('overview.caption')}
           />
         </CardContent>
       </Card>
 
       <Card padding="none" className="mt-4">
         <CardHeader className="flex-row flex-wrap items-center justify-between gap-2 px-4 pt-4 md:px-6 md:pt-6">
-          <h2 className="text-foreground text-base leading-none font-semibold">Recent activity</h2>
+          <h2 className="text-foreground text-base leading-none font-semibold">
+            {t('activity.title')}
+          </h2>
           <Button variant="ghost" size="sm" onClick={() => onNavigate('inbox')}>
-            View all
+            {t('common.viewAll')}
           </Button>
         </CardHeader>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Who</TableHead>
-              <TableHead>Action</TableHead>
-              <TableHead>Target</TableHead>
-              <TableHead className="text-right">When</TableHead>
+              <TableHead>{t('col.who')}</TableHead>
+              <TableHead>{t('col.action')}</TableHead>
+              <TableHead>{t('col.target')}</TableHead>
+              <TableHead className="text-right">{t('col.when')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -267,8 +301,8 @@ export function Overview({ onNavigate }: { onNavigate: (key: string) => void }) 
                 <TableCell colSpan={4} className="p-0">
                   <EmptyState
                     icon={<Inbox />}
-                    title="No activity yet"
-                    description="Merges, comments and status changes across the workspace land here."
+                    title={t('activity.emptyTitle')}
+                    description={t('activity.emptyDesc')}
                     className="min-h-[160px] rounded-none border-0 bg-transparent"
                   />
                 </TableCell>
@@ -282,14 +316,17 @@ export function Overview({ onNavigate }: { onNavigate: (key: string) => void }) 
                     <span className="text-foreground">{r.who}</span>
                   </div>
                 </TableCell>
-                <TableCell className="text-foreground-muted">{r.action}</TableCell>
+                <TableCell className="text-foreground-muted">{t(r.action)}</TableCell>
                 <TableCell>
                   <Badge tone="neutral" variant="outline">
                     {r.target}
                   </Badge>
                 </TableCell>
-                <TableCell className="tabular text-foreground-subtle text-right">
-                  {r.when}
+                <TableCell
+                  className="tabular text-foreground-subtle text-right"
+                  title={formatRelative(r.at, relativeTime).title}
+                >
+                  {formatRelative(r.at, relativeTime).label}
                 </TableCell>
               </TableRow>
             ))}
@@ -301,13 +338,15 @@ export function Overview({ onNavigate }: { onNavigate: (key: string) => void }) 
 }
 
 export function Analytics({ onNavigate }: { onNavigate: (key: string) => void }) {
-  const [range, setRange] = useState('30d');
+  const [range, setRange] = useState<Range>('30d');
   const demo = useDemo();
+  const t = useT(adminDict);
+  const { seriesB, channels } = useChartData();
   const header = (
     <PageHeader
       page="analytics"
-      title="Analytics"
-      subtitle="Traffic and engagement breakdown."
+      title={t('analytics.title')}
+      subtitle={t('analytics.subtitle')}
       actions={<RangeSelect value={range} onChange={setRange} />}
       onNavigate={onNavigate}
     />
@@ -325,19 +364,19 @@ export function Analytics({ onNavigate }: { onNavigate: (key: string) => void })
       {header}
       <KpiRow loading={demo.state === 'loading'} columns="sm:grid-cols-3">
         <KpiTile
-          label="Page views"
+          label={t('kpi.pageViews')}
           value={empty ? '—' : '128k'}
           delta={empty ? undefined : 8}
           positive
         />
         <KpiTile
-          label="Avg. session"
-          value={empty ? '—' : '4m 12s'}
+          label={t('kpi.avgSession')}
+          value={empty ? '—' : t('kpi.avgSessionValue')}
           delta={empty ? undefined : 5.8}
           positive
         />
         <KpiTile
-          label="Bounce rate"
+          label={t('kpi.bounce')}
           value={empty ? '—' : '38%'}
           delta={empty ? undefined : -2}
           positive
@@ -347,32 +386,32 @@ export function Analytics({ onNavigate }: { onNavigate: (key: string) => void })
         <Card>
           <CardHeader>
             <h2 className="text-foreground text-base leading-none font-semibold">
-              Sessions per day
+              {t('analytics.sessionsTitle')}
             </h2>
-            <CardDescription>Last 30 days</CardDescription>
+            <CardDescription>{t('range.30d')}</CardDescription>
           </CardHeader>
           <CardContent>
             <LineChart
-              data={SERIES_B}
+              data={seriesB}
               height={200}
               state={chartState(demo.state)}
-              caption="Sessions are flat week over week."
+              caption={t('analytics.sessionsCaption')}
             />
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
             <h2 className="text-foreground text-base leading-none font-semibold">
-              Traffic by channel
+              {t('analytics.channelTitle')}
             </h2>
-            <CardDescription>This month</CardDescription>
+            <CardDescription>{t('analytics.thisMonth')}</CardDescription>
           </CardHeader>
           <CardContent>
             <BarChart
-              data={CHANNELS}
+              data={channels}
               height={200}
               state={chartState(demo.state)}
-              caption="Direct is the largest channel at 4,200 sessions."
+              caption={t('analytics.channelCaption')}
             />
           </CardContent>
         </Card>
@@ -383,14 +422,16 @@ export function Analytics({ onNavigate }: { onNavigate: (key: string) => void })
 
 export function Reports({ onNavigate }: { onNavigate: (key: string) => void }) {
   const demo = useDemo();
+  const t = useT(adminDict);
+  const { seriesA, channels } = useChartData();
   const header = (
     <PageHeader
       page="reports"
-      title="Reports"
-      subtitle="Saved and scheduled reports."
+      title={t('reports.title')}
+      subtitle={t('reports.subtitle')}
       actions={
         <Button size="sm" leadingIcon={<Plus />}>
-          New report
+          {t('reports.new')}
         </Button>
       }
       onNavigate={onNavigate}
@@ -410,32 +451,32 @@ export function Reports({ onNavigate }: { onNavigate: (key: string) => void }) {
         <Card>
           <CardHeader>
             <h2 className="text-foreground text-base leading-none font-semibold">
-              Weekly active users
+              {t('reports.wauTitle')}
             </h2>
-            <CardDescription>Updated daily</CardDescription>
+            <CardDescription>{t('reports.updatedDaily')}</CardDescription>
           </CardHeader>
           <CardContent>
             <LineChart
-              data={SERIES_A}
+              data={seriesA}
               height={180}
               state={chartState(demo.state)}
-              caption="Weekly active users, last 30 days."
+              caption={t('reports.wauCaption')}
             />
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
             <h2 className="text-foreground text-base leading-none font-semibold">
-              Revenue by channel
+              {t('reports.revTitle')}
             </h2>
-            <CardDescription>This quarter</CardDescription>
+            <CardDescription>{t('reports.thisQuarter')}</CardDescription>
           </CardHeader>
           <CardContent>
             <BarChart
-              data={CHANNELS}
+              data={channels}
               height={180}
               state={chartState(demo.state)}
-              caption="Revenue by acquisition channel, this quarter."
+              caption={t('reports.revCaption')}
             />
           </CardContent>
         </Card>

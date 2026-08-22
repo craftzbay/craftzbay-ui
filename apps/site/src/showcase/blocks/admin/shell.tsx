@@ -18,7 +18,9 @@ import {
 } from '@/icons';
 import { useModifierKey } from '@/hooks/use-modifier-key';
 import { useTheme, type Theme } from '../../theme/theme-context';
-import { MonitorIcon, NEXT_THEME, THEME_LABEL } from '../../theme/Controls';
+import { MonitorIcon, NEXT_THEME } from '../../theme/Controls';
+import { adminDict, type AdminKey } from '../../i18n/admin';
+import { useT } from '../../i18n/locale';
 import {
   Avatar,
   Badge,
@@ -52,6 +54,7 @@ import {
   Tooltip,
   cn,
   useSidebar,
+  useStrings,
 } from '@craftzbay/ui';
 import {
   MODULES,
@@ -61,6 +64,7 @@ import {
   WORKSPACES,
   findModule,
   findNav,
+  formatRelative,
   type NavSection,
   type Workspace,
 } from './data';
@@ -87,6 +91,7 @@ export function WorkspaceSwitcher({
 }) {
   // Outside a Sidebar the context defaults to `collapsed: false`, so the bar
   // variant is safe without a provider.
+  const t = useT(adminDict);
   const { collapsed: railCollapsed } = useSidebar();
   const collapsed = variant === 'sidebar' && railCollapsed;
   const ws = WORKSPACES.find((w) => w.id === value) ?? WORKSPACES[0];
@@ -95,7 +100,7 @@ export function WorkspaceSwitcher({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          aria-label={collapsed ? `Workspace: ${ws.name}` : undefined}
+          aria-label={collapsed ? t('ws.label', { name: ws.name }) : undefined}
           className={cn(
             'flex items-center gap-2 rounded-md text-left transition-colors outline-none',
             'hover:bg-background-muted focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
@@ -115,7 +120,7 @@ export function WorkspaceSwitcher({
                 {ws.name}
               </span>
               <Badge tone="neutral" variant="outline" className="hidden sm:inline-flex">
-                {ws.plan}
+                {t(ws.plan)}
               </Badge>
               <ChevronsUpDown className="text-foreground-subtle size-4 shrink-0" aria-hidden />
             </>
@@ -129,7 +134,9 @@ export function WorkspaceSwitcher({
                   >
                     {ws.name}
                   </span>
-                  <span className="text-foreground-subtle block text-xs">{ws.plan} plan</span>
+                  <span className="text-foreground-subtle block text-xs">
+                    {t('ws.plan', { plan: t(ws.plan) })}
+                  </span>
                 </span>
                 <ChevronsUpDown className="text-foreground-subtle size-4 shrink-0" aria-hidden />
               </>
@@ -138,7 +145,7 @@ export function WorkspaceSwitcher({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[232px]">
-        <DropdownMenuLabel>Workspaces</DropdownMenuLabel>
+        <DropdownMenuLabel>{t('ws.list')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {WORKSPACES.map((w) => (
           <DropdownMenuItem key={w.id} onSelect={() => onChange(w.id)} className="gap-2">
@@ -147,7 +154,7 @@ export function WorkspaceSwitcher({
               <span className="text-foreground truncate text-sm" title={w.name}>
                 {w.name}
               </span>
-              <span className="text-foreground-subtle text-xs">{w.plan}</span>
+              <span className="text-foreground-subtle text-xs">{t(w.plan)}</span>
             </span>
             {w.id === value && <Check className="text-accent size-4" aria-hidden />}
           </DropdownMenuItem>
@@ -157,7 +164,7 @@ export function WorkspaceSwitcher({
           <span className="border-border text-foreground-subtle inline-flex size-6 items-center justify-center rounded-md border border-dashed">
             <Plus className="size-3.5" aria-hidden />
           </span>
-          Create workspace
+          {t('ws.create')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -178,10 +185,11 @@ function NavItems({
   sections?: NavSection[];
 }) {
   const { collapsed } = useSidebar();
+  const t = useT(adminDict);
   return (
     <>
       {sections.map((section) => (
-        <SidebarSection key={section.label} label={section.label}>
+        <SidebarSection key={section.label} label={t(section.label)}>
           {section.items.map((it) => {
             const active = page === it.key;
             const Icon = it.icon;
@@ -204,12 +212,12 @@ function NavItems({
                   active && 'text-foreground before:opacity-100',
                 )}
               >
-                {it.label}
+                {t(it.label)}
               </SidebarItem>
             );
             // Icon-only rail must still name the destination.
             return collapsed ? (
-              <Tooltip key={it.key} label={it.label} side="right">
+              <Tooltip key={it.key} label={t(it.label)} side="right">
                 {item}
               </Tooltip>
             ) : (
@@ -292,9 +300,10 @@ export function AppRail({
   onModuleChange: (key: string) => void;
   onNavigate: (key: string) => void;
 }) {
+  const t = useT(adminDict);
   return (
     <nav
-      aria-label="Modules"
+      aria-label={t('rail.modules')}
       className="border-border bg-background-subtle hidden w-14 shrink-0 flex-col items-center gap-1 border-r py-2 lg:flex"
     >
       {/* Brand mark — the rail is the only chrome that never scrolls away. */}
@@ -320,7 +329,7 @@ export function AppRail({
             return (
               <RailButton
                 key={m.key}
-                label={m.label}
+                label={t(m.label)}
                 icon={<Icon />}
                 active={m.key === module}
                 onClick={() => onModuleChange(m.key)}
@@ -330,10 +339,10 @@ export function AppRail({
         </div>
       </div>
       <div className="mt-1 shrink-0">
-        <Tooltip label={`${USER.name} — Settings`} side="right">
+        <Tooltip label={t('rail.userSettings', { name: USER.name })} side="right">
           <button
             type="button"
-            aria-label={`${USER.name}, open settings`}
+            aria-label={t('rail.userOpen', { name: USER.name })}
             onClick={() => onNavigate('settings')}
             className="hover:bg-background-muted focus-visible:ring-ring focus-visible:ring-offset-background inline-flex size-10 items-center justify-center rounded-md outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           >
@@ -353,10 +362,11 @@ function ModuleTabs({
   module: string;
   onModuleChange: (key: string) => void;
 }) {
+  const t = useT(adminDict);
   return (
     <div
       role="group"
-      aria-label="Modules"
+      aria-label={t('rail.modules')}
       className="bg-background-muted flex w-full snap-x [scrollbar-width:none] gap-0.5 overflow-x-auto rounded-md p-0.5 [&::-webkit-scrollbar]:hidden"
     >
       {MODULES.map((m) => {
@@ -384,7 +394,7 @@ function ModuleTabs({
             )}
           >
             <Icon aria-hidden />
-            {m.label}
+            {t(m.label)}
           </button>
         );
       })}
@@ -417,17 +427,17 @@ function PanelHeader({ label }: { label: string }) {
  *  page key so `renderLink` can route through `onNavigate`.
  * ------------------------------------------------------------------------ */
 
-export function pageCrumbs(page: string, withModule = false) {
+export function pageCrumbs(page: string, t: (key: AdminKey) => string, withModule = false) {
   const nav = findNav(page);
   if (!nav || page === 'overview') return null;
   const mod = findModule(page);
   return [
-    { label: 'Home', href: 'overview' },
-    ...(withModule && mod.label !== nav.section.label
-      ? [{ label: mod.label, href: mod.sections[0].items[0].key }]
+    { label: t('crumb.home'), href: 'overview' },
+    ...(withModule && t(mod.label) !== t(nav.section.label)
+      ? [{ label: t(mod.label), href: mod.sections[0].items[0].key }]
       : []),
-    { label: nav.section.label },
-    { label: nav.item.label },
+    { label: t(nav.section.label) },
+    { label: t(nav.item.label) },
   ];
 }
 
@@ -442,7 +452,8 @@ export function PageCrumbs({
   onNavigate?: (key: string) => void;
   className?: string;
 }) {
-  const crumbs = pageCrumbs(page, withModule);
+  const t = useT(adminDict);
+  const crumbs = pageCrumbs(page, t, withModule);
   if (!crumbs) return null;
   return (
     <Breadcrumbs
@@ -493,21 +504,23 @@ export const DemoContext = createContext<DemoControls>({
 
 export const useDemo = () => useContext(DemoContext);
 
-const DEMO_STATES: { value: DemoState; label: string }[] = [
-  { value: 'normal', label: 'Normal' },
-  { value: 'loading', label: 'Loading' },
-  { value: 'empty', label: 'Empty' },
-  { value: 'error', label: 'Error' },
+const DEMO_STATES: { value: DemoState; label: AdminKey }[] = [
+  { value: 'normal', label: 'demo.normal' },
+  { value: 'loading', label: 'demo.loading' },
+  { value: 'empty', label: 'demo.empty' },
+  { value: 'error', label: 'demo.error' },
 ];
 
 function DemoMenu() {
   const demo = useDemo();
+  const t = useT(adminDict);
+  const stateLabel = DEMO_STATES.find((s) => s.value === demo.state)?.label ?? 'demo.normal';
   return (
     <DropdownMenu>
-      <Tooltip label="Demo controls">
+      <Tooltip label={t('demo.controls')}>
         <DropdownMenuTrigger asChild>
           <IconButton
-            aria-label={`Demo controls. State: ${demo.state}`}
+            aria-label={t('demo.controlsState', { state: t(stateLabel) })}
             icon={<Sparkles />}
             variant="ghost"
             size="sm"
@@ -516,7 +529,7 @@ function DemoMenu() {
       </Tooltip>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="text-foreground-subtle text-xs font-normal">
-          Demo state
+          {t('demo.state')}
         </DropdownMenuLabel>
         <DropdownMenuRadioGroup
           value={demo.state}
@@ -524,24 +537,24 @@ function DemoMenu() {
         >
           {DEMO_STATES.map((s) => (
             <DropdownMenuRadioItem key={s.value} value={s.value}>
-              {s.label}
+              {t(s.label)}
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>
         <DropdownMenuSeparator />
         <DropdownMenuLabel className="text-foreground-subtle text-xs font-normal">
-          Density
+          {t('demo.density')}
         </DropdownMenuLabel>
         <DropdownMenuRadioGroup
           value={demo.density}
           onValueChange={(v) => demo.setDensity(v as Density)}
         >
-          <DropdownMenuRadioItem value="default">Default</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="compact">Compact</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="default">{t('demo.default')}</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="compact">{t('demo.compact')}</DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
         <DropdownMenuSeparator />
         <DropdownMenuCheckboxItem checked={demo.banner} onCheckedChange={demo.setBanner}>
-          Environment banner
+          {t('demo.banner')}
         </DropdownMenuCheckboxItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -549,14 +562,15 @@ function DemoMenu() {
 }
 
 /** Slim environment bar — visible on every page so nobody edits prod thinking it's staging. */
-export function EnvBanner({ label = 'Staging' }: { label?: string }) {
+export function EnvBanner({ label }: { label?: string }) {
+  const t = useT(adminDict);
   return (
     <div
       role="status"
       className="bg-warning-soft text-warning-text border-warning-border-soft flex h-7 shrink-0 items-center justify-center gap-2 border-b px-4 text-xs font-medium"
     >
       <AlertTriangle className="size-3.5" aria-hidden />
-      {label} environment — data resets nightly.
+      {t('env.banner', { label: label ?? t('env.staging') })}
     </div>
   );
 }
@@ -605,6 +619,7 @@ export function AppSidebar({
     onNavigate(key);
     onDrawerOpenChange(false);
   };
+  const t = useT(adminDict);
   const dual = mode === 'dual';
   const activeModule = MODULES.find((m) => m.key === module) ?? MODULES[0];
   const sections = dual ? activeModule.sections : NAV;
@@ -614,12 +629,12 @@ export function AppSidebar({
         <>
           <AppRail module={module} onModuleChange={onModuleChange} onNavigate={navigate} />
           <Sidebar
-            aria-label={`${activeModule.label} navigation`}
+            aria-label={t('rail.nav', { module: t(activeModule.label) })}
             // The tenant lives here (as in the `rail` header); the module is
             // named by the rail tooltip and the breadcrumb, plus this sr-only heading.
             header={
               <>
-                <h2 className="sr-only">{activeModule.label}</h2>
+                <h2 className="sr-only">{t(activeModule.label)}</h2>
                 <WorkspaceSwitcher value={workspace} onChange={onWorkspaceChange} />
               </>
             }
@@ -657,7 +672,7 @@ export function AppSidebar({
             drawerTriggerRef.current.focus();
           }}
         >
-          <SheetTitle className="sr-only">Navigation</SheetTitle>
+          <SheetTitle className="sr-only">{t('drawer.title')}</SheetTitle>
           <Sidebar
             header={
               dual ? (
@@ -671,7 +686,7 @@ export function AppSidebar({
           >
             {dual && (
               <div className="px-4 pb-2">
-                <PanelHeader label={activeModule.label} />
+                <PanelHeader label={t(activeModule.label)} />
               </div>
             )}
             <NavItems page={page} onNavigate={navigate} sections={sections} />
@@ -693,6 +708,7 @@ const TOPNAV_KEYS = ['overview', 'analytics', 'projects', 'inbox', 'members', 'r
 
 function TopNavItems({ page, onNavigate }: { page: string; onNavigate: (key: string) => void }) {
   const items = NAV.flatMap((s) => s.items).filter((it) => TOPNAV_KEYS.includes(it.key));
+  const t = useT(adminDict);
   return (
     // The library nav slot shows from md; this shell needs lg for six links +
     // a workspace switcher + search, so the wrapper hides itself below lg.
@@ -715,7 +731,7 @@ function TopNavItems({ page, onNavigate }: { page: string; onNavigate: (key: str
                 : 'text-foreground-muted hover:text-foreground font-medium',
             )}
           >
-            {it.label}
+            {t(it.label)}
             {it.count != null && (
               <Badge tone={active ? 'accent' : 'neutral'} className="tabular">
                 {it.count}
@@ -767,8 +783,11 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
 ) {
   const unread = NOTIFICATIONS.filter((n) => n.unread).length;
   const mod = useModifierKey();
+  const t = useT(adminDict);
+  const { relativeTime } = useStrings();
   // Site-wide theme (same store as the preview dock), so both stay in sync.
   const { theme, setTheme, toggleTheme } = useTheme();
+  const themeLabel = (th: Theme) => t(`theme.${th}`);
   return (
     <TopNav
       className="bg-background supports-[backdrop-filter]:bg-background"
@@ -776,7 +795,7 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
         <div className="flex min-w-0 items-center gap-2">
           <IconButton
             ref={drawerTriggerRef}
-            aria-label="Open navigation"
+            aria-label={t('topnav.openNav')}
             icon={<Menu />}
             variant="ghost"
             size="sm"
@@ -802,7 +821,7 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
                 className="hidden min-w-0 lg:block"
               />
               <span className="text-foreground truncate text-sm font-semibold lg:hidden">
-                {findNav(page)?.item.label ?? 'Home'}
+                {t(findNav(page)?.item.label ?? 'crumb.home')}
               </span>
             </>
           )}
@@ -813,10 +832,10 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
         <Input
           ref={searchRef}
           type="search"
-          label="Search"
+          label={t('topnav.search')}
           hideLabel
           size="sm"
-          placeholder="Search projects, people…"
+          placeholder={t('topnav.searchPlaceholder')}
           prefix={<Search className="size-4" aria-hidden />}
           suffix={
             <span className="hidden items-center gap-0.5 sm:inline-flex">
@@ -835,9 +854,9 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
       }
       actions={
         <>
-          <Tooltip label={`Command palette (${mod.label}+K)`}>
+          <Tooltip label={t('topnav.palette', { mod: mod.label })}>
             <IconButton
-              aria-label="Open command palette"
+              aria-label={t('topnav.openPalette')}
               icon={<Search />}
               variant="ghost"
               size="sm"
@@ -848,9 +867,12 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
 
           <DemoMenu />
 
-          <Tooltip label={`Theme: ${THEME_LABEL[theme]}`}>
+          <Tooltip label={t('topnav.theme', { theme: themeLabel(theme) })}>
             <IconButton
-              aria-label={`Theme: ${THEME_LABEL[theme]}. Switch to ${THEME_LABEL[NEXT_THEME[theme]].toLowerCase()}`}
+              aria-label={t('topnav.themeSwitch', {
+                theme: themeLabel(theme),
+                next: themeLabel(NEXT_THEME[theme]),
+              })}
               icon={theme === 'light' ? <Sun /> : theme === 'dark' ? <Moon /> : <MonitorIcon />}
               variant="ghost"
               size="sm"
@@ -861,7 +883,7 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <IconButton
-                aria-label={unread > 0 ? `Notifications, ${unread} unread` : 'Notifications'}
+                aria-label={unread > 0 ? t('notif.count', { n: unread }) : t('notif.title')}
                 icon={
                   <span className="relative inline-flex">
                     <Bell />
@@ -879,8 +901,8 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[min(20rem,calc(100vw-2rem))]">
               <DropdownMenuLabel className="flex items-center justify-between">
-                Notifications
-                {unread > 0 && <Badge tone="accent">{unread} new</Badge>}
+                {t('notif.title')}
+                {unread > 0 && <Badge tone="accent">{t('notif.new', { n: unread })}</Badge>}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               {NOTIFICATIONS.map((n) => (
@@ -892,20 +914,24 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
                   <Avatar size="xs" fallback={n.initials} alt="" className="mt-0.5" />
                   <span className="flex min-w-0 flex-col">
                     <span className="text-foreground text-sm">
-                      <span className="font-medium">{n.who}</span> {n.text}
+                      <span className="font-medium">{n.who}</span> {t(n.text, { target: n.target })}
                     </span>
-                    <span className="text-foreground-subtle text-xs">{n.when} ago</span>
+                    <span className="text-foreground-subtle text-xs">
+                      {formatRelative(n.at, relativeTime).label}
+                    </span>
                   </span>
                   {n.unread && (
                     <span
-                      aria-label="Unread"
+                      aria-label={t('notif.unread')}
                       className="bg-accent mt-1.5 ml-auto size-1.5 rounded-full"
                     />
                   )}
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => onNavigate('inbox')}>View all</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => onNavigate('inbox')}>
+                {t('notif.viewAll')}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -913,7 +939,7 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                aria-label="Account menu"
+                aria-label={t('account.menu')}
                 className="hover:bg-background-muted focus-visible:ring-ring focus-visible:ring-offset-background ml-1 inline-flex size-8 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
               >
                 <Avatar size="sm" fallback={USER.initials} alt={USER.name} status="online" />
@@ -928,26 +954,26 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={() => onNavigate('settings')}>
-                <User className="size-4" aria-hidden /> Profile
+                <User className="size-4" aria-hidden /> {t('account.profile')}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => onNavigate('settings')}>
-                <SettingsIcon className="size-4" aria-hidden /> Settings
+                <SettingsIcon className="size-4" aria-hidden /> {t('account.settings')}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => onNavigate('billing')}>
-                <CreditCard className="size-4" aria-hidden /> Billing
+                <CreditCard className="size-4" aria-hidden /> {t('account.billing')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuLabel className="text-foreground-subtle text-xs font-normal">
-                Theme
+                {t('account.theme')}
               </DropdownMenuLabel>
               <DropdownMenuRadioGroup value={theme} onValueChange={(v) => setTheme(v as Theme)}>
-                <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="system">System</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="light">{t('theme.light')}</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="dark">{t('theme.dark')}</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="system">{t('theme.system')}</DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={onSignOut}>
-                <LogOut className="size-4" aria-hidden /> Sign out
+                <LogOut className="size-4" aria-hidden /> {t('account.signOut')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -1016,40 +1042,41 @@ export function AdminPalette({
   /** Navigation groups to list; the `dual` shell passes every module's sections. */
   sections?: NavSection[];
 }) {
+  const t = useT(adminDict);
   const run = (fn: () => void) => () => {
     onOpenChange(false);
     fn();
   };
   return (
-    <CommandDialog open={open} onOpenChange={onOpenChange} title="Command palette">
-      <CommandInput placeholder="Go to a page or run an action…" />
+    <CommandDialog open={open} onOpenChange={onOpenChange} title={t('palette.title')}>
+      <CommandInput placeholder={t('palette.placeholder')} />
       <CommandList>
-        <CommandEmpty>No results.</CommandEmpty>
-        <CommandGroup heading="Actions">
+        <CommandEmpty>{t('palette.empty')}</CommandEmpty>
+        <CommandGroup heading={t('palette.actions')}>
           <CommandItem onSelect={run(() => onAction('new-project'))}>
-            <Plus /> New project
+            <Plus /> {t('palette.newProject')}
             <CommandShortcut>N</CommandShortcut>
           </CommandItem>
           <CommandItem onSelect={run(() => onAction('invite'))}>
-            <User /> Invite teammate
+            <User /> {t('palette.invite')}
           </CommandItem>
           {hasSidebar && (
             <CommandItem onSelect={run(() => onAction('toggle-sidebar'))}>
-              <Menu /> Toggle sidebar
+              <Menu /> {t('palette.toggleSidebar')}
             </CommandItem>
           )}
         </CommandGroup>
         {sections.map((section) => (
-          <CommandGroup key={section.label} heading={section.label}>
+          <CommandGroup key={section.label} heading={t(section.label)}>
             {section.items.map((it) => {
               const Icon = it.icon;
               return (
                 <CommandItem
                   key={it.key}
-                  value={`${section.label} ${it.label}`}
+                  value={`${t(section.label)} ${t(it.label)}`}
                   onSelect={run(() => onNavigate(it.key))}
                 >
-                  <Icon /> {it.label}
+                  <Icon /> {t(it.label)}
                 </CommandItem>
               );
             })}

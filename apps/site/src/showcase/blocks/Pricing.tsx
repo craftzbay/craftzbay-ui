@@ -3,6 +3,8 @@ import { Check } from '@/icons';
 import { Badge } from '@craftzbay/ui';
 import { Button } from '@craftzbay/ui';
 import { cn } from '@craftzbay/ui';
+import { useT } from '../i18n/locale';
+import { landingDict } from '../i18n/landing';
 
 /* -----------------------------------------------------------------------------
  *  Pricing — N-tier comparison grid. Tiers are declared as data so consumers
@@ -39,42 +41,40 @@ export interface PricingProps {
   className?: string;
 }
 
-const DEFAULT_TIERS: PricingTier[] = [
+type LandingT = ReturnType<typeof useT<(typeof landingDict)['en']>>;
+
+/** Demo tiers — USD in EN, ₮ (suffix) in MN. */
+const defaultTiers = (t: LandingT): PricingTier[] => [
   {
-    name: 'Starter',
-    price: '$0',
-    cadence: 'forever',
-    description: 'For individuals exploring the product.',
-    features: ['Up to 3 projects', 'Community support', 'Single workspace'],
-    cta: 'Start free',
+    name: t('tierStarter'),
+    price: t('tierStarterPrice'),
+    cadence: t('tierStarterCadence'),
+    description: t('tierStarterDesc'),
+    features: [t('tierStarterF1'), t('tierStarterF2'), t('tierStarterF3')],
+    cta: t('cta'),
   },
   {
-    name: 'Team',
-    price: '$20',
-    cadence: 'per user / month',
-    description: 'For small teams running real workloads.',
-    features: [
-      'Unlimited projects',
-      'Email support, 24h response',
-      'SSO via Google & Microsoft',
-      'Audit log (30 days)',
-    ],
-    cta: 'Start free',
+    name: t('tierTeam'),
+    price: t('tierTeamPrice'),
+    cadence: t('tierTeamCadence'),
+    description: t('tierTeamDesc'),
+    features: [t('tierTeamF1'), t('tierTeamF2'), t('tierTeamF3'), t('tierTeamF4')],
+    cta: t('cta'),
     highlighted: true,
   },
   {
-    name: 'Enterprise',
-    price: 'Custom',
-    cadence: 'annual',
-    description: 'For organisations with custom requirements.',
+    name: t('tierEnterprise'),
+    price: t('tierEnterprisePrice'),
+    cadence: t('tierEnterpriseCadence'),
+    description: t('tierEnterpriseDesc'),
     features: [
-      'Everything in Team',
-      'SAML SSO + SCIM',
-      'Dedicated CSM',
-      'SOC 2 report + DPA',
-      'Audit log (unlimited)',
+      t('tierEnterpriseF1'),
+      t('tierEnterpriseF2'),
+      t('tierEnterpriseF3'),
+      t('tierEnterpriseF4'),
+      t('tierEnterpriseF5'),
     ],
-    cta: 'Talk to sales',
+    cta: t('talkToSales'),
   },
 ];
 
@@ -92,13 +92,18 @@ const DEFAULT_TIERS: PricingTier[] = [
  *   />
  */
 export function Pricing({
-  title = 'Plans that scale with your team',
-  subtitle = 'Start free, upgrade when you need more. All paid plans include a 14-day trial — no credit card required.',
-  tiers = DEFAULT_TIERS,
-  highlightedLabel = 'Most popular',
+  title,
+  subtitle,
+  tiers,
+  highlightedLabel,
   onTierSelect,
   className,
 }: PricingProps = {}) {
+  const t = useT(landingDict);
+  title ??= t('pricingTitle');
+  subtitle ??= t('pricingBody');
+  tiers ??= defaultTiers(t);
+  highlightedLabel ??= t('mostPopular');
   const cols = tiers.length;
   return (
     <section

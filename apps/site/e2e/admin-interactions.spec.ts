@@ -130,7 +130,7 @@ test.describe('admin › projects @1280', () => {
       await page.getByRole('menuitemradio', { name: state }).click();
       await expect(demoMenu(page)).toHaveAttribute(
         'aria-label',
-        new RegExp(`State: ${state.toLowerCase()}`),
+        new RegExp(`State: ${state}`, 'i'),
       );
     };
 
@@ -149,7 +149,7 @@ test.describe('admin › projects @1280', () => {
     await page.getByRole('button', { name: /Try again|Retry/i }).click();
     await expect(table(page)).toBeVisible();
     await expect(dataRows(page).first()).toBeVisible();
-    await expect(demoMenu(page)).toHaveAttribute('aria-label', /State: normal/);
+    await expect(demoMenu(page)).toHaveAttribute('aria-label', /State: normal/i);
   });
 
   test('compact density reduces row height', async ({ page }) => {

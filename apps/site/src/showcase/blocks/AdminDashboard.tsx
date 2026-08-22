@@ -32,6 +32,8 @@ import {
 } from './admin/pages';
 import { UnsavedContext } from './admin/unsaved';
 import { writeHash } from './admin/use-hash-params';
+import { adminDict } from '../i18n/admin';
+import { useT } from '../i18n/locale';
 
 /* =============================================================================
  *  AdminDashboard — a complete admin console on the library's app shell.
@@ -97,6 +99,7 @@ export function AdminDashboard({
 }) {
   const hasRail = layout === 'sidebar';
   const { push } = useToast();
+  const t = useT(adminDict);
   // Unknown keys are kept so the shell can render its own 404 (the chrome
   // stays, the user keeps their bearings).
   const [page, setPage] = useState(() => initialPage || 'overview');
@@ -276,7 +279,7 @@ export function AdminDashboard({
                 onOpenPalette={() => setPaletteOpen(true)}
                 onNavigate={navigate}
                 onSignOut={() =>
-                  push({ title: 'Signed out', description: 'Demo — no real session.' })
+                  push({ title: t('toast.signedOut'), description: t('toast.signedOutDesc') })
                 }
                 searchValue={search}
                 onSearchChange={onSearchChange}
@@ -320,10 +323,10 @@ export function AdminDashboard({
               onOpenChange={(open) => {
                 if (!open) setPendingNav(null);
               }}
-              title="Discard changes?"
-              description="Your profile edits haven't been saved. Leaving this page will lose them."
-              cancelLabel="Keep editing"
-              confirmLabel="Discard"
+              title={t('unsaved.title')}
+              description={t('unsaved.desc')}
+              cancelLabel={t('unsaved.keep')}
+              confirmLabel={t('unsaved.discard')}
               confirmVariant="destructive"
               onConfirm={() => {
                 const run = pendingNav;

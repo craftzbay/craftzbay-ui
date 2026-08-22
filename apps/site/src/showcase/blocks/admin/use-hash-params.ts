@@ -27,6 +27,10 @@ export function readHashParams(): URLSearchParams {
 export function writeHash(values: HashParamValues, path = splitHash().path) {
   if (typeof window === 'undefined') return;
   const params = new URLSearchParams();
+  // `lang` is owned by the preview shell (i18n/locale.tsx) — carry it over
+  // unless the caller sets it explicitly.
+  const lang = readHashParams().get('lang');
+  if (lang && !('lang' in values)) params.set('lang', lang);
   for (const [k, v] of Object.entries(values)) {
     if (v !== undefined && v !== null && v !== '') params.set(k, String(v));
   }

@@ -14,7 +14,9 @@ import {
   SelectItem,
   SelectTrigger,
 } from '@craftzbay/ui';
-import { STATUSES, type Project, type ProjectStatus } from './data';
+import { STATUSES, STATUS_KEY, type Project, type ProjectStatus } from './data';
+import { adminDict } from '../../i18n/admin';
+import { useT } from '../../i18n/locale';
 
 /* =============================================================================
  *  Admin template — Projects page parts: debounce hook, create/edit dialog,
@@ -49,6 +51,7 @@ export function ProjectDialog({
   const [name, setName] = useState('');
   const [owner, setOwner] = useState('');
   const [status, setStatus] = useState<ProjectStatus>('Active');
+  const t = useT(adminDict);
 
   useEffect(() => {
     if (open) {
@@ -62,9 +65,9 @@ export function ProjectDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{initial ? 'Edit project' : 'New project'}</DialogTitle>
+          <DialogTitle>{initial ? t('dialog.editTitle') : t('dialog.newTitle')}</DialogTitle>
           <DialogDescription>
-            {initial ? 'Update the project details.' : 'Add a project to your workspace.'}
+            {initial ? t('dialog.editDesc') : t('dialog.newDesc')}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -73,33 +76,33 @@ export function ProjectDialog({
           onSubmit={(e) => {
             e.preventDefault();
             if (!name.trim()) return;
-            onSave({ name: name.trim(), status, owner: owner.trim() || 'Unassigned' });
+            onSave({ name: name.trim(), status, owner: owner.trim() || t('owner.unassigned') });
             onOpenChange(false);
           }}
         >
           <Input
-            label="Name"
+            label={t('field.name')}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Project name"
+            placeholder={t('field.namePlaceholder')}
             required
           />
           <Input
-            label="Owner"
+            label={t('field.owner')}
             value={owner}
             onChange={(e) => setOwner(e.target.value)}
-            placeholder="Owner name"
+            placeholder={t('field.ownerPlaceholder')}
           />
           <div className="flex flex-col gap-1.5">
             <label htmlFor="project-status" className="text-foreground text-sm font-medium">
-              Status
+              {t('field.status')}
             </label>
             <Select value={status} onValueChange={(v) => setStatus(v as ProjectStatus)}>
-              <SelectTrigger id="project-status" placeholder="Status" />
+              <SelectTrigger id="project-status" placeholder={t('field.status')} />
               <SelectContent>
                 {STATUSES.map((s) => (
                   <SelectItem key={s} value={s}>
-                    {s}
+                    {t(STATUS_KEY[s])}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -108,10 +111,10 @@ export function ProjectDialog({
         </form>
         <DialogFooter>
           <Button variant="ghost" type="button" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button type="submit" form="project-form" disabled={!name.trim()}>
-            {initial ? 'Save changes' : 'Create project'}
+            {initial ? t('common.saveChanges') : t('dialog.create')}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -124,13 +127,14 @@ export function ProjectDialog({
  * ------------------------------------------------------------------------ */
 
 export function FilterChip({ children, onRemove }: { children: ReactNode; onRemove: () => void }) {
+  const t = useT(adminDict);
   return (
     <span className="border-border bg-card text-foreground inline-flex h-7 items-center gap-1 rounded-full border pr-1 pl-2.5 text-xs">
       {children}
       <button
         type="button"
         onClick={onRemove}
-        aria-label="Remove filter"
+        aria-label={t('filter.remove')}
         className="text-foreground-subtle hover:bg-background-muted hover:text-foreground focus-visible:ring-ring inline-flex size-5 items-center justify-center rounded-full outline-none focus-visible:ring-2"
       >
         <X className="size-3" aria-hidden />

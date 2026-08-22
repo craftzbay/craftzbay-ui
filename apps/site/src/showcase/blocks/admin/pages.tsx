@@ -35,21 +35,28 @@ import {
   TableRow,
   cn,
   formatDate,
+  formatMNT,
   formatNumber,
+  useStrings,
   useToast,
 } from '@craftzbay/ui';
 import {
   INVOICES,
+  MEMBER_STATUS_KEY,
   ROLES,
+  ROLE_KEY,
   SEED_MEMBERS,
   SEED_MESSAGES,
   STUB_PAGES,
+  formatRelative,
   type Member,
   type Message,
 } from './data';
 import { PageHeader, StatusIcon, useDemo } from './shell';
 import { useTheme, type Theme } from '../../theme/theme-context';
 import { useUnsavedGuard } from './unsaved';
+import { adminDict, type AdminKey } from '../../i18n/admin';
+import { useLocale, useT } from '../../i18n/locale';
 
 /* =============================================================================
  *  Admin template — Inbox, Team, Settings, Billing
@@ -57,6 +64,8 @@ import { useUnsavedGuard } from './unsaved';
 
 export function InboxPage({ onNavigate }: { onNavigate: (key: string) => void }) {
   const { push } = useToast();
+  const t = useT(adminDict);
+  const { relativeTime } = useStrings();
   const [items, setItems] = useState<Message[]>(SEED_MESSAGES);
   const unread = items.filter((m) => m.unread).length;
   // Recoverable delete: no confirm, a 5s Undo in the toast restores the row
@@ -65,12 +74,12 @@ export function InboxPage({ onNavigate }: { onNavigate: (key: string) => void })
     const snapshot = items;
     setItems((xs) => xs.filter((x) => x.id !== m.id));
     push({
-      title: 'Conversation deleted',
-      description: m.subject,
+      title: t('toast.conversationDeleted'),
+      description: t(m.subject),
       duration: 5000,
       action: {
-        label: 'Undo',
-        altText: `Undo deleting “${m.subject}”`,
+        label: t('common.undo'),
+        altText: t('undo.deleteConversation', { subject: t(m.subject) }),
         onClick: () => setItems(snapshot),
       },
     });
@@ -79,8 +88,8 @@ export function InboxPage({ onNavigate }: { onNavigate: (key: string) => void })
     <div>
       <PageHeader
         page="inbox"
-        title="Inbox"
-        subtitle={`${items.length} conversations, ${unread} unread`}
+        title={t('inbox.title')}
+        subtitle={t('inbox.subtitle', { n: items.length, unread })}
         actions={
           <Button
             variant="outline"
@@ -88,17 +97,13 @@ export function InboxPage({ onNavigate }: { onNavigate: (key: string) => void })
             disabled={unread === 0}
             onClick={() => setItems((xs) => xs.map((m) => ({ ...m, unread: false })))}
           >
-            Mark all read
+            {t('inbox.markAllRead')}
           </Button>
         }
         onNavigate={onNavigate}
       />
       {items.length === 0 ? (
-        <EmptyState
-          icon={<Mail />}
-          title="Inbox zero"
-          description="New conversations will show up here."
-        />
+        <EmptyState icon={<Mail />} title={t('inbox.zero')} description={t('inbox.zeroDesc')} />
       ) : (
         <Card padding="none">
           <ul className="divide-border divide-y">
@@ -124,21 +129,24 @@ export function InboxPage({ onNavigate }: { onNavigate: (key: string) => void })
                       {m.unread && (
                         <span
                           className="bg-accent size-1.5 shrink-0 rounded-full"
-                          aria-label="Unread"
+                          aria-label={t('notif.unread')}
                         />
                       )}
-                      <span className="text-foreground-subtle ml-auto shrink-0 text-xs">
-                        {m.when}
+                      <span
+                        className="text-foreground-subtle ml-auto shrink-0 text-xs"
+                        title={formatRelative(m.at, relativeTime).title}
+                      >
+                        {formatRelative(m.at, relativeTime).label}
                       </span>
                     </span>
-                    <span className="text-foreground block truncate text-sm">{m.subject}</span>
+                    <span className="text-foreground block truncate text-sm">{t(m.subject)}</span>
                     <span className="text-foreground-muted block truncate text-xs">
-                      {m.preview}
+                      {t(m.preview)}
                     </span>
                   </span>
                 </button>
                 <IconButton
-                  aria-label={`Delete conversation from ${m.from}`}
+                  aria-label={t('inbox.deleteFrom', { name: m.from })}
                   icon={<Trash2 />}
                   variant="ghost"
                   size="sm"
@@ -154,11 +162,12 @@ export function InboxPage({ onNavigate }: { onNavigate: (key: string) => void })
 }
 
 function StatusBadge({ status }: { status: Member['status'] }) {
+  const t = useT(adminDict);
   const tone = status === 'Active' ? 'success' : 'warning';
   return (
     <Badge tone={tone} variant="outline">
       <StatusIcon tone={tone} />
-      {status}
+      {t(MEMBER_STATUS_KEY[status])}
     </Badge>
   );
 }
@@ -172,18 +181,19 @@ function RoleSelect({
   onChange: (id: number, role: Member['role']) => void;
   className?: string;
 }) {
+  const t = useT(adminDict);
   return (
     <Select value={m.role} onValueChange={(v) => onChange(m.id, v as Member['role'])}>
       <SelectTrigger
         size="sm"
-        aria-label={`Role for ${m.name}`}
+        aria-label={t('members.roleFor', { name: m.name })}
         className={className}
         disabled={m.role === 'Owner'}
       />
       <SelectContent>
         {ROLES.map((r) => (
           <SelectItem key={r} value={r}>
-            {r}
+            {t(ROLE_KEY[r])}
           </SelectItem>
         ))}
       </SelectContent>
@@ -192,14 +202,15 @@ function RoleSelect({
 }
 
 function RemoveButton({ member: m, onRemove }: { member: Member; onRemove: (m: Member) => void }) {
+  const t = useT(adminDict);
   return (
     <IconButton
-      aria-label={`Remove ${m.name}`}
+      aria-label={t('members.remove', { name: m.name })}
       icon={<Trash2 />}
       variant="ghost"
       size="sm"
       disabled={m.role === 'Owner'}
-      title={m.role === 'Owner' ? 'The owner cannot be removed' : undefined}
+      title={m.role === 'Owner' ? t('members.ownerLocked') : undefined}
       onClick={() => onRemove(m)}
     />
   );
@@ -213,6 +224,7 @@ export const Members = forwardRef<MembersHandle, { onNavigate: (key: string) => 
   function Members({ onNavigate }, ref) {
     const { push } = useToast();
     const demo = useDemo();
+    const t = useT(adminDict);
     const [items, setItems] = useState<Member[]>(SEED_MEMBERS);
     const [open, setOpen] = useState(false);
     const [email, setEmail] = useState('');
@@ -226,7 +238,7 @@ export const Members = forwardRef<MembersHandle, { onNavigate: (key: string) => 
         email
           .split('@')[0]
           .replace(/\W/g, ' ')
-          .replace(/\b\w/g, (c) => c.toUpperCase()) || 'New member';
+          .replace(/\b\w/g, (c) => c.toUpperCase()) || t('members.newMember');
       setItems((xs) => [
         ...xs,
         {
@@ -238,7 +250,7 @@ export const Members = forwardRef<MembersHandle, { onNavigate: (key: string) => 
           status: 'Invited',
         },
       ]);
-      push({ variant: 'success', title: 'Invitation sent', description: email });
+      push({ variant: 'success', title: t('toast.invitationSent'), description: email });
       setEmail('');
       setOpen(false);
     };
@@ -249,12 +261,12 @@ export const Members = forwardRef<MembersHandle, { onNavigate: (key: string) => 
       const snapshot = items;
       setItems((xs) => xs.filter((x) => x.id !== m.id));
       push({
-        title: 'Member removed',
+        title: t('toast.memberRemoved'),
         description: m.name,
         duration: 5000,
         action: {
-          label: 'Undo',
-          altText: `Undo removing ${m.name}`,
+          label: t('common.undo'),
+          altText: t('undo.remove', { name: m.name }),
           onClick: () => setItems(snapshot),
         },
       });
@@ -266,7 +278,7 @@ export const Members = forwardRef<MembersHandle, { onNavigate: (key: string) => 
     const visible = demo.state === 'empty' ? [] : items;
     const inviteButton = (
       <Button size="sm" leadingIcon={<Plus />} onClick={() => setOpen(true)}>
-        Invite
+        {t('members.invite')}
       </Button>
     );
 
@@ -274,27 +286,27 @@ export const Members = forwardRef<MembersHandle, { onNavigate: (key: string) => 
       <div>
         <PageHeader
           page="members"
-          title="Team"
-          subtitle="People with access to this workspace."
+          title={t('members.title')}
+          subtitle={t('members.subtitle')}
           actions={inviteButton}
           onNavigate={onNavigate}
         />
         {demo.state === 'error' ? (
           <ErrorState
             variant="500"
-            title="Couldn't load the team"
-            description="The members list didn't come back from the server. Your changes are safe."
+            title={t('members.errorTitle')}
+            description={t('members.errorDesc')}
             onRetry={() => demo.setState('normal')}
             live
           />
         ) : visible.length === 0 && demo.state !== 'loading' ? (
           <EmptyState
             icon={<Users />}
-            title="No one else is here yet"
-            description="Invite teammates to collaborate on projects. They'll get an email with a link to join."
+            title={t('members.emptyTitle')}
+            description={t('members.emptyDesc')}
             action={
               <Button leadingIcon={<Plus />} onClick={() => setOpen(true)}>
-                Invite a teammate
+                {t('members.inviteTeammate')}
               </Button>
             }
             className="min-h-[320px]"
@@ -335,11 +347,11 @@ export const Members = forwardRef<MembersHandle, { onNavigate: (key: string) => 
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>{t('col.name')}</TableHead>
+                    <TableHead>{t('col.role')}</TableHead>
+                    <TableHead>{t('col.status')}</TableHead>
                     <TableHead className="w-12 text-right">
-                      <span className="sr-only">Actions</span>
+                      <span className="sr-only">{t('common.actions')}</span>
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -395,8 +407,8 @@ export const Members = forwardRef<MembersHandle, { onNavigate: (key: string) => 
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Invite a member</DialogTitle>
-              <DialogDescription>They'll get an email to join the workspace.</DialogDescription>
+              <DialogTitle>{t('invite.title')}</DialogTitle>
+              <DialogDescription>{t('invite.desc')}</DialogDescription>
             </DialogHeader>
             <form
               id="invite-form"
@@ -407,24 +419,24 @@ export const Members = forwardRef<MembersHandle, { onNavigate: (key: string) => 
               }}
             >
               <Input
-                label="Email"
+                label={t('field.email')}
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@company.com"
+                placeholder={t('field.emailPlaceholder')}
                 autoComplete="off"
                 required
               />
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="invite-role" className="text-foreground text-sm font-medium">
-                  Role
+                  {t('field.role')}
                 </label>
                 <Select value={role} onValueChange={(v) => setRole(v as Member['role'])}>
-                  <SelectTrigger id="invite-role" placeholder="Role" />
+                  <SelectTrigger id="invite-role" placeholder={t('field.role')} />
                   <SelectContent>
                     {ROLES.map((r) => (
                       <SelectItem key={r} value={r}>
-                        {r}
+                        {t(ROLE_KEY[r])}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -433,10 +445,10 @@ export const Members = forwardRef<MembersHandle, { onNavigate: (key: string) => 
             </form>
             <DialogFooter>
               <Button variant="ghost" type="button" onClick={() => setOpen(false)}>
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button type="submit" form="invite-form" disabled={!email.includes('@')}>
-                Send invite
+                {t('invite.send')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -445,9 +457,13 @@ export const Members = forwardRef<MembersHandle, { onNavigate: (key: string) => 
         <ConfirmationDialog
           open={pendingRemove !== null}
           onOpenChange={(o) => !o && setPendingRemove(null)}
-          title={pendingRemove ? `Remove ${pendingRemove.name}?` : 'Remove member?'}
-          description="They lose access to every project in this workspace immediately."
-          confirmLabel="Remove member"
+          title={
+            pendingRemove
+              ? t('remove.title', { name: pendingRemove.name })
+              : t('remove.titleGeneric')
+          }
+          description={t('remove.desc')}
+          confirmLabel={t('remove.confirm')}
           confirmVariant="destructive"
           onConfirm={() => {
             if (pendingRemove) remove(pendingRemove);
@@ -459,17 +475,18 @@ export const Members = forwardRef<MembersHandle, { onNavigate: (key: string) => 
   },
 );
 
-const NOTIFICATION_ROWS = [
-  ['Email notifications', 'Product updates and mentions', true],
-  ['Push notifications', 'Real-time alerts on this device', true],
-  ['Weekly digest', 'A summary every Monday', false],
-  ['Marketing emails', 'Occasional news and offers', false],
-] as const;
+const NOTIFICATION_ROWS: [AdminKey, AdminKey, boolean][] = [
+  ['notifications.email', 'notifications.emailDesc', true],
+  ['notifications.push', 'notifications.pushDesc', true],
+  ['notifications.digest', 'notifications.digestDesc', false],
+  ['notifications.marketing', 'notifications.marketingDesc', false],
+];
 
 /** Settings: sections ≤ 720px wide; explicit Save for the multi-field form,
  *  autosave (inline "Saved") for the toggles. */
 export function SettingsPage({ onNavigate }: { onNavigate: (key: string) => void }) {
   const { push } = useToast();
+  const t = useT(adminDict);
   const { theme, setTheme } = useTheme();
   const [dirty, setDirty] = useState(false);
   const [savedAt, setSavedAt] = useState<string | null>(null);
@@ -479,15 +496,17 @@ export function SettingsPage({ onNavigate }: { onNavigate: (key: string) => void
     <div className="max-w-2xl">
       <PageHeader
         page="settings"
-        title="Settings"
-        subtitle="Profile and notification preferences."
+        title={t('settings.title')}
+        subtitle={t('settings.subtitle')}
         onNavigate={onNavigate}
       />
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <h2 className="text-foreground text-base leading-none font-semibold">Profile</h2>
-            <CardDescription>How others see you.</CardDescription>
+            <h2 className="text-foreground text-base leading-none font-semibold">
+              {t('profile.title')}
+            </h2>
+            <CardDescription>{t('profile.desc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <form
@@ -496,26 +515,30 @@ export function SettingsPage({ onNavigate }: { onNavigate: (key: string) => void
               onSubmit={(e) => {
                 e.preventDefault();
                 setDirty(false);
-                push({ variant: 'success', title: 'Profile saved' });
+                push({ variant: 'success', title: t('toast.profileSaved') });
               }}
             >
               <div className="flex items-center gap-4">
                 <Avatar size="lg" fallback="AM" alt="Alex Morgan" />
                 <Button type="button" variant="outline" size="sm">
-                  Change photo
+                  {t('profile.changePhoto')}
                 </Button>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Input label="First name" defaultValue="Alex" autoComplete="given-name" />
-                <Input label="Last name" defaultValue="Morgan" autoComplete="family-name" />
+                <Input label={t('field.firstName')} defaultValue="Alex" autoComplete="given-name" />
+                <Input
+                  label={t('field.lastName')}
+                  defaultValue="Morgan"
+                  autoComplete="family-name"
+                />
               </div>
               <Input
-                label="Email"
+                label={t('field.email')}
                 type="email"
                 defaultValue="alex@example.com"
                 autoComplete="email"
               />
-              <Input label="Bio" defaultValue="Product engineer. Building calm software." />
+              <Input key={t.locale} label={t('field.bio')} defaultValue={t('profile.bio')} />
               <div className="border-border flex justify-end gap-2 border-t pt-4">
                 <Button
                   type="reset"
@@ -523,10 +546,10 @@ export function SettingsPage({ onNavigate }: { onNavigate: (key: string) => void
                   disabled={!dirty}
                   onClick={() => setDirty(false)}
                 >
-                  Discard
+                  {t('common.discard')}
                 </Button>
                 <Button type="submit" disabled={!dirty}>
-                  Save changes
+                  {t('common.saveChanges')}
                 </Button>
               </div>
             </form>
@@ -535,20 +558,22 @@ export function SettingsPage({ onNavigate }: { onNavigate: (key: string) => void
 
         <Card>
           <CardHeader>
-            <h2 className="text-foreground text-base leading-none font-semibold">Appearance</h2>
-            <CardDescription>Applies immediately and follows you across tabs.</CardDescription>
+            <h2 className="text-foreground text-base leading-none font-semibold">
+              {t('appearance.title')}
+            </h2>
+            <CardDescription>{t('appearance.desc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <RadioGroup
-              aria-label="Theme"
+              aria-label={t('account.theme')}
               orientation="horizontal"
               value={theme}
               onValueChange={(v) => setTheme(v as Theme)}
               className="gap-6"
             >
-              <RadioItem value="light" label="Light" />
-              <RadioItem value="dark" label="Dark" />
-              <RadioItem value="system" label="System" />
+              <RadioItem value="light" label={t('theme.light')} />
+              <RadioItem value="dark" label={t('theme.dark')} />
+              <RadioItem value="system" label={t('theme.system')} />
             </RadioGroup>
           </CardContent>
         </Card>
@@ -557,22 +582,20 @@ export function SettingsPage({ onNavigate }: { onNavigate: (key: string) => void
           <CardHeader className="flex-row items-start justify-between">
             <div>
               <h2 className="text-foreground text-base leading-none font-semibold">
-                Notifications
+                {t('notifications.title')}
               </h2>
-              <CardDescription>
-                Choose what reaches you. Changes save automatically.
-              </CardDescription>
+              <CardDescription>{t('notifications.desc')}</CardDescription>
             </div>
             <span className="text-foreground-subtle text-xs" aria-live="polite">
-              {savedAt ? `Saved ${savedAt}` : ''}
+              {savedAt ? t('notifications.savedAt', { time: savedAt }) : ''}
             </span>
           </CardHeader>
           <CardContent className="divide-border divide-y">
             {NOTIFICATION_ROWS.map(([title, desc, on]) => (
               <div key={title} className="py-3 first:pt-0 last:pb-0">
                 <Switch
-                  label={title}
-                  description={desc}
+                  label={t(title)}
+                  description={t(desc)}
                   labelPosition="before"
                   defaultChecked={on}
                   onCheckedChange={() => setSavedAt(formatDate(new Date(), { pattern: 'HH:mm' }))}
@@ -587,25 +610,36 @@ export function SettingsPage({ onNavigate }: { onNavigate: (key: string) => void
   );
 }
 
-const usd = (n: number) =>
-  `$${formatNumber(n, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+/** Demo FX rate — the MN preview prices in ₮ (suffix, 09-localization-mn). */
+const USD_TO_MNT = 3500;
+
+/** USD amount → `$240.00` (en) or `840,000₮` (mn). */
+function useMoney() {
+  const locale = useLocale();
+  return (n: number) =>
+    locale === 'mn'
+      ? formatMNT(n * USD_TO_MNT)
+      : `$${formatNumber(n, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
 
 export function BillingPage({ onNavigate }: { onNavigate: (key: string) => void }) {
   const demo = useDemo();
+  const t = useT(adminDict);
+  const money = useMoney();
   const invoices = demo.state === 'empty' ? [] : INVOICES;
   if (demo.state === 'error')
     return (
       <div className="max-w-2xl">
         <PageHeader
           page="billing"
-          title="Billing"
-          subtitle="Plan and invoices."
+          title={t('billing.title')}
+          subtitle={t('billing.subtitle')}
           onNavigate={onNavigate}
         />
         <ErrorState
           variant="500"
-          title="Billing is unavailable"
-          description="We couldn't reach the billing provider. Your subscription is unaffected — try again in a moment."
+          title={t('billing.errorTitle')}
+          description={t('billing.errorDesc')}
           onRetry={() => demo.setState('normal')}
           live
         />
@@ -615,8 +649,8 @@ export function BillingPage({ onNavigate }: { onNavigate: (key: string) => void 
     <div className="max-w-2xl">
       <PageHeader
         page="billing"
-        title="Billing"
-        subtitle="Plan and invoices."
+        title={t('billing.title')}
+        subtitle={t('billing.subtitle')}
         onNavigate={onNavigate}
       />
       {demo.state === 'loading' ? (
@@ -631,23 +665,25 @@ export function BillingPage({ onNavigate }: { onNavigate: (key: string) => void 
           <CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-foreground text-lg font-semibold">Team plan</span>
-                <Badge tone="accent">Current</Badge>
+                <span className="text-foreground text-lg font-semibold">{t('billing.plan')}</span>
+                <Badge tone="accent">{t('billing.current')}</Badge>
               </div>
               <p className="text-foreground-muted mt-1 text-sm">
-                {usd(20)} / user / month · renews 2026-07-01
+                {t('billing.price', { price: money(20), date: '2026-07-01' })}
               </p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline">Manage</Button>
-              <Button>Upgrade</Button>
+              <Button variant="outline">{t('billing.manage')}</Button>
+              <Button>{t('billing.upgrade')}</Button>
             </div>
           </CardContent>
         </Card>
       )}
       <Card padding="none" className="mt-4">
         <CardHeader className="px-4 pt-4 md:px-6 md:pt-6">
-          <h2 className="text-foreground text-base leading-none font-semibold">Invoices</h2>
+          <h2 className="text-foreground text-base leading-none font-semibold">
+            {t('billing.invoices')}
+          </h2>
         </CardHeader>
         {demo.state === 'loading' ? (
           <div className="space-y-3 px-4 pb-4 md:px-6 md:pb-6" aria-hidden>
@@ -658,18 +694,18 @@ export function BillingPage({ onNavigate }: { onNavigate: (key: string) => void 
         ) : invoices.length === 0 ? (
           <EmptyState
             icon={<Receipt />}
-            title="No invoices yet"
-            description="Your first invoice is issued at the start of the next billing cycle."
+            title={t('billing.emptyTitle')}
+            description={t('billing.emptyDesc')}
             className="rounded-t-none border-0"
           />
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Invoice</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="text-right">Status</TableHead>
+                <TableHead>{t('col.invoice')}</TableHead>
+                <TableHead>{t('col.date')}</TableHead>
+                <TableHead className="text-right">{t('col.amount')}</TableHead>
+                <TableHead className="text-right">{t('col.status')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -678,12 +714,12 @@ export function BillingPage({ onNavigate }: { onNavigate: (key: string) => void 
                   <TableCell className="text-foreground font-medium">{inv.id}</TableCell>
                   <TableCell className="tabular text-foreground-muted">{inv.date}</TableCell>
                   <TableCell className="tabular text-foreground text-right">
-                    {usd(inv.amount)}
+                    {money(inv.amount)}
                   </TableCell>
                   <TableCell className="text-right">
                     <Badge tone="success" variant="outline">
                       <StatusIcon tone="success" />
-                      {inv.status}
+                      {t(inv.status)}
                     </Badge>
                   </TableCell>
                 </TableRow>
@@ -707,13 +743,14 @@ export function NotFoundPage({
   page: string;
   onNavigate: (key: string) => void;
 }) {
+  const t = useT(adminDict);
   return (
     <div className="max-w-2xl">
       <EmptyState
         icon={<FileText />}
-        title="Page not found"
-        description={`There's no page called “${page}” in this workspace. It may have moved or the link is out of date.`}
-        action={<Button onClick={() => onNavigate('overview')}>Back to overview</Button>}
+        title={t('notfound.title')}
+        description={t('notfound.desc', { page })}
+        action={<Button onClick={() => onNavigate('overview')}>{t('notfound.back')}</Button>}
         className="min-h-[320px]"
       />
     </div>
@@ -733,19 +770,27 @@ export function StubPage({
   page: string;
   onNavigate: (key: string) => void;
 }) {
-  const spec = STUB_PAGES[page];
-  if (!spec) return null;
-  const Icon = spec.icon;
+  const t = useT(adminDict);
+  const Icon = STUB_PAGES[page];
+  if (!Icon) return null;
+  // Stub copy lives under `stub.<page>.*`; the page set is fixed, so the keys exist.
+  const key = (suffix: 'subtitle' | 'emptyTitle' | 'emptyDesc') =>
+    `stub.${page}.${suffix}` as AdminKey;
   return (
     <div className="max-w-2xl">
-      <PageHeader page={page} title={spec.title} subtitle={spec.subtitle} onNavigate={onNavigate} />
+      <PageHeader
+        page={page}
+        title={t(`nav.${page}` as AdminKey)}
+        subtitle={t(key('subtitle'))}
+        onNavigate={onNavigate}
+      />
       <EmptyState
         icon={<Icon />}
-        title={spec.emptyTitle}
-        description={spec.emptyDescription}
+        title={t(key('emptyTitle'))}
+        description={t(key('emptyDesc'))}
         action={
           <Button variant="secondary" onClick={() => onNavigate('settings')}>
-            Open settings
+            {t('stub.openSettings')}
           </Button>
         }
       />
@@ -760,20 +805,21 @@ export function StubPage({
  */
 export function PermissionDeniedPage({ onNavigate }: { onNavigate: (key: string) => void }) {
   const { push } = useToast();
+  const t = useT(adminDict);
   const [requested, setRequested] = useState(false);
   return (
     <div className="max-w-2xl">
       <PageHeader
         page="apikeys"
-        title="API keys"
-        subtitle="Tokens that let other systems call your workspace."
+        title={t('nav.apikeys')}
+        subtitle={t('denied.subtitle')}
         onNavigate={onNavigate}
       />
       <EmptyState
         role="status"
         icon={<Lock />}
-        title="You don't have access"
-        description="API keys are limited to the Owner and Admin roles. A workspace Owner can grant you the Admin role from Team."
+        title={t('denied.title')}
+        description={t('denied.desc')}
         action={
           <Button
             disabled={requested}
@@ -781,17 +827,17 @@ export function PermissionDeniedPage({ onNavigate }: { onNavigate: (key: string)
               setRequested(true);
               push({
                 variant: 'success',
-                title: 'Access requested',
-                description: 'The workspace Owner has been notified.',
+                title: t('toast.accessRequested'),
+                description: t('toast.accessRequestedDesc'),
               });
             }}
           >
-            {requested ? 'Request sent' : 'Request access'}
+            {requested ? t('denied.sent') : t('denied.request')}
           </Button>
         }
         secondaryAction={
           <Button variant="ghost" onClick={() => onNavigate('members')}>
-            View team
+            {t('denied.viewTeam')}
           </Button>
         }
       />

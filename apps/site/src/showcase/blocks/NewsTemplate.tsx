@@ -8,81 +8,80 @@ import { IconButton } from '@craftzbay/ui';
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '@craftzbay/ui';
 import { Input } from '@craftzbay/ui';
 import { Separator } from '@craftzbay/ui';
-import { cn } from '@craftzbay/ui';
+import { cn, formatDate } from '@craftzbay/ui';
 import type { TemplateProps } from './meta';
 import { readHashParams, writeHash } from './admin/use-hash-params';
+import { useT } from '../i18n/locale';
+import { newsDict } from '../i18n/news';
 
 /**
  * News / magazine template — a publication front page (masthead + category
  * nav, lead story, latest grid, trending sidebar) and a full article reader.
  * Fully interactive without a backend: category nav and search filter the
- * mock article list client-side.
+ * mock article list client-side. All copy (chrome + demo stories) comes from
+ * `i18n/news.ts`, so `?lang=mn` renders the whole publication in Mongolian.
  */
-const CATEGORIES = ['All', 'World', 'Business', 'Technology', 'Science', 'Culture', 'Sport'];
+const CATEGORIES = [
+  'all',
+  'world',
+  'business',
+  'technology',
+  'science',
+  'culture',
+  'sport',
+] as const;
+type Category = (typeof CATEGORIES)[number];
 
 const ARTICLES = [
   {
     id: 'design-systems',
-    cat: 'Technology',
-    title: 'The quiet design system revolution reshaping the web',
-    excerpt: 'How token-driven UI libraries are collapsing the gap between design and code.',
+    cat: 'technology',
     author: 'A. Bold',
     initials: 'AB',
-    time: '2h ago',
+    date: '2026-08-21',
+    readMinutes: 6,
     hue: 250,
   },
   {
     id: 'markets-pause',
-    cat: 'Business',
-    title: 'Markets steady as central banks signal a pause',
-    excerpt: 'Investors weigh softer inflation against a cooling labour market.',
+    cat: 'business',
     author: 'B. Erdene',
     initials: 'BE',
-    time: '4h ago',
+    date: '2026-08-21',
+    readMinutes: 4,
     hue: 150,
   },
   {
     id: 'deep-sea-survey',
-    cat: 'Science',
-    title: 'Deep-sea survey finds dozens of unknown species',
-    excerpt: 'A months-long expedition mapped ridges no instrument had reached before.',
+    cat: 'science',
     author: 'T. Ganbat',
     initials: 'TG',
-    time: '6h ago',
+    date: '2026-08-20',
+    readMinutes: 5,
     hue: 200,
   },
   {
     id: 'long-form-essay',
-    cat: 'Culture',
-    title: 'The slow return of the long-form essay',
-    excerpt: 'Readers are paying for depth again — and writers are noticing.',
+    cat: 'culture',
     author: 'S. Khan',
     initials: 'SK',
-    time: '9h ago',
+    date: '2026-08-20',
+    readMinutes: 7,
     hue: 320,
   },
-];
+] as const satisfies readonly { cat: Category; [k: string]: unknown }[];
 
 type Article = (typeof ARTICLES)[number];
+type ArticleId = Article['id'];
 
 type LegalTopic = 'privacy' | 'terms' | 'contact';
-const LEGAL: { key: LegalTopic; title: string; body: string }[] = [
-  {
-    key: 'privacy',
-    title: 'Privacy',
-    body: 'We collect only what the newsletter needs — your email address — and never sell it. Unsubscribe from any issue in one click.',
-  },
-  {
-    key: 'terms',
-    title: 'Terms',
-    body: 'Articles are free to read and link to. Republishing full text requires written permission; excerpts with attribution are welcome.',
-  },
-  {
-    key: 'contact',
-    title: 'Contact',
-    body: 'Tips, corrections and press enquiries reach the newsroom desk within one business day.',
-  },
-];
+const LEGAL: readonly LegalTopic[] = ['privacy', 'terms', 'contact'];
+
+type T = ReturnType<typeof useT<typeof newsDict.en>>;
+const catLabel = (t: T, c: Category) => t(`cat.${c}`);
+const storyTitle = (t: T, id: ArticleId) => t(`story.${id}.title`);
+const storyExcerpt = (t: T, id: ArticleId) => t(`story.${id}.excerpt`);
+const legalTitle = (t: T, l: LegalTopic) => t(`legal.${l}.title`);
 
 /** Image placeholder — a flat, per-category tinted surface (solid colour mixed
  *  into the muted background, so it follows light/dark) with a faint image
@@ -110,11 +109,12 @@ function Masthead({
   onQuery,
 }: {
   brand: React.ReactNode;
-  active?: string;
-  onCategory?: (c: string) => void;
+  active?: Category;
+  onCategory?: (c: Category) => void;
   query?: string;
   onQuery?: (q: string) => void;
 }) {
+  const t = useT(newsDict);
   const [searchOpen, setSearchOpen] = useState(false);
   const interactive = Boolean(onCategory);
 
@@ -124,7 +124,7 @@ function Masthead({
         <Sheet>
           <SheetTrigger asChild>
             <IconButton
-              aria-label="Menu"
+              aria-label={t('nav.menu')}
               icon={<Menu />}
               variant="ghost"
               size="sm"
@@ -132,8 +132,8 @@ function Masthead({
             />
           </SheetTrigger>
           <SheetContent side="left" className="w-72">
-            <SheetTitle>Sections</SheetTitle>
-            <nav className="mt-6 flex flex-col gap-1" aria-label="Sections">
+            <SheetTitle>{t('nav.sections')}</SheetTitle>
+            <nav className="mt-6 flex flex-col gap-1" aria-label={t('nav.sections')}>
               {CATEGORIES.map((c) => (
                 <SheetClose asChild key={c}>
                   <button
@@ -147,11 +147,11 @@ function Masthead({
                         : 'text-foreground hover:bg-background-muted',
                     )}
                   >
-                    {c}
+                    {catLabel(t, c)}
                   </button>
                 </SheetClose>
               ))}
-              <Button className="mt-4 w-full sm:hidden">Subscribe</Button>
+              <Button className="mt-4 w-full sm:hidden">{t('nav.subscribe')}</Button>
             </nav>
           </SheetContent>
         </Sheet>
@@ -163,15 +163,15 @@ function Masthead({
                 // eslint-disable-next-line jsx-a11y/no-autofocus -- field is revealed by the user's own "search" click; focusing it is the expected result
                 autoFocus
                 size="sm"
-                label="Search stories"
+                label={t('nav.searchStories')}
                 hideLabel
-                placeholder="Search stories…"
+                placeholder={t('nav.searchPlaceholder')}
                 value={query}
                 onChange={(e) => onQuery?.(e.target.value)}
                 className="w-full max-w-56"
               />
               <IconButton
-                aria-label="Close search"
+                aria-label={t('nav.closeSearch')}
                 icon={<X />}
                 variant="ghost"
                 size="sm"
@@ -183,7 +183,7 @@ function Masthead({
             </div>
           ) : (
             <IconButton
-              aria-label="Search"
+              aria-label={t('nav.search')}
               icon={<Search />}
               variant="ghost"
               size="sm"
@@ -191,11 +191,11 @@ function Masthead({
             />
           )}
           <Button size="sm" className="hidden sm:inline-flex">
-            Subscribe
+            {t('nav.subscribe')}
           </Button>
         </div>
       </div>
-      <nav aria-label="Sections" className="border-border border-t">
+      <nav aria-label={t('nav.sections')} className="border-border border-t">
         <div className="mx-auto flex max-w-5xl snap-x [scrollbar-width:none] items-center gap-5 overflow-x-auto px-6 py-2.5 text-sm [&::-webkit-scrollbar]:hidden">
           {CATEGORIES.map((c) => (
             <button
@@ -210,7 +210,7 @@ function Masthead({
                   : 'text-foreground-muted hover:text-foreground',
               )}
             >
-              {c}
+              {catLabel(t, c)}
             </button>
           ))}
         </div>
@@ -225,9 +225,10 @@ function Footer({
   onLegal,
 }: {
   brand: React.ReactNode;
-  onSection: (c: string) => void;
+  onSection: (c: Category) => void;
   onLegal: (t: LegalTopic) => void;
 }) {
+  const t = useT(newsDict);
   const linkClass =
     'text-foreground-muted hover:text-foreground rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
   return (
@@ -236,18 +237,18 @@ function Footer({
         <div>
           <div className="text-base font-semibold tracking-tight">{brand}</div>
           <p className="text-foreground-muted mt-2 max-w-xs text-sm leading-relaxed">
-            Independent reporting on technology, business, science and culture — every day.
+            {t('footer.tagline')}
           </p>
         </div>
-        <nav aria-label="Footer sections">
+        <nav aria-label={t('footer.sections')}>
           <h2 className="text-foreground-subtle text-xs font-semibold tracking-wider uppercase">
-            Sections
+            {t('nav.sections')}
           </h2>
           <ul className="mt-3 space-y-2 text-sm">
-            {CATEGORIES.filter((c) => c !== 'All').map((c) => (
+            {CATEGORIES.filter((c) => c !== 'all').map((c) => (
               <li key={c}>
                 <button type="button" onClick={() => onSection(c)} className={linkClass}>
-                  {c}
+                  {catLabel(t, c)}
                 </button>
               </li>
             ))}
@@ -255,23 +256,21 @@ function Footer({
         </nav>
         <div>
           <h2 className="text-foreground-subtle text-xs font-semibold tracking-wider uppercase">
-            The Daily Brief
+            {t('newsletter.title')}
           </h2>
-          <p className="text-foreground-muted mt-3 text-sm">
-            Top stories in your inbox each morning.
-          </p>
+          <p className="text-foreground-muted mt-3 text-sm">{t('newsletter.body')}</p>
           <form className="mt-3 flex flex-wrap gap-2" onSubmit={(e) => e.preventDefault()}>
             <Input
               size="sm"
               type="email"
-              label="Email address"
+              label={t('newsletter.email')}
               hideLabel
               autoComplete="email"
-              placeholder="you@example.com"
+              placeholder={t('newsletter.placeholder')}
               className="min-w-0 flex-1 basis-40"
             />
             <Button size="sm" variant="secondary" type="submit">
-              Sign up
+              {t('newsletter.signUp')}
             </Button>
           </form>
         </div>
@@ -279,17 +278,18 @@ function Footer({
       <div className="border-border border-t">
         <div className="text-foreground-subtle mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-6 py-4 text-xs">
           <span>
-            © {new Date().getFullYear()} {brand}. All rights reserved.
+            © {new Date().getFullYear()} {brand}
+            {t('footer.rights')}
           </span>
-          <nav aria-label="Legal" className="flex gap-4">
+          <nav aria-label={t('footer.legal')} className="flex gap-4">
             {LEGAL.map((l) => (
               <button
-                key={l.key}
+                key={l}
                 type="button"
-                onClick={() => onLegal(l.key)}
+                onClick={() => onLegal(l)}
                 className="hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
               >
-                {l.title}
+                {legalTitle(t, l)}
               </button>
             ))}
           </nav>
@@ -310,10 +310,10 @@ function LegalPage({
   brand: React.ReactNode;
   topic: LegalTopic;
   onBack: () => void;
-  onSection: (c: string) => void;
+  onSection: (c: Category) => void;
   onLegal: (t: LegalTopic) => void;
 }) {
-  const active = LEGAL.find((l) => l.key === topic) ?? LEGAL[0];
+  const t = useT(newsDict);
   return (
     <div className="bg-background flex min-h-dvh flex-col">
       <Masthead brand={brand} onCategory={onSection} />
@@ -322,11 +322,13 @@ function LegalPage({
           onClick={onBack}
           className="text-foreground-muted hover:text-foreground mb-6 flex w-fit items-center gap-1.5 text-sm"
         >
-          <ArrowLeft className="size-4" aria-hidden /> Back to front page
+          <ArrowLeft className="size-4" aria-hidden /> {t('article.back')}
         </button>
-        <h1 className="text-3xl leading-tight font-semibold tracking-tight">{active.title}</h1>
+        <h1 className="text-3xl leading-tight font-semibold tracking-tight">
+          {legalTitle(t, topic)}
+        </h1>
         <p className="text-foreground-muted mt-4 max-w-[65ch] text-base leading-relaxed">
-          {active.body}
+          {t(`legal.${topic}.body`)}
         </p>
       </main>
       <Footer brand={brand} onSection={onSection} onLegal={onLegal} />
@@ -334,13 +336,13 @@ function LegalPage({
   );
 }
 
-function Byline({ initials, author, time }: { initials: string; author: string; time: string }) {
+function Byline({ initials, author, date }: { initials: string; author: string; date: string }) {
   return (
     <div className="text-foreground-subtle flex items-center gap-2 text-xs">
       <Avatar size="xs" fallback={initials} />
       <span className="text-foreground-muted">{author}</span>
       <span aria-hidden>·</span>
-      <span>{time}</span>
+      <time dateTime={date}>{formatDate(date, { pattern: 'yyyy-MM-dd', tz: 'UTC' })}</time>
     </div>
   );
 }
@@ -353,21 +355,24 @@ function FrontPage({
   onLegal,
 }: {
   brand: React.ReactNode;
-  category: string;
-  setCategory: (c: string) => void;
+  category: Category;
+  setCategory: (c: Category) => void;
   onOpen: (a: Article) => void;
   onLegal: (t: LegalTopic) => void;
 }) {
+  const t = useT(newsDict);
   const [query, setQuery] = useState('');
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return ARTICLES.filter(
       (a) =>
-        (category === 'All' || a.cat === category) &&
-        (!q || a.title.toLowerCase().includes(q) || a.excerpt.toLowerCase().includes(q)),
+        (category === 'all' || a.cat === category) &&
+        (!q ||
+          storyTitle(t, a.id).toLowerCase().includes(q) ||
+          storyExcerpt(t, a.id).toLowerCase().includes(q)),
     );
-  }, [category, query]);
+  }, [category, query, t]);
 
   const [lead, ...rest] = filtered;
 
@@ -384,11 +389,15 @@ function FrontPage({
         <div>
           {!lead ? (
             <div className="border-border bg-card rounded-lg border p-10 text-center">
-              <h1 className="text-sm font-medium">No stories found</h1>
+              <h1 className="text-sm font-medium">{t('front.empty.title')}</h1>
               <p className="text-foreground-muted mt-1 text-sm">
                 {query.trim()
-                  ? `Nothing matches “${query.trim()}” in ${category === 'All' ? 'any section' : category}.`
-                  : `Nothing in ${category} yet.`}
+                  ? t('front.empty.query', {
+                      query: query.trim(),
+                      section:
+                        category === 'all' ? t('front.empty.anySection') : catLabel(t, category),
+                    })
+                  : t('front.empty.section', { section: catLabel(t, category) })}
               </p>
               <Button
                 variant="outline"
@@ -396,10 +405,10 @@ function FrontPage({
                 className="mt-4"
                 onClick={() => {
                   setQuery('');
-                  setCategory('All');
+                  setCategory('all');
                 }}
               >
-                Clear filters
+                {t('front.clearFilters')}
               </Button>
             </div>
           ) : (
@@ -409,13 +418,13 @@ function FrontPage({
                 <Cover hue={lead.hue} className="aspect-[16/8] w-full rounded-lg" />
                 <div className="mt-4">
                   <Badge tone="accent" variant="outline">
-                    {lead.cat}
+                    {catLabel(t, lead.cat)}
                   </Badge>
                   <h1 className="group-hover:text-accent mt-3 text-3xl leading-tight font-semibold tracking-tight">
-                    {lead.title}
+                    {storyTitle(t, lead.id)}
                   </h1>
                   <p className="text-foreground-muted mt-2 text-base leading-relaxed">
-                    {lead.excerpt}
+                    {storyExcerpt(t, lead.id)}
                   </p>
                   <div className="mt-3">
                     <Byline {...lead} />
@@ -427,20 +436,20 @@ function FrontPage({
                 <>
                   <Separator className="my-8" />
                   <h2 className="text-foreground-subtle mb-4 text-xs font-semibold tracking-wider uppercase">
-                    Latest
+                    {t('front.latest')}
                   </h2>
                   <div className="grid gap-6 sm:grid-cols-2">
                     {rest.map((a) => (
                       <button key={a.id} onClick={() => onOpen(a)} className="group text-left">
                         <Cover hue={a.hue} className="aspect-[16/9] w-full rounded-md" />
                         <Badge tone="neutral" variant="outline" className="mt-3">
-                          {a.cat}
+                          {catLabel(t, a.cat)}
                         </Badge>
                         <h3 className="text-foreground group-hover:text-accent mt-2 leading-snug font-semibold">
-                          {a.title}
+                          {storyTitle(t, a.id)}
                         </h3>
                         <p className="text-foreground-muted mt-1 text-sm leading-relaxed">
-                          {a.excerpt}
+                          {storyExcerpt(t, a.id)}
                         </p>
                         <div className="mt-2">
                           <Byline {...a} />
@@ -457,7 +466,7 @@ function FrontPage({
         {/* Trending sidebar */}
         <aside className="lg:border-border lg:border-l lg:pl-8">
           <h2 className="text-foreground-subtle mb-4 text-xs font-semibold tracking-wider uppercase">
-            Trending
+            {t('front.trending')}
           </h2>
           <ol className="space-y-5">
             {ARTICLES.map((a, i) => (
@@ -465,19 +474,17 @@ function FrontPage({
                 <button onClick={() => onOpen(a)} className="group flex gap-3 text-left">
                   <span className="tabular text-border-strong text-xl font-semibold">{i + 1}</span>
                   <span className="text-foreground group-hover:text-accent text-sm leading-snug font-medium">
-                    {a.title}
+                    {storyTitle(t, a.id)}
                   </span>
                 </button>
               </li>
             ))}
           </ol>
           <div className="border-border bg-card mt-8 rounded-lg border p-4 md:p-6">
-            <h3 className="text-sm font-semibold">The Daily Brief</h3>
-            <p className="text-foreground-muted mt-1 text-sm">
-              Top stories in your inbox each morning.
-            </p>
+            <h3 className="text-sm font-semibold">{t('newsletter.title')}</h3>
+            <p className="text-foreground-muted mt-1 text-sm">{t('newsletter.body')}</p>
             <Button size="sm" variant="secondary" className="mt-3 w-full">
-              Sign up free
+              {t('newsletter.signUpFree')}
             </Button>
           </div>
         </aside>
@@ -497,9 +504,10 @@ function ArticlePage({
   brand: React.ReactNode;
   id: string;
   onBack: () => void;
-  onSection: (c: string) => void;
+  onSection: (c: Category) => void;
   onLegal: (t: LegalTopic) => void;
 }) {
+  const t = useT(newsDict);
   const a = ARTICLES.find((x) => x.id === id);
   if (!a)
     return (
@@ -508,11 +516,11 @@ function ArticlePage({
         <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
           <EmptyState
             icon={<FileText />}
-            title="Story not found"
-            description="It may have been unpublished or the link is out of date."
+            title={t('article.notFound.title')}
+            description={t('article.notFound.body')}
             action={
               <Button variant="secondary" leadingIcon={<ArrowLeft />} onClick={onBack}>
-                Back to front page
+                {t('article.back')}
               </Button>
             }
             headingLevel={1}
@@ -534,34 +542,28 @@ function ArticlePage({
             onClick={onBack}
             className="text-foreground-muted hover:text-foreground mb-6 flex w-fit items-center gap-1.5 text-sm"
           >
-            <ArrowLeft className="size-4" aria-hidden /> Back to front page
+            <ArrowLeft className="size-4" aria-hidden /> {t('article.back')}
           </button>
           <Badge tone="accent" variant="outline">
-            {a.cat}
+            {catLabel(t, a.cat)}
           </Badge>
-          <h1 className="mt-3 text-4xl leading-tight font-semibold tracking-tight">{a.title}</h1>
-          <p className="text-foreground-muted mt-4 text-lg leading-relaxed">{a.excerpt}</p>
+          <h1 className="mt-3 text-4xl leading-tight font-semibold tracking-tight">
+            {storyTitle(t, a.id)}
+          </h1>
+          <p className="text-foreground-muted mt-4 text-lg leading-relaxed">
+            {storyExcerpt(t, a.id)}
+          </p>
           <div className="mt-5 flex items-center justify-between">
             <Byline {...a} />
-            <span className="text-foreground-subtle text-xs">6 min read</span>
+            <span className="text-foreground-subtle text-xs">
+              {t('article.readTime', { n: a.readMinutes })}
+            </span>
           </div>
           <Cover hue={a.hue} className="mt-6 aspect-[16/9] w-full rounded-lg" />
           <div className="text-foreground mt-8 max-w-[65ch] space-y-4 text-base leading-relaxed">
-            <p>
-              For years the boundary between design and engineering was a stack of hand-offs. A new
-              generation of token-driven libraries is quietly erasing it — and teams are shipping
-              measurably faster as a result.
-            </p>
-            <p>
-              The shift is subtle. Instead of pixel specs, designers ship semantic tokens; instead
-              of re-implementing them, engineers consume the same source of truth. Themes become
-              data, and dark mode stops being a project.
-            </p>
-            <p>
-              “We stopped arguing about spacing,” one lead told us. “The system decides, and we get
-              our afternoons back.” That sentiment — less debate, more shipping — came up again and
-              again across the dozen teams we spoke to.
-            </p>
+            <p>{t('article.body.1')}</p>
+            <p>{t('article.body.2')}</p>
+            <p>{t('article.body.3')}</p>
           </div>
         </article>
       </main>
@@ -571,9 +573,10 @@ function ArticlePage({
 }
 
 export function NewsTemplate({ screen, setScreen, brand }: TemplateProps) {
-  const [category, setCategory] = useState('All');
+  const [category, setCategory] = useState<Category>('all');
   // Article id lives in the hash tail (`…?id=markets-pause`) so a story can be
   // reloaded or shared; an unknown id renders the in-template not-found.
+  // `writeHash` carries `?lang=` over, so the locale survives navigation.
   const [articleId, setArticleId] = useState(() => readHashParams().get('id') ?? ARTICLES[0].id);
   const [legalTopic, setLegalTopic] = useState<LegalTopic>('privacy');
   const go = (next: string) => {
@@ -585,7 +588,7 @@ export function NewsTemplate({ screen, setScreen, brand }: TemplateProps) {
     writeHash({ id: a.id });
     setScreen('article');
   };
-  const openSection = (c: string) => {
+  const openSection = (c: Category) => {
     setCategory(c);
     go('home');
   };

@@ -9,6 +9,8 @@ import {
   SignUpForm,
 } from './Authentication';
 import { readHashParams } from './admin/use-hash-params';
+import { useT } from '../i18n/locale';
+import { authDict } from '../i18n/auth';
 
 /**
  * Authentication template — the full auth flow on the single-column, centred AuthLayout:
@@ -24,6 +26,7 @@ const noop = async () => {};
  * the preview URL carries `?demo=error` (`#preview/auth/signin?demo=error`).
  */
 function useDemoSubmit(screen: string) {
+  const t = useT(authDict);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -42,7 +45,7 @@ function useDemoSubmit(screen: string) {
     timer.current = window.setTimeout(() => {
       setLoading(false);
       if (readHashParams().get('demo') === 'error') {
-        setError("That email and password don't match. Check both and try again.");
+        setError(t('demoError'));
       } else {
         setDone(true);
         onSuccess?.();
@@ -52,12 +55,16 @@ function useDemoSubmit(screen: string) {
   return { loading, error, done, submit };
 }
 
-const DEMO_HINT = (
-  <span className="text-foreground-subtle block text-xs">
-    Demo: submissions succeed after 800ms. Add <code>?demo=error</code> to the URL to preview the
-    error state.
-  </span>
-);
+function DemoHint() {
+  const t = useT(authDict);
+  return (
+    <span className="text-foreground-subtle block text-xs">
+      {t('demoHintBefore')}
+      <code>?demo=error</code>
+      {t('demoHintAfter')}
+    </span>
+  );
+}
 
 function FootLink({ onClick, children }: { onClick: () => void; children: ReactNode }) {
   return (
@@ -72,10 +79,11 @@ function FootLink({ onClick, children }: { onClick: () => void; children: ReactN
 }
 
 export function AuthTemplate({ screen, setScreen, brand }: TemplateProps) {
+  const t = useT(authDict);
   const demo = useDemoSubmit(screen);
   const success = demo.done && (
     <Alert variant="success" live className="mb-4">
-      Signed in — this is a demo, nothing was sent.
+      {t('demoSuccess')}
     </Alert>
   );
   switch (screen) {
@@ -83,13 +91,13 @@ export function AuthTemplate({ screen, setScreen, brand }: TemplateProps) {
       return (
         <AuthLayout
           brand={brand}
-          title="Create your account"
-          subtitle="Start free, no credit card."
+          title={t('signUpTitle')}
+          subtitle={t('signUpSubtitle')}
           footer={
             <>
-              Already have an account?{' '}
-              <FootLink onClick={() => setScreen('signin')}>Sign in</FootLink>
-              {DEMO_HINT}
+              {t('haveAccount')}{' '}
+              <FootLink onClick={() => setScreen('signin')}>{t('signIn')}</FootLink>
+              <DemoHint />
             </>
           }
         >
@@ -101,11 +109,11 @@ export function AuthTemplate({ screen, setScreen, brand }: TemplateProps) {
       return (
         <AuthLayout
           brand={brand}
-          title="Forgot password?"
-          subtitle="We'll email you a reset link."
+          title={t('forgotTitle')}
+          subtitle={t('forgotSubtitle')}
           footer={
             <>
-              <FootLink onClick={() => setScreen('signin')}>Back to sign in</FootLink>
+              <FootLink onClick={() => setScreen('signin')}>{t('backToSignIn')}</FootLink>
             </>
           }
         >
@@ -120,11 +128,11 @@ export function AuthTemplate({ screen, setScreen, brand }: TemplateProps) {
       return (
         <AuthLayout
           brand={brand}
-          title="Check your inbox"
-          subtitle="We sent a magic link to your email."
+          title={t('magicTitle')}
+          subtitle={t('magicSubtitle')}
           footer={
             <>
-              <FootLink onClick={() => setScreen('signin')}>Back to sign in</FootLink>
+              <FootLink onClick={() => setScreen('signin')}>{t('backToSignIn')}</FootLink>
             </>
           }
         >
@@ -135,13 +143,13 @@ export function AuthTemplate({ screen, setScreen, brand }: TemplateProps) {
       return (
         <AuthLayout
           brand={brand}
-          title="Sign in"
-          subtitle="Welcome back. Sign in to continue."
+          title={t('signInTitle')}
+          subtitle={t('signInSubtitle')}
           footer={
             <>
-              Don't have an account?{' '}
-              <FootLink onClick={() => setScreen('signup')}>Sign up</FootLink>
-              {DEMO_HINT}
+              {t('noAccount')}{' '}
+              <FootLink onClick={() => setScreen('signup')}>{t('signUp')}</FootLink>
+              <DemoHint />
             </>
           }
         >

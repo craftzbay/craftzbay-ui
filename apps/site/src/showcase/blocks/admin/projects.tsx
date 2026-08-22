@@ -43,11 +43,13 @@ import {
   Tooltip,
   cn,
   formatNumber,
+  useStrings,
   useToast,
 } from '@craftzbay/ui';
 import {
   SEED_PROJECTS,
   STATUSES,
+  STATUS_KEY,
   STATUS_TONE,
   formatRelative,
   type Project,
@@ -56,6 +58,8 @@ import {
 import { readHashParams, useHashParams } from './use-hash-params';
 import { PageHeader, StatusIcon, useDemo } from './shell';
 import { FilterChip, ProjectDialog, useDebounced } from './projects-parts';
+import { adminDict } from '../../i18n/admin';
+import { useT } from '../../i18n/locale';
 
 /* =============================================================================
  *  Admin template — Projects: the list→detail table pattern in full.
@@ -129,6 +133,8 @@ export const Projects = forwardRef<
   { onNavigate: (key: string) => void; globalQuery: string }
 >(function Projects({ onNavigate, globalQuery }, ref) {
   const { push } = useToast();
+  const t = useT(adminDict);
+  const { relativeTime } = useStrings();
   const [items, setItems] = useState<Project[]>(SEED_PROJECTS);
   // Filter/sort/page state seeds from the URL and is written back on change,
   // so a filtered view survives reload and can be shared as a link.
@@ -235,26 +241,27 @@ export const Projects = forwardRef<
       setItems((xs) =>
         xs.map((x) => (x.id === editing.id ? { ...x, ...data, updatedAt: now } : x)),
       );
-      push({ variant: 'success', title: 'Project updated', description: data.name });
+      push({ variant: 'success', title: t('toast.projectUpdated'), description: data.name });
     } else {
       setItems((xs) => [
         { id: Math.max(0, ...xs.map((x) => x.id)) + 1, updatedAt: now, ...data },
         ...xs,
       ]);
-      push({ variant: 'success', title: 'Project created', description: data.name });
+      push({ variant: 'success', title: t('toast.projectCreated'), description: data.name });
     }
   };
   const duplicate = (p: Project) => {
+    const name = t('projects.copy', { name: p.name });
     setItems((xs) => [
       {
         ...p,
         id: Math.max(0, ...xs.map((x) => x.id)) + 1,
-        name: `${p.name} (copy)`,
+        name,
         updatedAt: new Date().toISOString(),
       },
       ...xs,
     ]);
-    push({ variant: 'success', title: 'Project duplicated', description: `${p.name} (copy)` });
+    push({ variant: 'success', title: t('toast.projectDuplicated'), description: name });
   };
   // Archive is reversible: the toast carries a 5s Undo (10s for bulk) that
   // restores the previous rows. Delete stays behind a confirm — it's permanent.
@@ -265,12 +272,14 @@ export const Projects = forwardRef<
     setSelected(new Set());
     const bulk = ps.length > 1;
     push({
-      title: bulk ? `${ps.length} projects archived` : 'Project archived',
+      title: bulk ? t('toast.projectsArchived', { n: ps.length }) : t('toast.projectArchived'),
       description: bulk ? undefined : ps[0].name,
       duration: bulk ? 10000 : 5000,
       action: {
-        label: 'Undo',
-        altText: bulk ? `Undo archiving ${ps.length} projects` : `Undo archiving ${ps[0].name}`,
+        label: t('common.undo'),
+        altText: bulk
+          ? t('undo.archiveN', { n: ps.length })
+          : t('undo.archive', { name: ps[0].name }),
         onClick: () => setItems(snapshot),
       },
     });
@@ -283,7 +292,9 @@ export const Projects = forwardRef<
     push({
       variant: 'success',
       title:
-        pendingDelete.length === 1 ? 'Project deleted' : `${pendingDelete.length} projects deleted`,
+        pendingDelete.length === 1
+          ? t('toast.projectDeleted')
+          : t('toast.projectsDeleted', { n: pendingDelete.length }),
       description: pendingDelete.length === 1 ? pendingDelete[0].name : undefined,
     });
     setPendingDelete(null);
@@ -296,11 +307,11 @@ export const Projects = forwardRef<
   if (demo.state === 'error')
     return (
       <div>
-        <PageHeader page="projects" title="Projects" onNavigate={onNavigate} />
+        <PageHeader page="projects" title={t('projects.title')} onNavigate={onNavigate} />
         <ErrorState
           variant="500"
-          title="Couldn't load projects"
-          description="The list didn't come back from the server. Your filters are kept — try again."
+          title={t('projects.errorTitle')}
+          description={t('projects.errorDesc')}
           onRetry={() => demo.setState('normal')}
           live
         />
@@ -311,14 +322,14 @@ export const Projects = forwardRef<
     <div>
       <PageHeader
         page="projects"
-        title="Projects"
+        title={t('projects.title')}
         subtitle={
           <span aria-live="polite">
             {firstRun
-              ? 'No projects'
+              ? t('projects.none')
               : filtered.length === items.length
-                ? `${items.length} projects`
-                : `${filtered.length} of ${items.length} projects`}
+                ? t('projects.count', { n: items.length })
+                : t('projects.countOf', { n: filtered.length, total: items.length })}
           </span>
         }
         actions={
@@ -329,7 +340,7 @@ export const Projects = forwardRef<
               leadingIcon={<Download />}
               className="hidden sm:inline-flex"
             >
-              Export
+              {t('common.export')}
             </Button>
             <Button
               size="sm"
@@ -340,7 +351,7 @@ export const Projects = forwardRef<
                 setDialogOpen(true);
               }}
             >
-              New project
+              {t('projects.new')}
             </Button>
           </>
         }
@@ -349,8 +360,8 @@ export const Projects = forwardRef<
 
       {firstRun ? (
         <EmptyState
-          title="No projects yet"
-          description="Projects group issues, docs and releases for one product. Create your first one or import from another tool."
+          title={t('projects.emptyTitle')}
+          description={t('projects.emptyDesc')}
           action={
             <Button
               leadingIcon={<Plus />}
@@ -359,7 +370,7 @@ export const Projects = forwardRef<
                 setDialogOpen(true);
               }}
             >
-              New project
+              {t('projects.new')}
             </Button>
           }
           secondaryAction={
@@ -371,7 +382,7 @@ export const Projects = forwardRef<
                 demo.setState('normal');
               }}
             >
-              Import
+              {t('common.import')}
             </Button>
           }
           className="min-h-[320px]"
@@ -382,10 +393,10 @@ export const Projects = forwardRef<
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <Input
               type="search"
-              label="Search projects"
+              label={t('projects.search')}
               hideLabel
               size="sm"
-              placeholder="Search projects…"
+              placeholder={t('projects.searchPlaceholder')}
               prefix={<Search className="size-4" aria-hidden />}
               value={query}
               onChange={(e) => {
@@ -403,12 +414,17 @@ export const Projects = forwardRef<
                 setPage(1);
               }}
             >
-              <SelectTrigger size="sm" aria-label="Status" placeholder="Status" className="w-36" />
+              <SelectTrigger
+                size="sm"
+                aria-label={t('filter.status')}
+                placeholder={t('filter.status')}
+                className="w-36"
+              />
               <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="all">{t('filter.allStatuses')}</SelectItem>
                 {STATUSES.map((s) => (
                   <SelectItem key={s} value={s}>
-                    {s}
+                    {t(STATUS_KEY[s])}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -420,9 +436,14 @@ export const Projects = forwardRef<
                 setPage(1);
               }}
             >
-              <SelectTrigger size="sm" aria-label="Owner" placeholder="Owner" className="w-36" />
+              <SelectTrigger
+                size="sm"
+                aria-label={t('filter.owner')}
+                placeholder={t('filter.owner')}
+                className="w-36"
+              />
               <SelectContent>
-                <SelectItem value="all">All owners</SelectItem>
+                <SelectItem value="all">{t('filter.allOwners')}</SelectItem>
                 {owners.map((o) => (
                   <SelectItem key={o} value={o}>
                     {o}
@@ -432,26 +453,35 @@ export const Projects = forwardRef<
             </Select>
             {appliedFilters > 0 && (
               <Badge tone="accent" className="tabular">
-                Filters ({appliedFilters})
+                {t('filter.count', { n: appliedFilters })}
               </Badge>
             )}
           </div>
 
           {/* Applied filter chips */}
           {appliedFilters > 0 && (
-            <div className="mb-3 flex flex-wrap items-center gap-2" aria-label="Applied filters">
+            <div
+              className="mb-3 flex flex-wrap items-center gap-2"
+              aria-label={t('filter.applied')}
+            >
               {status !== 'all' && (
-                <FilterChip onRemove={() => setStatus('all')}>Status: {status}</FilterChip>
+                <FilterChip onRemove={() => setStatus('all')}>
+                  {t('filter.statusChip', { value: t(STATUS_KEY[status]) })}
+                </FilterChip>
               )}
               {owner !== 'all' && (
-                <FilterChip onRemove={() => setOwner('all')}>Owner: {owner}</FilterChip>
+                <FilterChip onRemove={() => setOwner('all')}>
+                  {t('filter.ownerChip', { value: owner })}
+                </FilterChip>
               )}
               {debouncedQuery.length >= 2 && (
-                <FilterChip onRemove={() => setQuery('')}>Search: “{query}”</FilterChip>
+                <FilterChip onRemove={() => setQuery('')}>
+                  {t('filter.searchChip', { query })}
+                </FilterChip>
               )}
               {appliedFilters >= 2 && (
                 <Button variant="link" size="sm" onClick={clearFilters}>
-                  Clear all
+                  {t('filter.clearAll')}
                 </Button>
               )}
             </div>
@@ -462,18 +492,20 @@ export const Projects = forwardRef<
             {selected.size > 0 && (
               <div
                 role="toolbar"
-                aria-label="Bulk actions"
+                aria-label={t('bulk.label')}
                 className="border-border bg-accent-soft text-on-accent-soft sticky top-0 z-20 flex flex-wrap items-center gap-2 border-b px-3 py-2 text-sm"
               >
                 <Checkbox
-                  aria-label="Deselect all"
+                  aria-label={t('bulk.deselectAll')}
                   checked={allOnPage ? true : someOnPage ? 'indeterminate' : false}
                   onCheckedChange={(c) => toggleAll(c === true)}
                 />
-                <span className="tabular font-medium">{selected.size} selected</span>
+                <span className="tabular font-medium">
+                  {t('bulk.selected', { n: selected.size })}
+                </span>
                 <div className="ml-2 flex items-center gap-1">
                   <Button variant="outline" size="sm" leadingIcon={<Download />}>
-                    Export
+                    {t('common.export')}
                   </Button>
                   <Button
                     variant="outline"
@@ -481,7 +513,7 @@ export const Projects = forwardRef<
                     leadingIcon={<Inbox />}
                     onClick={() => archive(selectedRows)}
                   >
-                    Archive
+                    {t('common.archive')}
                   </Button>
                   <Button
                     variant="destructive"
@@ -489,7 +521,7 @@ export const Projects = forwardRef<
                     leadingIcon={<Trash2 />}
                     onClick={() => setPendingDelete(selectedRows)}
                   >
-                    Delete
+                    {t('common.delete')}
                   </Button>
                 </div>
                 {selected.size < filtered.length && (
@@ -499,11 +531,11 @@ export const Projects = forwardRef<
                     className="ml-auto"
                     onClick={() => setSelected(new Set(filtered.map((p) => p.id)))}
                   >
-                    Select all {filtered.length}
+                    {t('bulk.selectAll', { n: filtered.length })}
                   </Button>
                 )}
                 <IconButton
-                  aria-label="Clear selection"
+                  aria-label={t('bulk.clear')}
                   icon={<X />}
                   variant="ghost"
                   size="sm"
@@ -517,7 +549,7 @@ export const Projects = forwardRef<
                 <TableRow>
                   <TableHead className={STICKY_CHECK}>
                     <Checkbox
-                      aria-label="Select all on this page"
+                      aria-label={t('table.selectAllPage')}
                       checked={allOnPage ? true : someOnPage ? 'indeterminate' : false}
                       onCheckedChange={(c) => toggleAll(c === true)}
                       disabled={loading || rows.length === 0}
@@ -529,10 +561,10 @@ export const Projects = forwardRef<
                     onSortChange={onSort}
                     className={STICKY_NAME}
                   >
-                    Name
+                    {t('col.name')}
                   </TableSortHeader>
                   <TableSortHeader sortKey="status" currentSort={sort} onSortChange={onSort}>
-                    Status
+                    {t('col.status')}
                   </TableSortHeader>
                   <TableSortHeader
                     sortKey="owner"
@@ -540,7 +572,7 @@ export const Projects = forwardRef<
                     onSortChange={onSort}
                     className="hidden md:table-cell"
                   >
-                    Owner
+                    {t('col.owner')}
                   </TableSortHeader>
                   <TableSortHeader
                     sortKey="updatedAt"
@@ -548,10 +580,10 @@ export const Projects = forwardRef<
                     onSortChange={onSort}
                     className="hidden sm:table-cell [&>button]:justify-end"
                   >
-                    Updated
+                    {t('col.updated')}
                   </TableSortHeader>
                   <TableHead className="w-24 text-right">
-                    <span className="sr-only">Actions</span>
+                    <span className="sr-only">{t('common.actions')}</span>
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -580,13 +612,13 @@ export const Projects = forwardRef<
                       </TableRow>
                     ))
                   : rows.map((p) => {
-                      const rel = formatRelative(p.updatedAt);
+                      const rel = formatRelative(p.updatedAt, relativeTime);
                       const isSelected = selected.has(p.id);
                       return (
                         <TableRow key={p.id} selected={isSelected} className="group">
                           <TableCell className={STICKY_CHECK}>
                             <Checkbox
-                              aria-label={`Select ${p.name}`}
+                              aria-label={t('row.select', { name: p.name })}
                               checked={isSelected}
                               onCheckedChange={(c) => toggleOne(p.id, c === true)}
                             />
@@ -603,7 +635,7 @@ export const Projects = forwardRef<
                           <TableCell>
                             <Badge tone={STATUS_TONE[p.status]}>
                               <StatusIcon tone={STATUS_TONE[p.status]} />
-                              {p.status}
+                              {t(STATUS_KEY[p.status])}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-foreground-muted hidden md:table-cell">
@@ -617,9 +649,9 @@ export const Projects = forwardRef<
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center justify-end gap-0.5">
-                              <Tooltip label="Edit">
+                              <Tooltip label={t('common.edit')}>
                                 <IconButton
-                                  aria-label={`Edit ${p.name}`}
+                                  aria-label={t('row.edit', { name: p.name })}
                                   icon={<Pencil />}
                                   variant="ghost"
                                   size="sm"
@@ -632,7 +664,7 @@ export const Projects = forwardRef<
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <IconButton
-                                    aria-label={`More actions for ${p.name}`}
+                                    aria-label={t('row.more', { name: p.name })}
                                     icon={<MoreHorizontal />}
                                     variant="ghost"
                                     size="sm"
@@ -640,20 +672,20 @@ export const Projects = forwardRef<
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem onSelect={() => duplicate(p)}>
-                                    <Copy className="size-4" aria-hidden /> Duplicate
+                                    <Copy className="size-4" aria-hidden /> {t('common.duplicate')}
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
                                     onSelect={() => archive([p])}
                                     disabled={p.status === 'Archived'}
                                   >
-                                    <Inbox className="size-4" aria-hidden /> Archive
+                                    <Inbox className="size-4" aria-hidden /> {t('common.archive')}
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator />
                                   <DropdownMenuItem
                                     destructive
                                     onSelect={() => setPendingDelete([p])}
                                   >
-                                    <Trash2 className="size-4" aria-hidden /> Delete
+                                    <Trash2 className="size-4" aria-hidden /> {t('common.delete')}
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
@@ -668,15 +700,15 @@ export const Projects = forwardRef<
                       {/* Filtered-empty: header + chips stay so the filter can be undone. */}
                       <EmptyState
                         icon={<Folder />}
-                        title="No projects match"
+                        title={t('projects.noMatch')}
                         description={
                           debouncedQuery.length >= 2
-                            ? `Nothing matches “${query}” with the current filters.`
-                            : 'Nothing matches the current filters.'
+                            ? t('projects.noMatchQuery', { query })
+                            : t('projects.noMatchDesc')
                         }
                         action={
                           <Button variant="outline" size="sm" onClick={clearFilters}>
-                            Clear filters
+                            {t('filter.clear')}
                           </Button>
                         }
                         className="min-h-[200px] rounded-none border-0 bg-transparent"
@@ -721,12 +753,14 @@ export const Projects = forwardRef<
         onOpenChange={(o) => !o && setPendingDelete(null)}
         title={
           pendingDelete && pendingDelete.length === 1
-            ? `Delete “${pendingDelete[0].name}”?`
-            : `Delete ${pendingDelete?.length ?? 0} projects?`
+            ? t('delete.titleOne', { name: pendingDelete[0].name })
+            : t('delete.titleN', { n: pendingDelete?.length ?? 0 })
         }
-        description="This permanently removes the project and its issues, docs and releases. This cannot be undone."
+        description={t('delete.desc')}
         confirmLabel={
-          pendingDelete && pendingDelete.length === 1 ? 'Delete project' : 'Delete projects'
+          pendingDelete && pendingDelete.length === 1
+            ? t('delete.confirmOne')
+            : t('delete.confirmN')
         }
         confirmVariant="destructive"
         onConfirm={confirmDelete}
