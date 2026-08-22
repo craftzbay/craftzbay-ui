@@ -158,7 +158,7 @@ export function PreviewPage({
     >
       <PreviewBoundary>
         <Suspense fallback={<DelayedFallback />}>
-          <LocaleProvider locale={locale}>
+          <LocaleProvider locale={locale} onChange={setLocale}>
             <DesignSystemProvider strings={locale === 'mn' ? mnStrings : undefined}>
               <BlockPreview
                 slug={slug}

@@ -28,9 +28,28 @@ export function defineDict<const E extends Record<string, string>>(dict: {
 export type Dict = ReturnType<typeof defineDict<Record<string, string>>>;
 
 const LocaleContext = createContext<Locale>('en');
+const SetLocaleContext = createContext<((next: Locale) => void) | null>(null);
 
-export function LocaleProvider({ locale, children }: { locale: Locale; children: ReactNode }) {
-  return <LocaleContext.Provider value={locale}>{children}</LocaleContext.Provider>;
+export function LocaleProvider({
+  locale,
+  onChange,
+  children,
+}: {
+  locale: Locale;
+  /** Optional — lets templates (admin top bar) switch the language themselves. */
+  onChange?: (next: Locale) => void;
+  children: ReactNode;
+}) {
+  return (
+    <LocaleContext.Provider value={locale}>
+      <SetLocaleContext.Provider value={onChange ?? null}>{children}</SetLocaleContext.Provider>
+    </LocaleContext.Provider>
+  );
+}
+
+/** Setter from the nearest provider; `null` when the host doesn't allow switching. */
+export function useSetLocale(): ((next: Locale) => void) | null {
+  return useContext(SetLocaleContext);
 }
 
 export function useLocale(): Locale {

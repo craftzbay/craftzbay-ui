@@ -20,7 +20,7 @@ import { useModifierKey } from '@/hooks/use-modifier-key';
 import { useTheme, type Theme } from '../../theme/theme-context';
 import { MonitorIcon, NEXT_THEME } from '../../theme/Controls';
 import { adminDict, type AdminKey } from '../../i18n/admin';
-import { useT } from '../../i18n/locale';
+import { useT, useLocale, useSetLocale } from '../../i18n/locale';
 import {
   Avatar,
   Badge,
@@ -41,6 +41,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  Button,
   IconButton,
   Input,
   Kbd,
@@ -787,6 +788,8 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
   const { relativeTime } = useStrings();
   // Site-wide theme (same store as the preview dock), so both stay in sync.
   const { theme, setTheme, toggleTheme } = useTheme();
+  const locale = useLocale();
+  const setLocale = useSetLocale();
   const themeLabel = (th: Theme) => t(`theme.${th}`);
   return (
     <TopNav
@@ -879,6 +882,20 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
               onClick={toggleTheme}
             />
           </Tooltip>
+
+          {setLocale && (
+            <Tooltip label={t('topnav.lang')}>
+              <Button
+                variant="ghost"
+                size="sm"
+                aria-label={t('topnav.langSwitch')}
+                className="px-2 font-semibold tabular-nums"
+                onClick={() => setLocale(locale === 'en' ? 'mn' : 'en')}
+              >
+                {locale === 'en' ? 'MN' : 'EN'}
+              </Button>
+            </Tooltip>
+          )}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
