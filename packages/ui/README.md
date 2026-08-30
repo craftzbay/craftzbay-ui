@@ -88,7 +88,7 @@ Precedence is per-component props (`placeholder`, `labels`, `aria-label`) → ne
 
 This library implements the [craftzbay design-research](https://github.com/craftzbay/design-research) guidelines
 ([rendered site](https://craftzbay.github.io/design-research/)) — colour, type, spacing, components, accessibility, tokens.
-design-research is the source of truth (canonical numbers in [`14-defaults.md`](https://github.com/craftzbay/design-research/blob/main/14-defaults.md));
+design-research is the source of truth (canonical numbers in [`00-defaults.md`](https://github.com/craftzbay/design-research/blob/main/00-defaults.md));
 [`docs/PHILOSOPHY.md`](./docs/PHILOSOPHY.md) is the library-specific summary.
 
 ## Local development

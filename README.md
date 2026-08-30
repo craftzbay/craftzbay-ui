@@ -50,7 +50,7 @@ Full setup (providers, fonts, dark mode) in [`packages/ui/README.md`](./packages
 
 The library implements the [craftzbay/design-research](https://github.com/craftzbay/design-research) guidelines
 ([rendered](https://craftzbay.github.io/design-research/)) — that repo is the source of truth
-([`14-defaults.md`](https://github.com/craftzbay/design-research/blob/main/14-defaults.md) holds the canonical numbers);
+([`00-defaults.md`](https://github.com/craftzbay/design-research/blob/main/00-defaults.md) holds the canonical numbers);
 [`packages/ui/docs/PHILOSOPHY.md`](./packages/ui/docs/PHILOSOPHY.md) summarises it.
 
 ## Develop
