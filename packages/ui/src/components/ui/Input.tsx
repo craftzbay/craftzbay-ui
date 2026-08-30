@@ -50,6 +50,11 @@ const field = cva(
 
 const innerInput = cva([
   'flex-1 min-w-0 bg-transparent outline-none',
+  // Fill the field's height so the focusable target is the full control
+  // (32/36/40px), not the ~20px text box. Below 24px axe's target-size
+  // rule only passes while nothing sits close by, which is a trap for
+  // consumers packing a toolbar.
+  'self-stretch',
   'placeholder:text-foreground-subtle',
   'text-foreground',
   // 16px below md so iOS Safari does not zoom the page on focus; --text-lg = 1rem.
