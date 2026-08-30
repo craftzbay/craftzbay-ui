@@ -120,24 +120,16 @@ export function WorkspaceSwitcher({
               <span className="text-foreground truncate text-sm font-semibold" title={ws.name}>
                 {ws.name}
               </span>
-              <Badge tone="neutral" variant="outline" className="hidden sm:inline-flex">
-                {t(ws.plan)}
-              </Badge>
               <ChevronsUpDown className="text-foreground-subtle size-4 shrink-0" aria-hidden />
             </>
           ) : (
             !collapsed && (
               <>
-                <span className="min-w-0 flex-1 leading-tight">
-                  <span
-                    className="text-foreground block truncate text-sm font-semibold"
-                    title={ws.name}
-                  >
-                    {ws.name}
-                  </span>
-                  <span className="text-foreground-subtle block text-xs">
-                    {t('ws.plan', { plan: t(ws.plan) })}
-                  </span>
+                <span
+                  className="text-foreground min-w-0 flex-1 truncate text-sm font-semibold"
+                  title={ws.name}
+                >
+                  {ws.name}
                 </span>
                 <ChevronsUpDown className="text-foreground-subtle size-4 shrink-0" aria-hidden />
               </>
@@ -151,11 +143,8 @@ export function WorkspaceSwitcher({
         {WORKSPACES.map((w) => (
           <DropdownMenuItem key={w.id} onSelect={() => onChange(w.id)} className="gap-2">
             <Avatar size="sm" fallback={w.initial} alt="" />
-            <span className="flex min-w-0 flex-1 flex-col">
-              <span className="text-foreground truncate text-sm" title={w.name}>
-                {w.name}
-              </span>
-              <span className="text-foreground-subtle text-xs">{t(w.plan)}</span>
+            <span className="text-foreground min-w-0 flex-1 truncate text-sm" title={w.name}>
+              {w.name}
             </span>
             {w.id === value && <Check className="text-accent size-4" aria-hidden />}
           </DropdownMenuItem>

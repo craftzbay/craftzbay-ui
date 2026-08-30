@@ -44,6 +44,13 @@ export const TopNav = forwardRef<HTMLElement, TopNavProps>(function TopNav(
       ref={ref}
       className={cn(
         'sticky top-0 z-[var(--z-sticky)] flex h-14 w-full items-center gap-4',
+        // Fixed three-column track from lg up: the centre slot keeps its
+        // position however wide the logo slot grows, so navigating between
+        // pages (breadcrumbs of different lengths) never shifts the search.
+        // Below lg the bar stays flex — there is not enough room for three
+        // tracks, and logo slots that vary in width (breadcrumbs) are hidden
+        // at those widths anyway.
+        search && 'lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)_minmax(0,1fr)]',
         'border-border bg-background border-b px-4',
         className,
       )}
@@ -60,7 +67,7 @@ export const TopNav = forwardRef<HTMLElement, TopNavProps>(function TopNav(
           </nav>
         )}
       </div>
-      {search && <div className="mx-auto max-w-md flex-1">{search}</div>}
+      {search && <div className="mx-auto w-full max-w-md flex-1 lg:flex-none">{search}</div>}
       {actions && <div className="ml-auto flex shrink-0 items-center gap-2">{actions}</div>}
     </header>
   );
