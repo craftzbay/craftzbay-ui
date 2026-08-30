@@ -1,5 +1,23 @@
 # @craftzbay/ui
 
+## 0.11.1
+
+### Patch Changes
+
+- 4a05b8f: Input: the inner `<input>` now stretches to the field's height, so the
+  focusable target is the full 32/36/40px control instead of the ~20px text box.
+  Below 24px axe's `target-size` rule only passes while nothing sits close by,
+  which broke as soon as the field was packed into a toolbar.
+- ad64552: Input: `type="search"` no longer shows two clear buttons. The native WebKit
+  search cancel button is suppressed so only the `clearable` button renders.
+
+  TopNav: the `search` slot keeps a fixed position from `md` up. The bar now
+  lays out as three tracks, so a wider logo slot (breadcrumbs that change per
+  page) no longer shifts the search box sideways on navigation.
+
+- 4d3b80f: Point the showcase links and package `homepage` at https://ui.gecore.mn, the
+  new home of the documentation site.
+
 ## 0.11.0
 
 ### Minor Changes
