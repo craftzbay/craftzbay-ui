@@ -270,7 +270,6 @@ export function AdminDashboard({
             />
 
             <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-              {banner && <EnvBanner />}
               <AppTopNav
                 ref={searchRef}
                 workspace={ws}
@@ -287,6 +286,7 @@ export function AdminDashboard({
                 page={page}
                 onWorkspaceChange={setWorkspace}
               />
+              {banner && <EnvBanner />}
               <main
                 id="main"
                 tabIndex={-1}

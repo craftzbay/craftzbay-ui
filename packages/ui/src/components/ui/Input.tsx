@@ -55,6 +55,10 @@ const innerInput = cva([
   // 16px below md so iOS Safari does not zoom the page on focus; --text-lg = 1rem.
   'text-lg md:text-sm',
   'disabled:cursor-not-allowed',
+  // `type="search"` draws a native clear button in WebKit/Chromium. We render
+  // our own via `clearable`, so suppress the native one or both show at once.
+  '[&::-webkit-search-cancel-button]:appearance-none',
+  '[&::-webkit-search-decoration]:appearance-none',
 ]);
 
 type InputType = NonNullable<InputHTMLAttributes<HTMLInputElement>['type']>;
