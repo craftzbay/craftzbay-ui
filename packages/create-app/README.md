@@ -43,7 +43,7 @@ npm create @craftzbay/app my-app -- --template vite-dashboard
 
 ## Docs
 
-- Showcase: <https://ui.gecore.mn>
-- Components: <https://ui.gecore.mn/#components>
-- Templates: <https://ui.gecore.mn/#templates>
-- Guides: <https://ui.gecore.mn/#guides>
+- Showcase: <https://ui.craftzbay.com>
+- Components: <https://ui.craftzbay.com/#components>
+- Templates: <https://ui.craftzbay.com/#templates>
+- Guides: <https://ui.craftzbay.com/#guides>

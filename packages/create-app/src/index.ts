@@ -230,7 +230,7 @@ async function run() {
       ...(installNow ? [] : [`    ${kleur.cyan(`${pm} install`)}`]),
       `    ${kleur.cyan(`${pm} run dev`)}`,
       '',
-      kleur.gray('  Docs: https://ui.gecore.mn'),
+      kleur.gray('  Docs: https://ui.craftzbay.com'),
     ].join('\n'),
   );
 }

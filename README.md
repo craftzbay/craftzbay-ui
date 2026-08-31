@@ -6,7 +6,7 @@
 
 Monorepo for **[@craftzbay/ui](https://www.npmjs.com/package/@craftzbay/ui)** — a
 refined-minimal Tailwind v4 + React design system — and its showcase site.
-Live demo: **[ui.gecore.mn](https://ui.gecore.mn)**.
+Live demo: **[ui.craftzbay.com](https://ui.craftzbay.com)**.
 
 > Aesthetic direction: Linear / Vercel / Stripe Dashboard / Notion / Raycast.
 > Neutral-dominant, one accent, hairline borders, generous whitespace, fast quiet motion.

@@ -4,7 +4,7 @@
   "description": "Scaffold a new project preconfigured with @craftzbay/ui. Invoke via `npm create @craftzbay/app my-app`.",
   "license": "MIT",
   "author": "craftzbay",
-  "homepage": "https://ui.gecore.mn",
+  "homepage": "https://ui.craftzbay.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/craftzbay/craftzbay-ui.git",
