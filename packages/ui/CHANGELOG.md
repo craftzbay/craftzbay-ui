@@ -1,5 +1,12 @@
 # @craftzbay/ui
 
+## 0.11.2
+
+### Patch Changes
+
+- 88415b8: Point the showcase links and package `homepage` at https://ui.craftzbay.com, the
+  canonical home of the design system.
+
 ## 0.11.1
 
 ### Patch Changes
