@@ -290,7 +290,13 @@ export function AdminDashboard({
               <main
                 id="main"
                 tabIndex={-1}
-                className="bg-background-subtle min-h-0 flex-1 overflow-y-auto p-4 pb-[max(1rem,env(safe-area-inset-bottom))] outline-none md:p-6 md:pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+                // `relative`: a scroll pane must be the containing block for its
+                // absolutely positioned descendants. Without it an `sr-only`
+                // label (position:absolute) deep in a long page resolves against
+                // the initial containing block, escapes both this pane's and the
+                // shell's overflow, and grows the document — a second scrollbar
+                // and dead space below the shell.
+                className="bg-background-subtle relative min-h-0 flex-1 overflow-y-auto p-4 pb-[max(1rem,env(safe-area-inset-bottom))] outline-none md:p-6 md:pb-[max(1.5rem,env(safe-area-inset-bottom))]"
               >
                 <div className="mx-auto max-w-[1440px]">
                   {!known && <NotFoundPage page={page} onNavigate={navigate} />}

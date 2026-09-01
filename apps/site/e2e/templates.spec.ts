@@ -4,6 +4,7 @@ import {
   expectAxeClean,
   expectFocusVisible,
   expectNoErrors,
+  expectNoDocumentScroll,
   expectNoHorizontalOverflow,
   gotoHash,
   recordFinding,
@@ -43,6 +44,7 @@ for (const [vpName, viewport] of Object.entries(VIEWPORTS)) {
           expect.soft(mains, 'a <main> landmark').toBeGreaterThanOrEqual(1);
 
           await expectNoHorizontalOverflow(page, theme, info);
+          if (route.shell === 'app') await expectNoDocumentScroll(page, theme, info);
           await expectAxeClean(page, theme, info);
           await expectFocusVisible(page, theme, info, 15);
           await expectNoErrors(page, errors, theme, info);

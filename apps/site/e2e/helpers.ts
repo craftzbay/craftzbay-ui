@@ -166,6 +166,50 @@ export async function expectNoHorizontalOverflow(page: Page, theme: Theme, info:
     .toBeLessThanOrEqual(clientWidth);
 }
 
+/**
+ * `app` shells own the viewport: only their own panes scroll, so the document
+ * itself must never grow past it. The usual culprit is an absolutely
+ * positioned descendant (`sr-only` labels above all) inside a scroll pane that
+ * is not `position: relative` — its containing block becomes the initial one,
+ * so it escapes every ancestor's overflow and stretches the document.
+ */
+export async function expectNoDocumentScroll(page: Page, theme: Theme, info: TestInfo) {
+  const { scrollHeight, clientHeight, offenders } = await page.evaluate(() => {
+    const doc = document.documentElement;
+    const vh = doc.clientHeight;
+    const offenders: string[] = [];
+    if (doc.scrollHeight > vh + 1) {
+      for (const el of Array.from(document.body.querySelectorAll<HTMLElement>('*'))) {
+        const r = el.getBoundingClientRect();
+        if (r.bottom <= vh + 1) continue;
+        const id = el.id ? `#${el.id}` : '';
+        const cls =
+          typeof el.className === 'string'
+            ? '.' + el.className.trim().split(/\s+/).slice(0, 4).join('.')
+            : '';
+        offenders.push(
+          `${el.tagName.toLowerCase()}${id}${cls} [${Math.round(r.top)}\u2192${Math.round(r.bottom)}]`,
+        );
+        if (offenders.length >= 8) break;
+      }
+    }
+    return { scrollHeight: doc.scrollHeight, clientHeight: vh, offenders };
+  });
+  if (scrollHeight > clientHeight + 1) {
+    recordFinding(info, {
+      ...ctx(page, theme),
+      kind: 'overflow',
+      detail: { scrollHeight, clientHeight, offenders },
+    });
+  }
+  expect
+    .soft(
+      scrollHeight,
+      `document scrolls behind a viewport-locked shell (scrollHeight ${scrollHeight} > viewport ${clientHeight}); below the fold: ${offenders.join(' | ')}`,
+    )
+    .toBeLessThanOrEqual(clientHeight + 1);
+}
+
 const AXE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'];
 
 export interface AxeOptions {
