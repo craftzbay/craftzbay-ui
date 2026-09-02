@@ -36,13 +36,17 @@ const button = cva(
     variants: {
       variant: {
         primary: ['bg-accent text-on-accent', 'hover:bg-accent-hover', 'active:bg-accent-active'],
+        // A button carries its own label, so its edge is not what identifies it:
+        // WCAG 1.4.11 asks for 3:1 only where the boundary is the sole cue
+        // (fields, checkbox, radio). --border-strong keeps the shape without
+        // eight dark rectangles in a toolbar; prefers-contrast: more darkens it.
         secondary: [
-          'bg-background-muted text-foreground border border-border-input',
+          'bg-background-muted text-foreground border border-border-strong',
           'hover:bg-surface-hover',
           'active:bg-surface-active',
         ],
         outline: [
-          'border border-border-input bg-transparent text-foreground',
+          'border border-border-strong bg-transparent text-foreground',
           'hover:bg-background-muted',
           'active:bg-background-subtle',
         ],

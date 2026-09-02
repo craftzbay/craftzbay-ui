@@ -144,8 +144,8 @@ describe('header comment ratios are not stale', () => {
     ['--foreground', '--background', 17.9],
     ['--foreground-muted', '--background', 7.4],
     ['--foreground-subtle', '--background', 5.1],
-    ['--border-input', '--background', 3.55],
-    ['--border-input', '--background-muted', 3.24],
+    ['--border-input', '--background', 3.32],
+    ['--border-input', '--background-muted', 3.04],
     ['--accent-foreground', '--accent', 7.7],
   ])('light %s on %s ≈ %s', (fg, bg, documented) => {
     expect(ratio(theme.light, { fg, bg, min: 0 }).value).toBeCloseTo(documented, 0);

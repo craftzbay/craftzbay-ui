@@ -21,10 +21,12 @@ const iconButton = cva(
     variants: {
       variant: {
         primary: 'bg-accent text-on-accent hover:bg-accent-hover active:bg-accent-active',
+        // Edge follows Button: the icon identifies the control, so the boundary
+        // is not the 3:1 carrier (WCAG 1.4.11) — see Button.tsx.
         secondary:
-          'bg-background-muted text-foreground border border-border-input hover:bg-surface-hover active:bg-surface-active',
+          'bg-background-muted text-foreground border border-border-strong hover:bg-surface-hover active:bg-surface-active',
         outline:
-          'border border-border-input bg-transparent text-foreground hover:bg-background-muted',
+          'border border-border-strong bg-transparent text-foreground hover:bg-background-muted',
         ghost:
           'bg-transparent text-foreground-muted hover:bg-background-muted hover:text-foreground',
         destructive: 'bg-danger text-on-danger hover:bg-danger-hover active:bg-danger-active',
