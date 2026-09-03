@@ -1,5 +1,42 @@
 # @craftzbay/ui
 
+## 0.11.3
+
+### Patch Changes
+
+- afda339: Form controls wear a lighter edge. `--border-input` moves from `hsl(215 16% 55%)`
+  to `hsl(215 16% 57%)` (#808ea3): 3.32:1 on `--background` and 3.04:1 on
+  `--background-muted`, still clearing WCAG 1.4.11 on every surface a field sits
+  on — and the lightest value that does. One step further (58%) drops to 2.92:1
+  on a muted panel.
+
+  Buttons no longer carry a field's edge. `Button` and `IconButton` in `secondary`
+  and `outline` take `--border-strong` instead of `--border-input`. Understanding
+  1.4.11 (rewritten 2026-06-01) asks for 3:1 only where the boundary is the sole
+  cue for the control; a button states its own name, so its edge is not that cue —
+  unlike a field, a checkbox or a radio, which keep `--border-input`. Under
+  `prefers-contrast: more` `--border-strong` already darkens to the old value.
+
+  Measured against 16 other systems: shadcn 1.26, Bootstrap 1.30, Ant 1.41,
+  Mantine 1.49, MUI 1.74 sit below the threshold; Spectrum 3.19, Atlassian 3.24
+  and Carbon 3.32 meet it on their own ground only. The library still meets it on
+  every surface.
+
+- ae3964e: Opening a modal layer no longer shoves the page sideways. Radix (Select,
+  Combobox, DropdownMenu, Dialog, Sheet…) locks the page with
+  react-remove-scroll, which hides the page scrollbar and then pads `<body>` by
+  the width it just reclaimed. `theme.css` already reserves that width
+  permanently with `scrollbar-gutter: stable`, so the compensation double-counted
+  and the whole page slid across for as long as a menu was open — visible only
+  with classic (non-overlay) scrollbars, which is why it never showed up
+  headless. The base layer now refuses that padding.
+
+  Showcase alignment: the home page was on `max-w-6xl` while the top bar and
+  footer are `max-w-[1400px]`, so the hero started 124px right of the brand mark
+  above it; the docs rail added `px-4` on top of the container's `px-6`, putting
+  Components, Templates, Guides and every component page 16px right of the same
+  mark. Both now start on the site column.
+
 ## 0.11.2
 
 ### Patch Changes
