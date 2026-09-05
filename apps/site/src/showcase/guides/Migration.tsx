@@ -81,7 +81,7 @@ export function MigrationBody() {
   title="Welcome to Atlas"
   steps={[
     { icon: <Plus />,   title: 'Create',  description: '…', cta: 'New', onSelect: handleNew },
-    { icon: <Github />, title: 'Import',  description: '…', cta: 'Connect' },
+    { icon: <Code />, title: 'Import',  description: '…', cta: 'Connect' },
   ]}
 />`}
       />

@@ -4,7 +4,7 @@ import { Button } from '@craftzbay/ui';
 import { Input } from '@craftzbay/ui';
 import { Alert } from '@craftzbay/ui';
 import { Separator } from '@craftzbay/ui';
-import { Github } from '@/icons';
+import { Code } from '@/icons';
 import { useT } from '../i18n/locale';
 import { authDict } from '../i18n/auth';
 
@@ -116,7 +116,7 @@ export function SsoButtons({ onProvider }: SsoButtonsProps) {
           type="button"
           variant="outline"
           className="w-full"
-          leadingIcon={<Github />}
+          leadingIcon={<Code />}
           onClick={() => onProvider?.('github')}
         >
           {t('ssoGithub')}

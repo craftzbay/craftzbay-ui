@@ -1,5 +1,5 @@
 import { useState, type MouseEvent, type ReactNode } from 'react';
-import { ArrowRight, BarChart3, Github, Lock, Menu, Plug, Sparkles, Star, Zap } from '@/icons';
+import { ArrowRight, BarChart3, Code, Lock, Menu, Plug, Sparkles, Star, Zap } from '@/icons';
 import { Avatar } from '@craftzbay/ui';
 import { Button } from '@craftzbay/ui';
 import { Card, CardContent } from '@craftzbay/ui';
@@ -54,7 +54,7 @@ const features = (t: T) => [
   { icon: BarChart3, title: t('featInsightTitle'), body: t('featInsightBody') },
   { icon: Plug, title: t('featIntegrateTitle'), body: t('featIntegrateBody') },
   { icon: Sparkles, title: t('featDelightTitle'), body: t('featDelightBody') },
-  { icon: Github, title: t('featOpenTitle'), body: t('featOpenBody') },
+  { icon: Code, title: t('featOpenTitle'), body: t('featOpenBody') },
 ];
 
 const steps = (t: T) => [

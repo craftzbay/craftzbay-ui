@@ -9,7 +9,7 @@ const doc: ComponentDoc = {
   group: 'Data Display',
   description:
     'Minimal SVG charts — LineChart, AreaChart and BarChart. Light axis + gridlines, keyboard-navigable points, and a hidden data table for screen readers: purpose-built for inline trend illustration. For data-dense analytics, integrate a charting library.',
-  exports: ['LineChart', 'AreaChart', 'BarChart'],
+  exports: ['LineChart', 'AreaChart', 'BarChart', 'abbreviateNumber'],
   i18n: 'Reads `chart.*` (loading / empty / error copy, table toggle, summary, point and series-navigation sentences).',
   sourceFile: 'Chart.tsx',
   examples: [
@@ -78,6 +78,7 @@ const doc: ComponentDoc = {
   ],
   api: [
     {
+      title: 'LineChart / AreaChart / BarChart',
       rows: [
         {
           name: 'data',
@@ -104,6 +105,18 @@ const doc: ComponentDoc = {
   accessibility: [
     'Renders <figure> with <figcaption> for the caption — screen readers announce it.',
     'For data-dense analytics, prefer a dedicated library (Recharts / Visx) with proper interactive tables.',
+    {
+      title: 'abbreviateNumber(n)',
+      rows: [
+        {
+          name: 'n',
+          type: 'number',
+          required: true,
+          description:
+            'Axis-tick formatter the charts use: 1234 → "1.2K", 3400000 → "3.4M", 2e9 → "2B" (one decimal, sign kept); below 1,000 integers stay as is and fractions round to two decimals.',
+        },
+      ],
+    },
   ],
   guidelines: {
     do: [
