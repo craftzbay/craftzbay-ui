@@ -30,7 +30,7 @@ function useDemoSubmit(screen: string) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
-  const timer = useRef<number>();
+  const timer = useRef<number | undefined>(undefined);
   // Reset when the screen changes — adjusted during render, the React way to
   // derive state from a prop change without an effect round-trip.
   const [prevScreen, setPrevScreen] = useState(screen);

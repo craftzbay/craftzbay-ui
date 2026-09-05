@@ -579,7 +579,7 @@ export interface AppSidebarProps {
   drawerOpen: boolean;
   onDrawerOpenChange: (open: boolean) => void;
   /** The hamburger that opens the drawer — focus returns to it on close. */
-  drawerTriggerRef?: RefObject<HTMLButtonElement>;
+  drawerTriggerRef?: RefObject<HTMLButtonElement | null>;
   /** Desktop chrome (≥lg). Every mode keeps the drawer below lg. */
   mode?: AppSidebarMode;
   /** Active module for `dual`. */
@@ -742,7 +742,7 @@ export interface AppTopNavProps {
   workspace: Workspace;
   onOpenDrawer: () => void;
   /** Ref to the hamburger so the drawer can restore focus on close. */
-  drawerTriggerRef?: RefObject<HTMLButtonElement>;
+  drawerTriggerRef?: RefObject<HTMLButtonElement | null>;
   onOpenPalette: () => void;
   onNavigate: (key: string) => void;
   onSignOut: () => void;

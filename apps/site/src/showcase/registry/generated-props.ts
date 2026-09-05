@@ -3027,7 +3027,7 @@ export const generatedProps: Record<string, PropGroup[]> = {
         },
         {
           "name": "rules",
-          "type": "Omit<RegisterOptions<TFieldValues, TName>, \"disabled\" | \"valueAsNumber\" | \"valueAsDate\" | \"setValueAs\">",
+          "type": "Omit<RegisterOptions<TFieldValues, TName>, \"valueAsNumber\" | \"valueAsDate\" | \"setValueAs\" | \"disabled\">",
           "required": false,
           "description": ""
         },

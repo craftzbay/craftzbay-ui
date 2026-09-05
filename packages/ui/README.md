@@ -109,7 +109,7 @@ Inside `packages/ui` itself, `pnpm build` produces the distributable bundle and
 ## Tech stack
 
 - **Tailwind CSS v4** — tokens defined in `@theme` in `src/styles/theme.css` (`globals.css` = tailwind + tw-animate-css + theme)
-- **React 18 / 19** + **TypeScript 5.7**
+- **React 18 / 19** + **TypeScript 5.7+**
 - **Radix UI** primitives for accessibility-correct overlays
 - **class-variance-authority** + `cn()` (`clsx` + `tailwind-merge`)
 - **Lucide** icons (16 / 20px, 1.5 stroke)
