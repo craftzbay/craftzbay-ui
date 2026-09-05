@@ -26,7 +26,23 @@ const CLI = path.join(ROOT, 'dist/index.js');
 const UI_SRC = path.resolve(ROOT, '../ui/src');
 const TSC = path.resolve(ROOT, '../../node_modules/.bin/tsc');
 const CACHE = path.join(ROOT, 'node_modules/.cache/czui-smoke');
+const UI_VERSION = JSON.parse(
+  readFileSync(path.resolve(ROOT, '../ui/package.json'), 'utf8'),
+).version;
 mkdirSync(CACHE, { recursive: true });
+
+/* Does a caret range admit `version`? Only `^x.y.z` is accepted — that is the
+ * only form the templates use. Caret pins the leftmost non-zero part, so on a
+ * 0.x library `^0.9.0` stops at 0.9.x and a scaffold silently installs an old
+ * release while the workspace typechecks against the new one. */
+function caretSatisfies(range, version) {
+  const m = /^\^(\d+)\.(\d+)\.(\d+)$/.exec(range);
+  if (!m) return false;
+  const [lo, v] = [m.slice(1).map(Number), version.split('.').map(Number)];
+  if (lo[0] !== v[0]) return false;
+  if (lo[0] === 0 && lo[1] !== v[1]) return false;
+  return v[1] > lo[1] || (v[1] === lo[1] && v[2] >= lo[2]);
+}
 
 if (!existsSync(CLI)) {
   console.error('dist/index.js not built — run `pnpm build` first.');
@@ -80,6 +96,15 @@ for (const tpl of TEMPLATES) {
     templateFailed++;
   } else {
     console.log(`  ✓ __PROJECT_NAME__ replaced in package.json`);
+  }
+
+  // The scaffold must resolve to the library version it was typechecked against.
+  const uiRange = pkg.dependencies?.['@craftzbay/ui'];
+  if (!caretSatisfies(uiRange, UI_VERSION)) {
+    console.error(`  ✗ @craftzbay/ui range "${uiRange}" does not admit workspace ${UI_VERSION}`);
+    templateFailed++;
+  } else {
+    console.log(`  ✓ @craftzbay/ui ${uiRange} admits ${UI_VERSION}`);
   }
 
   // No `_package.json` or `_gitignore` should leak through
