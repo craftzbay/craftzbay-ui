@@ -3,6 +3,15 @@ import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import * as AccordionPrimitive from '@radix-ui/react-accordion';
+import * as ContextMenuPrimitive from '@radix-ui/react-context-menu';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
+import * as PopoverPrimitive from '@radix-ui/react-popover';
+import * as SelectPrimitive from '@radix-ui/react-select';
+import * as TabsPrimitive from '@radix-ui/react-tabs';
+import * as TooltipPrimitive from '@radix-ui/react-tooltip';
+import { Drawer as DrawerPrimitive } from 'vaul';
 import * as UI from '../index';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -69,6 +78,36 @@ const NO_REF_ALLOWED = new Set([
   'DrawerHeader',
   'DrawerFooter',
 ]);
+
+/**
+ * Radix primitives re-exported unchanged. Radix stopped setting `displayName`
+ * on its components (react-dialog 1.1.23 and the matching 2026 releases), and
+ * assigning one here would mutate the shared Radix object — `DialogTrigger`
+ * and `SheetTrigger` are the very same function. Each entry must be
+ * identity-equal to the primitive it names, so a wrapper that grows its own
+ * body has to leave this list and set `displayName` like every other component.
+ */
+const RADIX_PASSTHROUGH: Record<string, unknown> = {
+  Accordion: AccordionPrimitive.Root,
+  ContextMenuTrigger: ContextMenuPrimitive.Trigger,
+  ContextMenuGroup: ContextMenuPrimitive.Group,
+  ContextMenuRadioGroup: ContextMenuPrimitive.RadioGroup,
+  DialogTrigger: DialogPrimitive.Trigger,
+  DialogClose: DialogPrimitive.Close,
+  DropdownMenuTrigger: DropdownMenuPrimitive.Trigger,
+  DropdownMenuGroup: DropdownMenuPrimitive.Group,
+  DropdownMenuRadioGroup: DropdownMenuPrimitive.RadioGroup,
+  PopoverTrigger: PopoverPrimitive.Trigger,
+  PopoverAnchor: PopoverPrimitive.Anchor,
+  PopoverClose: PopoverPrimitive.Close,
+  SelectValue: SelectPrimitive.Value,
+  SheetTrigger: DialogPrimitive.Trigger,
+  SheetClose: DialogPrimitive.Close,
+  Tabs: TabsPrimitive.Root,
+  TooltipTrigger: TooltipPrimitive.Trigger,
+  DrawerTrigger: DrawerPrimitive.Trigger,
+  DrawerClose: DrawerPrimitive.Close,
+};
 
 function isComponent(v: unknown): boolean {
   if (typeof v === 'function') return true;
@@ -144,10 +183,18 @@ describe('public API surface', () => {
 
   it('forwardRef components carry an explicit displayName (not just the render fn name)', () => {
     const missing = componentExports
-      .filter(([, v]) => forwardsRef(v))
+      .filter(([name, v]) => forwardsRef(v) && !(name in RADIX_PASSTHROUGH))
       .filter(([, v]) => !(v as { displayName?: string }).displayName)
       .map(([n]) => n);
     expect(missing).toEqual([]);
+  });
+
+  it('the Radix pass-through list names exactly the unchanged primitives', () => {
+    const names = new Map(componentExports);
+    const notIdentical = Object.entries(RADIX_PASSTHROUGH)
+      .filter(([name, primitive]) => names.get(name) !== primitive)
+      .map(([n]) => n);
+    expect(notIdentical, 'listed but no longer the bare Radix export').toEqual([]);
   });
 
   it('every exported component forwards a ref unless allow-listed', () => {

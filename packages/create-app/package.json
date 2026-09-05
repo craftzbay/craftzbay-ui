@@ -44,9 +44,9 @@
     "kleur": "^4.1.5"
   },
   "devDependencies": {
-    "@types/node": "^22.10.0",
-    "tsup": "^8.3.5",
-    "typescript": "^5.7.2"
+    "@types/node": "^22.20.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=18"
