@@ -120,12 +120,14 @@ export const DEFAULT_CHART_COLORS = [
 const FALLBACK_W = 600;
 const PAD = 6;
 
+/** `useLayoutEffect` warns during SSR; fall back to `useEffect` there. */
+const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
 /** Measure the container's content width; re-renders on resize. */
 function useMeasuredWidth<T extends HTMLElement>() {
   const ref = useRef<T>(null);
   const [width, setWidth] = useState(0);
-  const useIso = typeof window === 'undefined' ? useEffect : useLayoutEffect;
-  useIso(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     const update = () => setWidth(el.clientWidth);

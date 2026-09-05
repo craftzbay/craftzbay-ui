@@ -76,6 +76,9 @@ export function Icon({ name, fallback, ...props }: IconProps) {
 
   return (
     <Suspense fallback={placeholder}>
+      {/* `getIcon` returns the same lazy component for a name (module cache),
+          so its identity is stable across renders. */}
+      {/* eslint-disable-next-line react-hooks/static-components */}
       <LucideIcon {...props} />
     </Suspense>
   );

@@ -25,9 +25,13 @@ export function ComponentDocPage({ doc }: ComponentDocPageProps) {
   // manual wins, new names are appended) so docs can annotate without
   // re-listing every prop.
   const [apiGroups, setApiGroups] = useState<PropGroup[]>(() => doc.api ?? []);
+  const [prevDoc, setPrevDoc] = useState(doc);
+  if (prevDoc !== doc) {
+    setPrevDoc(doc);
+    setApiGroups(doc.api ?? []);
+  }
   useEffect(() => {
     let alive = true;
-    setApiGroups(doc.api ?? []);
     import('../registry/generated-props').then((m) => {
       if (alive)
         setApiGroups(mergeApiGroups(resolveGeneratedGroups(doc, m.getGeneratedProps), doc.api));

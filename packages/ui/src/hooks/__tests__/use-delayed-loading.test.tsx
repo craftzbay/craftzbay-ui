@@ -52,6 +52,8 @@ describe('useDelayedLoading', () => {
     expect(result.current).toBe(true);
     act(() => vi.advanceTimersByTime(200));
     rerender({ ms: 40 });
+    // The hide is scheduled (0 ms), never written synchronously from the effect.
+    act(() => vi.advanceTimersByTime(0));
     expect(result.current).toBe(false);
     act(() => vi.advanceTimersByTime(40));
     expect(result.current).toBe(true);

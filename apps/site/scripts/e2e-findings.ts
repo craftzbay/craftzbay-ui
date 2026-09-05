@@ -98,15 +98,13 @@ function render(report: JsonReport): string {
     ' |';
 
   const date = report.stats.startTime.slice(0, 10);
-  const minutes = (report.stats.duration / 60_000).toFixed(1);
   return [
     START,
     '',
     `## Current state — ${date}`,
     '',
     `Run: local, chromium (headless shell), fresh \`vite build\` of the showcase, Playwright ${version('@playwright/test')}, axe-core ${version('axe-core')}`,
-    '(tags `wcag2a wcag2aa wcag21aa wcag22aa`; only `serious`/`critical` fail a test). ' +
-      `${minutes} min.`,
+    '(tags `wcag2a wcag2aa wcag21aa wcag22aa`; only `serious`/`critical` fail a test).',
     'Matrix: docs 1280 light+dark, 375 light; templates 320/768 light, 375/1280 light+dark.',
     '',
     line(header),

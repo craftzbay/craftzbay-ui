@@ -43,11 +43,16 @@ export function TemplateDocPage({ doc }: TemplateDocPageProps) {
   const [variant, setVariant] = useState<string | undefined>(doc.variants?.[0]?.key);
   const [lang, setLang] = useState<'en' | 'mn'>('en');
 
-  useEffect(() => {
+  // A new template resets the viewer; the source text then loads lazily.
+  const [prevDoc, setPrevDoc] = useState(doc);
+  if (prevDoc !== doc) {
+    setPrevDoc(doc);
     setScreen(doc.screens[0]?.key ?? 'home');
     setVariant(doc.variants?.[0]?.key);
-    let alive = true;
     setSource(null);
+  }
+  useEffect(() => {
+    let alive = true;
     import('../blocks/sources').then((m) => {
       if (alive) setSource(m.blockSources[doc.slug] ?? '');
     });

@@ -53,13 +53,16 @@ export function ProjectDialog({
   const [status, setStatus] = useState<ProjectStatus>('Active');
   const t = useT(adminDict);
 
-  useEffect(() => {
+  // Seed the fields each time the dialog opens (or opens for another row).
+  const [seeded, setSeeded] = useState({ open, initial });
+  if (seeded.open !== open || seeded.initial !== initial) {
+    setSeeded({ open, initial });
     if (open) {
       setName(initial?.name ?? '');
       setOwner(initial?.owner ?? '');
       setStatus(initial?.status ?? 'Active');
     }
-  }, [open, initial]);
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

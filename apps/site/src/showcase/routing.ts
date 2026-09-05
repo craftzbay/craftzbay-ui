@@ -85,6 +85,11 @@ export function parseHash(hash: string): Route {
   return { kind: 'not-found' };
 }
 
+/** Navigate by hash. A plain function so callers stay free of DOM writes. */
+export function navigateTo(hash: string) {
+  window.location.hash = hash;
+}
+
 export function routeToHash(route: Route): string {
   switch (route.kind) {
     case 'home':

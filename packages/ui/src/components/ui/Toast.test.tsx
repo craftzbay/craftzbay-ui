@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createRef } from 'react';
+import { createRef, useEffect } from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { axe } from 'jest-axe';
 import {
@@ -20,7 +20,10 @@ import { mnStrings } from '@/lib/strings.mn';
    drain it afterwards. */
 let api: ReturnType<typeof useToast> | null = null;
 function Probe() {
-  api = useToast();
+  const hook = useToast();
+  useEffect(() => {
+    api = hook;
+  });
   return null;
 }
 

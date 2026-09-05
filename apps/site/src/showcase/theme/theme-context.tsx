@@ -1,12 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { brandPresets, type BrandName } from '@craftzbay/ui';
 
 /* -----------------------------------------------------------------------------
@@ -145,5 +137,5 @@ export function useTheme(): ThemeContextValue {
 /** Stable callback for non-provider call-sites that only need the toggle. */
 export function useToggleTheme() {
   const { toggleTheme } = useTheme();
-  return useCallback(toggleTheme, [toggleTheme]);
+  return toggleTheme; // already memoised by the provider
 }

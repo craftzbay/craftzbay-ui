@@ -108,6 +108,9 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(function Carou
   useEffect(() => {
     if (!api) return;
     setApi?.(api);
+    // Initial sync from Embla (an external store); every later change arrives
+    // through the events subscribed below.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     onSelect(api);
     api.on('reInit', onSelect).on('select', onSelect).on('slidesInView', onSelect);
     return () => {

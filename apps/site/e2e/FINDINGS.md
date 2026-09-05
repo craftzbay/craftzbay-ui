@@ -5,7 +5,7 @@
 ## Current state — 2026-09-05
 
 Run: local, chromium (headless shell), fresh `vite build` of the showcase, Playwright 1.63, axe-core 4.13
-(tags `wcag2a wcag2aa wcag21aa wcag22aa`; only `serious`/`critical` fail a test). 3.9 min.
+(tags `wcag2a wcag2aa wcag21aa wcag22aa`; only `serious`/`critical` fail a test).
 Matrix: docs 1280 light+dark, 375 light; templates 320/768 light, 375/1280 light+dark.
 
 | Spec                         | Tests | Passed | Failed | Skipped |

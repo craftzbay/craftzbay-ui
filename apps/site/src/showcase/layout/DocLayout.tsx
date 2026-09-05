@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Menu } from '@/icons';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/Sheet';
 import { DocSidebar, type DocSidebarSection } from './DocSidebar';
@@ -31,10 +31,13 @@ export function DocLayout({
 }: DocLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Close mobile sheet when the route changes (clicking any link).
-  useEffect(() => {
+  // Close the mobile sheet when the route changes (clicking any link).
+  const routeKey = `${current.kind}:${current.slug ?? ''}`;
+  const [prevRoute, setPrevRoute] = useState(routeKey);
+  if (prevRoute !== routeKey) {
+    setPrevRoute(routeKey);
     setMobileOpen(false);
-  }, [current.kind, current.slug]);
+  }
 
   return (
     <div className="mx-auto flex max-w-[1400px] gap-0 px-0 md:px-6">

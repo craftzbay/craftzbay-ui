@@ -28,8 +28,10 @@ export function useDelayedLoading(
   { minVisible = 500 }: DelayedLoadingOptions = {},
 ): boolean {
   const [ready, setReady] = useState(ms <= 0);
-  const shownAt = useRef<number | null>(ms <= 0 ? Date.now() : null);
+  const shownAt = useRef<number | null>(null);
 
+  // Every transition runs from a timer (a 0 ms one when it is due now), so the
+  // effect itself never writes state synchronously.
   useEffect(() => {
     const show = () => {
       shownAt.current = Date.now();
@@ -37,19 +39,16 @@ export function useDelayedLoading(
     };
     if (ms <= 0) {
       shownAt.current ??= Date.now();
-      setReady(true);
-      return;
+      const t = window.setTimeout(show, 0);
+      return () => window.clearTimeout(t);
     }
     // Respect the minimum-visible window before hiding again.
     const hold =
       shownAt.current === null ? 0 : Math.max(0, minVisible - (Date.now() - shownAt.current));
-    const timers: number[] = [];
-    if (hold > 0) {
-      timers.push(window.setTimeout(() => setReady(false), hold));
-    } else {
-      setReady(false);
-    }
-    timers.push(window.setTimeout(show, hold + ms));
+    const timers = [
+      window.setTimeout(() => setReady(false), hold),
+      window.setTimeout(show, hold + ms),
+    ];
     return () => timers.forEach((t) => window.clearTimeout(t));
   }, [ms, minVisible]);
 

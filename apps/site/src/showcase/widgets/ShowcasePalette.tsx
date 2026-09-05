@@ -10,7 +10,7 @@ import {
 import { componentDocs } from '../registry/components';
 import { templateDocs } from '../registry/templates';
 import { guideDocs } from '../registry/guides';
-import { previewUrl, routeToHash } from '../routing';
+import { navigateTo, previewUrl, routeToHash } from '../routing';
 import { GITHUB_URL } from '../site.config';
 import { useTheme } from '../theme/theme-context';
 
@@ -58,7 +58,7 @@ export function ShowcasePalette({
   );
 
   const go = (hash: string) => {
-    window.location.hash = hash;
+    navigateTo(hash);
     onOpenChange(false);
   };
 

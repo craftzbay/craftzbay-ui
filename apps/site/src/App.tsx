@@ -3,7 +3,13 @@ import { Toaster } from '@/components/ui/Toast';
 import { TooltipProvider } from '@/components/ui/Tooltip';
 import { useCommandPaletteShortcut } from '@/components/ui/CommandPalette';
 
-import { isFullBleedRoute, parseHash, routeToHash, type Route } from './showcase/routing';
+import {
+  isFullBleedRoute,
+  navigateTo,
+  parseHash,
+  routeToHash,
+  type Route,
+} from './showcase/routing';
 import { ThemeProvider } from './showcase/theme/theme-context';
 import { ShowcaseTopBar } from './showcase/layout/ShowcaseTopBar';
 import { ShowcaseFooter } from './showcase/layout/ShowcaseFooter';
@@ -157,6 +163,14 @@ function SkipLink() {
   );
 }
 
+/** Hash redirect, performed after render rather than during it. */
+function Redirect({ hash }: { hash: string }) {
+  useEffect(() => {
+    navigateTo(hash);
+  }, [hash]);
+  return null;
+}
+
 function RouteView({ route }: { route: Route }) {
   switch (route.kind) {
     case 'home':
@@ -164,10 +178,7 @@ function RouteView({ route }: { route: Route }) {
 
     case 'catalog':
       // Back-compat: the old mega-demo wall is gone; send to components index.
-      if (typeof window !== 'undefined') {
-        window.location.hash = routeToHash({ kind: 'components-index' });
-      }
-      return null;
+      return <Redirect hash={routeToHash({ kind: 'components-index' })} />;
 
     case 'components-index':
       return (

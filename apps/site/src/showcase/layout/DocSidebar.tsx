@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type KeyboardEvent } from 'react';
+import { useMemo, useState, type KeyboardEvent } from 'react';
 import { ArrowRight, Search } from '@/icons';
 import { Input } from '@/components/ui/Input';
 import { cn } from '@/lib/utils';
@@ -111,10 +111,12 @@ export function DocSidebar({
   }, [searchSections, q]);
 
   const [highlighted, setHighlighted] = useState(0);
-  // Reset highlight whenever query (and therefore flatResults) changes.
-  useEffect(() => {
+  // Reset the highlight whenever the query (and therefore flatResults) changes.
+  const [prevQ, setPrevQ] = useState(q);
+  if (prevQ !== q) {
+    setPrevQ(q);
     setHighlighted(0);
-  }, [q]);
+  }
 
   const onSearchKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
@@ -142,7 +144,6 @@ export function DocSidebar({
 
   const isSearching = q.length > 0;
   const renderedSections = isSearching ? searchSections : idleSections;
-  let flatIndex = -1;
 
   return (
     <aside
@@ -228,8 +229,12 @@ export function DocSidebar({
                     kind: section.kind,
                     slug: entry.slug,
                   } as Route);
-                  if (isSearching) flatIndex += 1;
-                  const isKbdHighlighted = isSearching && flatIndex === highlighted;
+                  // flatResults is built in this same render order.
+                  const isKbdHighlighted =
+                    isSearching &&
+                    flatResults.findIndex(
+                      (r) => r.kind === section.kind && r.slug === entry.slug,
+                    ) === highlighted;
                   return (
                     <SidebarLink
                       key={entry.slug}
