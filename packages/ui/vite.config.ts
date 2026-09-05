@@ -49,9 +49,9 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       output: {
-        // Rollup strips module-level directives; re-add per file so Next.js App Router
-        // treats every module as a Client Component (all export hooks/context).
-        banner: "'use client';",
+        // No banner: Rolldown (Vite 8) keeps each module's own `'use client'`
+        // directive, and every module that uses hooks or context carries one
+        // in source. The remaining modules (barrels, cn/cva, types) are plain.
         preserveModules: true,
         preserveModulesRoot: 'src',
         entryFileNames: '[name].js',

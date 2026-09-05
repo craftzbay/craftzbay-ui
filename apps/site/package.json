@@ -31,14 +31,14 @@
     "@types/node": "^22.20.1",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
-    "@vitejs/plugin-react": "^4.7.0",
+    "@vitejs/plugin-react": "^6.1.1",
     "autoprefixer": "^10.5.5",
     "jsdom": "^30.0.1",
     "react-docgen-typescript": "^2.4.0",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.13",
     "typescript": "^5.9.3",
-    "vite": "^6.4.3",
+    "vite": "^8.2.2",
     "vitest": "^5.0.0"
   }
 }
