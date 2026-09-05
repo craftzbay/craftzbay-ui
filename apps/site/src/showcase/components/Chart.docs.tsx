@@ -101,10 +101,6 @@ const doc: ComponentDoc = {
         { name: 'className', type: 'string', description: 'Width / spacing overrides.' },
       ],
     },
-  ],
-  accessibility: [
-    'Renders <figure> with <figcaption> for the caption — screen readers announce it.',
-    'For data-dense analytics, prefer a dedicated library (Recharts / Visx) with proper interactive tables.',
     {
       title: 'abbreviateNumber(n)',
       rows: [
@@ -117,6 +113,10 @@ const doc: ComponentDoc = {
         },
       ],
     },
+  ],
+  accessibility: [
+    'Renders <figure> with <figcaption> for the caption — screen readers announce it.',
+    'For data-dense analytics, prefer a dedicated library (Recharts / Visx) with proper interactive tables.',
   ],
   guidelines: {
     do: [
