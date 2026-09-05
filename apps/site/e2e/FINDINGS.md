@@ -1,24 +1,30 @@
-# E2E findings — 2026-08-21
+# E2E findings
+
+## Current state — 2026-09-05
 
 Run: local, chromium (headless shell), fresh `vite build` of the showcase, Playwright 1.62, axe-core 4.13
 (tags `wcag2a wcag2aa wcag21aa wcag22aa`; only `serious`/`critical` fail a test).
-Matrix after trimming: docs 1280 light+dark, 375 light; templates 320/768 light, 375/1280 light+dark.
+Matrix: docs 1280 light+dark, 375 light; templates 320/768 light, 375/1280 light+dark.
 
 | Spec                         | Tests | Passed | Failed |
 | ---------------------------- | ----: | -----: | -----: |
-| `docs.spec.ts`               |   218 |      2 |    216 |
-| `templates.spec.ts`          |   444 |    387 |     57 |
-| `admin-interactions.spec.ts` |     9 |      8 |      1 |
+| `docs.spec.ts`               |   218 |    218 |      0 |
+| `templates.spec.ts`          |   300 |    300 |      0 |
+| `admin-interactions.spec.ts` |     9 |      9 |      0 |
 | `templates-flows.spec.ts`    |    10 |     10 |      0 |
 | `visual.spec.ts` (baselines) |    12 |     12 |      0 |
-| **Total**                    |   693 |    419 |    274 |
+| **Total**                    |   649 |    649 |      0 |
 
-No horizontal-overflow failures at any width, no console errors / page errors / failed requests on any
-route. Every `docs.spec.ts` failure is axe; `templates.spec.ts` failures are focus-ring, landmark and a
-handful of axe hits inside the landing template. Nothing is skipped; the failing tests stay red until
-the app code below is fixed.
+Every finding below (F1–F13, recorded 2026-08-21) has been fixed in the library or the showcase; the
+tests that caught them stay in the suite as regression guards. The list is kept as the record of what
+each rule catches and where the root cause lived. CI runs the same suite on every push
+(`visual.spec.ts` skipped on Linux unless `CI_VISUAL=1`, see `README.md`).
 
-## Findings (deduped by root cause)
+## Findings of 2026-08-21 (all resolved)
+
+Run: local, chromium (headless shell), Playwright 1.62, axe-core 4.13. 693 tests, 419 passed,
+274 failed — every `docs.spec.ts` failure was axe; `templates.spec.ts` failures were focus-ring,
+landmark and a handful of axe hits inside the landing template.
 
 ### F1 · Showcase top bar / footer links are 16px-tall touch targets — `target-size` (serious)
 
