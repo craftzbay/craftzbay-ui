@@ -1,5 +1,35 @@
 # @craftzbay/ui
 
+## 0.11.4
+
+### Patch Changes
+
+- 54feeb4: Dependencies moved to their current in-range releases (Radix primitives, cmdk 1.1,
+  tailwind-merge 2.6, react-hook-form 7.87, react-day-picker 9.14). Radix no longer sets
+  `displayName` on its components; the primitives this library re-exports unchanged
+  (`DialogTrigger`, `SheetClose`, `Tabs`, …) therefore show their function name in
+  DevTools instead of a display name. Nothing else observable changed.
+- be63c5f: The published tarball no longer carries `dist-lib/__tests__/helpers/*.d.ts`. The
+  declaration build excluded `*.test.tsx` but not the `__tests__/` helpers, so their
+  Node-only stubs shipped with every release and the build logged three TS2307 errors
+  for `node:fs`/`node:path`/`node:url` on the way.
+- f5b4f96: `Calendar` and `DatePicker` run on react-day-picker 10. The library only ever used
+  the v9 API that v10 keeps (`startMonth`/`endMonth`, `hidden`, `captionLayout`,
+  `classNames`, `components`, `labels`), so `CalendarProps` and `DatePickerProps` are
+  unchanged; `DatePicker`'s `fromDate`/`toDate` are its own props and still map to
+  `disabled` matchers.
+- 2e24a19: `cn()` merges with tailwind-merge 3, the release that knows Tailwind v4's utilities.
+  On 2.x a v4-only class in an override (`rounded-xs`, `shadow-xs`, `outline-hidden`,
+  `ring-3`, `inset-ring-*`) was not recognised as a conflict, so both classes survived
+  and the stylesheet order decided. The upgrade costs about 1.5 kB (brotli) on the
+  first component you import; the `import { Button }` size budget moves from 10 to 11 kB
+  to record that.
+- d3b9167: Built with Vite 8 (Rolldown + Oxc minifier). Output shape is unchanged — one ESM
+  module per source file, `.d.ts` beside each — and every module that uses hooks or
+  context still starts with `'use client'`. That directive now comes from the source
+  file itself instead of a build banner, so it is no longer duplicated; plain modules
+  (barrels, `cn`/`cva`, types) no longer carry one, which is what Next.js expects.
+
 ## 0.11.3
 
 ### Patch Changes

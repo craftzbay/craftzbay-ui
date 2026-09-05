@@ -1,5 +1,16 @@
 # @craftzbay/site
 
+## 0.0.8
+
+### Patch Changes
+
+- Updated dependencies [54feeb4]
+- Updated dependencies [be63c5f]
+- Updated dependencies [f5b4f96]
+- Updated dependencies [2e24a19]
+- Updated dependencies [d3b9167]
+  - @craftzbay/ui@0.11.4
+
 ## 0.0.7
 
 ### Patch Changes
