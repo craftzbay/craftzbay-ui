@@ -21,7 +21,11 @@ live index pages, so a new component/guide fails until added here.
 | `visual.spec.ts`             | screenshot baselines (home / admin overview / landing)                |
 
 Failures are also appended to `test-results/findings.jsonl` (kind, URL,
-viewport, theme, axe nodes) — `FINDINGS.md` is the curated summary.
+viewport, theme, axe nodes) — `FINDINGS.md` is the curated summary. Its
+"Current state" table is generated: `pnpm test:e2e` wraps `playwright test`
+and rewrites the block from `test-results/report.json` after a full local run
+(`pnpm e2e:findings` re-renders it from the last report; CI, sharded and
+filtered runs leave it alone).
 
 ## Visual baselines
 

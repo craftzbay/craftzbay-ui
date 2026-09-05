@@ -24,9 +24,15 @@ export default defineConfig({
     timeout: 10_000,
     toHaveScreenshot: { maxDiffPixelRatio: 0.02, animations: 'disabled' },
   },
+  // The JSON report feeds scripts/e2e-findings.ts (FINDINGS.md "current state").
   reporter: CI
-    ? [['list'], ['html', { open: 'never' }], ['github']]
-    : [['list'], ['html', { open: 'never' }]],
+    ? [
+        ['list'],
+        ['html', { open: 'never' }],
+        ['github'],
+        ['json', { outputFile: 'test-results/report.json' }],
+      ]
+    : [['list'], ['html', { open: 'never' }], ['json', { outputFile: 'test-results/report.json' }]],
   snapshotPathTemplate:
     '{testDir}/__screenshots__/{projectName}-{platform}/{testFileName}/{arg}{ext}',
   use: {
