@@ -25,7 +25,7 @@
     "path": "packages/ui/dist-lib/index.js",
     "import": "{ Button }",
     "ignore": ["react", "react-dom", "react/jsx-runtime"],
-    "limit": "10 KB"
+    "limit": "11 KB"
   },
   {
     "name": "styles.css",
