@@ -30,7 +30,9 @@ filtered runs leave it alone).
 ## Visual baselines
 
 Rasterisation differs per OS, so baselines are stored per platform
-(`__screenshots__/chromium-<platform>/…`). Baselines committed from macOS do not
-match Linux; CI therefore skips `visual.spec.ts` unless `CI_VISUAL=1`. To enable
-it in CI, generate Linux baselines once (`--update-snapshots` inside the CI
-image or a Linux container) and commit them alongside the darwin set.
+(`__screenshots__/chromium-<platform>/…`): the darwin set is generated locally,
+the linux set by the "Visual baselines (Linux)" workflow (`workflow_dispatch`),
+which runs `--update-snapshots` on the CI runner image and opens a PR with the
+PNGs. CI compares against the linux set (`CI_VISUAL=1` in `ci.yml`); when a
+change legitimately alters a baseline render, run that workflow and review the
+PNG diffs in its PR — never regenerate to hide a regression.
