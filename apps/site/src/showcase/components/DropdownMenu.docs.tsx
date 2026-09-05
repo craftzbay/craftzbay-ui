@@ -7,6 +7,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu';
 import { Button } from '@/components/ui/Button';
+import { Copy, Download, Pencil, Trash2 } from '@/icons';
 import type { ComponentDoc } from '../registry/types';
 
 const doc: ComponentDoc = {
@@ -56,6 +57,48 @@ const doc: ComponentDoc = {
     <DropdownMenuItem className="text-danger-text">Delete</DropdownMenuItem>
   </DropdownMenuContent>
 </DropdownMenu>`,
+    },
+    {
+      title: 'With icons',
+      description:
+        'A leading icon is sized to 16px by the item; no className needed. An explicit size-* on the svg still wins.',
+      preview: (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">Actions</Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem>
+              <Pencil aria-hidden />
+              Rename
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Copy aria-hidden />
+              Duplicate
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Download aria-hidden />
+              Export
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem destructive>
+              <Trash2 aria-hidden />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+      code: `<DropdownMenuContent>
+  <DropdownMenuItem>
+    <Pencil aria-hidden />
+    Rename
+  </DropdownMenuItem>
+  <DropdownMenuSeparator />
+  <DropdownMenuItem destructive>
+    <Trash2 aria-hidden />
+    Delete
+  </DropdownMenuItem>
+</DropdownMenuContent>`,
     },
   ],
   api: [

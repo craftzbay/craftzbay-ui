@@ -197,6 +197,23 @@ describe('DropdownMenu', () => {
     expect(await screen.findByRole('menuitem', { name: 'Email' })).toBeInTheDocument();
   });
 
+  it('sizes an icon passed as a child to 16px unless the svg sets its own size', async () => {
+    render(
+      <DropdownMenu open>
+        <DropdownMenuTrigger>T</DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem>
+            <svg data-testid="icon" aria-hidden />
+            Item
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>,
+    );
+    const item = await screen.findByRole('menuitem');
+    expect(item).toHaveClass("[&_svg:not([class*='size-'])]:size-4", '[&_svg]:shrink-0');
+    expect(item).toContainElement(screen.getByTestId('icon'));
+  });
+
   it('forwards refs to content and item', async () => {
     const contentRef = createRef<HTMLDivElement>();
     const itemRef = createRef<HTMLDivElement>();

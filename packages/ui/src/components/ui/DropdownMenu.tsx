@@ -27,6 +27,9 @@ const itemClasses = cn(
   'data-[highlighted]:bg-background-muted data-[highlighted]:text-foreground',
   'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
   'transition-colors duration-[var(--duration-fast)]',
+  // Leading icons passed as children default to 16px like Button/Sidebar do;
+  // an explicit `size-*` on the svg (e.g. the size-2 radio dot) still wins.
+  "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 );
 
 export const DropdownMenuSubTrigger = forwardRef<

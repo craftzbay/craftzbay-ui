@@ -174,6 +174,26 @@ describe('ContextMenu', () => {
     expect(await screen.findByRole('menuitem', { name: 'Email' })).toBeInTheDocument();
   });
 
+  it('sizes an icon passed as a child to 16px unless the svg sets its own size', async () => {
+    render(
+      <ContextMenu>
+        <ContextMenuTrigger asChild>
+          <div data-testid="zone">Right-click me</div>
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <ContextMenuItem>
+            <svg data-testid="icon" aria-hidden />
+            Item
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>,
+    );
+    fireEvent.contextMenu(screen.getByTestId('zone'));
+    const item = await screen.findByRole('menuitem');
+    expect(item).toHaveClass("[&_svg:not([class*='size-'])]:size-4", '[&_svg]:shrink-0');
+    expect(item).toContainElement(screen.getByTestId('icon'));
+  });
+
   it('forwards refs to content and item', async () => {
     const contentRef = createRef<HTMLDivElement>();
     const itemRef = createRef<HTMLDivElement>();
