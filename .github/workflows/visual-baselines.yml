@@ -1,0 +1,50 @@
+name: Visual baselines (Linux)
+
+# Regenerates the Linux screenshot baselines for apps/site/e2e/visual.spec.ts
+# on the same runner image CI uses, and opens a PR with the PNGs. Run it when
+# a change legitimately alters the home / admin overview / landing renders
+# (typography, spacing, icon set, minifier) — never to paper over a regression.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build showcase
+        run: pnpm build:site
+
+      - name: Install Playwright chromium
+        run: pnpm --filter @craftzbay/site exec playwright install --with-deps chromium
+
+      - name: Regenerate baselines
+        env:
+          CI_VISUAL: '1'
+        run: pnpm --filter @craftzbay/site exec playwright test visual --update-snapshots
+
+      - name: Open PR
+        uses: peter-evans/create-pull-request@v8
+        with:
+          branch: visual-baselines/linux
+          title: 'e2e: refresh Linux visual baselines'
+          commit-message: 'e2e: refresh Linux visual baselines'
+          body: |
+            Regenerated `apps/site/e2e/__screenshots__/chromium-linux/**` on the CI runner image.
+            Review the PNG diffs before merging — every changed pixel is a deliberate render change.
+          add-paths: apps/site/e2e/__screenshots__/chromium-linux/**
+          delete-branch: true
