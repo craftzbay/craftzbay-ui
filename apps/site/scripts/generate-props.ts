@@ -31,6 +31,10 @@ const parser = withCustomConfig(TSCONFIG, {
       const fn = prop.parent.fileName;
       if (fn.includes('node_modules/@types/react')) return false;
       if (fn.includes('node_modules/react')) return false;
+      // TypeScript's lib files: Function/Number/Object prototype members that
+      // leak in when a parameter type widens; their Symbol-keyed entries carry
+      // an unstable `__@name@id` that flaked the freshness check (see below).
+      if (/node_modules\/typescript\/lib\//.test(fn)) return false;
     }
     return !prop.description?.startsWith('@internal');
   },
@@ -141,6 +145,12 @@ function propsFromType(name: string): PropGroup[] | undefined {
   for (const sym of checker.getPropertiesOfType(type)) {
     const d = sym.declarations?.[0];
     if (!d) continue;
+    // Members declared in TypeScript's own lib files (Number/Function/Object
+    // prototype: toFixed, apply, valueOf, Symbol.hasInstance…) are not props —
+    // they surface when a prop type widens to a primitive or callable, and
+    // the Symbol-keyed ones carry an unstable `__@name@id` that changed with
+    // every type-graph edit and flaked the generated-props freshness check.
+    if (d.getSourceFile().hasNoDefaultLib) continue;
     if (o.own && d.getSourceFile().fileName !== sf.fileName) continue;
     if (o.keep && !o.keep.includes(sym.name)) continue;
     const { description, def } = jsDocText(sym, checker);
