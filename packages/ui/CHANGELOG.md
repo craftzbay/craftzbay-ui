@@ -1,5 +1,39 @@
 # @craftzbay/ui
 
+## 1.0.0
+
+### Major Changes
+
+- 771483c: Icons come from lucide-react 1.x. `Icons.Github` is gone — lucide 1.0 removed every
+  brand icon — and `Icons.Code` is exported in its place for "source"/"developer"
+  affordances. `<Icon name>` and `iconNames` follow the 1.x set (4,100+ names; the
+  old aliases such as `alert-circle` still resolve). Consumers that reached into
+  `lucide-react/dist/esm/icons/*.js` themselves must use the `.mjs` files now.
+- a4ffa58: **1.0.0.** The public surface of 0.11 is the 1.0 surface: every export, prop and CSS
+  token stays as it was. What 1.0 changes is the promise — from here on a breaking
+  change means a major, and everything below is what this release itself breaks:
+  
+  - `Icons.Github` is removed (lucide 1.0 dropped brand icons); `Icons.Code` is new.
+  - Consumers importing `lucide-react/dist/esm/icons/*.js` directly must switch to
+    `.mjs`.
+  
+  Baseline: React 18 or 19 (the workspace now develops on 19 and tests 18 in CI),
+  Tailwind CSS v4, TypeScript 5.7+. Built with Vite 8; declarations ship without
+  test helpers; `'use client'` sits exactly on the modules that need it.
+
+### Patch Changes
+
+- 8bd47d9: The library passes eslint-plugin-react-hooks 7 (React Compiler rules) with two
+  documented exceptions. Behaviour changes are limited to timing details:
+  
+  - `useDebounce` with `delay <= 0` returns the input value directly instead of
+    mirroring it through state.
+  - `useDelayedLoading` schedules every transition on a timer (a 0 ms one when it is
+    due now); the hook never writes state synchronously inside its effect.
+  - `useModifierKey` reads the platform through `useSyncExternalStore` — server
+    output is still `Ctrl`, the client value arrives at hydration.
+  - `Chart`'s measuring hook uses a module-level isomorphic layout effect.
+
 ## 0.11.4
 
 ### Patch Changes

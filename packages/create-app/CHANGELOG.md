@@ -1,5 +1,11 @@
 # create-craftzbay-ui
 
+## 1.1.0
+
+### Minor Changes
+
+- 1fa1e0b: Scaffolds start on React 19 and Vite 8 (`@vitejs/plugin-react` 6).
+
 ## 1.0.5
 
 ### Patch Changes
