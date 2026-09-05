@@ -29,7 +29,7 @@ describe('DataGrid', () => {
     expect(screen.getByText('Alpha')).toBeInTheDocument();
     expect(screen.getByText('ALPHA').tagName).toBe('B');
     expect(container.querySelectorAll('colgroup col')).toHaveLength(5);
-    expect(container.querySelectorAll('colgroup col')[1]).toHaveStyle({ width: '8rem' });
+    expect(container.querySelectorAll('colgroup col')[1]).toHaveAttribute('style', 'width: 8rem;');
   });
 
   it('default cell rendering: Date formatted, null / undefined / "" as a labelled em dash', () => {

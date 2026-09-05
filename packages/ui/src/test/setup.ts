@@ -5,6 +5,17 @@ import { toHaveNoViolations } from 'jest-axe';
 
 expect.extend(toHaveNoViolations);
 
+// @types/jest-axe augments `jest.Matchers` only; vitest 5 no longer merges
+// that namespace into its own assertions, so declare the matcher on vitest's
+// `Matchers` (the one augmentation point that feeds both `expect(x)` and the
+// asymmetric matchers). Type parameters must repeat vitest's exactly.
+declare module 'vitest' {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- must repeat vitest's parameter list verbatim
+  interface Matchers<R extends void | Promise<void> = void | Promise<void>, T = unknown> {
+    toHaveNoViolations(): R;
+  }
+}
+
 afterEach(() => {
   cleanup();
 });
