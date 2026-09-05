@@ -98,7 +98,8 @@ for (const tpl of TEMPLATES) {
     console.log(`  ✓ __PROJECT_NAME__ replaced in package.json`);
   }
 
-  // The scaffold must resolve to the library version it was typechecked against.
+  // The scaffold must resolve to the library version it was typechecked
+  // against (the CLI injects the range from its own workspace:^ dependency).
   const uiRange = pkg.dependencies?.['@craftzbay/ui'];
   if (!caretSatisfies(uiRange, UI_VERSION)) {
     console.error(`  ✗ @craftzbay/ui range "${uiRange}" does not admit workspace ${UI_VERSION}`);

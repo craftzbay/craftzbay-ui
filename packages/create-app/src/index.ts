@@ -9,6 +9,26 @@ import kleur from 'kleur';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEMPLATES_DIR = path.resolve(__dirname, '../templates');
 
+/**
+ * The `@craftzbay/ui` range a scaffold gets. It comes from this package's own
+ * manifest, where changesets keeps the `workspace:^` dev dependency in step
+ * with every library release and pnpm rewrites it to `^x.y.z` on publish —
+ * so templates never carry a pin that can go stale. Inside the monorepo the
+ * protocol is still literal; resolve it against the installed library.
+ */
+function uiRange(): string {
+  const own = JSON.parse(readFileSync(path.resolve(__dirname, '../package.json'), 'utf8')) as {
+    devDependencies?: Record<string, string>;
+  };
+  const range = own.devDependencies?.['@craftzbay/ui'] ?? '';
+  if (!range.startsWith('workspace:')) return range;
+  const lib = JSON.parse(
+    readFileSync(path.resolve(__dirname, '../../ui/package.json'), 'utf8'),
+  ) as { version: string };
+  return `^${lib.version}`;
+}
+const UI_RANGE = uiRange();
+
 interface Template {
   id: string;
   label: string;
@@ -118,7 +138,9 @@ function walk(srcDir: string, destDir: string, projectName: string) {
       walk(srcPath, destPath, projectName);
     } else {
       const raw = readFileSync(srcPath, 'utf8');
-      const rendered = raw.replace(/__PROJECT_NAME__/g, projectName);
+      const rendered = raw
+        .replace(/__PROJECT_NAME__/g, projectName)
+        .replace(/__UI_VERSION__/g, UI_RANGE);
       writeFileSync(destPath, rendered);
     }
   }

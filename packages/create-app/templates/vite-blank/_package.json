@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@craftzbay/ui": "^0.11.3",
+    "@craftzbay/ui": "__UI_VERSION__",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
