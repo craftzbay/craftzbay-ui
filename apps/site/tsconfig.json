@@ -17,7 +17,6 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
     "paths": {
       "@craftzbay/ui": ["../../packages/ui/src/index.ts"],
       "@/*": ["../../packages/ui/src/*"],

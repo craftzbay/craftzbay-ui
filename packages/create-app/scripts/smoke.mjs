@@ -118,7 +118,6 @@ for (const tpl of TEMPLATES) {
   const tsconfig = {
     extends: './tsconfig.json',
     compilerOptions: {
-      baseUrl: '.',
       types: ['vite/client', 'node'],
       paths: {
         '@craftzbay/ui': [path.join(UI_SRC, 'index.ts')],
