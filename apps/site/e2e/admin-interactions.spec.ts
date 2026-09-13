@@ -183,23 +183,146 @@ test.describe('admin › projects @1280', () => {
     await expect(page.locator('aside, nav').filter({ hasText: 'Overview' }).first()).toBeVisible();
 
     await page.getByRole('button', { name: /^Template: Admin dashboard/ }).click();
-    await page.getByRole('menuitemradio', { name: 'Top nav' }).click();
-    await expect(page).toHaveURL(/#preview\/admin\/app\/topnav/);
-    await expect(page.getByRole('menuitemradio', { name: 'Top nav' })).toBeHidden();
+    await page.getByRole('menuitemradio', { name: 'Top nav', exact: true }).click();
+    await expect(page).toHaveURL(/#preview\/admin\/app\/topnav\//);
+    await expect(page.getByRole('menuitemradio', { name: 'Top nav', exact: true })).toBeHidden();
     // Top-nav shell renders the primary links in the header, not a rail.
     await expect(
       page.locator('header').getByRole('button', { name: 'Projects', exact: true }),
     ).toBeVisible();
 
     await page.getByRole('button', { name: /^Template: Admin dashboard/ }).click();
-    await page.getByRole('menuitemradio', { name: 'Rail + panel' }).click();
-    await expect(page).toHaveURL(/#preview\/admin\/app\/dual/);
+    await page.getByRole('menuitemradio', { name: 'Sidebar with module', exact: true }).click();
+    await expect(page).toHaveURL(/#preview\/admin\/app\/sidebar-module/);
     await expect(
       page
         .getByRole('navigation', { name: 'Modules' })
         .or(page.getByRole('group', { name: 'Modules' }))
         .first(),
     ).toBeVisible();
+    // Picking a module on the rail opens that module's first page.
+    await page
+      .getByRole('navigation', { name: 'Modules' })
+      .getByRole('button', { name: 'Finance' })
+      .click();
+    await expect(page).toHaveURL(/#preview\/admin\/app\/sidebar-module\/invoices/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Invoices' })).toBeVisible();
+
+    // Top nav with module: modules are menu buttons in the header; the menu
+    // lists the module's pages grouped under section headings (two tiers).
+    await page.getByRole('button', { name: /^Template: Admin dashboard/ }).click();
+    await page.getByRole('menuitemradio', { name: 'Top nav with module' }).click();
+    await expect(page).toHaveURL(/#preview\/admin\/app\/topnav-module/);
+    // Scoped to the primary nav: the page header's breadcrumb also has a "CRM" button.
+    const crm = page
+      .getByRole('navigation', { name: 'Primary' })
+      .getByRole('button', { name: 'CRM', exact: true });
+    await expect(crm).toBeVisible();
+    await crm.click();
+    // Two tiers: the menu lists every page, grouped under section headings.
+    const menu = page.getByRole('menu');
+    await expect(menu.getByText('Sales', { exact: true })).toBeVisible();
+    await expect(menu.getByText('Audience', { exact: true })).toBeVisible();
+    await expect(menu.getByRole('menuitem', { name: /^Segments/ })).toBeVisible();
+    await menu.getByRole('menuitem', { name: /^Customers/ }).click();
+    await expect(page).toHaveURL(/#preview\/admin\/app\/topnav-module\/customers/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Customers' })).toBeVisible();
+    // The owning module is the active item; the trail is rooted in the module
+    // (no Home — that would be another module's page).
+    await expect(crm).toHaveAttribute('aria-current', 'page');
+    await expect(page.locator('main nav[aria-label="Breadcrumb"]')).toHaveText(
+      /^CRMSalesCustomers$/,
+    );
+  });
+
+  test('demo menu › Top bar off: the sidebar takes the bar’s utilities and the trail', async ({
+    page,
+  }) => {
+    await openProjects(page);
+    await page.getByRole('button', { name: /^Demo controls/ }).click();
+    await page.getByRole('menuitemcheckbox', { name: 'Top bar' }).click();
+    // The bar only serves the drawer below lg now.
+    await expect(page.locator('header').first()).toBeHidden();
+    // This library's Sidebar carries no data-slot; with the bar off it is the
+    // one navigation landmark that holds the account menu.
+    const sidebar = page
+      .locator('nav')
+      .filter({ has: page.getByRole('button', { name: 'Account menu' }) })
+      .first();
+    await expect(sidebar.getByRole('button', { name: 'Open command palette' })).toBeVisible();
+    await expect(sidebar.getByRole('button', { name: 'Account menu' })).toBeVisible();
+    await expect(page.locator('main nav[aria-label="Breadcrumb"]')).toHaveText(
+      /^HomeWorkspaceProjects$/,
+    );
+    // Back on: the bar returns with its cluster, the trail leaves the page.
+    await sidebar.getByRole('button', { name: /^Demo controls/ }).click();
+    await page.getByRole('menuitemcheckbox', { name: 'Top bar' }).click();
+    await expect(page.locator('header').first()).toBeVisible();
+    await expect(page.locator('main nav[aria-label="Breadcrumb"]')).toHaveCount(0);
+  });
+
+  test('Top bar off, sidebar: utilities sit above the user card, which opens the account menu', async ({
+    page,
+  }) => {
+    await openProjects(page);
+    await page.getByRole('button', { name: /^Demo controls/ }).click();
+    await page.getByRole('menuitemcheckbox', { name: 'Top bar' }).click();
+    // This library's Sidebar carries no data-slot; with the bar off it is the
+    // one navigation landmark that holds the account menu.
+    const sidebar = page
+      .locator('nav')
+      .filter({ has: page.getByRole('button', { name: 'Account menu' }) })
+      .first();
+    const palette = await sidebar
+      .getByRole('button', { name: 'Open command palette' })
+      .boundingBox();
+    const card = sidebar.getByRole('button', { name: 'Account menu' });
+    await expect(card).toContainText('Alex Morgan');
+    expect(palette!.y + palette!.height).toBeLessThanOrEqual((await card.boundingBox())!.y);
+    await card.click();
+    await expect(page.getByRole('menuitem', { name: /Sign out/ })).toBeVisible();
+  });
+
+  test('Top bar off, sidebar with module: utilities stack in the rail above the avatar', async ({
+    page,
+  }) => {
+    await applyTheme(page, 'light');
+    await gotoHash(page, 'preview/admin/app/sidebar-module/customers');
+    await page.getByRole('button', { name: /^Demo controls/ }).click();
+    await page.getByRole('menuitemcheckbox', { name: 'Top bar' }).click();
+    const rail = page.getByRole('navigation', { name: 'Modules' });
+    const palette = await rail.getByRole('button', { name: 'Open command palette' }).boundingBox();
+    const bell = await rail.getByRole('button', { name: /Notifications/ }).boundingBox();
+    const account = rail.getByRole('button', { name: 'Account menu' });
+    // A column: same x, each below the last, the avatar at the foot.
+    expect(Math.round(bell!.x)).toBe(Math.round(palette!.x));
+    expect(bell!.y).toBeGreaterThan(palette!.y);
+    expect((await account.boundingBox())!.y).toBeGreaterThan(bell!.y);
+    // The panel keeps its list; no second account menu anywhere.
+    await expect(page.getByRole('button', { name: 'Account menu' })).toHaveCount(1);
+    await account.click();
+    await expect(page.getByRole('menuitem', { name: /Sign out/ })).toBeVisible();
+  });
+});
+
+test.describe('admin › top nav @1600', () => {
+  test.use({ viewport: { width: 1600, height: 900 } });
+
+  test('demo menu › Top bar in container: the bar’s content sits in the 1440px column', async ({
+    page,
+  }) => {
+    await applyTheme(page, 'light');
+    await gotoHash(page, 'preview/admin/app/topnav/projects');
+    const bar = page.locator('header').first();
+    // Edge to edge (minus a scrollbar, if the platform draws one).
+    expect((await bar.boundingBox())!.width).toBeGreaterThan(1500);
+    await page.getByRole('button', { name: /^Demo controls/ }).click();
+    await page.getByRole('menuitemcheckbox', { name: 'Top bar in container' }).click();
+    const box = (await bar.boundingBox())!;
+    expect(Math.round(box.width)).toBe(1440);
+    // Centred in the window (the offset shrinks by half a scrollbar, if any).
+    expect(box.x).toBeGreaterThan(70);
+    expect(box.x).toBeLessThan(90);
   });
 });
 

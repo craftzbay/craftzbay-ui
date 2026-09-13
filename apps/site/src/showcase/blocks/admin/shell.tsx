@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   Check,
   Circle,
+  ChevronDown,
   ChevronsUpDown,
   CreditCard,
   LogOut,
@@ -35,6 +36,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
@@ -105,7 +107,9 @@ export function WorkspaceSwitcher({
           className={cn(
             'flex items-center gap-2 rounded-md text-left transition-colors outline-none',
             'hover:bg-background-muted focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
-            variant === 'bar' ? 'h-9 min-w-0 px-1.5' : 'h-10 w-full',
+            // Bar below sm: the chip + chevron only, never shrinking into the
+            // actions beside it; the name returns from sm.
+            variant === 'bar' ? 'h-9 shrink-0 px-1.5 sm:min-w-0 sm:shrink' : 'h-10 w-full',
             variant === 'sidebar' && (collapsed ? 'justify-center px-0' : 'px-1.5'),
           )}
         >
@@ -117,7 +121,10 @@ export function WorkspaceSwitcher({
           />
           {variant === 'bar' ? (
             <>
-              <span className="text-foreground truncate text-sm font-semibold" title={ws.name}>
+              <span
+                className="text-foreground hidden truncate text-sm font-semibold sm:block"
+                title={ws.name}
+              >
                 {ws.name}
               </span>
               <ChevronsUpDown className="text-foreground-subtle size-4 shrink-0" aria-hidden />
@@ -240,7 +247,7 @@ function UserCard() {
 }
 
 /* ---------------------------------------------------------------------------
- *  `dual` shell — icon rail of modules (56px) + 240px panel of the active
+ *  `sidebar-module` shell — icon rail of modules (56px) + 240px panel of the active
  *  module's sections. Two-tier navigation for products with many areas.
  * ------------------------------------------------------------------------ */
 
@@ -285,10 +292,16 @@ export function AppRail({
   module,
   onModuleChange,
   onNavigate,
+  barless,
 }: {
   module: string;
   onModuleChange: (key: string) => void;
   onNavigate: (key: string) => void;
+  /**
+   * Top bar off: the bar's utilities stack at the foot of the rail, and the
+   * avatar opens the account menu instead of going straight to Settings.
+   */
+  barless?: { onSignOut: () => void; onOpenPalette: () => void };
 }) {
   const t = useT(adminDict);
   return (
@@ -328,17 +341,48 @@ export function AppRail({
           })}
         </div>
       </div>
+      {barless && (
+        <div className="border-border mt-1 flex w-full shrink-0 flex-col items-center gap-0.5 border-t pt-2">
+          <BarActions
+            onNavigate={onNavigate}
+            onSignOut={barless.onSignOut}
+            onOpenPalette={barless.onOpenPalette}
+            placement="rail"
+            account={false}
+          />
+        </div>
+      )}
       <div className="mt-1 shrink-0">
-        <Tooltip label={t('rail.userSettings', { name: USER.name })} side="right">
-          <button
-            type="button"
-            aria-label={t('rail.userOpen', { name: USER.name })}
-            onClick={() => onNavigate('settings')}
-            className="hover:bg-background-muted focus-visible:ring-ring focus-visible:ring-offset-background inline-flex size-10 items-center justify-center rounded-md outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-          >
-            <Avatar size="sm" fallback={USER.initials} alt="" status="online" />
-          </button>
-        </Tooltip>
+        {barless ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label={t('account.menu')}
+                className="hover:bg-background-muted focus-visible:ring-ring focus-visible:ring-offset-background inline-flex size-10 items-center justify-center rounded-md outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+              >
+                <Avatar size="sm" fallback={USER.initials} alt="" status="online" />
+              </button>
+            </DropdownMenuTrigger>
+            <AccountMenuContent
+              onNavigate={onNavigate}
+              onSignOut={barless.onSignOut}
+              side="right"
+              align="end"
+            />
+          </DropdownMenu>
+        ) : (
+          <Tooltip label={t('rail.userSettings', { name: USER.name })} side="right">
+            <button
+              type="button"
+              aria-label={t('rail.userOpen', { name: USER.name })}
+              onClick={() => onNavigate('settings')}
+              className="hover:bg-background-muted focus-visible:ring-ring focus-visible:ring-offset-background inline-flex size-10 items-center justify-center rounded-md outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            >
+              <Avatar size="sm" fallback={USER.initials} alt="" status="online" />
+            </button>
+          </Tooltip>
+        )}
       </div>
     </nav>
   );
@@ -417,33 +461,45 @@ function PanelHeader({ label }: { label: string }) {
  *  page key so `renderLink` can route through `onNavigate`.
  * ------------------------------------------------------------------------ */
 
-export function pageCrumbs(page: string, t: (key: AdminKey) => string, withModule = false) {
+/**
+ * What the trail is rooted in.
+ * - `home`: `Home › Section › Page` — the plain shells; Home is the Overview.
+ * - `module`: `Module › Section › Page` — module shells whose trail sits on
+ *   the page. Home would point at another module's page, so the module is
+ *   the root; a section named like its module is skipped.
+ * - `section`: `Section › Page` — the bar of the sidebar-module shell, where
+ *   the module label already stands before the trail.
+ */
+export type TrailRoot = 'home' | 'module' | 'section';
+
+export function pageCrumbs(page: string, t: (key: AdminKey) => string, root: TrailRoot = 'home') {
   const nav = findNav(page);
   if (!nav || page === 'overview') return null;
   const mod = findModule(page);
-  return [
-    { label: t('crumb.home'), href: 'overview' },
-    ...(withModule && t(mod.label) !== t(nav.section.label)
-      ? [{ label: t(mod.label), href: mod.sections[0].items[0].key }]
-      : []),
-    { label: t(nav.section.label) },
-    { label: t(nav.item.label) },
-  ];
+  const sectionIsModule = t(mod.label) === t(nav.section.label);
+  const section = sectionIsModule && root !== 'home' ? [] : [{ label: t(nav.section.label) }];
+  const head =
+    root === 'home'
+      ? [{ label: t('crumb.home'), href: 'overview' }]
+      : root === 'module'
+        ? [{ label: t(mod.label), href: mod.sections[0].items[0].key }]
+        : [];
+  return [...head, ...section, { label: t(nav.item.label) }];
 }
 
 export function PageCrumbs({
   page,
-  withModule,
+  root,
   onNavigate,
   className,
 }: {
   page: string;
-  withModule?: boolean;
+  root?: TrailRoot;
   onNavigate?: (key: string) => void;
   className?: string;
 }) {
   const t = useT(adminDict);
-  const crumbs = pageCrumbs(page, t, withModule);
+  const crumbs = pageCrumbs(page, t, root);
   if (!crumbs) return null;
   return (
     <Breadcrumbs
@@ -463,7 +519,8 @@ export function PageCrumbs({
 }
 
 /** Shell layout, so `PageHeader` knows when the top bar already shows the trail. */
-export const AdminLayoutContext = createContext<'sidebar' | 'topnav' | 'dual'>('sidebar');
+export type ShellLayout = 'sidebar' | 'topnav' | 'sidebar-module' | 'topnav-module';
+export const AdminLayoutContext = createContext<ShellLayout>('sidebar');
 
 /* ---------------------------------------------------------------------------
  *  Demo controls — preview every page in its loading / empty / error state,
@@ -481,6 +538,18 @@ export interface DemoControls {
   setDensity: (d: Density) => void;
   banner: boolean;
   setBanner: (on: boolean) => void;
+  /**
+   * Sidebar shells only: whether the desktop top bar is shown. Off, the bar's
+   * utility cluster moves into the sidebar footer and the trail onto the page.
+   */
+  header: boolean;
+  setHeader: (on: boolean) => void;
+  /**
+   * Top-nav shells only: the bar's content sits in the page's 1440px container
+   * instead of spanning the window.
+   */
+  contained: boolean;
+  setContained: (on: boolean) => void;
 }
 
 export const DemoContext = createContext<DemoControls>({
@@ -490,6 +559,10 @@ export const DemoContext = createContext<DemoControls>({
   setDensity: () => {},
   banner: false,
   setBanner: () => {},
+  header: true,
+  setHeader: () => {},
+  contained: false,
+  setContained: () => {},
 });
 
 export const useDemo = () => useContext(DemoContext);
@@ -504,6 +577,11 @@ const DEMO_STATES: { value: DemoState; label: AdminKey }[] = [
 function DemoMenu() {
   const demo = useDemo();
   const t = useT(adminDict);
+  // The top bar is optional only where a sidebar can take over its duties;
+  // containing it only makes sense where it is the primary navigation.
+  const layout = useContext(AdminLayoutContext);
+  const sidebarShell = layout.startsWith('sidebar');
+  const topnavShell = layout.startsWith('topnav');
   const stateLabel = DEMO_STATES.find((s) => s.value === demo.state)?.label ?? 'demo.normal';
   return (
     <DropdownMenu>
@@ -546,6 +624,16 @@ function DemoMenu() {
         <DropdownMenuCheckboxItem checked={demo.banner} onCheckedChange={demo.setBanner}>
           {t('demo.banner')}
         </DropdownMenuCheckboxItem>
+        {sidebarShell && (
+          <DropdownMenuCheckboxItem checked={demo.header} onCheckedChange={demo.setHeader}>
+            {t('demo.header')}
+          </DropdownMenuCheckboxItem>
+        )}
+        {topnavShell && (
+          <DropdownMenuCheckboxItem checked={demo.contained} onCheckedChange={demo.setContained}>
+            {t('demo.contained')}
+          </DropdownMenuCheckboxItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -565,8 +653,8 @@ export function EnvBanner({ label }: { label?: string }) {
   );
 }
 
-/** `rail` = collapsible sidebar (≥lg); `dual` = icon rail + module panel; `none` = drawer only. */
-export type AppSidebarMode = 'rail' | 'dual' | 'none';
+/** `rail` = collapsible sidebar (≥lg); `module` = icon rail + module panel; `none` = drawer only. */
+export type AppSidebarMode = 'rail' | 'module' | 'none';
 
 export interface AppSidebarProps {
   page: string;
@@ -582,9 +670,20 @@ export interface AppSidebarProps {
   drawerTriggerRef?: RefObject<HTMLButtonElement | null>;
   /** Desktop chrome (≥lg). Every mode keeps the drawer below lg. */
   mode?: AppSidebarMode;
-  /** Active module for `dual`. */
+  /**
+   * Drawer lists modules (tabs above the active module's sections) even
+   * without a desktop panel — the `topnav-module` shell. Implied by `module`.
+   */
+  drawerModules?: boolean;
+  /** Active module for the module shells. */
   module?: string;
   onModuleChange?: (key: string) => void;
+  /**
+   * Top bar off (≥lg): its utilities move into the sidebar — a row above the
+   * user card in the rail sidebar, a column in the module rail. The drawer
+   * below lg is unaffected (the bar is still there).
+   */
+  barless?: { onSignOut: () => void; onOpenPalette: () => void };
 }
 
 /**
@@ -602,22 +701,30 @@ export function AppSidebar({
   onDrawerOpenChange,
   drawerTriggerRef,
   mode = 'rail',
+  drawerModules = false,
   module = MODULES[0].key,
   onModuleChange = () => {},
+  barless,
 }: AppSidebarProps) {
   const navigate = (key: string) => {
     onNavigate(key);
     onDrawerOpenChange(false);
   };
   const t = useT(adminDict);
-  const dual = mode === 'dual';
+  const panel = mode === 'module';
+  const modules = panel || drawerModules;
   const activeModule = MODULES.find((m) => m.key === module) ?? MODULES[0];
-  const sections = dual ? activeModule.sections : NAV;
+  const sections = modules ? activeModule.sections : NAV;
   return (
     <>
-      {dual && (
+      {panel && (
         <>
-          <AppRail module={module} onModuleChange={onModuleChange} onNavigate={navigate} />
+          <AppRail
+            module={module}
+            onModuleChange={onModuleChange}
+            onNavigate={navigate}
+            barless={barless}
+          />
           <Sidebar
             aria-label={t('rail.nav', { module: t(activeModule.label) })}
             // The tenant lives here (as in the `rail` header); the module is
@@ -640,7 +747,17 @@ export function AppSidebar({
           collapsed={collapsed}
           onCollapsedChange={onCollapsedChange}
           header={<WorkspaceSwitcher value={workspace} onChange={onWorkspaceChange} />}
-          footer={<UserCard />}
+          footer={
+            barless ? (
+              <SidebarUtilities
+                onNavigate={navigate}
+                onSignOut={barless.onSignOut}
+                onOpenPalette={barless.onOpenPalette}
+              />
+            ) : (
+              <UserCard />
+            )
+          }
           // The library default is `hidden md:flex`; the admin shell promotes the
           // breakpoint to lg and serves a drawer below it.
           className="md:hidden lg:flex"
@@ -665,7 +782,7 @@ export function AppSidebar({
           <SheetTitle className="sr-only">{t('drawer.title')}</SheetTitle>
           <Sidebar
             header={
-              dual ? (
+              modules ? (
                 <ModuleTabs module={module} onModuleChange={onModuleChange} />
               ) : (
                 <WorkspaceSwitcher value={workspace} onChange={onWorkspaceChange} />
@@ -674,7 +791,7 @@ export function AppSidebar({
             footer={<UserCard />}
             className="flex h-full w-full border-r-0"
           >
-            {dual && (
+            {modules && (
               <div className="px-4 pb-2">
                 <PanelHeader label={t(activeModule.label)} />
               </div>
@@ -696,6 +813,18 @@ export function AppSidebar({
 
 const TOPNAV_KEYS = ['overview', 'analytics', 'projects', 'inbox', 'members', 'reports'];
 
+/** One top-bar item — link or menu trigger. Active = accent bar + weight, never colour alone. */
+const topNavItem = (active: boolean) =>
+  cn(
+    'relative inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm outline-none',
+    'transition-colors duration-[var(--duration-fast)]',
+    'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
+    'after:bg-accent after:absolute after:inset-x-3 after:-bottom-2.5 after:h-0.5 after:rounded-full after:opacity-0',
+    active
+      ? 'text-foreground font-semibold after:opacity-100'
+      : 'text-foreground-muted hover:text-foreground data-[state=open]:text-foreground font-medium',
+  );
+
 function TopNavItems({ page, onNavigate }: { page: string; onNavigate: (key: string) => void }) {
   const items = NAV.flatMap((s) => s.items).filter((it) => TOPNAV_KEYS.includes(it.key));
   const t = useT(adminDict);
@@ -711,15 +840,7 @@ function TopNavItems({ page, onNavigate }: { page: string; onNavigate: (key: str
             type="button"
             onClick={() => onNavigate(it.key)}
             aria-current={active ? 'page' : undefined}
-            className={cn(
-              'relative inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm outline-none',
-              'transition-colors duration-[var(--duration-fast)]',
-              'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
-              'after:bg-accent after:absolute after:inset-x-3 after:-bottom-2.5 after:h-0.5 after:rounded-full after:opacity-0',
-              active
-                ? 'text-foreground font-semibold after:opacity-100'
-                : 'text-foreground-muted hover:text-foreground font-medium',
-            )}
+            className={topNavItem(active)}
           >
             {t(it.label)}
             {it.count != null && (
@@ -730,6 +851,360 @@ function TopNavItems({ page, onNavigate }: { page: string; onNavigate: (key: str
           </button>
         );
       })}
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------------------
+ *  Horizontal module nav — the `topnav-module` shell. Each module is a menu
+ *  button in the bar; its menu lists every page, grouped under section
+ *  labels (two tiers: module → page, sections as headings, never submenus),
+ *  so a product with many areas keeps a single-row top bar. Active = the
+ *  module that owns the current page; the page is marked inside its menu.
+ *  Visible ≥lg only; below that the drawer carries module tabs + the list.
+ * ------------------------------------------------------------------------ */
+
+function ModuleMenuItems({
+  section,
+  page,
+  onNavigate,
+}: {
+  section: NavSection;
+  page: string;
+  onNavigate: (key: string) => void;
+}) {
+  const t = useT(adminDict);
+  return section.items.map((it) => {
+    const Icon = it.icon;
+    const active = it.key === page;
+    return (
+      <DropdownMenuItem
+        key={it.key}
+        onSelect={() => onNavigate(it.key)}
+        aria-current={active ? 'page' : undefined}
+        className={active ? 'font-medium' : undefined}
+      >
+        <Icon aria-hidden />
+        {t(it.label)}
+        <span className="ml-auto inline-flex items-center gap-1.5 pl-3">
+          {it.count != null && (
+            <Badge tone={active ? 'accent' : 'neutral'} className="tabular">
+              {it.count}
+            </Badge>
+          )}
+          {active && <Check className="size-4" aria-hidden />}
+        </span>
+      </DropdownMenuItem>
+    );
+  });
+}
+
+function TopNavModules({ page, onNavigate }: { page: string; onNavigate: (key: string) => void }) {
+  const t = useT(adminDict);
+  const activeModule = findModule(page).key;
+  return (
+    <div className="hidden lg:contents">
+      {MODULES.map((m) => {
+        const active = m.key === activeModule;
+        return (
+          <DropdownMenu key={m.key}>
+            <DropdownMenuTrigger asChild>
+              {/* Text + chevron only: five module icons plus the switcher and
+                  search do not fit a 1280px bar; the icons live in the menus. */}
+              <button
+                type="button"
+                aria-current={active ? 'page' : undefined}
+                className={topNavItem(active)}
+              >
+                {t(m.label)}
+                <ChevronDown className="size-3.5 opacity-70" aria-hidden />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="min-w-56">
+              {m.sections.map((s, i) => (
+                <DropdownMenuGroup key={s.label}>
+                  {i > 0 && <DropdownMenuSeparator />}
+                  {/* A single section needs no heading — the module name is one. */}
+                  {m.sections.length > 1 && <DropdownMenuLabel>{t(s.label)}</DropdownMenuLabel>}
+                  <ModuleMenuItems section={s} page={page} onNavigate={onNavigate} />
+                </DropdownMenuGroup>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * The module that owns the current page, as a label at the left of the top
+ * bar (`sidebar-module` shell, ≥lg): icon + name, then a hairline, then the
+ * breadcrumb trail. The rail already marks it; this names it where the eye
+ * starts reading the bar.
+ */
+function ModuleLabel({ page }: { page: string }) {
+  const t = useT(adminDict);
+  const mod = findModule(page);
+  const Icon = mod.icon;
+  // The home page has no trail; a hairline with nothing after it would dangle.
+  const hasTrail = pageCrumbs(page, t, 'section') !== null;
+  return (
+    <span className="hidden shrink-0 items-center gap-2 lg:inline-flex">
+      <Icon className="text-foreground-muted size-4" aria-hidden />
+      <span className="text-foreground text-sm font-semibold">{t(mod.label)}</span>
+      {hasTrail && <span aria-hidden className="bg-border mx-1 h-5 w-px" />}
+    </span>
+  );
+}
+
+/* ---------------------------------------------------------------------------
+ *  Utility cluster — palette (below md in the bar), demo menu, theme, language,
+ *  notifications, account. Lives at the right of the top bar; the headerless
+ *  sidebar shells put the same cluster in the sidebar footer instead.
+ * ------------------------------------------------------------------------ */
+
+function BarActions({
+  onNavigate,
+  onSignOut,
+  onOpenPalette,
+  placement = 'bar',
+  account = true,
+}: {
+  onNavigate: (key: string) => void;
+  onSignOut: () => void;
+  onOpenPalette: () => void;
+  /**
+   * `bar` = right of the top bar; `sidebar` = a row in the sidebar footer;
+   * `rail` = a column in the module rail. Off the bar, the palette button is
+   * the search at every width (there is no field).
+   */
+  placement?: 'bar' | 'sidebar' | 'rail';
+  /** The avatar menu. Off where the sidebar's own user card/avatar opens it. */
+  account?: boolean;
+}) {
+  const unread = NOTIFICATIONS.filter((n) => n.unread).length;
+  const mod = useModifierKey();
+  const t = useT(adminDict);
+  const { relativeTime } = useStrings();
+  // Site-wide theme (same store as the preview dock), so both stay in sync.
+  const { theme, toggleTheme } = useTheme();
+  const locale = useLocale();
+  const setLocale = useSetLocale();
+  const themeLabel = (th: Theme) => t(`theme.${th}`);
+  const layout = useContext(AdminLayoutContext);
+  const { contained } = useDemo();
+  // Tooltips and menus open away from the edge the cluster sits on.
+  const tipSide = placement === 'rail' ? 'right' : placement === 'sidebar' ? 'top' : undefined;
+  return (
+    <>
+      <Tooltip side={tipSide} label={t('topnav.palette', { mod: mod.label })}>
+        <IconButton
+          aria-label={t('topnav.openPalette')}
+          icon={<Search />}
+          variant="ghost"
+          size="sm"
+          // The bar has the search field from md; the sidebar has no field, so
+          // the palette button is the search there at every width.
+          className={cn(
+            placement === 'bar' &&
+              // Top-nav shells show the field only from 1800px (see the bar's
+              // grid), so the button stands in for it from lg until then.
+              (layout.startsWith('topnav')
+                ? cn('md:hidden lg:inline-flex', !contained && 'min-[1800px]:hidden')
+                : 'md:hidden'),
+          )}
+          onClick={onOpenPalette}
+        />
+      </Tooltip>
+
+      <DemoMenu />
+
+      <Tooltip side={tipSide} label={t('topnav.theme', { theme: themeLabel(theme) })}>
+        <IconButton
+          aria-label={t('topnav.themeSwitch', {
+            theme: themeLabel(theme),
+            next: themeLabel(NEXT_THEME[theme]),
+          })}
+          icon={theme === 'light' ? <Sun /> : theme === 'dark' ? <Moon /> : <MonitorIcon />}
+          variant="ghost"
+          size="sm"
+          // Below sm the bar is out of room; the account menu carries Theme too.
+          className={cn(placement === 'bar' && 'hidden sm:inline-flex')}
+          onClick={toggleTheme}
+        />
+      </Tooltip>
+
+      {setLocale && (
+        <Tooltip side={tipSide} label={t('topnav.lang')}>
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-label={t('topnav.langSwitch')}
+            className="px-2 font-semibold tabular-nums"
+            onClick={() => setLocale(locale === 'en' ? 'mn' : 'en')}
+          >
+            {locale === 'en' ? 'MN' : 'EN'}
+          </Button>
+        </Tooltip>
+      )}
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <IconButton
+            aria-label={unread > 0 ? t('notif.count', { n: unread }) : t('notif.title')}
+            icon={
+              <span className="relative inline-flex">
+                <Bell />
+                {unread > 0 && (
+                  <span
+                    aria-hidden
+                    className="bg-accent ring-background absolute -top-0.5 -right-0.5 size-2 rounded-full ring-2"
+                  />
+                )}
+              </span>
+            }
+            variant="ghost"
+            size="sm"
+          />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent side={tipSide} align="end" className="w-[min(20rem,calc(100vw-2rem))]">
+          <DropdownMenuLabel className="flex items-center justify-between">
+            {t('notif.title')}
+            {unread > 0 && <Badge tone="accent">{t('notif.new', { n: unread })}</Badge>}
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {NOTIFICATIONS.map((n) => (
+            <DropdownMenuItem
+              key={n.id}
+              className="flex items-start gap-2"
+              onSelect={() => onNavigate('inbox')}
+            >
+              <Avatar size="xs" fallback={n.initials} alt="" className="mt-0.5" />
+              <span className="flex min-w-0 flex-col">
+                <span className="text-foreground text-sm">
+                  <span className="font-medium">{n.who}</span> {t(n.text, { target: n.target })}
+                </span>
+                <span className="text-foreground-subtle text-xs">
+                  {formatRelative(n.at, relativeTime).label}
+                </span>
+              </span>
+              {n.unread && (
+                <span
+                  aria-label={t('notif.unread')}
+                  className="bg-accent mt-1.5 ml-auto size-1.5 rounded-full"
+                />
+              )}
+            </DropdownMenuItem>
+          ))}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => onNavigate('inbox')}>
+            {t('notif.viewAll')}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {account && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label={t('account.menu')}
+              className="hover:bg-background-muted focus-visible:ring-ring focus-visible:ring-offset-background ml-1 inline-flex size-8 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            >
+              <Avatar size="sm" fallback={USER.initials} alt={USER.name} status="online" />
+            </button>
+          </DropdownMenuTrigger>
+          <AccountMenuContent onNavigate={onNavigate} onSignOut={onSignOut} align="end" />
+        </DropdownMenu>
+      )}
+    </>
+  );
+}
+
+/** The account menu — profile, settings, billing, theme, sign out. One copy for every trigger. */
+function AccountMenuContent({
+  onNavigate,
+  onSignOut,
+  side,
+  align = 'end',
+}: {
+  onNavigate: (key: string) => void;
+  onSignOut: () => void;
+  side?: 'top' | 'right' | 'bottom' | 'left';
+  align?: 'start' | 'center' | 'end';
+}) {
+  const t = useT(adminDict);
+  const { theme, setTheme } = useTheme();
+  return (
+    <DropdownMenuContent side={side} align={align} className="w-56">
+      <DropdownMenuLabel>
+        <div className="leading-tight">
+          <div className="text-foreground text-sm font-medium">{USER.name}</div>
+          <div className="text-foreground-subtle text-xs font-normal">{USER.email}</div>
+        </div>
+      </DropdownMenuLabel>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem onSelect={() => onNavigate('settings')}>
+        <User className="size-4" aria-hidden /> {t('account.profile')}
+      </DropdownMenuItem>
+      <DropdownMenuItem onSelect={() => onNavigate('settings')}>
+        <SettingsIcon className="size-4" aria-hidden /> {t('account.settings')}
+      </DropdownMenuItem>
+      <DropdownMenuItem onSelect={() => onNavigate('billing')}>
+        <CreditCard className="size-4" aria-hidden /> {t('account.billing')}
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuLabel className="text-foreground-subtle text-xs font-normal">
+        {t('account.theme')}
+      </DropdownMenuLabel>
+      <DropdownMenuRadioGroup value={theme} onValueChange={(v) => setTheme(v as Theme)}>
+        <DropdownMenuRadioItem value="light">{t('theme.light')}</DropdownMenuRadioItem>
+        <DropdownMenuRadioItem value="dark">{t('theme.dark')}</DropdownMenuRadioItem>
+        <DropdownMenuRadioItem value="system">{t('theme.system')}</DropdownMenuRadioItem>
+      </DropdownMenuRadioGroup>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem onSelect={onSignOut}>
+        <LogOut className="size-4" aria-hidden /> {t('account.signOut')}
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  );
+}
+
+/**
+ * Sidebar footer with the top bar off: the bar's utilities as a row (a column
+ * when the sidebar is collapsed to its icons) above the user card, which
+ * opens the account menu.
+ */
+function SidebarUtilities(props: {
+  onNavigate: (key: string) => void;
+  onSignOut: () => void;
+  onOpenPalette: () => void;
+}) {
+  const { collapsed } = useSidebar();
+  const t = useT(adminDict);
+  return (
+    <div className="flex flex-col gap-2">
+      <div className={cn('flex items-center gap-0.5', collapsed ? 'flex-col' : 'justify-between')}>
+        <BarActions {...props} placement="sidebar" account={false} />
+      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            aria-label={t('account.menu')}
+            className="hover:bg-background-muted focus-visible:ring-ring rounded-md py-1 text-left outline-none focus-visible:ring-2"
+          >
+            <UserCard />
+          </button>
+        </DropdownMenuTrigger>
+        <AccountMenuContent
+          onNavigate={props.onNavigate}
+          onSignOut={props.onSignOut}
+          side={collapsed ? 'right' : 'top'}
+          align={collapsed ? 'end' : 'start'}
+        />
+      </DropdownMenu>
     </div>
   );
 }
@@ -748,8 +1223,12 @@ export interface AppTopNavProps {
   onSignOut: () => void;
   searchValue: string;
   onSearchChange: (q: string) => void;
-  /** `sidebar` (default) shows the tenant name; `topnav` adds primary links + the workspace switcher; `dual` shows the breadcrumb trail. */
-  layout?: 'sidebar' | 'topnav' | 'dual';
+  /**
+   * `sidebar` / `sidebar-module` show the breadcrumb trail (the sidebar carries
+   * the tenant); `topnav` / `topnav-module` carry the workspace switcher and
+   * the primary links or module menus.
+   */
+  layout?: ShellLayout;
   /** Active page — needed for the `topnav` links' active state. */
   page?: string;
   onWorkspaceChange?: (id: string) => void;
@@ -771,18 +1250,34 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
   },
   searchRef,
 ) {
-  const unread = NOTIFICATIONS.filter((n) => n.unread).length;
-  const mod = useModifierKey();
   const t = useT(adminDict);
-  const { relativeTime } = useStrings();
-  // Site-wide theme (same store as the preview dock), so both stay in sync.
-  const { theme, setTheme, toggleTheme } = useTheme();
-  const locale = useLocale();
-  const setLocale = useSetLocale();
-  const themeLabel = (th: Theme) => t(`theme.${th}`);
-  return (
+  const { header, contained } = useDemo();
+  const bar = (
     <TopNav
-      className="bg-background supports-[backdrop-filter]:bg-background"
+      className={cn(
+        'bg-background supports-[backdrop-filter]:bg-background',
+        // Contained: the band spans the window, the content sits in the same
+        // 1440px column as the page (the wrapper below carries the border).
+        contained && 'mx-auto max-w-[1440px] border-b-0',
+        // Top bar switched off (sidebar shells): it only serves the drawer below lg.
+        !header && 'lg:hidden',
+        // The search is always centred in the bar: a symmetric three-track
+        // grid whose side tracks must hold what sits beside the field (the
+        // actions cluster is ~200px). The field narrows where the bar does.
+        // md: no sidebar yet, a hamburger + title/switcher on the left.
+        'md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,18rem)_minmax(0,1fr)]',
+        // Sidebar shells lose 240–296px to the sidebar at lg; full width from xl.
+        layout.startsWith('sidebar') &&
+          'lg:grid-cols-[minmax(0,1fr)_minmax(0,16rem)_minmax(0,1fr)] xl:grid-cols-[minmax(0,1fr)_minmax(0,28rem)_minmax(0,1fr)]',
+        // Top-nav shells carry ~640px of switcher + links or module menus on
+        // the left, so a centred field only fits from 1800px (and never in the
+        // 1440px container): until then the centre track collapses and the
+        // palette button stands in for the field.
+        layout.startsWith('topnav') && 'lg:grid-cols-[minmax(0,1fr)_0_auto]',
+        layout.startsWith('topnav') &&
+          !contained &&
+          'min-[1800px]:grid-cols-[minmax(0,1fr)_minmax(0,20rem)_minmax(0,1fr)]',
+      )}
       logo={
         <div className="flex min-w-0 items-center gap-2">
           <IconButton
@@ -794,7 +1289,7 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
             className="lg:hidden"
             onClick={onOpenDrawer}
           />
-          {layout === 'topnav' ? (
+          {layout === 'topnav' || layout === 'topnav-module' ? (
             // No sidebar header to host the switcher, so it lives in the bar.
             <WorkspaceSwitcher
               variant="bar"
@@ -802,15 +1297,19 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
               onChange={(id) => onWorkspaceChange?.(id)}
             />
           ) : (
-            // Sidebar/dual: the sidebar (or panel) header already shows the
+            // Sidebar shells: the sidebar (or panel) header already shows the
             // tenant, so the bar carries the trail (≥lg) and collapses to the
-            // current page title below that. Dual adds the module crumb.
+            // current page title below that. The module shell names the page's
+            // module first, as its own label, and the trail follows it.
             <>
+              {layout.startsWith('sidebar-module') && <ModuleLabel page={page} />}
               <PageCrumbs
                 page={page}
-                withModule={layout === 'dual'}
+                root={layout.startsWith('sidebar-module') ? 'section' : 'home'}
                 onNavigate={onNavigate}
-                className="hidden min-w-0 lg:block"
+                // One line, never wrapping into the bar's height: earlier crumbs
+                // keep their width, the current page truncates.
+                className="hidden min-w-0 overflow-hidden lg:block [&_li]:shrink-0 [&_li:last-child]:min-w-0 [&_li:last-child]:shrink [&_li:last-child>span]:block [&_li:last-child>span]:truncate [&_ol]:flex-nowrap"
               />
               <span className="text-foreground truncate text-sm font-semibold lg:hidden">
                 {t(findNav(page)?.item.label ?? 'crumb.home')}
@@ -819,7 +1318,13 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
           )}
         </div>
       }
-      nav={layout === 'topnav' ? <TopNavItems page={page} onNavigate={onNavigate} /> : undefined}
+      nav={
+        layout === 'topnav' ? (
+          <TopNavItems page={page} onNavigate={onNavigate} />
+        ) : layout === 'topnav-module' ? (
+          <TopNavModules page={page} onNavigate={onNavigate} />
+        ) : undefined
+      }
       search={
         <Input
           ref={searchRef}
@@ -841,151 +1346,22 @@ export const AppTopNav = forwardRef<HTMLInputElement, AppTopNavProps>(function A
           onKeyDown={(e) => {
             if (e.key === 'Escape') (e.target as HTMLInputElement).blur();
           }}
-          className="hidden md:block"
+          className={cn(
+            'hidden md:block',
+            layout.startsWith('topnav') && 'lg:hidden',
+            layout.startsWith('topnav') && !contained && 'min-[1800px]:block',
+          )}
         />
       }
       actions={
-        <>
-          <Tooltip label={t('topnav.palette', { mod: mod.label })}>
-            <IconButton
-              aria-label={t('topnav.openPalette')}
-              icon={<Search />}
-              variant="ghost"
-              size="sm"
-              className="md:hidden"
-              onClick={onOpenPalette}
-            />
-          </Tooltip>
-
-          <DemoMenu />
-
-          <Tooltip label={t('topnav.theme', { theme: themeLabel(theme) })}>
-            <IconButton
-              aria-label={t('topnav.themeSwitch', {
-                theme: themeLabel(theme),
-                next: themeLabel(NEXT_THEME[theme]),
-              })}
-              icon={theme === 'light' ? <Sun /> : theme === 'dark' ? <Moon /> : <MonitorIcon />}
-              variant="ghost"
-              size="sm"
-              onClick={toggleTheme}
-            />
-          </Tooltip>
-
-          {setLocale && (
-            <Tooltip label={t('topnav.lang')}>
-              <Button
-                variant="ghost"
-                size="sm"
-                aria-label={t('topnav.langSwitch')}
-                className="px-2 font-semibold tabular-nums"
-                onClick={() => setLocale(locale === 'en' ? 'mn' : 'en')}
-              >
-                {locale === 'en' ? 'MN' : 'EN'}
-              </Button>
-            </Tooltip>
-          )}
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <IconButton
-                aria-label={unread > 0 ? t('notif.count', { n: unread }) : t('notif.title')}
-                icon={
-                  <span className="relative inline-flex">
-                    <Bell />
-                    {unread > 0 && (
-                      <span
-                        aria-hidden
-                        className="bg-accent ring-background absolute -top-0.5 -right-0.5 size-2 rounded-full ring-2"
-                      />
-                    )}
-                  </span>
-                }
-                variant="ghost"
-                size="sm"
-              />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[min(20rem,calc(100vw-2rem))]">
-              <DropdownMenuLabel className="flex items-center justify-between">
-                {t('notif.title')}
-                {unread > 0 && <Badge tone="accent">{t('notif.new', { n: unread })}</Badge>}
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {NOTIFICATIONS.map((n) => (
-                <DropdownMenuItem
-                  key={n.id}
-                  className="flex items-start gap-2"
-                  onSelect={() => onNavigate('inbox')}
-                >
-                  <Avatar size="xs" fallback={n.initials} alt="" className="mt-0.5" />
-                  <span className="flex min-w-0 flex-col">
-                    <span className="text-foreground text-sm">
-                      <span className="font-medium">{n.who}</span> {t(n.text, { target: n.target })}
-                    </span>
-                    <span className="text-foreground-subtle text-xs">
-                      {formatRelative(n.at, relativeTime).label}
-                    </span>
-                  </span>
-                  {n.unread && (
-                    <span
-                      aria-label={t('notif.unread')}
-                      className="bg-accent mt-1.5 ml-auto size-1.5 rounded-full"
-                    />
-                  )}
-                </DropdownMenuItem>
-              ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => onNavigate('inbox')}>
-                {t('notif.viewAll')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                aria-label={t('account.menu')}
-                className="hover:bg-background-muted focus-visible:ring-ring focus-visible:ring-offset-background ml-1 inline-flex size-8 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-              >
-                <Avatar size="sm" fallback={USER.initials} alt={USER.name} status="online" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>
-                <div className="leading-tight">
-                  <div className="text-foreground text-sm font-medium">{USER.name}</div>
-                  <div className="text-foreground-subtle text-xs font-normal">{USER.email}</div>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => onNavigate('settings')}>
-                <User className="size-4" aria-hidden /> {t('account.profile')}
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => onNavigate('settings')}>
-                <SettingsIcon className="size-4" aria-hidden /> {t('account.settings')}
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => onNavigate('billing')}>
-                <CreditCard className="size-4" aria-hidden /> {t('account.billing')}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-foreground-subtle text-xs font-normal">
-                {t('account.theme')}
-              </DropdownMenuLabel>
-              <DropdownMenuRadioGroup value={theme} onValueChange={(v) => setTheme(v as Theme)}>
-                <DropdownMenuRadioItem value="light">{t('theme.light')}</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="dark">{t('theme.dark')}</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="system">{t('theme.system')}</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={onSignOut}>
-                <LogOut className="size-4" aria-hidden /> {t('account.signOut')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </>
+        <BarActions onNavigate={onNavigate} onSignOut={onSignOut} onOpenPalette={onOpenPalette} />
       }
     />
+  );
+  return contained ? (
+    <div className={cn('border-border bg-background border-b', !header && 'lg:hidden')}>{bar}</div>
+  ) : (
+    bar
   );
 });
 
@@ -1008,14 +1384,24 @@ export function PageHeader({
   subtitle?: ReactNode;
   actions?: ReactNode;
   onNavigate?: (key: string) => void;
-  /** Defaults to true in the `dual` shell, whose top bar already shows the trail. */
+  /** Defaults to true in the sidebar shells, whose top bar already shows the trail. */
   hideBreadcrumbs?: boolean;
 }) {
   const layout = useContext(AdminLayoutContext);
-  const hide = hideBreadcrumbs ?? layout !== 'topnav';
+  const { header } = useDemo();
+  // The bar carries the trail only in the sidebar shells, and only while it is shown.
+  const barHasTrail = header && layout.startsWith('sidebar');
+  const hide = hideBreadcrumbs ?? barHasTrail;
   return (
     <header className="mb-6">
-      {!hide && <PageCrumbs page={page} onNavigate={onNavigate} className="mb-2" />}
+      {!hide && (
+        <PageCrumbs
+          page={page}
+          root={layout.endsWith('-module') ? 'module' : 'home'}
+          onNavigate={onNavigate}
+          className="mb-2"
+        />
+      )}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
           <h1 className="text-foreground text-2xl font-semibold tracking-tight">{title}</h1>
@@ -1045,7 +1431,7 @@ export function AdminPalette({
   onAction: (action: 'new-project' | 'invite' | 'toggle-sidebar') => void;
   /** False in the `topnav` / `dual` shells — there is no rail to toggle. */
   hasSidebar?: boolean;
-  /** Navigation groups to list; the `dual` shell passes every module's sections. */
+  /** Navigation groups to list; the module shells pass every module's sections. */
   sections?: NavSection[];
 }) {
   const t = useT(adminDict);

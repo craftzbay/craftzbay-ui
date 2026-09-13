@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { AdminTemplate } from './AdminTemplate';
+import { ADMIN_LAYOUTS, type AdminLayout } from './AdminDashboard';
 import { AuthTemplate } from './AuthTemplate';
 import { LandingTemplate } from './LandingTemplate';
 import { NewsTemplate } from './NewsTemplate';
@@ -27,6 +28,9 @@ export default function BlockPreview({
   page?: string;
 }) {
   const props = { screen, setScreen, brand: <BrandMark />, variant };
+  // The legacy `dual` key is resolved by PreviewPage before it reaches here.
+  const adminLayout = (v?: string): AdminLayout =>
+    ADMIN_LAYOUTS.includes(v as AdminLayout) ? (v as AdminLayout) : 'sidebar';
   // This chunk loaded — re-arm the preview page's one-shot chunk-error reload.
   useEffect(() => {
     try {
@@ -37,12 +41,7 @@ export default function BlockPreview({
   }, []);
   switch (slug) {
     case 'admin':
-      return (
-        <AdminTemplate
-          layout={variant === 'topnav' || variant === 'dual' ? variant : 'sidebar'}
-          initialPage={page}
-        />
-      );
+      return <AdminTemplate layout={adminLayout(variant)} initialPage={page} />;
     case 'auth':
       return <AuthTemplate {...props} />;
     case 'landing':
