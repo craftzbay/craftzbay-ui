@@ -73,12 +73,21 @@ export function ShowcaseTopBar({ onOpenPalette, current }: ShowcaseTopBarProps) 
             type="button"
             onClick={onOpenPalette}
             aria-label={`Search (${mod.label}+K)`}
-            className="border-border-input bg-card text-foreground-subtle hover:border-border-strong hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background hidden h-8 w-44 items-center gap-2 rounded-md border pr-1.5 pl-2.5 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:flex lg:w-56"
+            className="border-border-input bg-card text-foreground-subtle hover:border-border-strong hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background hidden h-8 w-44 items-center gap-2 rounded-md border pr-1.5 pl-2.5 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-offset-2 lg:flex lg:w-56"
           >
             <Search className="size-4 shrink-0" aria-hidden />
             <span className="flex-1 truncate text-left text-xs">Search docs…</span>
             <Kbd className="shrink-0">{mod.symbol} K</Kbd>
           </button>
+          {/* sm–lg: the field does not fit beside the nav and the switchers. */}
+          <IconButton
+            aria-label={`Search (${mod.label}+K)`}
+            icon={<Search />}
+            variant="ghost"
+            size="sm"
+            className="hidden sm:inline-flex lg:hidden"
+            onClick={onOpenPalette}
+          />
 
           <BrandSwitcher />
 
@@ -103,7 +112,7 @@ export function ShowcaseTopBar({ onOpenPalette, current }: ShowcaseTopBarProps) 
 
           <ThemeToggle />
 
-          {/* < sm: nav + search + external links collapse into one menu. */}
+          {/* < lg: search and external links collapse into one menu (with the nav below sm). */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <IconButton
@@ -111,7 +120,7 @@ export function ShowcaseTopBar({ onOpenPalette, current }: ShowcaseTopBarProps) 
                 icon={<Menu />}
                 variant="ghost"
                 size="sm"
-                className="sm:hidden"
+                className="lg:hidden"
               />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
@@ -151,7 +160,7 @@ export function ShowcaseTopBar({ onOpenPalette, current }: ShowcaseTopBarProps) 
 
 /** ≥32px hit area + visible focus ring for the icon-only links. */
 const iconLinkClass = cn(
-  'hidden size-8 items-center justify-center rounded-md text-foreground-muted outline-none transition-colors sm:inline-flex',
+  'hidden size-8 items-center justify-center rounded-md text-foreground-muted outline-none transition-colors lg:inline-flex',
   'hover:bg-background-muted hover:text-foreground',
   'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
 );
