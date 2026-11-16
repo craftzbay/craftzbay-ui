@@ -262,7 +262,8 @@ describe('SheetBody', () => {
     const sheet = await screen.findByRole('dialog', { name: 'Activity' });
     expect(sheet).toHaveClass('flex', 'flex-col', 'overflow-y-auto', 'max-h-[100dvh]');
     const body = screen.getByTestId('body');
-    expect(body).toHaveClass('min-h-0', 'flex-1', 'overflow-y-auto', 'extra');
+    expect(body).toHaveAttribute('data-slot', 'sheet-body');
+    expect(body).toHaveClass('min-h-16', 'flex-1', 'overflow-y-auto', 'extra');
     const header = screen.getByText('Activity').parentElement as HTMLElement;
     const footer = screen.getByRole('button', { name: 'Done' }).parentElement as HTMLElement;
     expect(header).toHaveClass('shrink-0');
@@ -273,7 +274,7 @@ describe('SheetBody', () => {
     expect(footer.parentElement).toBe(body.parentElement);
   });
 
-  it('the close button stays the last DOM child (tab order) and is pinned with sticky', async () => {
+  it('the close button stays the last DOM child and is absolutely positioned', async () => {
     render(
       <Sheet defaultOpen>
         <SheetContent>
@@ -285,7 +286,6 @@ describe('SheetBody', () => {
     const sheet = await screen.findByRole('dialog', { name: 'T' });
     const close = screen.getByRole('button', { name: 'Close' });
     expect(sheet.lastElementChild).toBe(close);
-    expect(close).toHaveClass('sticky', 'top-4', 'order-first');
-    expect(close).not.toHaveClass('absolute');
+    expect(close).toHaveClass('absolute', 'top-4', 'right-4');
   });
 });

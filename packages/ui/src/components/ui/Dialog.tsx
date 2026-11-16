@@ -73,7 +73,10 @@ export const DialogContent = forwardRef<
         className={cn(
           'fixed top-1/2 left-1/2 z-[var(--z-modal)] -translate-x-1/2 -translate-y-1/2',
           'border-border bg-card text-card-foreground w-[calc(100%-2rem)] rounded-xl border shadow-lg',
-          'flex max-h-[calc(100dvh-2rem)] flex-col overflow-y-auto p-6',
+          'max-h-[calc(100dvh-2rem)] overflow-y-auto p-6',
+          // Column layout only when a DialogBody is a direct child, so dialogs that do not
+          // use it keep their block layout.
+          'has-[>[data-slot=dialog-body]]:flex has-[>[data-slot=dialog-body]]:flex-col',
           'data-[state=open]:animate-in data-[state=closed]:animate-out',
           'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
           'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
@@ -89,10 +92,7 @@ export const DialogContent = forwardRef<
           <DialogPrimitive.Close
             aria-label={strings.dialog.close}
             className={cn(
-              // Pinned without moving it in the DOM (tab order unchanged): a sticky,
-              // first-in-flow item that nets to zero height, so it stays put while the
-              // content scrolls and costs no layout space. Same spot as top-4 / right-4.
-              'text-foreground-subtle sticky top-4 order-first -mt-2 -mr-2 -mb-8 inline-flex size-8 shrink-0 items-center justify-center self-end rounded-md',
+              'text-foreground-subtle absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-md',
               'hover:bg-background-muted hover:text-foreground',
               'focus-visible:ring-ring focus-visible:ring-offset-card outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
               'transition-colors duration-[var(--duration-fast)]',
@@ -131,7 +131,13 @@ DialogFooter.displayName = 'DialogFooter';
  * pinned.
  */
 export function DialogBody({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('-mx-6 min-h-0 flex-1 overflow-y-auto px-6', className)} {...props} />;
+  return (
+    <div
+      data-slot="dialog-body"
+      className={cn('-mx-6 -my-1 min-h-16 flex-1 overflow-y-auto px-6 py-1', className)}
+      {...props}
+    />
+  );
 }
 DialogBody.displayName = 'DialogBody';
 

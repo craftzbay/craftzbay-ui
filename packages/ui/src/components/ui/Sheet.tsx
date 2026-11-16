@@ -109,10 +109,7 @@ export const SheetContent = forwardRef<
           <DialogPrimitive.Close
             aria-label={strings.sheet.close}
             className={cn(
-              // Pinned without moving it in the DOM (tab order unchanged): a sticky,
-              // first-in-flow item that nets to zero height (-mb-12 also cancels the
-              // gap-4). Same spot as top-4 / right-4, including the safe-area inset.
-              'text-foreground-subtle sticky top-4 order-first -mt-2 -mb-12 mr-[calc(1rem-max(1.5rem,env(safe-area-inset-right)))] inline-flex size-8 shrink-0 items-center justify-center self-end rounded-md',
+              'text-foreground-subtle absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-md',
               'hover:bg-background-muted hover:text-foreground',
               'focus-visible:ring-ring focus-visible:ring-offset-card outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
               'transition-colors duration-[var(--duration-fast)]',
@@ -152,8 +149,9 @@ SheetFooter.displayName = 'SheetFooter';
 export function SheetBody({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
+      data-slot="sheet-body"
       className={cn(
-        'min-h-0 flex-1 overflow-y-auto',
+        '-my-1 min-h-16 flex-1 overflow-y-auto py-1',
         '-ml-[max(1.5rem,env(safe-area-inset-left))] pl-[max(1.5rem,env(safe-area-inset-left))]',
         '-mr-[max(1.5rem,env(safe-area-inset-right))] pr-[max(1.5rem,env(safe-area-inset-right))]',
         className,
