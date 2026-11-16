@@ -112,7 +112,10 @@ DialogHeader.displayName = 'DialogHeader';
 export function DialogFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('flex shrink-0 flex-col-reverse gap-2 pt-6 sm:flex-row sm:justify-end', className)}
+      className={cn(
+        'flex shrink-0 flex-col-reverse gap-2 pt-6 sm:flex-row sm:justify-end',
+        className,
+      )}
       {...props}
     />
   );
