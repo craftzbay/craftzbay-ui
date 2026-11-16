@@ -73,6 +73,7 @@ const NO_REF_ALLOWED = new Set([
   // here so adding forwardRef later turns into an allow-list cleanup.
   'DialogHeader',
   'DialogFooter',
+  'DialogBody',
   'SheetHeader',
   'SheetFooter',
   'DrawerHeader',

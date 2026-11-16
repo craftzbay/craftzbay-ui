@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -46,6 +47,7 @@ const doc: ComponentDoc = {
     'DialogHeader',
     'DialogTitle',
     'DialogDescription',
+    'DialogBody',
     'DialogFooter',
     'DialogClose',
     'ConfirmationDialog',
@@ -84,6 +86,47 @@ const doc: ComponentDoc = {
     </DialogFooter>
   </DialogContent>
 </Dialog>`,
+    },
+    {
+      title: 'Long content',
+      description:
+        'Wrap the scrolling part in DialogBody. The dialog is capped to the viewport height; only the body scrolls while the header and footer stay pinned.',
+      preview: (
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline">Open long dialog</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Terms of service</DialogTitle>
+              <DialogDescription>Scroll to read all sections.</DialogDescription>
+            </DialogHeader>
+            <DialogBody className="text-foreground-muted flex flex-col gap-4 text-sm">
+              {Array.from({ length: 20 }, (_, i) => (
+                <p key={i}>
+                  Section {i + 1}. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                  eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                </p>
+              ))}
+            </DialogBody>
+            <DialogFooter>
+              <Button>Accept</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      ),
+      code: `<DialogContent>
+  <DialogHeader>
+    <DialogTitle>Terms of service</DialogTitle>
+    <DialogDescription>Scroll to read all sections.</DialogDescription>
+  </DialogHeader>
+  <DialogBody>
+    {/* long content — only this region scrolls */}
+  </DialogBody>
+  <DialogFooter>
+    <Button>Accept</Button>
+  </DialogFooter>
+</DialogContent>`,
     },
     {
       title: 'Sizes',
