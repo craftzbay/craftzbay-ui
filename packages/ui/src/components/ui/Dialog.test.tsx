@@ -7,6 +7,7 @@ import {
   ConfirmationDialog,
   Dialog,
   DialogClose,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -196,6 +197,51 @@ describe('Dialog', () => {
     await user.click(screen.getByRole('button', { name: 'Open' }));
     await screen.findByRole('dialog');
     expect(await axeBody()).toHaveNoViolations();
+  });
+});
+
+describe('DialogBody', () => {
+  it('is the scroll region; header and footer are siblings outside it and stay pinned', async () => {
+    render(
+      <Dialog defaultOpen>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Terms</DialogTitle>
+            <DialogDescription>Read carefully.</DialogDescription>
+          </DialogHeader>
+          <DialogBody data-testid="body" className="extra">
+            <p>Long content</p>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button">Accept</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>,
+    );
+    const dialog = await screen.findByRole('dialog', { name: 'Terms' });
+    expect(dialog).toHaveClass('max-h-[calc(100dvh-2rem)]', 'overflow-y-auto');
+    expect(dialog).toHaveClass('has-[>[data-slot=dialog-body]]:flex');
+    const body = screen.getByTestId('body');
+    expect(body).toHaveAttribute('data-slot', 'dialog-body');
+    expect(body).toHaveClass('min-h-16', 'flex-1', 'overflow-y-auto', 'extra');
+    const header = screen.getByText('Terms').parentElement as HTMLElement;
+    const footer = screen.getByRole('button', { name: 'Accept' }).parentElement as HTMLElement;
+    expect(header).toHaveClass('shrink-0');
+    expect(footer).toHaveClass('shrink-0');
+    expect(body.contains(header)).toBe(false);
+    expect(body.contains(footer)).toBe(false);
+    expect(header.parentElement).toBe(body.parentElement);
+    expect(footer.parentElement).toBe(body.parentElement);
+  });
+});
+
+describe('Dialog close button', () => {
+  it('stays the last DOM child and is absolutely positioned', async () => {
+    render(<Demo defaultOpen />);
+    const dialog = await screen.findByRole('dialog', { name: 'Edit profile' });
+    const close = screen.getByRole('button', { name: 'Close' });
+    expect(dialog.lastElementChild).toBe(close);
+    expect(close).toHaveClass('absolute', 'top-4', 'right-4');
   });
 });
 

@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { axe } from 'jest-axe';
 import {
   Sheet,
+  SheetBody,
   SheetClose,
   SheetContent,
   SheetDescription,
@@ -237,5 +238,54 @@ describe('Sheet', () => {
     await user.click(screen.getByRole('button', { name: 'Filters' }));
     await screen.findByRole('dialog');
     expect(await axe(baseElement)).toHaveNoViolations();
+  });
+});
+
+describe('SheetBody', () => {
+  it('is the scroll region; header and footer are siblings outside it and stay pinned', async () => {
+    render(
+      <Sheet defaultOpen>
+        <SheetContent side="bottom">
+          <SheetHeader>
+            <SheetTitle>Activity</SheetTitle>
+            <SheetDescription>Everything.</SheetDescription>
+          </SheetHeader>
+          <SheetBody data-testid="body" className="extra">
+            <p>Long content</p>
+          </SheetBody>
+          <SheetFooter>
+            <button type="button">Done</button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>,
+    );
+    const sheet = await screen.findByRole('dialog', { name: 'Activity' });
+    expect(sheet).toHaveClass('flex', 'flex-col', 'overflow-y-auto', 'max-h-[100dvh]');
+    const body = screen.getByTestId('body');
+    expect(body).toHaveAttribute('data-slot', 'sheet-body');
+    expect(body).toHaveClass('min-h-16', 'flex-1', 'overflow-y-auto', 'extra');
+    const header = screen.getByText('Activity').parentElement as HTMLElement;
+    const footer = screen.getByRole('button', { name: 'Done' }).parentElement as HTMLElement;
+    expect(header).toHaveClass('shrink-0');
+    expect(footer).toHaveClass('shrink-0');
+    expect(body.contains(header)).toBe(false);
+    expect(body.contains(footer)).toBe(false);
+    expect(header.parentElement).toBe(body.parentElement);
+    expect(footer.parentElement).toBe(body.parentElement);
+  });
+
+  it('the close button stays the last DOM child and is absolutely positioned', async () => {
+    render(
+      <Sheet defaultOpen>
+        <SheetContent>
+          <SheetTitle>T</SheetTitle>
+          <SheetDescription>D</SheetDescription>
+        </SheetContent>
+      </Sheet>,
+    );
+    const sheet = await screen.findByRole('dialog', { name: 'T' });
+    const close = screen.getByRole('button', { name: 'Close' });
+    expect(sheet.lastElementChild).toBe(close);
+    expect(close).toHaveClass('absolute', 'top-4', 'right-4');
   });
 });

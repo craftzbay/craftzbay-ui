@@ -73,7 +73,10 @@ export const DialogContent = forwardRef<
         className={cn(
           'fixed top-1/2 left-1/2 z-[var(--z-modal)] -translate-x-1/2 -translate-y-1/2',
           'border-border bg-card text-card-foreground w-[calc(100%-2rem)] rounded-xl border shadow-lg',
-          'p-6',
+          'max-h-[calc(100dvh-2rem)] overflow-y-auto p-6',
+          // Column layout only when a DialogBody is a direct child, so dialogs that do not
+          // use it keep their block layout.
+          'has-[>[data-slot=dialog-body]]:flex has-[>[data-slot=dialog-body]]:flex-col',
           'data-[state=open]:animate-in data-[state=closed]:animate-out',
           'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
           'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
@@ -105,19 +108,38 @@ export const DialogContent = forwardRef<
 DialogContent.displayName = 'DialogContent';
 
 export function DialogHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('flex flex-col gap-1 pb-4', className)} {...props} />;
+  return <div className={cn('flex shrink-0 flex-col gap-1 pb-4', className)} {...props} />;
 }
 DialogHeader.displayName = 'DialogHeader';
 
 export function DialogFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('flex flex-col-reverse gap-2 pt-6 sm:flex-row sm:justify-end', className)}
+      className={cn(
+        'flex shrink-0 flex-col-reverse gap-2 pt-6 sm:flex-row sm:justify-end',
+        className,
+      )}
       {...props}
     />
   );
 }
 DialogFooter.displayName = 'DialogFooter';
+
+/**
+ * Scrolling region between `DialogHeader` and `DialogFooter`. When the content
+ * is taller than the viewport only the body scrolls; header and footer stay
+ * pinned.
+ */
+export function DialogBody({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      data-slot="dialog-body"
+      className={cn('-mx-6 -my-1 min-h-16 flex-1 overflow-y-auto px-6 py-1', className)}
+      {...props}
+    />
+  );
+}
+DialogBody.displayName = 'DialogBody';
 
 export const DialogTitle = forwardRef<
   ElementRef<typeof DialogPrimitive.Title>,

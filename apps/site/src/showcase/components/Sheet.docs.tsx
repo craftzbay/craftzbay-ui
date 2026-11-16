@@ -1,5 +1,6 @@
 import {
   Sheet,
+  SheetBody,
   SheetClose,
   SheetContent,
   SheetDescription,
@@ -21,7 +22,15 @@ const doc: ComponentDoc = {
   description:
     'Edge-anchored modal panel. Use for filters, contextual settings, mobile-friendly menus — anything that benefits from staying anchored to a screen edge.',
   i18n: 'Reads `sheet.close` (close button aria-label).',
-  exports: ['Sheet', 'SheetTrigger', 'SheetContent', 'SheetHeader', 'SheetTitle', 'SheetClose'],
+  exports: [
+    'Sheet',
+    'SheetTrigger',
+    'SheetContent',
+    'SheetHeader',
+    'SheetTitle',
+    'SheetBody',
+    'SheetClose',
+  ],
   sourceFile: 'Sheet.tsx',
   examples: [
     {
@@ -95,6 +104,48 @@ const doc: ComponentDoc = {
     </SheetFooter>
   </SheetContent>
 </Sheet>`,
+    },
+    {
+      title: 'Long content',
+      description:
+        'Wrap the scrolling part in SheetBody. Only the body scrolls; the header and footer stay pinned. SheetBody must be a direct child of SheetContent. With a form, wrap header, body and footer in <form className="contents">, or keep the footer outside the form and point its submit button at it with the form attribute. The body\'s horizontal bleed assumes the default content padding; if you override the padding on SheetContent, override it on SheetBody too.',
+      preview: (
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="outline">Open long sheet</Button>
+          </SheetTrigger>
+          <SheetContent side="right">
+            <SheetHeader>
+              <SheetTitle>Activity</SheetTitle>
+              <SheetDescription>Scroll to see everything.</SheetDescription>
+            </SheetHeader>
+            <SheetBody className="text-foreground-muted flex flex-col gap-4 text-sm">
+              {Array.from({ length: 30 }, (_, i) => (
+                <p key={i}>Entry {i + 1}. Lorem ipsum dolor sit amet, consectetur elit.</p>
+              ))}
+            </SheetBody>
+            <SheetFooter>
+              <SheetClose asChild>
+                <Button>Done</Button>
+              </SheetClose>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
+      ),
+      code: `<SheetContent side="right">
+  <SheetHeader>
+    <SheetTitle>Activity</SheetTitle>
+    <SheetDescription>Scroll to see everything.</SheetDescription>
+  </SheetHeader>
+  <SheetBody>
+    {/* long content — only this region scrolls */}
+  </SheetBody>
+  <SheetFooter>
+    <SheetClose asChild>
+      <Button>Done</Button>
+    </SheetClose>
+  </SheetFooter>
+</SheetContent>`,
     },
     {
       title: 'Sides',

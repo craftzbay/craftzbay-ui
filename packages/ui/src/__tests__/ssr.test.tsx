@@ -175,6 +175,7 @@ const trees: Record<string, () => ReactElement> = {
             <UI.DialogTitle>Title</UI.DialogTitle>
             <UI.DialogDescription>Desc</UI.DialogDescription>
           </UI.DialogHeader>
+          <UI.DialogBody>Body</UI.DialogBody>
           <UI.DialogFooter>
             <UI.DialogClose>Close</UI.DialogClose>
           </UI.DialogFooter>
@@ -289,6 +290,7 @@ const trees: Record<string, () => ReactElement> = {
             <UI.SheetTitle>Title</UI.SheetTitle>
             <UI.SheetDescription>Desc</UI.SheetDescription>
           </UI.SheetHeader>
+          <UI.SheetBody>Body</UI.SheetBody>
           <UI.SheetFooter>
             <UI.SheetClose>Close</UI.SheetClose>
           </UI.SheetFooter>
@@ -442,6 +444,7 @@ const coveredBy: Record<string, string> = {
   DialogTitle: 'Dialog',
   DialogDescription: 'Dialog',
   DialogFooter: 'Dialog',
+  DialogBody: 'Dialog',
   DialogClose: 'Dialog',
   DrawerTrigger: 'Drawer',
   DrawerPortal: 'Drawer',
@@ -494,6 +497,7 @@ const coveredBy: Record<string, string> = {
   SheetTitle: 'Sheet',
   SheetDescription: 'Sheet',
   SheetFooter: 'Sheet',
+  SheetBody: 'Sheet',
   SheetClose: 'Sheet',
   SidebarSection: 'Sidebar',
   SidebarItem: 'Sidebar',

@@ -45,7 +45,7 @@ SheetOverlay.displayName = 'SheetOverlay';
 const sheet = cva(
   [
     'fixed z-[var(--z-modal)] bg-card text-card-foreground shadow-lg',
-    'flex flex-col gap-4 p-6',
+    'flex flex-col gap-4 overflow-y-auto p-6',
     // Safe-area insets for notched devices (consumers set viewport-fit=cover).
     'pb-[max(1.5rem,env(safe-area-inset-bottom))] pl-[max(1.5rem,env(safe-area-inset-left))] pr-[max(1.5rem,env(safe-area-inset-right))]',
     'data-[state=open]:animate-in data-[state=closed]:animate-out',
@@ -54,9 +54,9 @@ const sheet = cva(
   {
     variants: {
       side: {
-        top: 'inset-x-0 top-0 border-b border-border data-[state=open]:slide-in-from-top data-[state=closed]:slide-out-to-top',
+        top: 'inset-x-0 top-0 max-h-[100dvh] border-b border-border data-[state=open]:slide-in-from-top data-[state=closed]:slide-out-to-top',
         bottom:
-          'inset-x-0 bottom-0 border-t border-border data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom',
+          'inset-x-0 bottom-0 max-h-[100dvh] border-t border-border data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom',
         left: 'inset-y-0 left-0 h-full w-3/4 max-w-md border-r border-border data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left',
         right:
           'inset-y-0 right-0 h-full w-3/4 max-w-md border-l border-border data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right',
@@ -125,7 +125,7 @@ export const SheetContent = forwardRef<
 SheetContent.displayName = 'SheetContent';
 
 export function SheetHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('flex flex-col gap-1', className)} {...props} />;
+  return <div className={cn('flex shrink-0 flex-col gap-1', className)} {...props} />;
 }
 SheetHeader.displayName = 'SheetHeader';
 
@@ -133,7 +133,7 @@ export function SheetFooter({ className, ...props }: HTMLAttributes<HTMLDivEleme
   return (
     <div
       className={cn(
-        'mt-auto flex flex-col-reverse gap-2 pt-4 sm:flex-row sm:justify-end',
+        'mt-auto flex shrink-0 flex-col-reverse gap-2 pt-4 sm:flex-row sm:justify-end',
         className,
       )}
       {...props}
@@ -141,6 +141,26 @@ export function SheetFooter({ className, ...props }: HTMLAttributes<HTMLDivEleme
   );
 }
 SheetFooter.displayName = 'SheetFooter';
+
+/**
+ * Scrolling region between `SheetHeader` and `SheetFooter`. When the content is
+ * taller than the sheet only the body scrolls; header and footer stay pinned.
+ */
+export function SheetBody({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      data-slot="sheet-body"
+      className={cn(
+        '-my-1 min-h-16 flex-1 overflow-y-auto py-1',
+        '-ml-[max(1.5rem,env(safe-area-inset-left))] pl-[max(1.5rem,env(safe-area-inset-left))]',
+        '-mr-[max(1.5rem,env(safe-area-inset-right))] pr-[max(1.5rem,env(safe-area-inset-right))]',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+SheetBody.displayName = 'SheetBody';
 
 export const SheetTitle = forwardRef<
   ElementRef<typeof DialogPrimitive.Title>,
