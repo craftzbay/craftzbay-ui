@@ -76,6 +76,7 @@ const NO_REF_ALLOWED = new Set([
   'DialogBody',
   'SheetHeader',
   'SheetFooter',
+  'SheetBody',
   'DrawerHeader',
   'DrawerFooter',
 ]);

@@ -290,6 +290,7 @@ const trees: Record<string, () => ReactElement> = {
             <UI.SheetTitle>Title</UI.SheetTitle>
             <UI.SheetDescription>Desc</UI.SheetDescription>
           </UI.SheetHeader>
+          <UI.SheetBody>Body</UI.SheetBody>
           <UI.SheetFooter>
             <UI.SheetClose>Close</UI.SheetClose>
           </UI.SheetFooter>
@@ -496,6 +497,7 @@ const coveredBy: Record<string, string> = {
   SheetTitle: 'Sheet',
   SheetDescription: 'Sheet',
   SheetFooter: 'Sheet',
+  SheetBody: 'Sheet',
   SheetClose: 'Sheet',
   SidebarSection: 'Sidebar',
   SidebarItem: 'Sidebar',

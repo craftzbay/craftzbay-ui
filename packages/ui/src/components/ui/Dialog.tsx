@@ -89,7 +89,10 @@ export const DialogContent = forwardRef<
           <DialogPrimitive.Close
             aria-label={strings.dialog.close}
             className={cn(
-              'text-foreground-subtle absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-md',
+              // Pinned without moving it in the DOM (tab order unchanged): a sticky,
+              // first-in-flow item that nets to zero height, so it stays put while the
+              // content scrolls and costs no layout space. Same spot as top-4 / right-4.
+              'text-foreground-subtle sticky top-4 order-first -mt-2 -mr-2 -mb-8 inline-flex size-8 shrink-0 items-center justify-center self-end rounded-md',
               'hover:bg-background-muted hover:text-foreground',
               'focus-visible:ring-ring focus-visible:ring-offset-card outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
               'transition-colors duration-[var(--duration-fast)]',

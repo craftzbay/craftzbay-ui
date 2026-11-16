@@ -233,6 +233,17 @@ describe('DialogBody', () => {
   });
 });
 
+describe('Dialog close button pinning', () => {
+  it('stays the last DOM child (tab order) and is pinned with sticky', async () => {
+    render(<Demo defaultOpen />);
+    const dialog = await screen.findByRole('dialog', { name: 'Edit profile' });
+    const close = screen.getByRole('button', { name: 'Close' });
+    expect(dialog.lastElementChild).toBe(close);
+    expect(close).toHaveClass('sticky', 'top-4', 'order-first');
+    expect(close).not.toHaveClass('absolute');
+  });
+});
+
 describe('ConfirmationDialog', () => {
   function Demo({
     onConfirm,
