@@ -108,7 +108,7 @@ const doc: ComponentDoc = {
     {
       title: 'Long content',
       description:
-        'Wrap the scrolling part in SheetBody. Only the body scrolls; the header and footer stay pinned.',
+        'Wrap the scrolling part in SheetBody. Only the body scrolls; the header and footer stay pinned. SheetBody must be a direct child of SheetContent. With a form, wrap header, body and footer in <form className="contents">, or keep the footer outside the form and point its submit button at it with the form attribute. The body\'s horizontal bleed assumes the default content padding; if you override the padding on SheetContent, override it on SheetBody too.',
       preview: (
         <Sheet>
           <SheetTrigger asChild>

@@ -90,7 +90,7 @@ const doc: ComponentDoc = {
     {
       title: 'Long content',
       description:
-        'Wrap the scrolling part in DialogBody. The dialog is capped to the viewport height; only the body scrolls while the header and footer stay pinned.',
+        'Wrap the scrolling part in DialogBody. The dialog is capped to the viewport height; only the body scrolls while the header and footer stay pinned. DialogBody must be a direct child of DialogContent. With a form, wrap header, body and footer in <form className="contents">, or keep the footer outside the form and point its submit button at it with the form attribute. The body\'s horizontal bleed assumes the default content padding; if you override the padding on DialogContent, override it on DialogBody too.',
       preview: (
         <Dialog>
           <DialogTrigger asChild>
