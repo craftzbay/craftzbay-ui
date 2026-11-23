@@ -4,9 +4,9 @@ A refined-minimal Tailwind v4 + React design system. Production-grade
 primitives — Button through DataGrid — plus composed patterns
 (authentication, app shell, settings, etc.).
 
-- **Showcase:** [ui.craftzbay.com](https://ui.craftzbay.com)
-- **Components:** [ui.craftzbay.com#components](https://ui.craftzbay.com#components)
-- **Templates:** [ui.craftzbay.com#templates](https://ui.craftzbay.com#templates)
+- **Showcase:** [ui.runestonetechnologies.com](https://ui.runestonetechnologies.com)
+- **Components:** [ui.runestonetechnologies.com#components](https://ui.runestonetechnologies.com#components)
+- **Templates:** [ui.runestonetechnologies.com#templates](https://ui.runestonetechnologies.com#templates)
 
 > **Aesthetic direction:** Linear / Vercel / Stripe Dashboard / Notion / Raycast.
 > Neutral-dominant, one accent, hairline borders, generous whitespace, fast quiet
@@ -214,7 +214,7 @@ record detail, onboarding, first-run — are **not** shipped as importable
 components. They live in the showcase as copy-paste **blocks**: complete pages
 assembled from the primitives above, with the full source on the page. Read it,
 copy it, adapt it — no opaque `<Dashboard />` import. Browse them under
-**Templates** in the [showcase](https://ui.craftzbay.com/#templates).
+**Templates** in the [showcase](https://ui.runestonetechnologies.com/#templates).
 
 ## Documentation
 
