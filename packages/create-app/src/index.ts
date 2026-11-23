@@ -252,7 +252,7 @@ async function run() {
       ...(installNow ? [] : [`    ${kleur.cyan(`${pm} install`)}`]),
       `    ${kleur.cyan(`${pm} run dev`)}`,
       '',
-      kleur.gray('  Docs: https://ui.craftzbay.com'),
+      kleur.gray('  Docs: https://ui.runestonetechnologies.com'),
     ].join('\n'),
   );
 }
