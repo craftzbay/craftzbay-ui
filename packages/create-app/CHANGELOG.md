@@ -1,5 +1,13 @@
 # create-craftzbay-ui
 
+## 1.1.1
+
+### Patch Changes
+
+- a34062e: Point the showcase links and package `homepage` at https://ui.runestonetechnologies.com,
+  the new home of the design system. The previous host, ui.craftzbay.com, is no longer
+  served.
+
 ## 1.1.0
 
 ### Minor Changes
